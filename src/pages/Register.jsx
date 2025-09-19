@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../state/AuthContext'
+import TurnstileCaptcha from './TurnstileCaptcha'
 
 export default function Register() {
   const { register } = useAuth()
@@ -9,16 +10,30 @@ export default function Register() {
   const [lastName, setLastName] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
     setMessage('')
+    
+    if (!turnstileToken) {
+      setError('Por favor completa la verificación de seguridad.')
+      return
+    }
+    
     try {
-      await register({ email, password, first_name: firstName, last_name: lastName })
+      await register({ 
+        email, 
+        password, 
+        first_name: firstName, 
+        last_name: lastName,
+        turnstile_token: turnstileToken
+      })
       setMessage('Registro exitoso. Revisa tu correo y verifica tu cuenta.')
     } catch (err) {
       setError('No se pudo registrar. Verifica los datos.')
+      setTurnstileToken('') // Reset captcha on error
     }
   }
 
@@ -41,6 +56,13 @@ export default function Register() {
         <div>
           <label>Apellidos</label>
           <input value={lastName} onChange={(e) => setLastName(e.target.value)} type="text" />
+        </div>
+        <div>
+          <TurnstileCaptcha 
+            onVerify={setTurnstileToken}
+            onError={() => setTurnstileToken('')}
+            onExpire={() => setTurnstileToken('')}
+          />
         </div>
         <button className="btn" type="submit">Crear cuenta</button>
         {message && <p className="notice">{message}</p>}

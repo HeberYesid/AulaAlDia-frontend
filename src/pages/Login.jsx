@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
+import TurnstileCaptcha from './TurnstileCaptcha'
 
 export default function Login() {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
@@ -14,11 +16,18 @@ export default function Login() {
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
+    
+    if (!turnstileToken) {
+      setError('Por favor completa la verificación de seguridad.')
+      return
+    }
+    
     try {
-      await login(email, password)
+      await login(email, password, turnstileToken)
       navigate(from)
     } catch (err) {
       setError('Credenciales inválidas o correo no verificado.')
+      setTurnstileToken('') // Reset captcha on error
     }
   }
 
@@ -33,6 +42,13 @@ export default function Login() {
         <div>
           <label>Contraseña</label>
           <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
+        </div>
+        <div>
+          <TurnstileCaptcha 
+            onVerify={setTurnstileToken}
+            onError={() => setTurnstileToken('')}
+            onExpire={() => setTurnstileToken('')}
+          />
         </div>
         <button className="btn" type="submit">Entrar</button>
         {error && <p className="notice">{error}</p>}
