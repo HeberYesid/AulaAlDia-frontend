@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import TurnstileCaptcha from './TurnstileCaptcha'
 
 export default function Register() {
   const { register } = useAuth()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -30,7 +32,14 @@ export default function Register() {
         last_name: lastName,
         turnstile_token: turnstileToken
       })
-      setMessage('Registro exitoso. Revisa tu correo y verifica tu cuenta.')
+      
+      // Redirigir a la página de verificación por código
+      navigate('/verify-code', { 
+        state: { 
+          email: email,
+          message: 'Registro exitoso. Hemos enviado un código de verificación a tu correo.'
+        }
+      })
     } catch (err) {
       setError('No se pudo registrar. Verifica los datos.')
       setTurnstileToken('') // Reset captcha on error

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import TurnstileCaptcha from './TurnstileCaptcha'
@@ -8,10 +8,22 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const [showVerifyLink, setShowVerifyLink] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
+
+  // Mostrar mensaje si viene del registro o verificación
+  useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message)
+    }
+    if (location.state?.email) {
+      setEmail(location.state.email)
+    }
+  }, [location.state])
 
   async function onSubmit(e) {
     e.preventDefault()
@@ -26,7 +38,14 @@ export default function Login() {
       await login(email, password, turnstileToken)
       navigate(from)
     } catch (err) {
-      setError('Credenciales inválidas o correo no verificado.')
+      const errorMessage = err.response?.data?.detail || 'Error al iniciar sesión'
+      setError(errorMessage)
+      
+      // Mostrar enlace de verificación si el error es sobre email no verificado
+      if (errorMessage.includes('verificar tu correo')) {
+        setShowVerifyLink(true)
+      }
+      
       setTurnstileToken('') // Reset captcha on error
     }
   }
@@ -51,9 +70,36 @@ export default function Login() {
           />
         </div>
         <button className="btn" type="submit">Entrar</button>
-        {error && <p className="notice">{error}</p>}
+        
+        {message && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mt-4">
+            {message}
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4">
+            {error}
+            {showVerifyLink && (
+              <div className="mt-2">
+                <Link 
+                  to="/verify-code" 
+                  state={{ email }}
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Verificar mi correo con código
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
       </form>
-      <p className="notice">¿No tienes cuenta? <Link to="/register">Regístrate</Link></p>
+      
+      <div className="mt-4 text-center">
+        <p className="text-gray-600">
+          ¿No tienes cuenta? <Link to="/register" className="text-blue-600 hover:text-blue-800 underline">Regístrate</Link>
+        </p>
+      </div>
     </div>
   )
 }

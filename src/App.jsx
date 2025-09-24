@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Verify from './pages/Verify'
+import VerifyCode from './pages/VerifyCode'
 import Dashboard from './pages/Dashboard'
 import Subjects from './pages/Subjects'
 import SubjectDetail from './pages/SubjectDetail'
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify" element={<Verify />} />
+          <Route path="/verify-code" element={<VerifyCode />} />
 
           <Route
             path="/"
