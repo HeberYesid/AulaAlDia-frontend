@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { api } from '../api/axios'
 
@@ -14,7 +14,7 @@ export default function VerifyCode() {
   const location = useLocation()
   
   // Obtener email de los parámetros de la URL o del estado de navegación
-  useState(() => {
+  useEffect(() => {
     const params = new URLSearchParams(location.search)
     const emailParam = params.get('email')
     const stateEmail = location.state?.email
@@ -108,90 +108,99 @@ export default function VerifyCode() {
   }
 
   return (
-    <div className="card">
-      <h2>Verificar Correo Electrónico</h2>
-      <p className="text-gray-600 mb-4">
-        Ingresa el código de 6 dígitos que enviamos a tu correo electrónico.
-      </p>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
-            Correo Electrónico
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
+    <div className="auth-container">
+      <div className="auth-card fade-in">
+        <div className="auth-header">
+          <h1>📧 Verificar Email</h1>
+          <p>Ingresa el código de 6 dígitos que enviamos a tu correo</p>
         </div>
+        
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label>📧 Correo Electrónico</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
+              required
+            />
+          </div>
 
-        <div>
-          <label htmlFor="code" className="block text-sm font-medium mb-1">
-            Código de Verificación
-          </label>
-          <input
-            type="text"
-            id="code"
-            value={code}
-            onChange={handleCodeChange}
-            placeholder="123456"
-            className="w-full p-2 border rounded text-center text-2xl font-mono tracking-widest focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            maxLength="6"
-            required
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            Ingresa los 6 dígitos que recibiste por email
+          <div className="form-group">
+            <label>🔢 Código de Verificación</label>
+            <input
+              type="text"
+              value={code}
+              onChange={handleCodeChange}
+              placeholder="123456"
+              style={{
+                textAlign: 'center',
+                fontSize: 'var(--font-size-2xl)',
+                fontFamily: 'monospace',
+                letterSpacing: '0.5em',
+                fontWeight: 'bold'
+              }}
+              maxLength="6"
+              required
+            />
+            <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
+              Ingresa los 6 dígitos que recibiste por email
+            </small>
+          </div>
+
+          {error && (
+            <div className="alert error">
+              ❌ {error}
+            </div>
+          )}
+
+          {message && (
+            <div className="alert success">
+              ✅ {message}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn auth-btn"
+          >
+            {loading ? (
+              <>
+                <div className="spinner"></div>
+                Verificando...
+              </>
+            ) : (
+              <>✅ Verificar Código</>
+            )}
+          </button>
+        </form>
+
+        <div className="auth-footer" style={{ borderTop: '1px solid var(--border-primary)', paddingTop: 'var(--space-lg)' }}>
+          <p style={{ marginBottom: 'var(--space-sm)' }}>
+            ¿No recibiste el código?
           </p>
+          <button
+            type="button"
+            onClick={handleResendCode}
+            disabled={resendLoading}
+            className="link"
+            style={{ marginBottom: 'var(--space-md)' }}
+          >
+            {resendLoading ? '📤 Reenviando...' : '📤 Reenviar código'}
+          </button>
+          
+          <div style={{ textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="link"
+            >
+              ← Volver al inicio de sesión
+            </button>
+          </div>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-            {message}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Verificando...' : 'Verificar Código'}
-        </button>
-      </form>
-
-      <div className="mt-6 pt-4 border-t">
-        <p className="text-sm text-gray-600 mb-2">
-          ¿No recibiste el código?
-        </p>
-        <button
-          type="button"
-          onClick={handleResendCode}
-          disabled={resendLoading}
-          className="text-blue-600 hover:text-blue-800 text-sm underline disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {resendLoading ? 'Reenviando...' : 'Reenviar código'}
-        </button>
-      </div>
-
-      <div className="mt-4 text-center">
-        <button
-          type="button"
-          onClick={() => navigate('/login')}
-          className="text-gray-600 hover:text-gray-800 text-sm"
-        >
-          ← Volver al inicio de sesión
-        </button>
       </div>
     </div>
   )

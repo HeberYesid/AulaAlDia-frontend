@@ -11,6 +11,7 @@ export default function Login() {
   const [message, setMessage] = useState('')
   const [showVerifyLink, setShowVerifyLink] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
@@ -28,9 +29,11 @@ export default function Login() {
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
+    setIsLoading(true)
     
     if (!turnstileToken) {
       setError('Por favor completa la verificación de seguridad.')
+      setIsLoading(false)
       return
     }
     
@@ -47,58 +50,94 @@ export default function Login() {
       }
       
       setTurnstileToken('') // Reset captcha on error
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="card">
-      <h2>Iniciar sesión</h2>
-      <form onSubmit={onSubmit}>
-        <div>
-          <label>Correo</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+    <div className="auth-container">
+      <div className="auth-card fade-in">
+        <div className="auth-header">
+          <h1><span className="auth-icon">🔐</span> Iniciar Sesión</h1>
+          <p>Accede a tu cuenta de DevTrack</p>
         </div>
-        <div>
-          <label>Contraseña</label>
-          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
-        </div>
-        <div>
-          <TurnstileCaptcha 
-            onVerify={setTurnstileToken}
-            onError={() => setTurnstileToken('')}
-            onExpire={() => setTurnstileToken('')}
-          />
-        </div>
-        <button className="btn" type="submit">Entrar</button>
         
-        {message && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mt-4">
-            {message}
+        <form onSubmit={onSubmit} className="auth-form">
+          <div className="form-group">
+            <label>📧 Correo Electrónico</label>
+            <input 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              type="email" 
+              placeholder="tu@email.com"
+              required 
+            />
           </div>
-        )}
-        
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4">
-            {error}
-            {showVerifyLink && (
-              <div className="mt-2">
-                <Link 
-                  to="/verify-code" 
-                  state={{ email }}
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  Verificar mi correo con código
-                </Link>
-              </div>
+          
+          <div className="form-group">
+            <label>🔒 Contraseña</label>
+            <input 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              type="password" 
+              placeholder="••••••••"
+              required 
+            />
+          </div>
+          
+          <div className="form-group">
+            <TurnstileCaptcha 
+              onVerify={setTurnstileToken}
+              onError={() => setTurnstileToken('')}
+              onExpire={() => setTurnstileToken('')}
+            />
+          </div>
+          
+          <button 
+            className="btn auth-btn" 
+            type="submit" 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className="spinner"></div>
+                Iniciando sesión...
+              </>
+            ) : (
+              <>🚀 Entrar</>
             )}
-          </div>
-        )}
-      </form>
-      
-      <div className="mt-4 text-center">
-        <p className="text-gray-600">
-          ¿No tienes cuenta? <Link to="/register" className="text-blue-600 hover:text-blue-800 underline">Regístrate</Link>
-        </p>
+          </button>
+          
+          {message && (
+            <div className="alert success">
+              ✅ {message}
+            </div>
+          )}
+          
+          {error && (
+            <div className="alert error">
+              ❌ {error}
+              {showVerifyLink && (
+                <div style={{ marginTop: 'var(--space-sm)' }}>
+                  <Link 
+                    to="/verify-code" 
+                    state={{ email }}
+                    className="link"
+                  >
+                    📧 Verificar mi correo con código
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </form>
+        
+        <div className="auth-footer">
+          <p>
+            ¿No tienes cuenta? <Link to="/register" className="link">Regístrate aquí</Link>
+          </p>
+        </div>
       </div>
     </div>
   )
