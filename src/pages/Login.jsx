@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import TurnstileCaptcha from './TurnstileCaptcha'
 
 export default function Login() {
   const { login } = useAuth()
+  const captchaRef = useRef(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [showVerifyLink, setShowVerifyLink] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
@@ -49,7 +51,11 @@ export default function Login() {
         setShowVerifyLink(true)
       }
       
-      setTurnstileToken('') // Reset captcha on error
+      // Reset captcha on error
+      setTurnstileToken('')
+      if (captchaRef.current?.reset) {
+        captchaRef.current.reset()
+      }
     } finally {
       setIsLoading(false)
     }
@@ -87,23 +93,48 @@ export default function Login() {
           </div>
           
           <div className="form-group">
-            <TurnstileCaptcha 
+            <TurnstileCaptcha
+              ref={captchaRef}
               onVerify={setTurnstileToken}
-              onError={() => setTurnstileToken('')}
-              onExpire={() => setTurnstileToken('')}
+              onError={() => {
+                setTurnstileToken('')
+                setIsCaptchaReady(false)
+              }}
+              onExpire={() => {
+                setTurnstileToken('')
+                setIsCaptchaReady(false)
+              }}
+              onReady={() => setIsCaptchaReady(true)}
             />
           </div>
+          
+          {!isCaptchaReady && (
+            <div style={{ 
+              padding: 'var(--space-sm)', 
+              backgroundColor: 'var(--bg-secondary)', 
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--text-secondary)',
+              textAlign: 'center'
+            }}>
+              ⏳ Esperando verificación de seguridad...
+            </div>
+          )}
           
           <button 
             className="btn auth-btn" 
             type="submit" 
-            disabled={isLoading}
+            disabled={isLoading || !isCaptchaReady || !turnstileToken}
           >
             {isLoading ? (
               <>
                 <div className="spinner"></div>
                 Iniciando sesión...
               </>
+            ) : !isCaptchaReady ? (
+              <>⏳ Cargando...</>
+            ) : !turnstileToken ? (
+              <>🔒 Completa el captcha</>
             ) : (
               <>🚀 Entrar</>
             )}

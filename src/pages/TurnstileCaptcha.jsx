@@ -1,9 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 
-export default function TurnstileCaptcha({ onVerify, onError, onExpire, theme = 'light', size = 'normal' }) {
+const TurnstileCaptcha = forwardRef(({ onVerify, onError, onExpire, onReady, theme = 'light', size = 'normal' }, ref) => {
   const turnstileRef = useRef(null)
   const [widgetId, setWidgetId] = useState(null)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isRendered, setIsRendered] = useState(false)
+  
+  // Store callbacks in refs to prevent re-renders from unmounting the widget
+  const onVerifyRef = useRef(onVerify)
+  const onErrorRef = useRef(onError)
+  const onExpireRef = useRef(onExpire)
+  const onReadyRef = useRef(onReady)
+  
+  // Update refs when callbacks change
+  useEffect(() => {
+    onVerifyRef.current = onVerify
+    onErrorRef.current = onError
+    onExpireRef.current = onExpire
+    onReadyRef.current = onReady
+  }, [onVerify, onError, onExpire, onReady])
 
   useEffect(() => {
     // Check if Turnstile script is already loaded
@@ -29,27 +44,34 @@ export default function TurnstileCaptcha({ onVerify, onError, onExpire, theme = 
         const id = window.turnstile.render(turnstileRef.current, {
           sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAB195XyO5y089iC-',
           callback: (token) => {
-            if (onVerify) onVerify(token)
+            if (onVerifyRef.current) onVerifyRef.current(token)
           },
           'error-callback': (error) => {
             console.error('Turnstile error:', error)
-            if (onError) onError(error)
+            if (onErrorRef.current) onErrorRef.current(error)
+            setIsRendered(false)
           },
           'expired-callback': () => {
-            if (onExpire) onExpire()
+            if (onExpireRef.current) onExpireRef.current()
+            setIsRendered(false)
           },
           theme: theme,
           size: size
         })
         setWidgetId(id)
+        setIsRendered(true)
+        if (onReadyRef.current) onReadyRef.current()
       } catch (error) {
         console.error('Error rendering Turnstile:', error)
-        if (onError) onError(error)
+        if (onErrorRef.current) onErrorRef.current(error)
       }
     }
-
+  }, [isLoaded, widgetId, theme, size])
+  
+  // Cleanup widget on unmount
+  useEffect(() => {
     return () => {
-      if (widgetId && window.turnstile) {
+      if (widgetId !== null && window.turnstile) {
         try {
           window.turnstile.remove(widgetId)
         } catch (error) {
@@ -57,7 +79,7 @@ export default function TurnstileCaptcha({ onVerify, onError, onExpire, theme = 
         }
       }
     }
-  }, [isLoaded, widgetId, onVerify, onError, onExpire, theme, size])
+  }, [widgetId])
 
   const reset = () => {
     if (widgetId && window.turnstile) {
@@ -82,12 +104,10 @@ export default function TurnstileCaptcha({ onVerify, onError, onExpire, theme = 
   }
 
   // Expose reset and getResponse methods via ref
-  useEffect(() => {
-    if (turnstileRef.current) {
-      turnstileRef.current.reset = reset
-      turnstileRef.current.getResponse = getResponse
-    }
-  }, [widgetId])
+  useImperativeHandle(ref, () => ({
+    reset,
+    getResponse
+  }), [widgetId])
 
   if (!isLoaded) {
     return (
@@ -108,4 +128,8 @@ export default function TurnstileCaptcha({ onVerify, onError, onExpire, theme = 
   }
 
   return <div ref={turnstileRef}></div>
-}
+})
+
+TurnstileCaptcha.displayName = 'TurnstileCaptcha'
+
+export default TurnstileCaptcha
