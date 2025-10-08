@@ -4,7 +4,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import TurnstileCaptcha from './TurnstileCaptcha'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, user } = useAuth()
   const captchaRef = useRef(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,6 +17,13 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
+
+  // Redirigir al dashboard si ya está autenticado
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, navigate])
 
   // Mostrar mensaje si viene del registro o verificación
   useEffect(() => {

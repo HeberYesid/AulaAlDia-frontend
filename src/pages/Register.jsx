@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import TurnstileCaptcha from './TurnstileCaptcha'
 
 export default function Register() {
-  const { register } = useAuth()
+  const { register, user } = useAuth()
   const navigate = useNavigate()
   const captchaRef = useRef(null)
   const [email, setEmail] = useState('')
@@ -16,6 +16,13 @@ export default function Register() {
   const [turnstileToken, setTurnstileToken] = useState('')
   const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // Redirigir al dashboard si ya está autenticado
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, navigate])
 
   async function onSubmit(e) {
     e.preventDefault()

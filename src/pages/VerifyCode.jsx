@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../state/AuthContext'
 import { api } from '../api/axios'
 
 export default function VerifyCode() {
+  const { user } = useAuth()
   const [code, setCode] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -12,6 +14,13 @@ export default function VerifyCode() {
   
   const navigate = useNavigate()
   const location = useLocation()
+  
+  // Redirigir al dashboard si ya está autenticado
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, navigate])
   
   // Obtener email de los parámetros de la URL o del estado de navegación
   useEffect(() => {
