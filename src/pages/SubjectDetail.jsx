@@ -20,8 +20,9 @@ export default function SubjectDetail() {
   const [newExerciseDescription, setNewExerciseDescription] = useState('')
   const [showExerciseForm, setShowExerciseForm] = useState(false)
   const [activeTab, setActiveTab] = useState('students') // 'students', 'exercises', 'results'
-  const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, studentEmail, exerciseName}
+  const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, currentComment, studentEmail, exerciseName}
   const [newStatus, setNewStatus] = useState('')
+  const [newComment, setNewComment] = useState('')
   const [detailedResults, setDetailedResults] = useState([])
   
   // Filtros y búsqueda
@@ -196,16 +197,19 @@ export default function SubjectDetail() {
     setEditingResult({
       resultId: result.id,
       currentStatus: result.status,
+      currentComment: result.comment || '',
       studentEmail: result.student_email,
       exerciseName: result.exercise_name
     })
     setNewStatus(result.status)
+    setNewComment(result.comment || '')
     setError('')
   }
 
   function closeEditModal() {
     setEditingResult(null)
     setNewStatus('')
+    setNewComment('')
     setError('')
   }
 
@@ -215,7 +219,8 @@ export default function SubjectDetail() {
     
     try {
       await api.patch(`/api/courses/results/${editingResult.resultId}/`, {
-        status: newStatus
+        status: newStatus,
+        comment: newComment
       })
       setSuccess(`✅ Resultado actualizado: ${editingResult.studentEmail} - ${editingResult.exerciseName} → ${newStatus}`)
       closeEditModal()
@@ -781,26 +786,56 @@ export default function SubjectDetail() {
                 {filteredResults.length === 0 ? (
                   <p className="notice">No se encontraron resultados con los filtros aplicados</p>
                 ) : (
-                  <div className="data-table" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                    <table className="table">
+                  <div className="data-table" style={{ maxHeight: '500px', overflowY: 'auto', overflowX: 'auto' }}>
+                    <table className="table" style={{ tableLayout: 'fixed', width: '100%', minWidth: '900px' }}>
                       <thead style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1 }}>
                         <tr>
                           <th>👤 Estudiante</th>
                           <th>📚 Ejercicio</th>
-                          <th>🚦 Estado</th>
-                          <th>📅 Actualizado</th>
-                          <th>⚡ Acción</th>
+                          <th style={{ width: '120px' }}>🚦 Estado</th>
+                          <th style={{ width: '250px', maxWidth: '250px' }}>💬 Comentarios</th>
+                          <th style={{ width: '150px' }}>📅 Actualizado</th>
+                          <th style={{ width: '100px' }}>⚡ Acción</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredResults.map((result) => (
                           <tr key={result.id}>
-                            <td>{result.student_email}</td>
-                            <td>{result.exercise_name}</td>
+                            <td style={{ 
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }} title={result.student_email}>{result.student_email}</td>
+                            <td style={{ 
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }} title={result.exercise_name}>{result.exercise_name}</td>
                             <td>
                               <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
                             </td>
-                            <td>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
+                            <td style={{ 
+                              fontSize: '0.85rem', 
+                              color: 'var(--text-secondary)', 
+                              maxWidth: '250px',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {result.comment ? (
+                                <span title={result.comment} style={{ 
+                                  display: 'block',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {result.comment}
+                                </span>
+                              ) : (
+                                <em style={{ color: 'var(--text-muted)' }}>Sin comentarios</em>
+                              )}
+                            </td>
+                            <td style={{ fontSize: '0.85rem' }}>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
                             <td>
                               <button
                                 className="btn secondary"
@@ -862,25 +897,57 @@ export default function SubjectDetail() {
                   grade={editingResult.currentStatus === 'GREEN' ? 5.0 : editingResult.currentStatus === 'YELLOW' ? 3.0 : 1.0} 
                 />
               </p>
+              {editingResult.currentComment && (
+                <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--bg)', borderRadius: '6px', borderLeft: '3px solid var(--primary)' }}>
+                  <strong>💬 Comentario Anterior:</strong>
+                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                    {editingResult.currentComment}
+                  </p>
+                </div>
+              )}
             </div>
 
             <form onSubmit={updateResultStatus}>
-              <label><strong>Nuevo Estado</strong></label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                required
-                style={{ 
-                  padding: '0.75rem',
-                  fontSize: '1rem',
-                  border: '2px solid var(--border)',
-                  borderRadius: '8px'
-                }}
-              >
-                <option value="GREEN">🟢 Verde - Completado exitosamente</option>
-                <option value="YELLOW">🟡 Amarillo - Con observaciones</option>
-                <option value="RED">🔴 Rojo - No completado</option>
-              </select>
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>Nuevo Estado</strong></label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  required
+                  style={{ 
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <option value="GREEN">🟢 Verde - Completado exitosamente</option>
+                  <option value="YELLOW">🟡 Amarillo - Con observaciones</option>
+                  <option value="RED">🔴 Rojo - No completado</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>💬 Comentarios / Retroalimentación (Opcional)</strong></label>
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Escribe observaciones, sugerencias o felicitaciones para el estudiante..."
+                  rows="4"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px',
+                    fontFamily: 'inherit',
+                    resize: 'vertical'
+                  }}
+                />
+                <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  💡 Los comentarios ayudan al estudiante a entender qué puede mejorar
+                </p>
+              </div>
 
               {error && (
                 <p style={{ color: 'var(--danger)', marginTop: '0.75rem', padding: '0.5rem', background: 'rgba(244, 67, 54, 0.1)', borderRadius: '4px' }}>
