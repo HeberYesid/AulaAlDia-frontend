@@ -58,33 +58,37 @@ Variables que se mantienen constantes en ambos temas
 }
 
 /* 
-🌙 TEMA OSCURO (Por Defecto)
-Paleta optimizada para uso nocturno y desarrolladores
+🌙 TEMA OSCURO ELEGANTE (Por Defecto)
+Paleta minimalista en negro/gris - Diseño sofisticado
 */
 [data-theme="dark"] {
-  /* 🎨 Colores de Fondo - Tonos oscuros con buena jerarquía */
-  --bg-primary: #0f172a;      /* Slate 900 - Fondo principal */
-  --bg-secondary: #1e293b;    /* Slate 800 - Contenedores */
-  --bg-tertiary: #334155;     /* Slate 700 - Elementos elevados */
-  --bg-card: #1e293b;         /* Slate 800 - Tarjetas */
-  --bg-hover: #334155;        /* Slate 700 - Estados hover */
+  /* 🎨 Colores de Fondo - Escala de grises pura */
+  --bg-primary: #000000;      /* Negro absoluto - Fondo principal */
+  --bg-secondary: #0a0a0a;    /* Negro suave - Contenedores */
+  --bg-tertiary: #141414;     /* Gris muy oscuro - Elementos elevados */
+  --bg-card: #0f0f0f;         /* Gris oscuro - Tarjetas */
+  --bg-hover: #1a1a1a;        /* Gris medio oscuro - Estados hover */
   
-  /* ✍️ Colores de Texto - Alto contraste para legibilidad */
-  --text-primary: #f8fafc;    /* Slate 50 - Texto principal */
-  --text-secondary: #cbd5e1;  /* Slate 300 - Texto secundario */
-  --text-muted: #94a3b8;      /* Slate 400 - Texto atenuado */
-  --text-accent: #60a5fa;     /* Blue 400 - Enlaces y acentos */
+  /* ✍️ Colores de Texto - Alto contraste elegante */
+  --text-primary: #ffffff;    /* Blanco puro - Texto principal */
+  --text-secondary: #a1a1a1;  /* Gris claro - Texto secundario */
+  --text-muted: #6b6b6b;      /* Gris medio - Texto atenuado */
+  --text-accent: #ffffff;     /* Blanco - Enlaces y acentos */
   
-  /* 🖼️ Bordes - Sutiles pero definidos */
-  --border-primary: #334155;   /* Slate 700 - Bordes principales */
-  --border-secondary: #475569; /* Slate 600 - Bordes secundarios */
-  --border-accent: #3b82f6;    /* Blue 500 - Bordes de acento */
+  /* 🖼️ Bordes - Sutiles en gris */
+  --border-primary: #1f1f1f;   /* Gris muy oscuro - Bordes principales */
+  --border-secondary: #2a2a2a; /* Gris oscuro - Bordes secundarios */
+  --border-accent: #3f3f3f;    /* Gris medio - Bordes de acento */
   
-  /* 🌫️ Sombras - Más pronunciadas para profundidad */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  /* 🌫️ Sombras - Sutiles y elegantes */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px 0 rgba(0, 0, 0, 0.7), 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 30px 0 rgba(0, 0, 0, 0.8), 0 10px 15px 0 rgba(0, 0, 0, 0.6);
+  
+  /* 🎨 Overlay sutil para profundidad */
+  --overlay-bg: rgba(255, 255, 255, 0.03);
+  --overlay-hover: rgba(255, 255, 255, 0.06);
 }
 
 /* 
@@ -147,9 +151,12 @@ body {
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* 🌙 Gradiente específico para tema oscuro */
+/* 🌙 Fondo elegante para tema oscuro */
 [data-theme="dark"] body {
-  background: linear-gradient(135deg, var(--bg-primary) 0%, #0c1220 100%);
+  background: #000000;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(30, 30, 30, 0.3) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(20, 20, 20, 0.3) 0px, transparent 50%);
 }
 
 /* ☀️ Gradiente específico para tema claro */
@@ -171,20 +178,23 @@ body {
   flex: 1;
 }
 
-/* Navigation */
+/* Navigation - Diseño elegante y minimalista */
 .navbar {
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(20px);
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--border-primary);
   padding: var(--space-md) var(--space-lg);
   position: sticky;
   top: 0;
   z-index: 50;
   transition: all var(--transition-normal);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="light"] .navbar {
-  background: rgba(248, 250, 252, 0.8);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
 .navbar-content {
@@ -207,10 +217,8 @@ body {
 }
 
 .navbar .brand a .brand-text {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .navbar .brand a:hover {
@@ -240,8 +248,9 @@ body {
 }
 
 .navbar a.active {
-  color: var(--primary-light);
+  color: var(--text-primary);
   background: var(--bg-hover);
+  font-weight: 600;
 }
 
 .navbar .user {
@@ -257,8 +266,9 @@ body {
 }
 
 .role-badge {
-  background: linear-gradient(135deg, var(--accent), var(--secondary));
-  color: white;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
@@ -315,12 +325,12 @@ Componente interactivo para alternar entre modo oscuro/claro
   letter-spacing: 0.05em;
 }
 
-/* Buttons */
+/* Buttons - Diseño moderno y elegante */
 .btn {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   border: none;
   color: white;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 0.625rem 1.5rem;
   border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
@@ -329,14 +339,15 @@ Componente interactivo para alternar entre modo oscuro/claro
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
+  letter-spacing: 0.02em;
 }
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 
 .btn:active {
@@ -344,9 +355,15 @@ Componente interactivo para alternar entre modo oscuro/claro
 }
 
 .btn.secondary {
-  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  background: var(--bg-tertiary);
   color: var(--text-primary);
-  border: 1px solid var(--border-primary);
+  border: 1px solid var(--border-secondary);
+}
+
+.btn.secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-accent);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.05);
 }
 
 .btn.success {
@@ -367,14 +384,14 @@ Componente interactivo para alternar entre modo oscuro/claro
   transform: none;
 }
 
-/* Cards */
+/* Cards - Diseño minimalista y elegante */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
   margin: var(--space-md) 0;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all var(--transition-normal), 
               background-color var(--transition-normal), 
               border-color var(--transition-normal),
@@ -389,20 +406,20 @@ Componente interactivo para alternar entre modo oscuro/claro
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: var(--border-secondary);
 }
 
 .card:hover::before {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 .card h1, .card h2, .card h3 {
@@ -437,7 +454,7 @@ Componente interactivo para alternar entre modo oscuro/claro
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
-/* Forms */
+/* Forms - Inputs elegantes y minimalistas */
 .form-group {
   margin-bottom: var(--space-lg);
 }
@@ -448,6 +465,7 @@ label {
   color: var(--text-secondary);
   font-weight: 500;
   font-size: var(--font-size-sm);
+  letter-spacing: 0.01em;
 }
 
 input, select, textarea {
@@ -455,20 +473,21 @@ input, select, textarea {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  padding: var(--space-md);
+  padding: 0.75rem 1rem;
   color: var(--text-primary);
   font-size: var(--font-size-base);
   transition: all var(--transition-fast),
               background-color var(--transition-normal),
               border-color var(--transition-normal),
               color var(--transition-normal);
+  font-family: inherit;
 }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  background: var(--bg-primary);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px rgba(63, 63, 63, 0.1);
+  background: var(--bg-tertiary);
 }
 
 input::placeholder {
@@ -481,7 +500,7 @@ form {
   gap: var(--space-lg);
 }
 
-/* Tables */
+/* Tables - Diseño limpio y profesional */
 .table-container {
   overflow-x: auto;
   border-radius: var(--radius-lg);
@@ -495,26 +514,27 @@ form {
 }
 
 .table th {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   color: var(--text-primary);
   font-weight: 600;
-  padding: var(--space-md) var(--space-lg);
+  padding: 1rem 1.25rem;
   text-align: left;
-  border-bottom: 1px solid var(--border-primary);
-  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--border-secondary);
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .table td {
-  padding: var(--space-md) var(--space-lg);
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border-primary);
   color: var(--text-secondary);
   transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
 }
 
 .table tr:hover td {
-  background: var(--bg-hover);
+  background: var(--overlay-hover);
   color: var(--text-primary);
 }
 
@@ -570,7 +590,7 @@ form {
 }
 
 .link:hover {
-  color: var(--primary-light);
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
@@ -626,9 +646,9 @@ form {
 }
 
 .alert.info {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-light);
-  border-left-color: var(--primary);
+  background: rgba(63, 63, 63, 0.1);
+  color: var(--text-primary);
+  border-left-color: var(--border-accent);
 }
 
 /* Responsive Design */
@@ -680,7 +700,7 @@ form {
   animation: slideIn 0.3s ease-out;
 }
 
-/* Authentication Pages */
+/* Authentication Pages - Diseño sofisticado */
 .auth-container {
   min-height: calc(100vh - 80px);
   display: flex;
@@ -692,13 +712,14 @@ form {
 .auth-card {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
-  border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
+  border-radius: 1rem;
+  padding: 2.5rem;
   width: 100%;
   max-width: 450px;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .auth-card::before {
@@ -707,8 +728,9 @@ form {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+  opacity: 0.5;
 }
 
 .auth-header {
@@ -732,10 +754,8 @@ form {
 }
 
 .auth-header h1 span:not(.auth-icon) {
-  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .auth-header p {
@@ -766,25 +786,24 @@ form {
   font-size: var(--font-size-sm);
 }
 
-/* Dashboard Enhancements */
+/* Dashboard Enhancements - Diseño elegante */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-xl);
-  padding: var(--space-lg);
+  padding: var(--space-xl);
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-title {
   font-size: var(--font-size-3xl);
   font-weight: 700;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .dashboard-subtitle {
@@ -804,7 +823,7 @@ form {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  padding: 1.5rem;
   text-align: center;
   transition: all var(--transition-normal);
   position: relative;
@@ -817,19 +836,20 @@ form {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--success), var(--warning), var(--danger));
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: var(--border-secondary);
 }
 
 .stat-card:hover::before {
-  opacity: 1;
+  opacity: 0.6;
 }
 
 .stat-value {
@@ -863,7 +883,7 @@ form {
 }
 
 .data-table .table th {
-  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  background: var(--bg-secondary);
   color: var(--text-primary);
   font-weight: 600;
   padding: var(--space-lg);

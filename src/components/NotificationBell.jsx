@@ -145,10 +145,10 @@ export default function NotificationBell() {
             right: 0,
             width: '400px',
             maxWidth: '90vw',
-            background: '#1e293b',
-            border: '2px solid #334155',
+            background: '#0f0f0f',
+            border: '1px solid #1f1f1f',
             borderRadius: '12px',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
             zIndex: 1000,
             maxHeight: '500px',
             display: 'flex',
@@ -160,11 +160,11 @@ export default function NotificationBell() {
           <div
             style={{
               padding: '1rem',
-              borderBottom: '2px solid #334155',
+              borderBottom: '1px solid #1f1f1f',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              background: '#1e293b',
+              background: '#0f0f0f',
               borderTopLeftRadius: '12px',
               borderTopRightRadius: '12px'
             }}
@@ -188,7 +188,7 @@ export default function NotificationBell() {
           </div>
 
           {/* Notifications List */}
-          <div style={{ overflowY: 'auto', flex: 1, background: '#1e293b' }}>
+          <div style={{ overflowY: 'auto', flex: 1, background: '#0f0f0f' }}>
             {loading ? (
               <div style={{ padding: '2rem', textAlign: 'center' }}>
                 <div className="spinner"></div>
@@ -205,13 +205,13 @@ export default function NotificationBell() {
                   onClick={() => handleNotificationClick(notification)}
                   style={{
                     padding: '1rem',
-                    borderBottom: '1px solid #334155',
+                    borderBottom: '1px solid #1f1f1f',
                     cursor: 'pointer',
-                    background: notification.is_read ? '#1e293b' : 'rgba(59, 130, 246, 0.2)',
+                    background: notification.is_read ? '#0f0f0f' : 'rgba(255, 255, 255, 0.05)',
                     transition: 'background 0.2s ease'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#334155'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = notification.is_read ? '#1e293b' : 'rgba(59, 130, 246, 0.2)'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#1a1a1a'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = notification.is_read ? '#0f0f0f' : 'rgba(255, 255, 255, 0.05)'}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
                     <strong style={{ fontSize: '0.95rem', flex: 1 }}>{notification.title}</strong>
@@ -244,9 +244,9 @@ export default function NotificationBell() {
             <div
               style={{
                 padding: '0.75rem',
-                borderTop: '2px solid #334155',
+                borderTop: '1px solid #1f1f1f',
                 textAlign: 'center',
-                background: '#1e293b',
+                background: '#0f0f0f',
                 borderBottomLeftRadius: '12px',
                 borderBottomRightRadius: '12px'
               }}
