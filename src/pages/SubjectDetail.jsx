@@ -12,6 +12,7 @@ export default function SubjectDetail() {
   const [dash, setDash] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [exporting, setExporting] = useState(false)
 
   async function loadAll() {
@@ -39,12 +40,21 @@ export default function SubjectDetail() {
   async function addEnrollment(e) {
     e.preventDefault()
     setError('')
+    setSuccess('')
     try {
       await api.post(`/api/courses/subjects/${id}/enrollments/`, { student_email: email })
+      setSuccess(`✅ Estudiante ${email} inscrito correctamente`)
       setEmail('')
       loadAll()
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      setError('No se pudo inscribir el estudiante. Verifica permisos y correo.')
+      console.error('Error al inscribir:', err.response?.data)
+      const errorMsg = err.response?.data?.detail || 
+                       err.response?.data?.student_email?.[0] ||
+                       err.response?.data?.non_field_errors?.[0] ||
+                       'No se pudo inscribir el estudiante. Verifica permisos y correo.'
+      setError(errorMsg)
     }
   }
 
@@ -85,7 +95,8 @@ export default function SubjectDetail() {
           <label>Correo del estudiante</label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <button className="btn" type="submit" style={{ marginTop: '.5rem' }}>Inscribir</button>
-          {error && <p className="notice">{error}</p>}
+          {success && <p className="notice" style={{ color: 'var(--success)' }}>{success}</p>}
+          {error && <p className="notice" style={{ color: 'var(--danger)' }}>{error}</p>}
         </form>
 
         <CSVUpload
