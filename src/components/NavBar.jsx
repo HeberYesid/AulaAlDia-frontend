@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import ThemeToggle from './ThemeToggle'
+import NotificationBell from './NotificationBell'
 
 export default function NavBar() {
   const { user, logout } = useAuth()
@@ -50,12 +51,7 @@ export default function NavBar() {
                   📈 Mis Resultados
                 </Link>
               )}
-              <Link 
-                to="/notifications" 
-                className={isActive('/notifications') ? 'active' : ''}
-              >
-                🔔 Notificaciones
-              </Link>
+              <NotificationBell />
               <ThemeToggle />
               <div className="user">
                 <span>👤 {user.email}</span>
