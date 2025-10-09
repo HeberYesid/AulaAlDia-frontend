@@ -16,6 +16,8 @@ export default function SubjectDetail() {
   const [exporting, setExporting] = useState(false)
   const [exercises, setExercises] = useState([])
   const [newExerciseName, setNewExerciseName] = useState('')
+  const [newExerciseDeadline, setNewExerciseDeadline] = useState('')
+  const [newExerciseDescription, setNewExerciseDescription] = useState('')
   const [showExerciseForm, setShowExerciseForm] = useState(false)
   const [activeTab, setActiveTab] = useState('students') // 'students', 'exercises', 'results'
   const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, studentEmail, exerciseName}
@@ -144,13 +146,25 @@ export default function SubjectDetail() {
     setError('')
     setSuccess('')
     try {
-      await api.post('/api/courses/exercises/', {
+      const payload = {
         subject: id,
         name: newExerciseName,
         order: exercises.length
-      })
+      }
+      
+      // Add optional fields if provided
+      if (newExerciseDeadline) {
+        payload.deadline = newExerciseDeadline
+      }
+      if (newExerciseDescription) {
+        payload.description = newExerciseDescription
+      }
+      
+      await api.post('/api/courses/exercises/', payload)
       setSuccess(`✅ Ejercicio "${newExerciseName}" creado correctamente`)
       setNewExerciseName('')
+      setNewExerciseDeadline('')
+      setNewExerciseDescription('')
       setShowExerciseForm(false)
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
@@ -414,16 +428,57 @@ export default function SubjectDetail() {
                 ➕ Crear Ejercicio
               </button>
             ) : (
-              <form onSubmit={createExercise} style={{ maxWidth: '600px', padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
-                <label>Nombre del Ejercicio</label>
-                <input 
-                  type="text" 
-                  value={newExerciseName} 
-                  onChange={(e) => setNewExerciseName(e.target.value)} 
-                  placeholder="Ej: Ejercicio 1 - Ecuaciones Lineales"
-                  required 
-                />
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+              <form onSubmit={createExercise} style={{ maxWidth: '700px', padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label><strong>Nombre del Ejercicio *</strong></label>
+                  <input 
+                    type="text" 
+                    value={newExerciseName} 
+                    onChange={(e) => setNewExerciseName(e.target.value)} 
+                    placeholder="Ej: Ejercicio 1 - Ecuaciones Lineales"
+                    required 
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label><strong>Descripción (Opcional)</strong></label>
+                  <textarea 
+                    value={newExerciseDescription} 
+                    onChange={(e) => setNewExerciseDescription(e.target.value)} 
+                    placeholder="Describe en qué consiste este ejercicio..."
+                    rows="3"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label><strong>Fecha Límite (Opcional)</strong></label>
+                  <input 
+                    type="datetime-local" 
+                    value={newExerciseDeadline} 
+                    onChange={(e) => setNewExerciseDeadline(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                  <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                    💡 Define hasta cuándo los estudiantes pueden entregar este ejercicio
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button className="btn" type="submit" style={{ flex: 1 }}>
                     ✅ Crear Ejercicio
                   </button>
@@ -433,6 +488,8 @@ export default function SubjectDetail() {
                     onClick={() => {
                       setShowExerciseForm(false)
                       setNewExerciseName('')
+                      setNewExerciseDeadline('')
+                      setNewExerciseDescription('')
                       setError('')
                     }}
                     style={{ flex: 1 }}
@@ -488,25 +545,87 @@ export default function SubjectDetail() {
                     <tr>
                       <th style={{ width: '60px' }}>#</th>
                       <th>📚 Nombre del Ejercicio</th>
+                      <th>📝 Descripción</th>
+                      <th style={{ width: '180px' }}>📅 Fecha Límite</th>
                       <th style={{ width: '150px' }}>⚡ Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredExercises.map((ex, index) => (
-                      <tr key={ex.id}>
-                        <td><strong>{index + 1}</strong></td>
-                        <td>{ex.name}</td>
-                        <td>
-                          <button 
-                            className="btn secondary"
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', width: '100%' }}
-                            onClick={() => deleteExercise(ex.id, ex.name)}
-                          >
-                            🗑️ Eliminar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredExercises.map((ex, index) => {
+                      const getDeadlineBadge = () => {
+                        if (!ex.deadline) return null
+                        
+                        const deadlineDate = new Date(ex.deadline)
+                        const now = new Date()
+                        const diffTime = deadlineDate - now
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+                        
+                        let color = 'var(--success)'
+                        let icon = '✅'
+                        let text = `${diffDays} días`
+                        
+                        if (diffDays < 0) {
+                          color = 'var(--danger)'
+                          icon = '⚠️'
+                          text = `Vencido hace ${Math.abs(diffDays)} días`
+                        } else if (diffDays === 0) {
+                          color = 'var(--danger)'
+                          icon = '🔥'
+                          text = 'Vence HOY'
+                        } else if (diffDays <= 3) {
+                          color = 'var(--warning)'
+                          icon = '⏰'
+                          text = `${diffDays} día${diffDays > 1 ? 's' : ''}`
+                        }
+                        
+                        return (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <span style={{ fontSize: '0.85rem' }}>
+                              {deadlineDate.toLocaleDateString('es-CO', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                            <span 
+                              style={{ 
+                                fontSize: '0.75rem', 
+                                color, 
+                                fontWeight: 'bold'
+                              }}
+                            >
+                              {icon} {text}
+                            </span>
+                          </div>
+                        )
+                      }
+                      
+                      return (
+                        <tr key={ex.id}>
+                          <td><strong>{index + 1}</strong></td>
+                          <td>
+                            <strong>{ex.name}</strong>
+                          </td>
+                          <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            {ex.description || <em>Sin descripción</em>}
+                          </td>
+                          <td>
+                            {getDeadlineBadge() || <em style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin fecha límite</em>}
+                          </td>
+                          <td>
+                            <button 
+                              className="btn secondary"
+                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', width: '100%' }}
+                              onClick={() => deleteExercise(ex.id, ex.name)}
+                            >
+                              🗑️ Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
