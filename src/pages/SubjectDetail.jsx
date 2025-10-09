@@ -14,18 +14,23 @@ export default function SubjectDetail() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [exporting, setExporting] = useState(false)
+  const [exercises, setExercises] = useState([])
+  const [newExerciseName, setNewExerciseName] = useState('')
+  const [showExerciseForm, setShowExerciseForm] = useState(false)
 
   async function loadAll() {
     setLoading(true)
     try {
-      const [s, e, d] = await Promise.all([
+      const [s, e, d, ex] = await Promise.all([
         api.get(`/api/courses/subjects/${id}/`),
         api.get(`/api/courses/subjects/${id}/enrollments/`),
         api.get(`/api/courses/subjects/${id}/dashboard/`),
+        api.get(`/api/courses/exercises/?subject=${id}`),
       ])
       setSubject(s.data)
       setEnrollments(e.data)
       setDash(d.data)
+      setExercises(ex.data)
     } catch (err) {
       setError('No se pudo cargar la información de la materia.')
     } finally {
@@ -81,6 +86,45 @@ export default function SubjectDetail() {
     }
   }
 
+  async function createExercise(e) {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    try {
+      await api.post('/api/courses/exercises/', {
+        subject: id,
+        name: newExerciseName,
+        order: exercises.length
+      })
+      setSuccess(`✅ Ejercicio "${newExerciseName}" creado correctamente`)
+      setNewExerciseName('')
+      setShowExerciseForm(false)
+      loadAll()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('Error al crear ejercicio:', err.response?.data)
+      const errorMsg = err.response?.data?.detail ||
+                       err.response?.data?.name?.[0] ||
+                       err.response?.data?.non_field_errors?.[0] ||
+                       'No se pudo crear el ejercicio.'
+      setError(errorMsg)
+    }
+  }
+
+  async function deleteExercise(exerciseId, exerciseName) {
+    if (!confirm(`¿Estás seguro de eliminar el ejercicio "${exerciseName}"? Esto eliminará todos los resultados asociados.`)) {
+      return
+    }
+    try {
+      await api.delete(`/api/courses/exercises/${exerciseId}/`)
+      setSuccess(`✅ Ejercicio eliminado correctamente`)
+      loadAll()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      setError('No se pudo eliminar el ejercicio.')
+    }
+  }
+
   if (loading) return <div className="card">Cargando...</div>
   if (!subject) return <div className="card">Materia no encontrada</div>
 
@@ -121,6 +165,76 @@ export default function SubjectDetail() {
             ))}
           </tbody>
         </table>
+
+        <h3 style={{ marginTop: '2rem' }}>📝 Ejercicios ({exercises.length})</h3>
+        
+        {!showExerciseForm ? (
+          <button 
+            className="btn" 
+            onClick={() => setShowExerciseForm(true)}
+            style={{ marginBottom: '1rem' }}
+          >
+            ➕ Crear Ejercicio
+          </button>
+        ) : (
+          <form onSubmit={createExercise} style={{ marginBottom: '1rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+            <label>Nombre del Ejercicio</label>
+            <input 
+              type="text" 
+              value={newExerciseName} 
+              onChange={(e) => setNewExerciseName(e.target.value)} 
+              placeholder="Ej: Ejercicio 1 - Ecuaciones Lineales"
+              required 
+            />
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <button className="btn" type="submit">✅ Crear</button>
+              <button 
+                className="btn secondary" 
+                type="button"
+                onClick={() => {
+                  setShowExerciseForm(false)
+                  setNewExerciseName('')
+                  setError('')
+                }}
+              >
+                ❌ Cancelar
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+          {exercises.length === 0 ? (
+            <p className="notice">No hay ejercicios creados aún. Crea el primero para empezar a cargar resultados.</p>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nombre</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {exercises.map((ex, index) => (
+                  <tr key={ex.id}>
+                    <td>{index + 1}</td>
+                    <td>{ex.name}</td>
+                    <td>
+                      <button 
+                        className="btn secondary"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}
+                        onClick={() => deleteExercise(ex.id, ex.name)}
+                      >
+                        🗑️ Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
       <div className="card">
