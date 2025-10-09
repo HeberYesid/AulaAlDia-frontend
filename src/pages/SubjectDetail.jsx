@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api/axios'
 import CSVUpload from '../components/CSVUpload'
@@ -21,6 +21,12 @@ export default function SubjectDetail() {
   const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, studentEmail, exerciseName}
   const [newStatus, setNewStatus] = useState('')
   const [detailedResults, setDetailedResults] = useState([])
+  
+  // Filtros y búsqueda
+  const [studentSearch, setStudentSearch] = useState('')
+  const [exerciseSearch, setExerciseSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL') // 'ALL', 'GREEN', 'YELLOW', 'RED'
+  const [resultSearch, setResultSearch] = useState('')
 
   async function loadAll() {
     setLoading(true)
@@ -47,6 +53,47 @@ export default function SubjectDetail() {
   useEffect(() => {
     loadAll()
   }, [id])
+
+  // Filtrado de estudiantes
+  const filteredEnrollments = useMemo(() => {
+    if (!studentSearch.trim()) return enrollments
+    const search = studentSearch.toLowerCase()
+    return enrollments.filter(e => 
+      e.student.email.toLowerCase().includes(search) ||
+      e.student.first_name.toLowerCase().includes(search) ||
+      e.student.last_name.toLowerCase().includes(search) ||
+      `${e.student.first_name} ${e.student.last_name}`.toLowerCase().includes(search)
+    )
+  }, [enrollments, studentSearch])
+
+  // Filtrado de ejercicios
+  const filteredExercises = useMemo(() => {
+    if (!exerciseSearch.trim()) return exercises
+    const search = exerciseSearch.toLowerCase()
+    return exercises.filter(ex => ex.name.toLowerCase().includes(search))
+  }, [exercises, exerciseSearch])
+
+  // Filtrado de resultados
+  const filteredResults = useMemo(() => {
+    let filtered = detailedResults
+
+    // Filtrar por estado
+    if (statusFilter !== 'ALL') {
+      filtered = filtered.filter(r => r.status === statusFilter)
+    }
+
+    // Filtrar por búsqueda
+    if (resultSearch.trim()) {
+      const search = resultSearch.toLowerCase()
+      filtered = filtered.filter(r => 
+        r.student_email.toLowerCase().includes(search) ||
+        r.exercise_name.toLowerCase().includes(search) ||
+        (r.student_name && r.student_name.toLowerCase().includes(search))
+      )
+    }
+
+    return filtered
+  }, [detailedResults, statusFilter, resultSearch])
 
   async function addEnrollment(e) {
     e.preventDefault()
@@ -295,9 +342,38 @@ export default function SubjectDetail() {
           </div>
 
           <div>
-            <h3>📋 Lista de Estudiantes Inscritos</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>📋 Lista de Estudiantes Inscritos ({enrollments.length})</h3>
+            </div>
+            
+            {enrollments.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  placeholder="🔍 Buscar por email, nombre o apellido..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    maxWidth: '500px',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+                {studentSearch && (
+                  <p className="notice" style={{ marginTop: '0.5rem' }}>
+                    Mostrando {filteredEnrollments.length} de {enrollments.length} estudiantes
+                  </p>
+                )}
+              </div>
+            )}
+
             {enrollments.length === 0 ? (
               <p className="notice">No hay estudiantes inscritos en esta materia. Inscribe al primero usando el formulario arriba.</p>
+            ) : filteredEnrollments.length === 0 ? (
+              <p className="notice">No se encontraron estudiantes que coincidan con "{studentSearch}"</p>
             ) : (
               <div className="data-table">
                 <table className="table">
@@ -309,7 +385,7 @@ export default function SubjectDetail() {
                     </tr>
                   </thead>
                   <tbody>
-                    {enrollments.map((e, index) => (
+                    {filteredEnrollments.map((e, index) => (
                       <tr key={e.id}>
                         <td>{index + 1}</td>
                         <td>{e.student.email}</td>
@@ -369,13 +445,42 @@ export default function SubjectDetail() {
           </div>
 
           <div>
-            <h3>📋 Lista de Ejercicios</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>📋 Lista de Ejercicios ({exercises.length})</h3>
+            </div>
+
+            {exercises.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  placeholder="🔍 Buscar ejercicio por nombre..."
+                  value={exerciseSearch}
+                  onChange={(e) => setExerciseSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    maxWidth: '500px',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+                {exerciseSearch && (
+                  <p className="notice" style={{ marginTop: '0.5rem' }}>
+                    Mostrando {filteredExercises.length} de {exercises.length} ejercicios
+                  </p>
+                )}
+              </div>
+            )}
+
             {exercises.length === 0 ? (
               <div className="notice" style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
                 <p style={{ fontSize: '3rem', margin: '0' }}>📝</p>
                 <p style={{ fontSize: '1.1rem', margin: '1rem 0 0.5rem 0' }}>No hay ejercicios creados</p>
                 <p style={{ margin: '0', color: 'var(--text-secondary)' }}>Crea el primer ejercicio para empezar a cargar resultados</p>
               </div>
+            ) : filteredExercises.length === 0 ? (
+              <p className="notice">No se encontraron ejercicios que coincidan con "{exerciseSearch}"</p>
             ) : (
               <div className="data-table">
                 <table className="table">
@@ -387,7 +492,7 @@ export default function SubjectDetail() {
                     </tr>
                   </thead>
                   <tbody>
-                    {exercises.map((ex, index) => (
+                    {filteredExercises.map((ex, index) => (
                       <tr key={ex.id}>
                         <td><strong>{index + 1}</strong></td>
                         <td>{ex.name}</td>
@@ -507,44 +612,91 @@ export default function SubjectDetail() {
             {/* Detailed Results Table with Edit */}
             {detailedResults.length > 0 && (
               <div style={{ marginTop: '3rem' }}>
-                <h3>✏️ Resultados Individuales (Editable)</h3>
+                <h3>✏️ Resultados Individuales (Editable) - {detailedResults.length} resultados</h3>
                 <p className="notice" style={{ marginBottom: '1rem' }}>
                   Haz clic en "Editar" para cambiar el estado de cualquier resultado individual
                 </p>
-                <div className="data-table" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                  <table className="table">
-                    <thead style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1 }}>
-                      <tr>
-                        <th>👤 Estudiante</th>
-                        <th>📚 Ejercicio</th>
-                        <th>🚦 Estado</th>
-                        <th>📅 Actualizado</th>
-                        <th>⚡ Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {detailedResults.map((result) => (
-                        <tr key={result.id}>
-                          <td>{result.student_email}</td>
-                          <td>{result.exercise_name}</td>
-                          <td>
-                            <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
-                          </td>
-                          <td>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
-                          <td>
-                            <button
-                              className="btn secondary"
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
-                              onClick={() => openEditModal(result)}
-                            >
-                              ✏️ Editar
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+
+                {/* Filtros */}
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    placeholder="🔍 Buscar por estudiante o ejercicio..."
+                    value={resultSearch}
+                    onChange={(e) => setResultSearch(e.target.value)}
+                    style={{
+                      flex: '1 1 300px',
+                      padding: '0.75rem',
+                      fontSize: '1rem',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    style={{
+                      flex: '0 1 200px',
+                      padding: '0.75rem',
+                      fontSize: '1rem',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="ALL">🚦 Todos los estados</option>
+                    <option value="GREEN">🟢 Verde</option>
+                    <option value="YELLOW">🟡 Amarillo</option>
+                    <option value="RED">🔴 Rojo</option>
+                  </select>
                 </div>
+
+                {(resultSearch || statusFilter !== 'ALL') && (
+                  <p className="notice" style={{ marginBottom: '1rem' }}>
+                    Mostrando {filteredResults.length} de {detailedResults.length} resultados
+                    {resultSearch && ` con búsqueda "${resultSearch}"`}
+                    {statusFilter !== 'ALL' && ` filtrados por estado: ${statusFilter}`}
+                  </p>
+                )}
+
+                {filteredResults.length === 0 ? (
+                  <p className="notice">No se encontraron resultados con los filtros aplicados</p>
+                ) : (
+                  <div className="data-table" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                    <table className="table">
+                      <thead style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1 }}>
+                        <tr>
+                          <th>👤 Estudiante</th>
+                          <th>📚 Ejercicio</th>
+                          <th>🚦 Estado</th>
+                          <th>📅 Actualizado</th>
+                          <th>⚡ Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredResults.map((result) => (
+                          <tr key={result.id}>
+                            <td>{result.student_email}</td>
+                            <td>{result.exercise_name}</td>
+                            <td>
+                              <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
+                            </td>
+                            <td>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
+                            <td>
+                              <button
+                                className="btn secondary"
+                                style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
+                                onClick={() => openEditModal(result)}
+                              >
+                                ✏️ Editar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
