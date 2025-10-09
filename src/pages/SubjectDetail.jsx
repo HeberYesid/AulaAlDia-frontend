@@ -12,6 +12,7 @@ export default function SubjectDetail() {
   const [dash, setDash] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [exporting, setExporting] = useState(false)
 
   async function loadAll() {
     setLoading(true)
@@ -44,6 +45,29 @@ export default function SubjectDetail() {
       loadAll()
     } catch (err) {
       setError('No se pudo inscribir el estudiante. Verifica permisos y correo.')
+    }
+  }
+
+  async function exportCSV() {
+    setExporting(true)
+    try {
+      const response = await api.get(`/api/courses/subjects/${id}/export-csv/`, {
+        responseType: 'blob'
+      })
+      
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `${subject?.code || 'resultados'}_consolidado.csv`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      setError('No se pudo exportar el CSV. Verifica permisos.')
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -127,7 +151,13 @@ export default function SubjectDetail() {
               </tbody>
             </table>
             <p className="notice">Promedio: {dash.aggregates?.avg_grade} | Verde: {dash.aggregates?.pct_green}% | Amarillo: {dash.aggregates?.pct_yellow}% | Rojo: {dash.aggregates?.pct_red}%</p>
-            <a className="btn secondary" href={`/api/courses/subjects/${id}/export-csv/`} target="_blank" rel="noreferrer">Exportar CSV</a>
+            <button 
+              className="btn secondary" 
+              onClick={exportCSV}
+              disabled={exporting}
+            >
+              {exporting ? '⏳ Exportando...' : '📥 Exportar CSV'}
+            </button>
           </>
         ) : (
           <p className="notice">Sin datos</p>
