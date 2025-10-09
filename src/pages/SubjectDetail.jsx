@@ -18,20 +18,25 @@ export default function SubjectDetail() {
   const [newExerciseName, setNewExerciseName] = useState('')
   const [showExerciseForm, setShowExerciseForm] = useState(false)
   const [activeTab, setActiveTab] = useState('students') // 'students', 'exercises', 'results'
+  const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, studentEmail, exerciseName}
+  const [newStatus, setNewStatus] = useState('')
+  const [detailedResults, setDetailedResults] = useState([])
 
   async function loadAll() {
     setLoading(true)
     try {
-      const [s, e, d, ex] = await Promise.all([
+      const [s, e, d, ex, results] = await Promise.all([
         api.get(`/api/courses/subjects/${id}/`),
         api.get(`/api/courses/subjects/${id}/enrollments/`),
         api.get(`/api/courses/subjects/${id}/dashboard/`),
         api.get(`/api/courses/exercises/?subject=${id}`),
+        api.get(`/api/courses/results/?subject=${id}`),
       ])
       setSubject(s.data)
       setEnrollments(e.data)
       setDash(d.data)
       setExercises(ex.data)
+      setDetailedResults(results.data)
     } catch (err) {
       setError('No se pudo cargar la información de la materia.')
     } finally {
@@ -123,6 +128,44 @@ export default function SubjectDetail() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError('No se pudo eliminar el ejercicio.')
+    }
+  }
+
+  function openEditModal(result) {
+    setEditingResult({
+      resultId: result.id,
+      currentStatus: result.status,
+      studentEmail: result.student_email,
+      exerciseName: result.exercise_name
+    })
+    setNewStatus(result.status)
+    setError('')
+  }
+
+  function closeEditModal() {
+    setEditingResult(null)
+    setNewStatus('')
+    setError('')
+  }
+
+  async function updateResultStatus(e) {
+    e.preventDefault()
+    if (!editingResult) return
+    
+    try {
+      await api.patch(`/api/courses/results/${editingResult.resultId}/`, {
+        status: newStatus
+      })
+      setSuccess(`✅ Resultado actualizado: ${editingResult.studentEmail} - ${editingResult.exerciseName} → ${newStatus}`)
+      closeEditModal()
+      loadAll()
+      setTimeout(() => setSuccess(''), 5000)
+    } catch (err) {
+      console.error('Error al actualizar resultado:', err.response?.data)
+      const errorMsg = err.response?.data?.detail || 
+                       err.response?.data?.status?.[0] ||
+                       'No se pudo actualizar el resultado.'
+      setError(errorMsg)
     }
   }
 
@@ -460,6 +503,138 @@ export default function SubjectDetail() {
                 </p>
               </div>
             )}
+
+            {/* Detailed Results Table with Edit */}
+            {detailedResults.length > 0 && (
+              <div style={{ marginTop: '3rem' }}>
+                <h3>✏️ Resultados Individuales (Editable)</h3>
+                <p className="notice" style={{ marginBottom: '1rem' }}>
+                  Haz clic en "Editar" para cambiar el estado de cualquier resultado individual
+                </p>
+                <div className="data-table" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                  <table className="table">
+                    <thead style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1 }}>
+                      <tr>
+                        <th>👤 Estudiante</th>
+                        <th>📚 Ejercicio</th>
+                        <th>🚦 Estado</th>
+                        <th>📅 Actualizado</th>
+                        <th>⚡ Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailedResults.map((result) => (
+                        <tr key={result.id}>
+                          <td>{result.student_email}</td>
+                          <td>{result.exercise_name}</td>
+                          <td>
+                            <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
+                          </td>
+                          <td>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
+                          <td>
+                            <button
+                              className="btn secondary"
+                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
+                              onClick={() => openEditModal(result)}
+                            >
+                              ✏️ Editar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Result Modal */}
+      {editingResult && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}
+          onClick={closeEditModal}
+        >
+          <div 
+            className="card" 
+            style={{ 
+              maxWidth: '500px', 
+              width: '100%',
+              margin: '0',
+              animation: 'fadeIn 0.2s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>✏️ Editar Resultado</h2>
+            
+            <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+              <p style={{ margin: '0.5rem 0' }}><strong>👤 Estudiante:</strong> {editingResult.studentEmail}</p>
+              <p style={{ margin: '0.5rem 0' }}><strong>📚 Ejercicio:</strong> {editingResult.exerciseName}</p>
+              <p style={{ margin: '0.5rem 0' }}>
+                <strong>Estado Actual:</strong>{' '}
+                <StatusBadge 
+                  status={editingResult.currentStatus} 
+                  grade={editingResult.currentStatus === 'GREEN' ? 5.0 : editingResult.currentStatus === 'YELLOW' ? 3.0 : 1.0} 
+                />
+              </p>
+            </div>
+
+            <form onSubmit={updateResultStatus}>
+              <label><strong>Nuevo Estado</strong></label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                required
+                style={{ 
+                  padding: '0.75rem',
+                  fontSize: '1rem',
+                  border: '2px solid var(--border)',
+                  borderRadius: '8px'
+                }}
+              >
+                <option value="GREEN">🟢 Verde - Completado exitosamente</option>
+                <option value="YELLOW">🟡 Amarillo - Con observaciones</option>
+                <option value="RED">🔴 Rojo - No completado</option>
+              </select>
+
+              {error && (
+                <p style={{ color: 'var(--danger)', marginTop: '0.75rem', padding: '0.5rem', background: 'rgba(244, 67, 54, 0.1)', borderRadius: '4px' }}>
+                  {error}
+                </p>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button 
+                  type="submit" 
+                  className="btn"
+                  style={{ flex: 1 }}
+                >
+                  ✅ Guardar Cambios
+                </button>
+                <button 
+                  type="button"
+                  className="btn secondary"
+                  onClick={closeEditModal}
+                  style={{ flex: 1 }}
+                >
+                  ❌ Cancelar
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
