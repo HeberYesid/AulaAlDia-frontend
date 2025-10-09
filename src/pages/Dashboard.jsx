@@ -45,7 +45,7 @@ export default function Dashboard() {
       <div className="fade-in">
         <div className="dashboard-header">
           <div>
-            <h1 className="dashboard-title">👨‍🏫 Panel de Profesor</h1>
+            <h1 className="dashboard-title">Panel de Profesor</h1>
             <p className="dashboard-subtitle">Gestiona tus materias y estudiantes</p>
           </div>
           <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
