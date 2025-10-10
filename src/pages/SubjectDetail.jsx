@@ -25,6 +25,13 @@ export default function SubjectDetail() {
   const [newComment, setNewComment] = useState('')
   const [detailedResults, setDetailedResults] = useState([])
   
+  // Estados para crear resultado individual
+  const [showCreateResultForm, setShowCreateResultForm] = useState(false)
+  const [selectedEnrollmentId, setSelectedEnrollmentId] = useState('')
+  const [selectedExerciseId, setSelectedExerciseId] = useState('')
+  const [createStatus, setCreateStatus] = useState('GREEN')
+  const [createComment, setCreateComment] = useState('')
+  
   // Filtros y búsqueda
   const [studentSearch, setStudentSearch] = useState('')
   const [exerciseSearch, setExerciseSearch] = useState('')
@@ -231,6 +238,59 @@ export default function SubjectDetail() {
       const errorMsg = err.response?.data?.detail || 
                        err.response?.data?.status?.[0] ||
                        'No se pudo actualizar el resultado.'
+      setError(errorMsg)
+    }
+  }
+
+  function openCreateResultForm() {
+    setShowCreateResultForm(true)
+    setSelectedEnrollmentId('')
+    setSelectedExerciseId('')
+    setCreateStatus('GREEN')
+    setCreateComment('')
+    setError('')
+    setSuccess('')
+  }
+
+  function closeCreateResultForm() {
+    setShowCreateResultForm(false)
+    setSelectedEnrollmentId('')
+    setSelectedExerciseId('')
+    setCreateStatus('GREEN')
+    setCreateComment('')
+    setError('')
+  }
+
+  async function createResult(e) {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    
+    if (!selectedEnrollmentId || !selectedExerciseId) {
+      setError('Debes seleccionar un estudiante y un ejercicio')
+      return
+    }
+    
+    try {
+      await api.post('/api/courses/results/', {
+        enrollment: selectedEnrollmentId,
+        exercise: selectedExerciseId,
+        status: createStatus,
+        comment: createComment
+      })
+      
+      const enrollment = enrollments.find(e => e.id === parseInt(selectedEnrollmentId))
+      const exercise = exercises.find(ex => ex.id === parseInt(selectedExerciseId))
+      
+      setSuccess(`✅ Resultado asignado: ${enrollment?.student?.email} - ${exercise?.name} → ${createStatus}`)
+      closeCreateResultForm()
+      loadAll()
+      setTimeout(() => setSuccess(''), 5000)
+    } catch (err) {
+      console.error('Error al crear resultado:', err.response?.data)
+      const errorMsg = err.response?.data?.detail || 
+                       err.response?.data?.status?.[0] ||
+                       'No se pudo crear el resultado.'
       setError(errorMsg)
     }
   }
@@ -655,6 +715,19 @@ export default function SubjectDetail() {
             </p>
           </div>
 
+          {/* Asignar Resultado Individual */}
+          <div style={{ marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+              <h3 style={{ margin: 0 }}>➕ Asignar Resultado Individual</h3>
+              <button className="btn" onClick={openCreateResultForm}>
+                📝 Nuevo Resultado
+              </button>
+            </div>
+            <p className="notice" style={{ margin: 0 }}>
+              Asigna resultados manualmente seleccionando un estudiante y un ejercicio
+            </p>
+          </div>
+
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0 }}>📈 Dashboard de Resultados</h3>
@@ -967,6 +1040,154 @@ export default function SubjectDetail() {
                   type="button"
                   className="btn secondary"
                   onClick={closeEditModal}
+                  style={{ flex: 1 }}
+                >
+                  ❌ Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create Result Modal */}
+      {showCreateResultForm && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}
+          onClick={closeCreateResultForm}
+        >
+          <div 
+            className="card" 
+            style={{ 
+              maxWidth: '600px', 
+              width: '100%',
+              margin: '0',
+              animation: 'fadeIn 0.2s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>📝 Asignar Resultado Individual</h2>
+            
+            <p className="notice" style={{ marginBottom: '1.5rem' }}>
+              Selecciona un estudiante inscrito y un ejercicio existente para asignarle un resultado
+            </p>
+
+            <form onSubmit={createResult}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>👤 Estudiante</strong></label>
+                <select
+                  value={selectedEnrollmentId}
+                  onChange={(e) => setSelectedEnrollmentId(e.target.value)}
+                  required
+                  style={{ 
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border-primary)',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <option value="">-- Selecciona un estudiante --</option>
+                  {enrollments.map(enrollment => (
+                    <option key={enrollment.id} value={enrollment.id}>
+                      {enrollment.student.email} - {enrollment.student.first_name} {enrollment.student.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>📚 Ejercicio</strong></label>
+                <select
+                  value={selectedExerciseId}
+                  onChange={(e) => setSelectedExerciseId(e.target.value)}
+                  required
+                  style={{ 
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border-primary)',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <option value="">-- Selecciona un ejercicio --</option>
+                  {exercises.map(exercise => (
+                    <option key={exercise.id} value={exercise.id}>
+                      {exercise.name} {exercise.deadline && `(Entrega: ${new Date(exercise.deadline).toLocaleDateString()})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>🚦 Estado del Resultado</strong></label>
+                <select
+                  value={createStatus}
+                  onChange={(e) => setCreateStatus(e.target.value)}
+                  required
+                  style={{ 
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border-primary)',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <option value="GREEN">🟢 Verde - Completado exitosamente</option>
+                  <option value="YELLOW">🟡 Amarillo - Con observaciones</option>
+                  <option value="RED">🔴 Rojo - No completado</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>💬 Comentarios / Retroalimentación (Opcional)</strong></label>
+                <textarea
+                  value={createComment}
+                  onChange={(e) => setCreateComment(e.target.value)}
+                  placeholder="Escribe observaciones, sugerencias o felicitaciones para el estudiante..."
+                  rows="4"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border-primary)',
+                    borderRadius: 'var(--radius-md)',
+                    fontFamily: 'inherit',
+                    resize: 'vertical'
+                  }}
+                />
+                <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  💡 Los comentarios ayudan al estudiante a entender qué puede mejorar
+                </p>
+              </div>
+
+              {error && (
+                <div className="alert error" style={{ marginBottom: '1rem' }}>
+                  {error}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button 
+                  type="submit" 
+                  className="btn"
+                  style={{ flex: 1 }}
+                >
+                  ✅ Asignar Resultado
+                </button>
+                <button 
+                  type="button"
+                  className="btn secondary"
+                  onClick={closeCreateResultForm}
                   style={{ flex: 1 }}
                 >
                   ❌ Cancelar
