@@ -53,10 +53,22 @@ export default function NavBar() {
               )}
               <NotificationBell />
               <ThemeToggle />
-              <div className="user">
+              <Link 
+                to="/profile" 
+                className={isActive('/profile') ? 'active' : ''}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-sm)',
+                  padding: 'var(--space-sm) var(--space-md)',
+                  background: 'var(--bg-secondary)',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1px solid var(--border-primary)'
+                }}
+              >
                 <span>👤 {user.email}</span>
                 <span className="role-badge">{user.role}</span>
-              </div>
+              </Link>
               <button onClick={onLogout} className="btn danger">
                 🚪 Salir
               </button>

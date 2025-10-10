@@ -12,6 +12,7 @@ import Subjects from './pages/Subjects'
 import SubjectDetail from './pages/SubjectDetail'
 import NotificationsPage from './pages/Notifications'
 import MyResults from './pages/MyResults'
+import UserProfile from './pages/UserProfile'
 
 export default function App() {
   return (
@@ -66,6 +67,15 @@ export default function App() {
             element={
               <ProtectedRoute roles={["STUDENT"]}>
                 <MyResults />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
               </ProtectedRoute>
             }
           />
