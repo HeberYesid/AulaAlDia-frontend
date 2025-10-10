@@ -2,34 +2,53 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api } from '../api/axios'
-import StatusBadge from '../components/StatusBadge'
-import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
-
-const COLORS = ['#16a34a', '#f59e0b', '#ef4444']
+import StudentDashboard from './StudentDashboard'
 
 export default function Dashboard() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [subjects, setSubjects] = useState([])
-  const [mine, setMine] = useState([])
+  const [success, setSuccess] = useState('')
+  const [error, setError] = useState('')
+
+  // Si es estudiante, mostrar StudentDashboard
+  if (user.role === 'STUDENT') {
+    return <StudentDashboard />
+  }
+
+  async function loadSubjects() {
+    setLoading(true)
+    try {
+      const { data } = await api.get('/api/courses/subjects/')
+      setSubjects(data)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    async function run() {
-      setLoading(true)
-      try {
-        if (user.role === 'TEACHER' || user.role === 'ADMIN') {
-          const { data } = await api.get('/api/courses/subjects/')
-          setSubjects(data)
-        } else {
-          const { data } = await api.get('/api/courses/my-enrollments/')
-          setMine(data.enrollments || [])
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
-    run()
+    loadSubjects()
   }, [user])
+
+  async function deleteSubject(subject) {
+    const confirmMessage = `¿Estás seguro de que deseas eliminar la materia "${subject.name}" (${subject.code})?\n\nEsta acción eliminará:\n- Todos los estudiantes inscritos\n- Todos los ejercicios\n- Todos los resultados\n\nEsta acción NO se puede deshacer.`
+    
+    if (!window.confirm(confirmMessage)) {
+      return
+    }
+
+    setError('')
+    setSuccess('')
+    try {
+      await api.delete(`/api/courses/subjects/${subject.id}/`)
+      setSuccess(`✅ Materia "${subject.name}" eliminada exitosamente`)
+      loadSubjects()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('Error deleting subject:', err)
+      setError(`❌ No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
+    }
+  }
 
   if (loading) {
     return (
@@ -43,6 +62,18 @@ export default function Dashboard() {
   if (user.role === 'TEACHER' || user.role === 'ADMIN') {
     return (
       <div className="fade-in">
+        {/* Mensajes de éxito/error */}
+        {success && (
+          <div className="alert success" style={{ marginBottom: 'var(--space-lg)' }}>
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="alert error" style={{ marginBottom: 'var(--space-lg)' }}>
+            {error}
+          </div>
+        )}
+
         <div className="dashboard-header">
           <div>
             <h1 className="dashboard-title">Panel de Profesor</h1>
@@ -79,9 +110,22 @@ export default function Dashboard() {
                     <td>{s.name}</td>
                     <td>{s.enrollments_count || 0}</td>
                     <td>
-                      <Link className="action-btn btn" to={`/subjects/${s.id}`}>
-                        👁️ Ver Detalles
-                      </Link>
+                      <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                        <Link 
+                          className="btn secondary" 
+                          to={`/subjects/${s.id}`}
+                          style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                        >
+                          👁️ Ver Detalles
+                        </Link>
+                        <button
+                          onClick={() => deleteSubject(s)}
+                          className="btn danger"
+                          style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                        >
+                          🗑️ Eliminar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -92,101 +136,4 @@ export default function Dashboard() {
       </div>
     )
   }
-
-  // Student dashboard
-  const total = mine.reduce((acc, e) => acc + (e.stats?.total || 0), 0)
-  const green = mine.reduce((acc, e) => acc + (e.stats?.green || 0), 0)
-  const yellow = mine.reduce((acc, e) => acc + (e.stats?.yellow || 0), 0)
-  const red = mine.reduce((acc, e) => acc + (e.stats?.red || 0), 0)
-  const avgGrade = mine.length > 0 ? mine.reduce((acc, e) => acc + (e.stats?.grade || 0), 0) / mine.length : 0
-  
-  const chartData = [
-    { name: 'Verde', value: green },
-    { name: 'Amarillo', value: yellow },
-    { name: 'Rojo', value: red },
-  ]
-
-  return (
-    <div className="fade-in">
-      <div className="dashboard-header">
-        <div>
-          <h1 className="dashboard-title">🎓 Mi Dashboard</h1>
-          <p className="dashboard-subtitle">Seguimiento de tu progreso académico</p>
-        </div>
-      </div>
-
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-value">{mine.length}</div>
-          <div className="stat-label">📚 Materias</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{total}</div>
-          <div className="stat-label">📝 Ejercicios</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{avgGrade.toFixed(1)}</div>
-          <div className="stat-label">📊 Promedio</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{green}</div>
-          <div className="stat-label">✅ Aprobados</div>
-        </div>
-      </div>
-
-      <div className="grid cols-2">
-        <div className="card">
-          <h2>📋 Mis Materias</h2>
-          <div className="data-table">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>📝 Código</th>
-                  <th>📚 Materia</th>
-                  <th>📊 Nota</th>
-                  <th>🚦 Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mine.map((e) => (
-                  <tr key={e.enrollment_id}>
-                    <td><strong>{e.subject_code}</strong></td>
-                    <td>{e.subject_name}</td>
-                    <td>
-                      <span style={{ 
-                        fontWeight: 'bold',
-                        color: e.stats?.grade >= 3.0 ? 'var(--success)' : 
-                               e.stats?.grade >= 2.0 ? 'var(--warning)' : 'var(--danger)'
-                      }}>
-                        {e.stats?.grade?.toFixed?.(2) || 'N/A'}
-                      </span>
-                    </td>
-                    <td><StatusBadge status={e.stats?.semaphore} grade={e.stats?.grade} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        <div className="card">
-          <h2>📈 Resumen Visual</h2>
-          <div className="chart-container">
-            <PieChart width={320} height={240}>
-              <Pie data={chartData} cx={160} cy={120} innerRadius={50} outerRadius={90} dataKey="value">
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </div>
-          <div style={{ textAlign: 'center', marginTop: 'var(--space-md)' }}>
-            <p className="notice">📊 Total de ejercicios completados: <strong>{total}</strong></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
 }
