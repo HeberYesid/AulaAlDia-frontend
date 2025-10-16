@@ -89,7 +89,15 @@ export default function Login() {
           </div>
           
           <div className="form-group">
-            <label>🔒 Contraseña</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label>🔒 Contraseña</label>
+              <Link 
+                to="/forgot-password" 
+                style={{ fontSize: '0.85rem', color: 'var(--primary)' }}
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <input 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 

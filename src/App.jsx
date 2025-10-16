@@ -7,6 +7,8 @@ import Register from './pages/Register'
 import RegisterTeacher from './pages/RegisterTeacher'
 import Verify from './pages/Verify'
 import VerifyCode from './pages/VerifyCode'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Subjects from './pages/Subjects'
 import SubjectDetail from './pages/SubjectDetail'
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/register-teacher" element={<RegisterTeacher />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/verify-code" element={<VerifyCode />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route
             path="/"
