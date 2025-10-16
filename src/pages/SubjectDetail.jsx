@@ -39,6 +39,10 @@ export default function SubjectDetail() {
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL') // 'ALL', 'GREEN', 'YELLOW', 'RED'
   const [resultSearch, setResultSearch] = useState('')
+  
+  // Verificación de existencia de usuario
+  const [userExistsStatus, setUserExistsStatus] = useState(null) // null, 'checking', 'exists', 'not-exists'
+  const [userExistsInfo, setUserExistsInfo] = useState(null)
 
   async function loadAll() {
     setLoading(true)
@@ -119,6 +123,35 @@ export default function SubjectDetail() {
     return filtered
   }, [detailedResults, statusFilter, resultSearch, user])
 
+  // Verificar si el usuario existe en la plataforma
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (!email || !email.includes('@')) {
+        setUserExistsStatus(null)
+        setUserExistsInfo(null)
+        return
+      }
+
+      setUserExistsStatus('checking')
+      
+      try {
+        const response = await api.get(`/api/auth/check-user-exists/?email=${encodeURIComponent(email)}`)
+        setUserExistsStatus('exists')
+        setUserExistsInfo(response.data)
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setUserExistsStatus('not-exists')
+          setUserExistsInfo(null)
+        } else {
+          setUserExistsStatus(null)
+          setUserExistsInfo(null)
+        }
+      }
+    }, 500) // Debounce de 500ms
+
+    return () => clearTimeout(timeoutId)
+  }, [email])
+
   async function addEnrollment(e) {
     e.preventDefault()
     setError('')
@@ -127,6 +160,8 @@ export default function SubjectDetail() {
       await api.post(`/api/courses/subjects/${id}/enrollments/`, { student_email: email })
       setSuccess(`✅ Estudiante ${email} inscrito correctamente`)
       setEmail('')
+      setUserExistsStatus(null)
+      setUserExistsInfo(null)
       loadAll()
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(''), 3000)
@@ -420,15 +455,99 @@ export default function SubjectDetail() {
             <h3>➕ Inscribir Estudiante Individual</h3>
             <form onSubmit={addEnrollment} style={{ maxWidth: '500px' }}>
               <label>Correo electrónico del estudiante</label>
-              <input 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                placeholder="estudiante@ejemplo.com"
-                required 
-              />
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  placeholder="estudiante@ejemplo.com"
+                  required
+                  style={{
+                    paddingRight: userExistsStatus ? '2.5rem' : undefined
+                  }}
+                />
+                {userExistsStatus === 'checking' && (
+                  <div style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '1.2rem'
+                  }}>
+                    <div className="spinner" style={{ width: '16px', height: '16px' }}></div>
+                  </div>
+                )}
+                {userExistsStatus === 'exists' && (
+                  <div style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '1.2rem',
+                    color: 'var(--success)'
+                  }} title="Usuario encontrado">
+                    ✅
+                  </div>
+                )}
+                {userExistsStatus === 'not-exists' && (
+                  <div style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '1.2rem',
+                    color: 'var(--warning)'
+                  }} title="Usuario no encontrado">
+                    ⚠️
+                  </div>
+                )}
+              </div>
+              
+              {/* Información del usuario si existe */}
+              {userExistsStatus === 'exists' && userExistsInfo && (
+                <div style={{
+                  marginTop: '0.75rem',
+                  padding: '0.75rem',
+                  background: 'rgba(76, 175, 80, 0.1)',
+                  border: '1px solid var(--success)',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem'
+                }}>
+                  <div style={{ fontWeight: 'bold', color: 'var(--success)', marginBottom: '0.25rem' }}>
+                    ✅ Usuario encontrado en la plataforma
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)' }}>
+                    👤 {userExistsInfo.first_name} {userExistsInfo.last_name}
+                  </div>
+                  {userExistsInfo.role && (
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                      🎓 Rol: {userExistsInfo.role === 'STUDENT' ? 'Estudiante' : userExistsInfo.role === 'TEACHER' ? 'Profesor' : 'Admin'}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Advertencia si el usuario no existe */}
+              {userExistsStatus === 'not-exists' && (
+                <div style={{
+                  marginTop: '0.75rem',
+                  padding: '0.75rem',
+                  background: 'rgba(255, 193, 7, 0.1)',
+                  border: '1px solid var(--warning)',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem'
+                }}>
+                  <div style={{ fontWeight: 'bold', color: 'var(--warning)', marginBottom: '0.25rem' }}>
+                    ⚠️ Usuario no encontrado
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                    Se creará automáticamente una cuenta nueva con este correo. El estudiante deberá verificar su email para activarla.
+                  </div>
+                </div>
+              )}
+              
               <button className="btn" type="submit" style={{ marginTop: '0.75rem', width: '100%' }}>
-                ✅ Inscribir Estudiante
+                {userExistsStatus === 'exists' ? '✅ Inscribir Estudiante Existente' : '➕ Inscribir Estudiante'}
               </button>
             </form>
           </div>
