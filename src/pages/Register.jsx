@@ -53,7 +53,53 @@ export default function Register() {
         }
       })
     } catch (err) {
-      setError('No se pudo registrar. Verifica los datos.')
+      console.error('Error en registro:', err)
+      
+      // Detectar errores específicos del servidor
+      let errorMessage = 'No se pudo registrar. Verifica los datos.'
+      
+      if (err.response?.data) {
+        const errorData = err.response.data
+        
+        // Error de email duplicado
+        if (errorData.email) {
+          if (Array.isArray(errorData.email)) {
+            errorMessage = errorData.email[0]
+          } else {
+            errorMessage = errorData.email
+          }
+          // Normalizar mensajes comunes de email duplicado
+          if (errorMessage.toLowerCase().includes('already exists') || 
+              errorMessage.toLowerCase().includes('unique')) {
+            errorMessage = '📧 Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?'
+          }
+        }
+        // Error de username duplicado
+        else if (errorData.username) {
+          errorMessage = '👤 Este usuario ya existe.'
+        }
+        // Error de contraseña débil
+        else if (errorData.password) {
+          if (Array.isArray(errorData.password)) {
+            errorMessage = '🔒 ' + errorData.password.join(' ')
+          } else {
+            errorMessage = '🔒 ' + errorData.password
+          }
+        }
+        // Error general del servidor
+        else if (errorData.detail) {
+          errorMessage = errorData.detail
+        }
+        // Otros errores de campos
+        else if (errorData.non_field_errors) {
+          errorMessage = Array.isArray(errorData.non_field_errors) 
+            ? errorData.non_field_errors[0] 
+            : errorData.non_field_errors
+        }
+      }
+      
+      setError(errorMessage)
+      
       // Reset captcha on error
       setTurnstileToken('')
       if (captchaRef.current?.reset) {
@@ -178,7 +224,20 @@ export default function Register() {
           
           {error && (
             <div className="alert error">
-              ❌ {error}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div>❌ {error}</div>
+                {error.includes('ya está registrado') && (
+                  <div style={{ fontSize: '0.9rem' }}>
+                    <Link to="/forgot-password" className="link" style={{ color: 'white', textDecoration: 'underline' }}>
+                      → Recuperar contraseña
+                    </Link>
+                    {' o '}
+                    <Link to="/login" className="link" style={{ color: 'white', textDecoration: 'underline' }}>
+                      → Iniciar sesión
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </form>

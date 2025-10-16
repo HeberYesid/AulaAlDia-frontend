@@ -56,18 +56,37 @@ export default function RegisterTeacher() {
         }
       })
     } catch (err) {
+      console.error('Error en registro de profesor:', err)
       const errorData = err.response?.data
       
       // Manejar errores específicos por campo
+      let errorMessage = 'No se pudo registrar. Verifica los datos.'
+      
       if (errorData?.invitation_code) {
-        setError(errorData.invitation_code[0] || errorData.invitation_code)
+        errorMessage = '🎟️ ' + (errorData.invitation_code[0] || errorData.invitation_code)
       } else if (errorData?.email) {
-        setError(errorData.email[0] || errorData.email)
+        const emailError = errorData.email[0] || errorData.email
+        errorMessage = emailError
+        
+        // Normalizar mensajes de email duplicado
+        if (emailError.toLowerCase().includes('already exists') || 
+            emailError.toLowerCase().includes('unique')) {
+          errorMessage = '📧 Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?'
+        } else {
+          errorMessage = '📧 ' + emailError
+        }
+      } else if (errorData?.password) {
+        const passwordError = Array.isArray(errorData.password) 
+          ? errorData.password.join(' ') 
+          : errorData.password
+        errorMessage = '🔒 ' + passwordError
       } else if (errorData?.non_field_errors) {
-        setError(errorData.non_field_errors[0])
-      } else {
-        setError('No se pudo registrar. Verifica los datos.')
+        errorMessage = errorData.non_field_errors[0] || errorData.non_field_errors
+      } else if (errorData?.detail) {
+        errorMessage = errorData.detail
       }
+      
+      setError(errorMessage)
       
       // Reset captcha on error
       setTurnstileToken('')
@@ -216,7 +235,20 @@ export default function RegisterTeacher() {
           
           {error && (
             <div className="alert error">
-              ❌ {error}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div>❌ {error}</div>
+                {error.includes('ya está registrado') && (
+                  <div style={{ fontSize: '0.9rem' }}>
+                    <Link to="/forgot-password" className="link" style={{ color: 'white', textDecoration: 'underline' }}>
+                      → Recuperar contraseña
+                    </Link>
+                    {' o '}
+                    <Link to="/login" className="link" style={{ color: 'white', textDecoration: 'underline' }}>
+                      → Iniciar sesión
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </form>
