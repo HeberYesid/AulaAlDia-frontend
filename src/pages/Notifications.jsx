@@ -9,12 +9,15 @@ export default function NotificationsPage() {
   async function load() {
     setLoading(true)
     try {
-      const [{ data: list }, { data: count }] = await Promise.all([
-        api.get('/api/notifs/items/'),
-        api.get('/api/notifs/items/unread-count/'),
-      ])
-      setItems(list)
-      setUnread(count.unread)
+      // Usar la misma API que NotificationBell
+      const response = await api.get('/api/courses/notifications/')
+      setItems(response.data)
+      
+      // Contar las no leídas
+      const unreadCount = response.data.filter(n => !n.is_read).length
+      setUnread(unreadCount)
+    } catch (err) {
+      console.error('Error loading notifications:', err)
     } finally {
       setLoading(false)
     }
@@ -25,46 +28,168 @@ export default function NotificationsPage() {
   }, [])
 
   async function markAll() {
-    await api.post('/api/notifs/items/mark-all-read/')
-    load()
+    try {
+      await api.post('/api/courses/notifications/mark-all-read/')
+      load()
+    } catch (err) {
+      console.error('Error marking all as read:', err)
+    }
   }
 
   async function toggleRead(item) {
-    await api.patch(`/api/notifs/items/${item.id}/`, { is_read: !item.is_read })
-    load()
+    try {
+      await api.patch(`/api/courses/notifications/${item.id}/`, { is_read: !item.is_read })
+      load()
+    } catch (err) {
+      console.error('Error toggling read status:', err)
+    }
   }
 
-  if (loading) return <div className="card">Cargando...</div>
+  if (loading) {
+    return (
+      <div className="card">
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div className="spinner"></div>
+          <p>Cargando notificaciones...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="card">
-      <h2>Notificaciones</h2>
-      <p className="notice">No leídas: {unread}</p>
-      <button className="btn secondary" onClick={markAll}>Marcar todas como leídas</button>
-      <table className="table" style={{ marginTop: '.5rem' }}>
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>Título</th>
-            <th>Mensaje</th>
-            <th>Estado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((n) => (
-            <tr key={n.id}>
-              <td>{n.type}</td>
-              <td>{n.title}</td>
-              <td>{n.message}</td>
-              <td>{n.is_read ? 'Leída' : 'No leída'}</td>
-              <td>
-                <button className="btn" onClick={() => toggleRead(n)}>{n.is_read ? 'Marcar no leída' : 'Marcar leída'}</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div>
+          <h2 style={{ margin: 0 }}>🔔 Notificaciones</h2>
+          <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
+            {unread > 0 ? `Tienes ${unread} notificación${unread > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
+          </p>
+        </div>
+        {unread > 0 && (
+          <button className="btn secondary" onClick={markAll}>
+            Marcar todas como leídas
+          </button>
+        )}
+      </div>
+
+      {items.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+          <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
+          <p style={{ fontSize: '1.2rem', margin: '1rem 0 0 0' }}>No tienes notificaciones</p>
+        </div>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table className="table" style={{ marginTop: '1rem', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ width: '100px' }}>Tipo</th>
+                <th style={{ width: '200px' }}>Título</th>
+                <th>Mensaje</th>
+                <th style={{ width: '150px' }}>Fecha</th>
+                <th style={{ width: '100px', textAlign: 'center' }}>Estado</th>
+                <th style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((n) => (
+                <tr key={n.id} style={{ 
+                  background: n.is_read ? 'transparent' : 'rgba(var(--primary-rgb, 59, 130, 246), 0.05)',
+                  borderLeft: n.is_read ? 'none' : '3px solid var(--primary)'
+                }}>
+                  <td>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      background: n.notification_type === 'ENROLLMENT' ? '#10b981' :
+                                 n.notification_type === 'RESULT_CREATED' ? '#3b82f6' :
+                                 n.notification_type === 'RESULT_UPDATED' ? '#f59e0b' :
+                                 n.notification_type === 'EXERCISE_CREATED' ? '#8b5cf6' :
+                                 '#6b7280',
+                      color: 'white',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {n.notification_type === 'ENROLLMENT' ? '📝' :
+                       n.notification_type === 'RESULT_CREATED' ? '✅' :
+                       n.notification_type === 'RESULT_UPDATED' ? '📊' :
+                       n.notification_type === 'EXERCISE_CREATED' ? '📚' : '📌'}
+                      <span style={{ fontSize: '0.7rem' }}>
+                        {n.notification_type === 'ENROLLMENT' ? 'Inscr.' :
+                         n.notification_type === 'RESULT_CREATED' ? 'Result.' :
+                         n.notification_type === 'RESULT_UPDATED' ? 'Actual.' :
+                         n.notification_type === 'EXERCISE_CREATED' ? 'Ejerc.' : 'Gral.'}
+                      </span>
+                    </span>
+                  </td>
+                  <td style={{ 
+                    fontWeight: n.is_read ? 'normal' : '600',
+                    fontSize: '0.9rem'
+                  }}>
+                    {n.title}
+                  </td>
+                  <td style={{ 
+                    fontSize: '0.85rem',
+                    color: n.is_read ? 'var(--text-secondary)' : 'var(--text)'
+                  }}>
+                    {n.message}
+                  </td>
+                  <td style={{ 
+                    fontSize: '0.8rem', 
+                    color: 'var(--text-secondary)',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {new Date(n.created_at).toLocaleDateString('es', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                    <br />
+                    <span style={{ fontSize: '0.75rem' }}>
+                      {new Date(n.created_at).toLocaleTimeString('es', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '12px',
+                      fontSize: '0.7rem',
+                      fontWeight: '500',
+                      background: n.is_read ? '#e5e7eb' : 'var(--primary)',
+                      color: n.is_read ? '#6b7280' : 'white',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {n.is_read ? '✓' : '●'}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <button 
+                      className="btn sm"
+                      onClick={() => toggleRead(n)}
+                      title={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
+                      style={{
+                        padding: '0.3rem 0.6rem',
+                        fontSize: '0.8rem',
+                        whiteSpace: 'nowrap',
+                        minWidth: 'auto'
+                      }}
+                    >
+                      {n.is_read ? '📭' : '✓'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
