@@ -62,7 +62,8 @@ export default function StudentDashboard() {
 
       {/* Resumen General */}
       <div className="stats-grid" style={{ 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+        gridTemplateColumns: 'repeat(6, 1fr)',
+        gap: '1.5rem',
         marginBottom: 'var(--space-xl)' 
       }}>
         <div className="stat-card">
@@ -72,35 +73,35 @@ export default function StudentDashboard() {
           <div className="stat-label">📊 Total Resultados</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--success)' }}>
             {summary.green_count}
           </div>
           <div className="stat-label">🟢 Verdes</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--warning)' }}>
             {summary.yellow_count}
           </div>
           <div className="stat-label">🟡 Amarillos</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--danger)' }}>
             {summary.red_count}
           </div>
           <div className="stat-label">🔴 Rojos</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.1), rgba(25, 118, 210, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--primary)' }}>
             {summary.success_rate}%
           </div>
           <div className="stat-label">✅ Tasa de Éxito</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.1), rgba(156, 39, 176, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--text-accent)' }}>
             {summary.total_pending}
           </div>
@@ -109,59 +110,68 @@ export default function StudentDashboard() {
       </div>
 
       {/* Progreso por Materia */}
-      <div className="card" style={{ marginBottom: 'var(--space-xl)' }}>
-        <h2 style={{ marginBottom: 'var(--space-lg)' }}>📚 Progreso por Materia</h2>
+      <div style={{ marginBottom: 'var(--space-xl)' }}>
+        <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: '1.5rem', fontWeight: 'bold' }}>
+          📚 Progreso por Materia
+        </h2>
         
         {subjects_progress.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
+          <div className="card" style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
             <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
             <p>No estás inscrito en ninguna materia</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
+            gap: 'var(--space-lg)' 
+          }}>
             {subjects_progress.map((subject) => (
               <div
                 key={subject.subject_id}
+                className="card"
                 style={{
                   padding: 'var(--space-lg)',
-                  background: 'var(--bg-secondary)',
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid var(--border-primary)',
                   cursor: 'pointer',
-                  transition: 'all var(--transition-fast)'
+                  transition: 'all var(--transition-fast)',
+                  height: '100%'
                 }}
                 onClick={() => navigate(`/subjects/${subject.subject_id}`)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--bg-hover)'
-                  e.currentTarget.style.borderColor = 'var(--border-accent)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--bg-secondary)'
-                  e.currentTarget.style.borderColor = 'var(--border-primary)'
                   e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = ''
                 }}
               >
                 {/* Header de la materia */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: 'var(--space-md)'
+                  alignItems: 'flex-start',
+                  marginBottom: '1.25rem'
                 }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700 }}>
                       {subject.subject_name}
                     </h3>
-                    <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                      {subject.subject_code}
+                    <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                      📋 {subject.subject_code}
                     </p>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  <div style={{ 
+                    textAlign: 'right',
+                    padding: '0.75rem 1rem',
+                    background: 'var(--bg-primary)',
+                    borderRadius: 'var(--radius-md)',
+                    minWidth: '100px'
+                  }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
                       {subject.completion_rate}%
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       Completado
                     </div>
                   </div>
@@ -170,69 +180,71 @@ export default function StudentDashboard() {
                 {/* Barra de progreso */}
                 <div style={{
                   width: '100%',
-                  height: '8px',
+                  height: '10px',
                   background: 'var(--bg-primary)',
                   borderRadius: '999px',
                   overflow: 'hidden',
-                  marginBottom: 'var(--space-md)'
+                  marginBottom: '1.25rem',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
                 }}>
                   <div style={{
                     width: `${subject.completion_rate}%`,
                     height: '100%',
                     background: 'linear-gradient(90deg, var(--primary), var(--primary-light))',
                     borderRadius: '999px',
-                    transition: 'width 0.3s ease'
+                    transition: 'width 0.5s ease',
+                    boxShadow: '0 0 8px rgba(25, 118, 210, 0.4)'
                   }} />
                 </div>
 
                 {/* Estadísticas */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                  gap: 'var(--space-md)'
+                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gap: 'var(--space-sm)'
                 }}>
-                  <div style={{ textAlign: 'center', padding: 'var(--space-sm)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600 }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>
                       {subject.completed_exercises}/{subject.total_exercises}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                       Ejercicios
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-sm)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--success)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(76, 175, 80, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>
                       {subject.green_count}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                      Verdes
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                      🟢 Verdes
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-sm)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--warning)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(255, 193, 7, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--warning)' }}>
                       {subject.yellow_count}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                      Amarillos
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                      🟡 Amarillos
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-sm)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--danger)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(244, 67, 54, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--danger)' }}>
                       {subject.red_count}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                      Rojos
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                      🔴 Rojos
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-sm)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--primary)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(25, 118, 210, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
                       {subject.success_rate}%
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                      Éxito
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                      ✅ Éxito
                     </div>
                   </div>
                 </div>
@@ -243,7 +255,11 @@ export default function StudentDashboard() {
       </div>
 
       {/* Grid de 2 columnas para Ejercicios Pendientes y Últimos Resultados */}
-      <div className="grid cols-2" style={{ gap: 'var(--space-lg)' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', 
+        gap: 'var(--space-lg)' 
+      }}>
         {/* Ejercicios Pendientes */}
         <div className="card">
           <h2 style={{ marginBottom: 'var(--space-lg)' }}>⏳ Ejercicios Pendientes</h2>
