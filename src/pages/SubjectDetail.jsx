@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api/axios'
+import { useAuth } from '../state/AuthContext'
 import CSVUpload from '../components/CSVUpload'
 import StatusBadge from '../components/StatusBadge'
 
 export default function SubjectDetail() {
   const { id } = useParams()
+  const { user } = useAuth()
   const [subject, setSubject] = useState(null)
   const [enrollments, setEnrollments] = useState([])
   const [email, setEmail] = useState('')
@@ -64,6 +66,13 @@ export default function SubjectDetail() {
     loadAll()
   }, [id])
 
+  // Establecer tab inicial basado en rol
+  useEffect(() => {
+    if (user?.role === 'STUDENT') {
+      setActiveTab('results')
+    }
+  }, [user])
+
   // Filtrado de estudiantes
   const filteredEnrollments = useMemo(() => {
     if (!studentSearch.trim()) return enrollments
@@ -87,6 +96,11 @@ export default function SubjectDetail() {
   const filteredResults = useMemo(() => {
     let filtered = detailedResults
 
+    // Si es estudiante, solo mostrar sus propios resultados
+    if (user?.role === 'STUDENT' && user?.email) {
+      filtered = filtered.filter(r => r.student_email === user.email)
+    }
+
     // Filtrar por estado
     if (statusFilter !== 'ALL') {
       filtered = filtered.filter(r => r.status === statusFilter)
@@ -103,7 +117,7 @@ export default function SubjectDetail() {
     }
 
     return filtered
-  }, [detailedResults, statusFilter, resultSearch])
+  }, [detailedResults, statusFilter, resultSearch, user])
 
   async function addEnrollment(e) {
     e.preventDefault()
@@ -333,61 +347,69 @@ export default function SubjectDetail() {
       )}
 
       {/* Tabs Navigation */}
-      <div className="card" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', borderBottom: '2px solid var(--border)' }}>
-          <button
-            onClick={() => setActiveTab('students')}
-            style={{
-              flex: 1,
-              padding: '1rem',
-              border: 'none',
-              background: activeTab === 'students' ? 'var(--primary)' : 'transparent',
-              color: activeTab === 'students' ? 'white' : 'var(--text)',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: activeTab === 'students' ? 'bold' : 'normal',
-              transition: 'all 0.3s ease',
-              borderBottom: activeTab === 'students' ? '3px solid var(--primary)' : '3px solid transparent'
-            }}
-          >
-            👥 Estudiantes ({enrollments.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('exercises')}
-            style={{
-              flex: 1,
-              padding: '1rem',
-              border: 'none',
-              background: activeTab === 'exercises' ? 'var(--primary)' : 'transparent',
-              color: activeTab === 'exercises' ? 'white' : 'var(--text)',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: activeTab === 'exercises' ? 'bold' : 'normal',
-              transition: 'all 0.3s ease',
-              borderBottom: activeTab === 'exercises' ? '3px solid var(--primary)' : '3px solid transparent'
-            }}
-          >
-            📝 Ejercicios ({exercises.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('results')}
-            style={{
-              flex: 1,
-              padding: '1rem',
-              border: 'none',
-              background: activeTab === 'results' ? 'var(--primary)' : 'transparent',
-              color: activeTab === 'results' ? 'white' : 'var(--text)',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: activeTab === 'results' ? 'bold' : 'normal',
-              transition: 'all 0.3s ease',
-              borderBottom: activeTab === 'results' ? '3px solid var(--primary)' : '3px solid transparent'
-            }}
-          >
-            📊 Resultados
-          </button>
+      {user?.role === 'STUDENT' ? (
+        // Vista simplificada para estudiantes - sin tabs
+        <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--primary)', color: 'white' }}>
+          <h2 style={{ margin: 0 }}>📊 Mis Resultados en {subject.name}</h2>
         </div>
-      </div>
+      ) : (
+        // Vista completa para profesores/admin con tabs
+        <div className="card" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', borderBottom: '2px solid var(--border)' }}>
+            <button
+              onClick={() => setActiveTab('students')}
+              style={{
+                flex: 1,
+                padding: '1rem',
+                border: 'none',
+                background: activeTab === 'students' ? 'var(--primary)' : 'transparent',
+                color: activeTab === 'students' ? 'white' : 'var(--text)',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: activeTab === 'students' ? 'bold' : 'normal',
+                transition: 'all 0.3s ease',
+                borderBottom: activeTab === 'students' ? '3px solid var(--primary)' : '3px solid transparent'
+              }}
+            >
+              👥 Estudiantes ({enrollments.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('exercises')}
+              style={{
+                flex: 1,
+                padding: '1rem',
+                border: 'none',
+                background: activeTab === 'exercises' ? 'var(--primary)' : 'transparent',
+                color: activeTab === 'exercises' ? 'white' : 'var(--text)',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: activeTab === 'exercises' ? 'bold' : 'normal',
+                transition: 'all 0.3s ease',
+                borderBottom: activeTab === 'exercises' ? '3px solid var(--primary)' : '3px solid transparent'
+              }}
+            >
+              📝 Ejercicios ({exercises.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('results')}
+              style={{
+                flex: 1,
+                padding: '1rem',
+                border: 'none',
+                background: activeTab === 'results' ? 'var(--primary)' : 'transparent',
+                color: activeTab === 'results' ? 'white' : 'var(--text)',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: activeTab === 'results' ? 'bold' : 'normal',
+                transition: 'all 0.3s ease',
+                borderBottom: activeTab === 'results' ? '3px solid var(--primary)' : '3px solid transparent'
+              }}
+            >
+              📊 Resultados
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tab Content */}
       {activeTab === 'students' && (
@@ -699,126 +721,141 @@ export default function SubjectDetail() {
         </div>
       )}
 
-      {activeTab === 'results' && (
+      {(activeTab === 'results' || user?.role === 'STUDENT') && (
         <div className="card">
-          <h2>📊 Resultados y Dashboard</h2>
+          <h2>📊 {user?.role === 'STUDENT' ? 'Mis Resultados' : 'Resultados y Dashboard'}</h2>
           
-          <div style={{ marginBottom: '2rem' }}>
-            <h3>📤 Cargar Resultados desde CSV</h3>
-            <CSVUpload
-              label="Cargar resultados (columnas: student_email, exercise_name, status)"
-              uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
-              onComplete={loadAll}
-            />
-            <p className="notice" style={{ marginTop: '0.5rem' }}>
-              💡 Los ejercicios se crean automáticamente si no existen al subir el CSV
-            </p>
-          </div>
-
-          {/* Asignar Resultado Individual */}
-          <div style={{ marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-              <h3 style={{ margin: 0 }}>➕ Asignar Resultado Individual</h3>
-              <button className="btn" onClick={openCreateResultForm}>
-                📝 Nuevo Resultado
-              </button>
-            </div>
-            <p className="notice" style={{ margin: 0 }}>
-              Asigna resultados manualmente seleccionando un estudiante y un ejercicio
-            </p>
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>📈 Dashboard de Resultados</h3>
-              {dash && dash.enrollments.length > 0 && (
-                <button 
-                  className="btn secondary" 
-                  onClick={exportCSV}
-                  disabled={exporting}
-                >
-                  {exporting ? '⏳ Exportando...' : '📥 Exportar CSV'}
-                </button>
-              )}
-            </div>
-
-            {dash && dash.enrollments.length > 0 ? (
-              <>
-                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: '1.5rem' }}>
-                  <div className="stat-card">
-                    <div className="stat-value">{dash.total_exercises}</div>
-                    <div className="stat-label">📝 Ejercicios</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-value">{dash.aggregates?.avg_grade?.toFixed(2) || '0.0'}</div>
-                    <div className="stat-label">📊 Promedio</div>
-                  </div>
-                  <div className="stat-card" style={{ background: 'var(--success)' }}>
-                    <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_green?.toFixed(0) || '0'}%</div>
-                    <div className="stat-label" style={{ color: 'white' }}>🟢 Verde</div>
-                  </div>
-                  <div className="stat-card" style={{ background: 'var(--warning)' }}>
-                    <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_yellow?.toFixed(0) || '0'}%</div>
-                    <div className="stat-label" style={{ color: 'white' }}>🟡 Amarillo</div>
-                  </div>
-                  <div className="stat-card" style={{ background: 'var(--danger)' }}>
-                    <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_red?.toFixed(0) || '0'}%</div>
-                    <div className="stat-label" style={{ color: 'white' }}>🔴 Rojo</div>
-                  </div>
-                </div>
-
-                <div className="data-table">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>👤 Estudiante</th>
-                        <th>📝 Total</th>
-                        <th>🟢 Verde</th>
-                        <th>🟡 Amarillo</th>
-                        <th>🔴 Rojo</th>
-                        <th>📊 Nota</th>
-                        <th>🚦 Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dash.enrollments.map((i) => (
-                        <tr key={i.enrollment_id}>
-                          <td><strong>{i.student_email}</strong></td>
-                          <td>{i.total}</td>
-                          <td>{i.green}</td>
-                          <td>{i.yellow}</td>
-                          <td>{i.red}</td>
-                          <td><strong>{i.grade?.toFixed(2)}</strong></td>
-                          <td><StatusBadge status={i.semaphore} grade={i.grade} /></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            ) : (
-              <div className="notice" style={{ padding: '3rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                <p style={{ fontSize: '3rem', margin: '0' }}>📊</p>
-                <p style={{ fontSize: '1.1rem', margin: '1rem 0 0.5rem 0' }}>No hay resultados cargados</p>
-                <p style={{ margin: '0', color: 'var(--text-secondary)' }}>
-                  Asegúrate de tener estudiantes inscritos y ejercicios creados, luego carga los resultados vía CSV
+          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+            <>
+              <div style={{ marginBottom: '2rem' }}>
+                <h3>📤 Cargar Resultados desde CSV</h3>
+                <CSVUpload
+                  label="Cargar resultados (columnas: student_email, exercise_name, status)"
+                  uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
+                  onComplete={loadAll}
+                />
+                <p className="notice" style={{ marginTop: '0.5rem' }}>
+                  💡 Los ejercicios se crean automáticamente si no existen al subir el CSV
                 </p>
               </div>
+
+              {/* Asignar Resultado Individual */}
+              <div style={{ marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+                  <h3 style={{ margin: 0 }}>➕ Asignar Resultado Individual</h3>
+                  <button className="btn" onClick={openCreateResultForm}>
+                    📝 Nuevo Resultado
+                  </button>
+                </div>
+                <p className="notice" style={{ margin: 0 }}>
+                  Asigna resultados manualmente seleccionando un estudiante y un ejercicio
+                </p>
+              </div>
+            </>
+          )}
+
+          <div>
+            {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h3 style={{ margin: 0 }}>📈 Dashboard de Resultados</h3>
+                  {dash && dash.enrollments.length > 0 && (
+                    <button 
+                      className="btn secondary" 
+                      onClick={exportCSV}
+                      disabled={exporting}
+                    >
+                      {exporting ? '⏳ Exportando...' : '📥 Exportar CSV'}
+                    </button>
+                  )}
+                </div>
+
+                {dash && dash.enrollments.length > 0 ? (
+                  <>
+                    <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: '1.5rem' }}>
+                      <div className="stat-card">
+                        <div className="stat-value">{dash.total_exercises}</div>
+                        <div className="stat-label">📝 Ejercicios</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-value">{dash.aggregates?.avg_grade?.toFixed(2) || '0.0'}</div>
+                        <div className="stat-label">📊 Promedio</div>
+                      </div>
+                      <div className="stat-card" style={{ background: 'var(--success)' }}>
+                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_green?.toFixed(0) || '0'}%</div>
+                        <div className="stat-label" style={{ color: 'white' }}>🟢 Verde</div>
+                      </div>
+                      <div className="stat-card" style={{ background: 'var(--warning)' }}>
+                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_yellow?.toFixed(0) || '0'}%</div>
+                        <div className="stat-label" style={{ color: 'white' }}>🟡 Amarillo</div>
+                      </div>
+                      <div className="stat-card" style={{ background: 'var(--danger)' }}>
+                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_red?.toFixed(0) || '0'}%</div>
+                        <div className="stat-label" style={{ color: 'white' }}>🔴 Rojo</div>
+                      </div>
+                    </div>
+
+                    <div className="data-table">
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>👤 Estudiante</th>
+                            <th>📝 Total</th>
+                            <th>🟢 Verde</th>
+                            <th>🟡 Amarillo</th>
+                            <th>🔴 Rojo</th>
+                            <th>📊 Nota</th>
+                            <th>🚦 Estado</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dash.enrollments.map((i) => (
+                            <tr key={i.enrollment_id}>
+                              <td><strong>{i.student_email}</strong></td>
+                              <td>{i.total}</td>
+                              <td>{i.green}</td>
+                              <td>{i.yellow}</td>
+                              <td>{i.red}</td>
+                              <td><strong>{i.grade?.toFixed(2)}</strong></td>
+                              <td><StatusBadge status={i.semaphore} grade={i.grade} /></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                ) : (
+                  <div className="notice" style={{ padding: '3rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                    <p style={{ fontSize: '3rem', margin: '0' }}>📊</p>
+                    <p style={{ fontSize: '1.1rem', margin: '1rem 0 0.5rem 0' }}>No hay resultados cargados</p>
+                    <p style={{ margin: '0', color: 'var(--text-secondary)' }}>
+                      Asegúrate de tener estudiantes inscritos y ejercicios creados, luego carga los resultados vía CSV
+                    </p>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Detailed Results Table with Edit */}
             {detailedResults.length > 0 && (
-              <div style={{ marginTop: '3rem' }}>
-                <h3>✏️ Resultados Individuales (Editable) - {detailedResults.length} resultados</h3>
-                <p className="notice" style={{ marginBottom: '1rem' }}>
-                  Haz clic en "Editar" para cambiar el estado de cualquier resultado individual
-                </p>
+              <div style={{ marginTop: user?.role === 'STUDENT' ? '0' : '3rem' }}>
+                <h3>
+                  {user?.role === 'STUDENT' 
+                    ? `📝 Mis Ejercicios y Resultados - ${filteredResults.length} ${filteredResults.length === 1 ? 'ejercicio' : 'ejercicios'}`
+                    : `✏️ Resultados Individuales (Editable) - ${detailedResults.length} resultados`
+                  }
+                </h3>
+                {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+                  <p className="notice" style={{ marginBottom: '1rem' }}>
+                    Haz clic en "Editar" para cambiar el estado de cualquier resultado individual
+                  </p>
+                )}
 
                 {/* Filtros */}
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
                   <input
                     type="text"
-                    placeholder="🔍 Buscar por estudiante o ejercicio..."
+                    placeholder={user?.role === 'STUDENT' ? '🔍 Buscar por ejercicio...' : '🔍 Buscar por estudiante o ejercicio...'}
                     value={resultSearch}
                     onChange={(e) => setResultSearch(e.target.value)}
                     style={{
@@ -860,25 +897,27 @@ export default function SubjectDetail() {
                   <p className="notice">No se encontraron resultados con los filtros aplicados</p>
                 ) : (
                   <div className="data-table" style={{ maxHeight: '500px', overflowY: 'auto', overflowX: 'auto' }}>
-                    <table className="table" style={{ tableLayout: 'fixed', width: '100%', minWidth: '900px' }}>
+                    <table className="table" style={{ tableLayout: 'fixed', width: '100%', minWidth: user?.role === 'STUDENT' ? '700px' : '900px' }}>
                       <thead style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1 }}>
                         <tr>
-                          <th>👤 Estudiante</th>
+                          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>👤 Estudiante</th>}
                           <th>📚 Ejercicio</th>
                           <th style={{ width: '120px' }}>🚦 Estado</th>
                           <th style={{ width: '250px', maxWidth: '250px' }}>💬 Comentarios</th>
                           <th style={{ width: '150px' }}>📅 Actualizado</th>
-                          <th style={{ width: '100px' }}>⚡ Acción</th>
+                          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th style={{ width: '100px' }}>⚡ Acción</th>}
                         </tr>
                       </thead>
                       <tbody>
                         {filteredResults.map((result) => (
                           <tr key={result.id}>
-                            <td style={{ 
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }} title={result.student_email}>{result.student_email}</td>
+                            {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+                              <td style={{ 
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }} title={result.student_email}>{result.student_email}</td>
+                            )}
                             <td style={{ 
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -909,15 +948,17 @@ export default function SubjectDetail() {
                               )}
                             </td>
                             <td style={{ fontSize: '0.85rem' }}>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
-                            <td>
-                              <button
-                                className="btn secondary"
-                                style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
-                                onClick={() => openEditModal(result)}
-                              >
-                                ✏️ Editar
-                              </button>
-                            </td>
+                            {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+                              <td>
+                                <button
+                                  className="btn secondary"
+                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
+                                  onClick={() => openEditModal(result)}
+                                >
+                                  ✏️ Editar
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
                       </tbody>
@@ -931,7 +972,7 @@ export default function SubjectDetail() {
       )}
 
       {/* Edit Result Modal */}
-      {editingResult && (
+      {editingResult && (user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
         <div 
           style={{
             position: 'fixed',
@@ -1051,7 +1092,7 @@ export default function SubjectDetail() {
       )}
 
       {/* Create Result Modal */}
-      {showCreateResultForm && (
+      {showCreateResultForm && (user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
         <div 
           style={{
             position: 'fixed',
