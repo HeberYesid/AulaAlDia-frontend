@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
+import { showPasswordChangeToast } from '../utils/toast'
 
 export default function UserProfile() {
   const [user, setUser] = useState(null)
@@ -81,11 +82,18 @@ export default function UserProfile() {
         current_password: currentPassword,
         new_password: newPassword
       })
-      setSuccess('✅ Contraseña cambiada correctamente')
+      
+      // Mostrar toast de seguridad
+      showPasswordChangeToast()
+      
+      // Limpiar formulario
       setChangingPassword(false)
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
+      
+      // Mensaje de éxito temporal
+      setSuccess('✅ Contraseña cambiada correctamente')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error changing password:', err)
