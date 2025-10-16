@@ -98,13 +98,11 @@ export default function NotificationsPage() {
                 }}>
                   <td>
                     <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                      padding: '0.2rem 0.5rem',
+                      display: 'inline-block',
+                      padding: '0.3rem 0.6rem',
                       borderRadius: '6px',
                       fontSize: '0.75rem',
-                      fontWeight: '500',
+                      fontWeight: '600',
                       background: n.notification_type === 'ENROLLMENT' ? '#10b981' :
                                  n.notification_type === 'RESULT_CREATED' ? '#3b82f6' :
                                  n.notification_type === 'RESULT_UPDATED' ? '#f59e0b' :
@@ -113,16 +111,10 @@ export default function NotificationsPage() {
                       color: 'white',
                       whiteSpace: 'nowrap'
                     }}>
-                      {n.notification_type === 'ENROLLMENT' ? '📝' :
-                       n.notification_type === 'RESULT_CREATED' ? '✅' :
-                       n.notification_type === 'RESULT_UPDATED' ? '📊' :
-                       n.notification_type === 'EXERCISE_CREATED' ? '📚' : '📌'}
-                      <span style={{ fontSize: '0.7rem' }}>
-                        {n.notification_type === 'ENROLLMENT' ? 'Inscr.' :
-                         n.notification_type === 'RESULT_CREATED' ? 'Result.' :
-                         n.notification_type === 'RESULT_UPDATED' ? 'Actual.' :
-                         n.notification_type === 'EXERCISE_CREATED' ? 'Ejerc.' : 'Gral.'}
-                      </span>
+                      {n.notification_type === 'ENROLLMENT' ? 'Inscripción' :
+                       n.notification_type === 'RESULT_CREATED' ? 'Resultado' :
+                       n.notification_type === 'RESULT_UPDATED' ? 'Actualización' :
+                       n.notification_type === 'EXERCISE_CREATED' ? 'Ejercicio' : 'General'}
                     </span>
                   </td>
                   <td style={{ 
@@ -158,15 +150,15 @@ export default function NotificationsPage() {
                   <td style={{ textAlign: 'center' }}>
                     <span style={{
                       display: 'inline-block',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '12px',
-                      fontSize: '0.7rem',
-                      fontWeight: '500',
+                      padding: '0.25rem 0.6rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
                       background: n.is_read ? '#e5e7eb' : 'var(--primary)',
                       color: n.is_read ? '#6b7280' : 'white',
                       whiteSpace: 'nowrap'
                     }}>
-                      {n.is_read ? '✓' : '●'}
+                      {n.is_read ? 'Leída' : 'Nueva'}
                     </span>
                   </td>
                   <td style={{ textAlign: 'center' }}>
@@ -176,12 +168,12 @@ export default function NotificationsPage() {
                       title={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
                       style={{
                         padding: '0.3rem 0.6rem',
-                        fontSize: '0.8rem',
+                        fontSize: '0.75rem',
                         whiteSpace: 'nowrap',
                         minWidth: 'auto'
                       }}
                     >
-                      {n.is_read ? '📭' : '✓'}
+                      {n.is_read ? 'No leída' : 'Marcar'}
                     </button>
                   </td>
                 </tr>
