@@ -1,0 +1,156 @@
+/* ========================================
+   📱 RESPONSIVE DASHBOARD STYLES
+   ======================================== */
+
+/* Stats Grid - Desktop: 6 columnas, Mobile: 3 columnas */
+.stats-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.5rem;
+}
+
+/* Subjects Grid - Desktop: minmax(400px), Mobile: 100% */
+.subjects-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* Subject Header - Desktop: no wrap, Mobile: wrap */
+.subject-header-responsive {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+/* Subject Stats - Desktop: 5 columnas, Mobile: 3 columnas */
+.subject-stats-responsive {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-sm);
+}
+
+/* Exercises Grid - Desktop: 2 columnas, Mobile: 1 columna */
+.exercises-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* Text labels - Desktop: texto completo, Mobile: solo emojis */
+.stat-label-desktop,
+.stat-text-desktop {
+  display: block;
+}
+
+.stat-label-mobile,
+.stat-text-mobile {
+  display: none;
+}
+
+/* ========================================
+   📱 MOBILE BREAKPOINT (< 768px)
+   ======================================== */
+@media (max-width: 768px) {
+  /* Stats Grid: 3 columnas en móvil */
+  .stats-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  
+  /* Stat cards: padding reducido */
+  .stats-grid-responsive .stat-card {
+    padding: var(--space-sm);
+  }
+  
+  /* Stat values: tamaño reducido */
+  .stats-grid-responsive .stat-value {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Subjects Grid: 1 columna en móvil */
+  .subjects-grid-responsive {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  /* Subject Header: wrap en móvil */
+  .subject-header-responsive {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .subject-header-responsive > div:first-child {
+    min-width: 200px;
+  }
+  
+  .subject-header-responsive h3 {
+    font-size: 1.1rem !important;
+  }
+  
+  .subject-header-responsive p {
+    font-size: 0.8rem !important;
+  }
+  
+  .subject-header-responsive > div:last-child {
+    min-width: 80px;
+    padding: var(--space-sm) var(--space-md) !important;
+  }
+  
+  .subject-header-responsive > div:last-child > div:first-child {
+    font-size: 1.5rem !important;
+  }
+  
+  .subject-header-responsive > div:last-child > div:last-child {
+    font-size: 0.65rem !important;
+  }
+  
+  /* Subject Stats: ajuste responsive */
+  .subject-stats-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: var(--space-xs);
+  }
+  
+  .subject-stats-responsive > div {
+    padding: var(--space-sm) !important;
+  }
+  
+  .subject-stats-responsive > div > div:first-child {
+    font-size: 1rem !important;
+  }
+  
+  /* Exercises Grid: 1 columna en móvil */
+  .exercises-grid-responsive {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  /* Text labels: mostrar versión móvil (solo emojis) */
+  .stat-label-desktop,
+  .stat-text-desktop {
+    display: none;
+  }
+  
+  .stat-label-mobile,
+  .stat-text-mobile {
+    display: block;
+  }
+}
+
+/* ========================================
+   💻 TABLET BREAKPOINT (768px - 1024px)
+   ======================================== */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Stats Grid: 3 columnas en tablet */
+  .stats-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  
+  /* Subjects Grid: ajuste para tablet */
+  .subjects-grid-responsive {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
