@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [access, setAccess] = useState(null)
   const [refresh, setRefresh] = useState(null)
+  const [lastActivity, setLastActivity] = useState(Date.now())
 
   useEffect(() => {
     const raw = localStorage.getItem('auth')
@@ -18,12 +19,45 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  // Auto-logout por inactividad
+  useEffect(() => {
+    if (!user) return
+
+    const timeout = (user.session_timeout || 30) * 60 * 1000 // Convertir minutos a ms
+    
+    const checkInactivity = setInterval(() => {
+      const now = Date.now()
+      const inactive = now - lastActivity
+      
+      if (inactive >= timeout) {
+        console.log('⏱️ Sesión cerrada por inactividad')
+        logout()
+      }
+    }, 60000) // Verificar cada minuto
+
+    // Detectar actividad del usuario
+    const updateActivity = () => setLastActivity(Date.now())
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click']
+    
+    events.forEach(event => {
+      window.addEventListener(event, updateActivity)
+    })
+
+    return () => {
+      clearInterval(checkInactivity)
+      events.forEach(event => {
+        window.removeEventListener(event, updateActivity)
+      })
+    }
+  }, [user, lastActivity])
+
   function saveAuth({ user, access, refresh }) {
     const payload = { user, access, refresh }
     localStorage.setItem('auth', JSON.stringify(payload))
     setUser(user)
     setAccess(access)
     setRefresh(refresh)
+    setLastActivity(Date.now()) // Resetear actividad al guardar auth
   }
 
   async function login(email, password, turnstile_token) {
@@ -42,7 +76,15 @@ export function AuthProvider({ children }) {
     setRefresh(null)
   }
 
-  const value = { user, access, refresh, login, register, logout }
+  // Función para actualizar el usuario (después de cambiar configuración)
+  function updateUser(updatedUser) {
+    const currentAuth = JSON.parse(localStorage.getItem('auth') || '{}')
+    const newAuth = { ...currentAuth, user: updatedUser }
+    localStorage.setItem('auth', JSON.stringify(newAuth))
+    setUser(updatedUser)
+  }
+
+  const value = { user, access, refresh, login, register, logout, updateUser, lastActivity }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
