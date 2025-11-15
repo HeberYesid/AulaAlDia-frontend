@@ -184,8 +184,15 @@ export default function AppTour() {
   const location = useLocation()
   const [run, setRun] = useState(false)
   const [steps, setSteps] = useState([])
+  const [stepIndex, setStepIndex] = useState(0)
 
   useEffect(() => {
+    // Resetear el tour cuando cambia la ubicación
+    if (location.pathname !== '/') {
+      setRun(false)
+      return
+    }
+
     // Solo mostrar el tour si:
     // 1. Usuario autenticado
     // 2. Está en la página principal (Dashboard)
@@ -221,35 +228,46 @@ export default function AppTour() {
 
       if (tourSteps.length > 0) {
         setSteps(tourSteps)
+        setStepIndex(0)
         
-        // Pequeño delay para asegurar que el DOM esté listo
+        // Delay más largo para asegurar que el DOM esté completamente listo
         setTimeout(() => {
           console.log('[AppTour] Activando tour con', tourSteps.length, 'pasos')
           setRun(true)
-        }, 1500)
+        }, 2000)
       }
+    } else if (hasCompletedTour) {
+      console.log('[AppTour] Tour ya completado para', user?.role)
     }
   }, [isAuthenticated, user, location])
 
   const handleJoyrideCallback = (data) => {
-    const { action, index, status, type } = data
+    const { action, index, status, type, lifecycle } = data
 
-    console.log('[AppTour] Callback:', { action, index, status, type })
+    console.log('[AppTour] Callback:', { action, index, status, type, lifecycle, step: steps[index]?.target })
+
+    // Actualizar índice del step
+    if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
+      setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1))
+    }
 
     // Tour finalizado o saltado
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       console.log('[AppTour] Tour completado/saltado')
       setRun(false)
+      setStepIndex(0)
       // Marcar como completado en localStorage
       if (user) {
         localStorage.setItem(`${TOUR_STORAGE_KEY}-${user.role}`, 'true')
+        console.log('[AppTour] Guardado en localStorage:', `${TOUR_STORAGE_KEY}-${user.role}`)
       }
     }
 
     // Si el usuario cierra el tour con ESC o hace clic fuera
-    if (action === ACTIONS.CLOSE) {
+    if (action === ACTIONS.CLOSE && type === EVENTS.TOUR_END) {
       console.log('[AppTour] Tour cerrado por usuario')
       setRun(false)
+      setStepIndex(0)
       if (user) {
         localStorage.setItem(`${TOUR_STORAGE_KEY}-${user.role}`, 'true')
       }
@@ -273,9 +291,15 @@ export default function AppTour() {
     <Joyride
       steps={steps}
       run={run}
+      stepIndex={stepIndex}
       continuous
       showProgress
       showSkipButton
+      scrollToFirstStep
+      disableScrolling={false}
+      disableOverlayClose
+      hideCloseButton
+      spotlightClicks={false}
       callback={handleJoyrideCallback}
       styles={{
         options: {

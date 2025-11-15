@@ -1,22 +1,36 @@
 import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 export default function TourDebugButton() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [tourStatus, setTourStatus] = useState('❓')
+
+  useEffect(() => {
+    if (user) {
+      const tourKey = `devtrack-tour-completed-${user.role}`
+      const completed = localStorage.getItem(tourKey)
+      setTourStatus(completed ? '✅' : '❌')
+    }
+  }, [user, location])
 
   const resetAndShowTour = () => {
     if (user) {
       const tourKey = `devtrack-tour-completed-${user.role}`
       localStorage.removeItem(tourKey)
       console.log('[TourDebug] Tour reset for role:', user.role)
+      console.log('[TourDebug] Removed key:', tourKey)
+      
+      // Mostrar confirmación
+      alert(`✅ Tour reseteado para ${user.role}.\n\nRecargando página para mostrar el tour...`)
       
       // Si ya estamos en dashboard, recargar, si no, navegar
       if (location.pathname === '/') {
         window.location.reload()
       } else {
-        navigate('/')
+        window.location.href = '/'
       }
     }
   }
@@ -25,13 +39,27 @@ export default function TourDebugButton() {
     if (user) {
       const tourKey = `devtrack-tour-completed-${user.role}`
       const completed = localStorage.getItem(tourKey)
-      console.log('[TourDebug] Status:', {
+      const allTourKeys = Object.keys(localStorage).filter(k => k.includes('tour'))
+      
+      console.log('[TourDebug] Full Status:', {
         role: user.role,
         tourKey,
         completed: completed ? 'SÍ' : 'NO',
-        localStorage: Object.keys(localStorage).filter(k => k.includes('tour'))
+        completedValue: completed,
+        allTourKeys,
+        pathname: location.pathname,
+        isAuthenticated: !!user
       })
-      alert(`Tour para ${user.role}: ${completed ? 'COMPLETADO' : 'NO COMPLETADO'}`)
+      
+      alert(
+        `📊 Estado del Tour\n\n` +
+        `Rol: ${user.role}\n` +
+        `Key: ${tourKey}\n` +
+        `Estado: ${completed ? '✅ COMPLETADO' : '❌ NO COMPLETADO'}\n` +
+        `Valor: ${completed || 'null'}\n` +
+        `Ubicación: ${location.pathname}\n\n` +
+        `Keys relacionadas: ${allTourKeys.length > 0 ? allTourKeys.join(', ') : 'Ninguna'}`
+      )
     }
   }
 
@@ -56,7 +84,7 @@ export default function TourDebugButton() {
       border: '2px solid var(--primary)'
     }}>
       <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
-        🔧 Tour Debug
+        🔧 Tour Debug {tourStatus}
       </div>
       <button 
         onClick={resetAndShowTour}
