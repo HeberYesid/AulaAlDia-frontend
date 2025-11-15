@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import { showPasswordChangeToast } from '../utils/toast'
 import { useAuth } from '../state/AuthContext'
+import { resetTour } from '../components/AppTour'
 
 export default function UserProfile() {
   const { updateUser } = useAuth()
@@ -593,6 +594,28 @@ export default function UserProfile() {
             {user.is_verified ? '✅ Verificado' : '⏳ Pendiente'}
           </span>
         </div>
+      </div>
+
+      {/* Tour Guide */}
+      <div className="card">
+        <h2 style={{ marginBottom: 'var(--space-lg)' }}>🎓 Tour de Bienvenida</h2>
+        <p style={{ 
+          color: 'var(--text-secondary)', 
+          marginBottom: 'var(--space-lg)',
+          fontSize: 'var(--font-size-sm)'
+        }}>
+          ¿Necesitas ayuda navegando la plataforma? Reinicia el tour interactivo para ver las funcionalidades principales.
+        </p>
+        <button 
+          onClick={() => {
+            resetTour(user.role)
+            navigate('/')
+          }} 
+          className="btn secondary"
+          style={{ width: '100%' }}
+        >
+          🔄 Reiniciar Tour de Bienvenida
+        </button>
       </div>
     </div>
   )
