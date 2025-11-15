@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppTour from './components/AppTour'
+import TourDebugButton from './components/TourDebugButton'
 
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -22,6 +23,7 @@ export default function App() {
     <div className="app">
       <NavBar />
       <AppTour />
+      <TourDebugButton />
       <main className="container">
         <Routes>
           <Route path="/login" element={<Login />} />

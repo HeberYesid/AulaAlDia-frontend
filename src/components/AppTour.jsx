@@ -190,12 +190,25 @@ export default function AppTour() {
     // 1. Usuario autenticado
     // 2. Está en la página principal (Dashboard)
     // 3. No ha completado el tour antes
+    const tourKey = `${TOUR_STORAGE_KEY}-${user?.role}`
+    const hasCompletedTour = localStorage.getItem(tourKey)
+    
+    console.log('[AppTour] Debug:', {
+      isAuthenticated,
+      userRole: user?.role,
+      pathname: location.pathname,
+      hasCompletedTour,
+      tourKey
+    })
+
     if (
       isAuthenticated &&
       user &&
       location.pathname === '/' &&
-      !localStorage.getItem(`${TOUR_STORAGE_KEY}-${user.role}`)
+      !hasCompletedTour
     ) {
+      console.log('[AppTour] Iniciando tour para rol:', user.role)
+      
       // Seleccionar steps según el rol
       let tourSteps = []
       if (user.role === 'STUDENT') {
@@ -206,18 +219,26 @@ export default function AppTour() {
         tourSteps = ADMIN_STEPS
       }
 
-      setSteps(tourSteps)
-      
-      // Pequeño delay para asegurar que el DOM esté listo
-      setTimeout(() => setRun(true), 1000)
+      if (tourSteps.length > 0) {
+        setSteps(tourSteps)
+        
+        // Pequeño delay para asegurar que el DOM esté listo
+        setTimeout(() => {
+          console.log('[AppTour] Activando tour con', tourSteps.length, 'pasos')
+          setRun(true)
+        }, 1500)
+      }
     }
   }, [isAuthenticated, user, location])
 
   const handleJoyrideCallback = (data) => {
     const { action, index, status, type } = data
 
+    console.log('[AppTour] Callback:', { action, index, status, type })
+
     // Tour finalizado o saltado
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      console.log('[AppTour] Tour completado/saltado')
       setRun(false)
       // Marcar como completado en localStorage
       if (user) {
@@ -227,6 +248,7 @@ export default function AppTour() {
 
     // Si el usuario cierra el tour con ESC o hace clic fuera
     if (action === ACTIONS.CLOSE) {
+      console.log('[AppTour] Tour cerrado por usuario')
       setRun(false)
       if (user) {
         localStorage.setItem(`${TOUR_STORAGE_KEY}-${user.role}`, 'true')
@@ -257,37 +279,42 @@ export default function AppTour() {
       callback={handleJoyrideCallback}
       styles={{
         options: {
-          arrowColor: 'var(--bg-card)',
-          backgroundColor: 'var(--bg-card)',
-          overlayColor: 'rgba(0, 0, 0, 0.7)',
-          primaryColor: 'var(--primary)',
-          textColor: 'var(--text-primary)',
+          arrowColor: '#ffffff',
+          backgroundColor: '#ffffff',
+          overlayColor: 'rgba(0, 0, 0, 0.8)',
+          primaryColor: '#1976d2',
+          textColor: '#333333',
           zIndex: 10000,
         },
         tooltip: {
           borderRadius: '12px',
           padding: '20px',
           fontSize: '15px',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
         },
         tooltipContent: {
           padding: '10px 0',
         },
         buttonNext: {
-          backgroundColor: 'var(--primary)',
+          backgroundColor: '#1976d2',
           borderRadius: '8px',
           padding: '10px 20px',
           fontSize: '14px',
           fontWeight: '600',
+          color: '#ffffff',
         },
         buttonBack: {
-          color: 'var(--text-secondary)',
+          color: '#666666',
           marginRight: '10px',
         },
         buttonSkip: {
-          color: 'var(--text-secondary)',
+          color: '#666666',
         },
         buttonClose: {
           display: 'none',
+        },
+        spotlight: {
+          borderRadius: '8px',
         },
       }}
       locale={{
