@@ -191,7 +191,7 @@ body {
   padding: var(--space-md) var(--space-lg);
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 40;
   transition: all var(--transition-normal);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
@@ -1228,7 +1228,8 @@ form {
   /* Navbar móvil - menú hamburguesa */
   .hamburger-btn {
     display: block;
-    z-index: 52;
+    z-index: 42;
+    position: relative;
   }
   
   .navbar nav {
@@ -1248,6 +1249,7 @@ form {
     transition: right 0.3s ease;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
     overflow-y: auto;
+    z-index: 41;
   }
   
   .navbar nav.nav-open {
@@ -1284,6 +1286,23 @@ form {
   .user-email {
     font-size: var(--font-size-sm);
     word-break: break-all;
+  }
+  
+  /* Overlay para cerrar el menú al hacer click fuera */
+  .navbar nav.nav-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+  
+  /* Asegurar que las notificaciones se vean correctamente */
+  .notification-bell {
+    position: static !important;
   }
 }
 

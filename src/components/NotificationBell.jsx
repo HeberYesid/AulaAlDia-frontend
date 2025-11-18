@@ -140,17 +140,17 @@ export default function NotificationBell() {
       {showDropdown && (
         <div
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 10px)',
-            right: 0,
+            position: 'fixed',
+            top: '70px',
+            right: '10px',
             width: '400px',
-            maxWidth: '90vw',
+            maxWidth: 'calc(100vw - 20px)',
             background: 'var(--bg-card)',
             border: '1px solid var(--border-primary)',
             borderRadius: '12px',
             boxShadow: 'var(--shadow-xl)',
             zIndex: 1000,
-            maxHeight: '500px',
+            maxHeight: 'calc(100vh - 90px)',
             display: 'flex',
             flexDirection: 'column',
             animation: 'fadeIn 0.2s ease'
