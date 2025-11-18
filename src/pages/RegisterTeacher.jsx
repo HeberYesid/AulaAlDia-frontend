@@ -10,6 +10,7 @@ export default function RegisterTeacher() {
   const captchaRef = useRef(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [invitationCode, setInvitationCode] = useState('')
@@ -34,6 +35,13 @@ export default function RegisterTeacher() {
     
     if (!turnstileToken) {
       setError('Por favor completa la verificación de seguridad.')
+      setIsLoading(false)
+      return
+    }
+    
+    // Validar que las contraseñas coincidan
+    if (password !== confirmPassword) {
+      setError('🔒 Las contraseñas no coinciden. Por favor verifica.')
       setIsLoading(false)
       return
     }
@@ -177,6 +185,28 @@ export default function RegisterTeacher() {
             <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
               La contraseña debe tener al menos 8 caracteres
             </small>
+          </div>
+          
+          <div className="form-group">
+            <label>🔒 Confirmar Contraseña</label>
+            <input 
+              value={confirmPassword} 
+              onChange={(e) => setConfirmPassword(e.target.value)} 
+              type="password"
+              placeholder="Ingresa la contraseña nuevamente"
+              minLength={8}
+              required 
+            />
+            {confirmPassword && password !== confirmPassword && (
+              <small style={{ color: 'var(--danger)', fontSize: 'var(--font-size-xs)' }}>
+                ❌ Las contraseñas no coinciden
+              </small>
+            )}
+            {confirmPassword && password === confirmPassword && (
+              <small style={{ color: 'var(--success)', fontSize: 'var(--font-size-xs)' }}>
+                ✅ Las contraseñas coinciden
+              </small>
+            )}
           </div>
           
           <div className="form-group">
