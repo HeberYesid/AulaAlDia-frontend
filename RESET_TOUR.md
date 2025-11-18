@@ -27,9 +27,6 @@ localStorage.removeItem('devtrack-tour-completed-STUDENT')
 // Para profesor
 localStorage.removeItem('devtrack-tour-completed-TEACHER')
 
-// Para admin
-localStorage.removeItem('devtrack-tour-completed-ADMIN')
-
 // O eliminar todos los tours
 localStorage.clear()
 ```
@@ -80,7 +77,7 @@ El tour necesita que estos elementos existan en el DOM:
 - ✅ `.stats-grid-responsive` - Grid de estadísticas
 - ✅ `.subjects-grid-responsive` - Grid de materias
 
-**Para Profesores/Admin:**
+**Para Profesores:**
 - ✅ `.theme-toggle`
 - ✅ `.notification-bell` (ARREGLADO)
 - ✅ `.dashboard-title`

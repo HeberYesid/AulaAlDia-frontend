@@ -123,62 +123,6 @@ const TEACHER_STEPS = [
   },
 ]
 
-const ADMIN_STEPS = [
-  {
-    target: 'body',
-    content: (
-      <div>
-        <h2>¡Bienvenido Administrador! 🔐</h2>
-        <p>Tienes acceso completo a todas las funcionalidades del sistema.</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true,
-  },
-  {
-    target: '.theme-toggle',
-    content: 'Cambia entre tema claro y oscuro según tu preferencia.',
-    disableBeacon: true,
-  },
-  {
-    target: '.notification-bell',
-    content: 'Recibirás notificaciones de toda la actividad del sistema.',
-    disableBeacon: true,
-  },
-  {
-    target: '.dashboard-title',
-    content: 'Panel de administración: gestión completa de materias y usuarios.',
-    disableBeacon: true,
-  },
-  {
-    target: '.stats-grid',
-    content: 'Estadísticas globales del sistema.',
-    disableBeacon: true,
-  },
-  {
-    target: 'a[href="/subjects"]',
-    content: 'Como admin, puedes ver y editar TODAS las materias del sistema, no solo las tuyas.',
-    disableBeacon: true,
-  },
-  {
-    target: 'body',
-    content: (
-      <div>
-        <h3>✨ ¡Tour completado!</h3>
-        <p>Como administrador tienes:</p>
-        <ul style={{ textAlign: 'left', marginTop: '10px' }}>
-          <li>🔐 <strong>Acceso total:</strong> Ver/editar todas las materias</li>
-          <li>👥 <strong>Gestión de usuarios:</strong> Via Django Admin</li>
-          <li>📊 <strong>Supervisión:</strong> Monitorear toda la plataforma</li>
-        </ul>
-        <p style={{ marginTop: '15px' }}>Puedes reactivar este tour desde tu perfil.</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true,
-  },
-]
-
 export default function AppTour() {
   const { user, isAuthenticated } = useAuth()
   const location = useLocation()
@@ -221,8 +165,6 @@ export default function AppTour() {
         tourSteps = STUDENT_STEPS
       } else if (user.role === 'TEACHER') {
         tourSteps = TEACHER_STEPS
-      } else if (user.role === 'ADMIN') {
-        tourSteps = ADMIN_STEPS
       }
 
       if (tourSteps.length > 0) {
