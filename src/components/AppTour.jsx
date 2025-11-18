@@ -193,27 +193,26 @@ export default function AppTour() {
       return
     }
 
-    // Solo mostrar el tour si:
-    // 1. Usuario autenticado
-    // 2. Está en la página principal (Dashboard)
-    // 3. No ha completado el tour antes
-    const tourKey = `${TOUR_STORAGE_KEY}-${user?.role}`
+    // Solo mostrar el tour si hay usuario autenticado
+    // Verificamos que user exista y tenga un role válido
+    if (!user || !user.role) {
+      console.log('[AppTour] Usuario no disponible aún')
+      return
+    }
+
+    const tourKey = `${TOUR_STORAGE_KEY}-${user.role}`
     const hasCompletedTour = localStorage.getItem(tourKey)
     
     console.log('[AppTour] Debug:', {
       isAuthenticated,
-      userRole: user?.role,
+      user: user ? { role: user.role, email: user.email } : null,
       pathname: location.pathname,
       hasCompletedTour,
       tourKey
     })
 
-    if (
-      isAuthenticated &&
-      user &&
-      location.pathname === '/' &&
-      !hasCompletedTour
-    ) {
+    // Verificar si debe mostrar el tour
+    if (location.pathname === '/' && !hasCompletedTour) {
       console.log('[AppTour] Iniciando tour para rol:', user.role)
       
       // Seleccionar steps según el rol
@@ -237,9 +236,9 @@ export default function AppTour() {
         }, 2000)
       }
     } else if (hasCompletedTour) {
-      console.log('[AppTour] Tour ya completado para', user?.role)
+      console.log('[AppTour] Tour ya completado para', user.role)
     }
-  }, [isAuthenticated, user, location])
+  }, [user, location])
 
   const handleJoyrideCallback = (data) => {
     const { action, index, status, type, lifecycle } = data

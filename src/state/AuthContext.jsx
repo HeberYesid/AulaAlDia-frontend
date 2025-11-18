@@ -84,7 +84,20 @@ export function AuthProvider({ children }) {
     setUser(updatedUser)
   }
 
-  const value = { user, access, refresh, login, register, logout, updateUser, lastActivity }
+  // Computed value para saber si está autenticado
+  const isAuthenticated = !!user
+
+  const value = { 
+    user, 
+    access, 
+    refresh, 
+    isAuthenticated,
+    login, 
+    register, 
+    logout, 
+    updateUser, 
+    lastActivity 
+  }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
