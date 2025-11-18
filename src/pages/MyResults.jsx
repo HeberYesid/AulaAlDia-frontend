@@ -207,7 +207,13 @@ export default function MyResults() {
         </div>
       )}
 
-      <div className="grid cols-2">
+      {/* Layout responsive: lista completa cuando no hay selección, split cuando hay detalles */}
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: selected && details ? '1fr 1.2fr' : '1fr',
+        gap: 'var(--space-lg)',
+        transition: 'grid-template-columns 0.3s ease'
+      }}>
       <div className="card">
         <div style={{ marginBottom: 'var(--space-lg)' }}>
           <h2 style={{ marginBottom: 'var(--space-md)' }}>📚 Mis Materias</h2>
@@ -271,25 +277,35 @@ export default function MyResults() {
             <p>No se encontraron materias con los filtros aplicados</p>
           </div>
         ) : (
-          <div className="table-container">
+          <div className="table-container" style={{ maxHeight: selected && details ? '600px' : 'none', overflowY: 'auto' }}>
             <table className="table">
           <thead>
             <tr>
-              <th>Código</th>
-              <th>Materia</th>
-              <th>Nota</th>
-              <th>Semáforo</th>
-              <th></th>
+              <th style={{ width: '15%' }}>Código</th>
+              <th style={{ width: '40%' }}>Materia</th>
+              <th style={{ width: '12%', textAlign: 'center' }}>Nota</th>
+              <th style={{ width: '18%', textAlign: 'center' }}>Estado</th>
+              <th style={{ width: '15%', textAlign: 'center' }}>Acción</th>
             </tr>
           </thead>
           <tbody>
             {filteredEnrs.map((e) => (
-              <tr key={e.enrollment_id}>
-                <td>{e.subject_code}</td>
+              <tr key={e.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => openDetails(e.enrollment_id)}>
+                <td><strong>{e.subject_code}</strong></td>
                 <td>{e.subject_name}</td>
-                <td>{e.stats?.grade?.toFixed?.(2)}</td>
-                <td><StatusBadge status={e.stats?.semaphore} grade={e.stats?.grade} /></td>
-                <td><button className="btn secondary" onClick={() => openDetails(e.enrollment_id)}>Ver detalles</button></td>
+                <td style={{ textAlign: 'center', fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                  {e.stats?.grade?.toFixed?.(2)}
+                </td>
+                <td style={{ textAlign: 'center' }}><StatusBadge status={e.stats?.semaphore} grade={e.stats?.grade} /></td>
+                <td style={{ textAlign: 'center' }}>
+                  <button 
+                    className="btn secondary" 
+                    onClick={(ev) => { ev.stopPropagation(); openDetails(e.enrollment_id); }}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: 'var(--font-size-sm)' }}
+                  >
+                    👁️ Ver
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -298,15 +314,18 @@ export default function MyResults() {
         )}
       </div>
 
+      {(selected && details) && (
       <div className="card">
-        <h2 style={{ marginBottom: 'var(--space-lg)' }}>📋 Detalle de Resultados</h2>
-        {!selected && (
-          <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: '3rem', margin: 0 }}>👈</p>
-            <p style={{ fontSize: 'var(--font-size-lg)', margin: '1rem 0 0 0' }}>Selecciona una materia</p>
-            <p style={{ margin: '0.5rem 0 0 0', fontSize: 'var(--font-size-sm)' }}>Haz clic en "Ver detalles" para ver tus ejercicios y resultados</p>
-          </div>
-        )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+          <h2 style={{ margin: 0 }}>📋 Detalle de Resultados</h2>
+          <button 
+            className="btn secondary"
+            onClick={() => { setSelected(null); setDetails(null); }}
+            style={{ fontSize: 'var(--font-size-sm)' }}
+          >
+            ✕ Cerrar
+          </button>
+        </div>
         {details && (
           <>
             {/* Info del estudiante y materia */}
@@ -375,7 +394,18 @@ export default function MyResults() {
             </div>
 
             {/* Tabla de ejercicios */}
-            <h3 style={{ marginBottom: 'var(--space-md)' }}>📝 Ejercicios ({details.results?.length || 0})</h3>
+            <h3 style={{ marginBottom: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+              📝 Ejercicios 
+              <span style={{ 
+                fontSize: 'var(--font-size-sm)', 
+                padding: '0.25rem 0.5rem', 
+                background: 'var(--bg-secondary)', 
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 'normal'
+              }}>
+                {details.results?.length || 0}
+              </span>
+            </h3>
             
             {details.results?.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
@@ -383,21 +413,27 @@ export default function MyResults() {
                 <p>No hay resultados registrados para esta materia</p>
               </div>
             ) : (
-              <div className="table-container">
+              <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <table className="table">
               <thead>
                 <tr>
-                  <th>Ejercicio</th>
-                  <th>Estado</th>
-                  <th>Actualizado</th>
+                  <th style={{ width: '50%' }}>Ejercicio</th>
+                  <th style={{ width: '25%', textAlign: 'center' }}>Estado</th>
+                  <th style={{ width: '25%', textAlign: 'center' }}>Fecha</th>
                 </tr>
               </thead>
               <tbody>
                 {details.results.map((r) => (
                   <tr key={r.exercise_id}>
-                    <td>{r.exercise_name}</td>
-                    <td><StatusBadge status={r.status} /></td>
-                    <td>{new Date(r.updated_at).toLocaleString()}</td>
+                    <td><strong>{r.exercise_name}</strong></td>
+                    <td style={{ textAlign: 'center' }}><StatusBadge status={r.status} /></td>
+                    <td style={{ textAlign: 'center', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                      {new Date(r.updated_at).toLocaleDateString('es-ES', { 
+                        day: '2-digit', 
+                        month: 'short', 
+                        year: 'numeric' 
+                      })}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -407,6 +443,7 @@ export default function MyResults() {
           </>
         )}
       </div>
+      )}
       </div>
     </div>
   )
