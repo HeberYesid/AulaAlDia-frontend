@@ -281,6 +281,44 @@ body {
   letter-spacing: 0.05em;
 }
 
+/* Hamburger button - oculto en desktop */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: var(--space-sm);
+  transition: transform var(--transition-fast);
+}
+
+.hamburger-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Nav icons container */
+.nav-icons {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+/* User link styling */
+.user-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.user-email {
+  color: var(--text-primary);
+}
+
+.logout-btn {
+  white-space: nowrap;
+}
+
 /* 
 ===============================================
 ðŸŒ“ BOTÃ“N DE CAMBIO DE TEMA
@@ -1186,6 +1224,67 @@ form {
     width: 100%;
     justify-content: space-around;
   }
+  
+  /* Navbar mÃ³vil - menÃº hamburguesa */
+  .hamburger-btn {
+    display: block;
+    z-index: 52;
+  }
+  
+  .navbar nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 80%;
+    max-width: 300px;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border-primary);
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 4rem 1.5rem 2rem;
+    gap: 0;
+    transition: right 0.3s ease;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+  }
+  
+  .navbar nav.nav-open {
+    right: 0;
+  }
+  
+  .navbar nav a,
+  .navbar nav .user-link {
+    width: 100%;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-primary);
+  }
+  
+  .navbar nav .nav-icons {
+    width: 100%;
+    justify-content: space-around;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-primary);
+  }
+  
+  .navbar nav .logout-btn {
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .navbar nav .user-link {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .user-email {
+    font-size: var(--font-size-sm);
+    word-break: break-all;
+  }
 }
 
 
@@ -1244,7 +1343,7 @@ form {
    ?? MOBILE BREAKPOINT (< 768px)
    ======================================== */
 @media (max-width: 768px) {
-  /* Stats Grid: 3 columnas en móvil */
+  /* Stats Grid: 3 columnas en mï¿½vil */
   .stats-grid-responsive {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
@@ -1255,18 +1354,18 @@ form {
     padding: var(--space-sm);
   }
   
-  /* Stat values: tamaño reducido */
+  /* Stat values: tamaï¿½o reducido */
   .stats-grid-responsive .stat-value {
     font-size: 1.5rem !important;
   }
   
-  /* Subjects Grid: 1 columna en móvil */
+  /* Subjects Grid: 1 columna en mï¿½vil */
   .subjects-grid-responsive {
     grid-template-columns: 1fr;
     gap: var(--space-md);
   }
   
-  /* Subject Header: wrap en móvil */
+  /* Subject Header: wrap en mï¿½vil */
   .subject-header-responsive {
     flex-wrap: wrap;
     gap: 0.75rem;
@@ -1312,13 +1411,13 @@ form {
     font-size: 1rem !important;
   }
   
-  /* Exercises Grid: 1 columna en móvil */
+  /* Exercises Grid: 1 columna en mï¿½vil */
   .exercises-grid-responsive {
     grid-template-columns: 1fr;
     gap: var(--space-md);
   }
   
-  /* Text labels: mostrar versión móvil (solo emojis) */
+  /* Text labels: mostrar versiï¿½n mï¿½vil (solo emojis) */
   .stat-label-desktop,
   .stat-text-desktop {
     display: none;

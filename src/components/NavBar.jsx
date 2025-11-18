@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+import { useState } from 'react'
 import ThemeToggle from './ThemeToggle'
 import NotificationBell from './NotificationBell'
 
@@ -7,31 +8,50 @@ export default function NavBar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   function onLogout() {
     logout()
     navigate('/login')
+    setMenuOpen(false)
   }
 
   function isActive(path) {
     return location.pathname === path
   }
 
+  function closeMenu() {
+    setMenuOpen(false)
+  }
+
   return (
     <header className="navbar">
       <div className="navbar-content">
         <div className="brand">
-          <Link to="/">
+          <Link to="/" onClick={closeMenu}>
             <span>📊</span>
             <span className="brand-text">DevTrack</span>
           </Link>
         </div>
-        <nav>
+        
+        {/* Hamburger button - solo visible en móvil */}
+        {user && (
+          <button 
+            className="hamburger-btn"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Menú"
+          >
+            <span>{menuOpen ? '✕' : '☰'}</span>
+          </button>
+        )}
+
+        <nav className={menuOpen ? 'nav-open' : ''}>
           {user ? (
             <>
               <Link 
                 to="/" 
                 className={isActive('/') ? 'active' : ''}
+                onClick={closeMenu}
               >
                 🏠 Dashboard
               </Link>
@@ -39,6 +59,7 @@ export default function NavBar() {
                 <Link 
                   to="/subjects" 
                   className={isActive('/subjects') ? 'active' : ''}
+                  onClick={closeMenu}
                 >
                   📚 Materias
                 </Link>
@@ -47,37 +68,32 @@ export default function NavBar() {
                 <Link 
                   to="/my" 
                   className={isActive('/my') ? 'active' : ''}
+                  onClick={closeMenu}
                 >
                   📈 Mis Resultados
                 </Link>
               )}
-              <NotificationBell />
-              <ThemeToggle />
+              <div className="nav-icons">
+                <NotificationBell />
+                <ThemeToggle />
+              </div>
               <Link 
                 to="/profile" 
-                className={isActive('/profile') ? 'active' : ''}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-sm)',
-                  padding: 'var(--space-sm) var(--space-md)',
-                  background: 'var(--bg-secondary)',
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid var(--border-primary)'
-                }}
+                className={`user-link ${isActive('/profile') ? 'active' : ''}`}
+                onClick={closeMenu}
               >
-                <span>👤 {user.email}</span>
+                <span className="user-email">👤 {user.email}</span>
                 <span className="role-badge">{user.role}</span>
               </Link>
-              <button onClick={onLogout} className="btn danger">
+              <button onClick={onLogout} className="btn danger logout-btn">
                 🚪 Salir
               </button>
             </>
           ) : (
             <>
               <ThemeToggle />
-              <Link to="/login">Iniciar sesión</Link>
-              <Link to="/register">Registrarse</Link>
+              <Link to="/login" onClick={closeMenu}>Iniciar sesión</Link>
+              <Link to="/register" onClick={closeMenu}>Registrarse</Link>
             </>
           )}
         </nav>
