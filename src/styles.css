@@ -1242,7 +1242,7 @@ form {
   }
   
   /* Ocultar botón hamburguesa cuando el menú está abierto */
-  .nav-open ~ .hamburger-btn {
+  .hamburger-btn.menu-open {
     display: none;
   }
   

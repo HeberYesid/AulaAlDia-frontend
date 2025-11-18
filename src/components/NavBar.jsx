@@ -37,11 +37,11 @@ export default function NavBar() {
         {/* Hamburger button - solo visible en móvil */}
         {user && (
           <button 
-            className="hamburger-btn"
+            className={`hamburger-btn ${menuOpen ? 'menu-open' : ''}`}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menú"
           >
-            <span>{menuOpen ? '✕' : '☰'}</span>
+            <span>☰</span>
           </button>
         )}
 
