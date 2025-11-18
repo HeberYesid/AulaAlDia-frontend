@@ -8,6 +8,7 @@ export default function Login() {
   const captchaRef = useRef(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [showVerifyLink, setShowVerifyLink] = useState(false)
@@ -98,13 +99,37 @@ export default function Login() {
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
-            <input 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              type="password" 
-              placeholder="••••••••"
-              required 
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                style={{ paddingRight: '2.5rem' }}
+                required 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '0.5rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem',
+                  padding: '0.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: 'var(--text-secondary)'
+                }}
+                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
           
           <div className="form-group">

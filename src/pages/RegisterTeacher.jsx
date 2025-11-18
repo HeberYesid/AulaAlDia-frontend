@@ -11,6 +11,8 @@ export default function RegisterTeacher() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [invitationCode, setInvitationCode] = useState('')
@@ -174,14 +176,38 @@ export default function RegisterTeacher() {
           
           <div className="form-group">
             <label>🔒 Contraseña</label>
-            <input 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              type="password"
-              placeholder="Mínimo 8 caracteres"
-              minLength={8}
-              required 
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                type={showPassword ? "text" : "password"}
+                placeholder="Mínimo 8 caracteres"
+                style={{ paddingRight: '2.5rem' }}
+                minLength={8}
+                required 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '0.5rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem',
+                  padding: '0.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: 'var(--text-secondary)'
+                }}
+                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
             <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
               La contraseña debe tener al menos 8 caracteres
             </small>
@@ -189,14 +215,38 @@ export default function RegisterTeacher() {
           
           <div className="form-group">
             <label>🔒 Confirmar Contraseña</label>
-            <input 
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              type="password"
-              placeholder="Ingresa la contraseña nuevamente"
-              minLength={8}
-              required 
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Ingresa la contraseña nuevamente"
+                style={{ paddingRight: '2.5rem' }}
+                minLength={8}
+                required 
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '0.5rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem',
+                  padding: '0.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: 'var(--text-secondary)'
+                }}
+                title={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showConfirmPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
             {confirmPassword && password !== confirmPassword && (
               <small style={{ color: 'var(--danger)', fontSize: 'var(--font-size-xs)' }}>
                 ❌ Las contraseñas no coinciden
