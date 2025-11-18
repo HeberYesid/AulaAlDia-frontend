@@ -1241,6 +1241,11 @@ form {
     z-index: 42;
   }
   
+  /* Ocultar botón hamburguesa cuando el menú está abierto */
+  .nav-open ~ .hamburger-btn {
+    display: none;
+  }
+  
   .navbar nav {
     position: fixed;
     top: 0;
