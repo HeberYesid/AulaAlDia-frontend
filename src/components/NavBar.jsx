@@ -34,12 +34,6 @@ export default function NavBar() {
           </Link>
         </div>
         
-        {/* Contenedor para iconos en móvil - visible solo cuando el menú está cerrado */}
-        <div className="navbar-mobile-icons">
-          {user && <NotificationBell />}
-          <ThemeToggle />
-        </div>
-        
         {/* Hamburger button - solo visible en móvil */}
         {user && (
           <button 
@@ -54,6 +48,15 @@ export default function NavBar() {
         <nav className={menuOpen ? 'nav-open' : ''}>
           {user ? (
             <>
+              {/* Botón de cerrar dentro del menú - solo móvil */}
+              <button 
+                className="close-menu-btn"
+                onClick={closeMenu}
+                aria-label="Cerrar menú"
+              >
+                ✕
+              </button>
+              
               <Link 
                 to="/" 
                 className={isActive('/') ? 'active' : ''}
