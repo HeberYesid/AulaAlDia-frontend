@@ -94,7 +94,7 @@ export default function NotificationBell() {
   }, [])
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative' }}>
+    <div ref={dropdownRef} style={{ position: 'relative' }} className="notification-bell">
       {/* Bell Icon */}
       <button
         onClick={toggleDropdown}

@@ -76,8 +76,12 @@ export default function Dashboard() {
 
         <div className="dashboard-header">
           <div>
-            <h1 className="dashboard-title">Panel de Profesor</h1>
-            <p className="dashboard-subtitle">Gestiona tus materias y estudiantes</p>
+            <h1 className="dashboard-title">
+              {user.role === 'ADMIN' ? 'Panel de Administrador' : 'Panel de Profesor'}
+            </h1>
+            <p className="dashboard-subtitle">
+              {user.role === 'ADMIN' ? 'Acceso completo al sistema' : 'Gestiona tus materias y estudiantes'}
+            </p>
           </div>
           <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
             <div className="stat-card">
