@@ -998,9 +998,9 @@ export default function SubjectDetail() {
                     }}
                   >
                     <option value="ALL">🚦 Todos los estados</option>
-                    <option value="GREEN">🟢 Verde</option>
-                    <option value="YELLOW">🟡 Amarillo</option>
-                    <option value="RED">🔴 Rojo</option>
+                    <option value="GREEN">🟢 Aprobado</option>
+                    <option value="YELLOW">🟡 Suficiente</option>
+                    <option value="RED">🔴 Reprobado</option>
                   </select>
                 </div>
 
@@ -1154,9 +1154,9 @@ export default function SubjectDetail() {
                     borderRadius: '8px'
                   }}
                 >
-                  <option value="GREEN">🟢 Verde - Completado exitosamente</option>
-                  <option value="YELLOW">🟡 Amarillo - Con observaciones</option>
-                  <option value="RED">🔴 Rojo - No completado</option>
+                  <option value="GREEN">🟢 Aprobado - Completado exitosamente</option>
+                  <option value="YELLOW">🟡 Suficiente - Con observaciones</option>
+                  <option value="RED">🔴 Reprobado - No completado</option>
                 </select>
               </div>
 
@@ -1302,9 +1302,9 @@ export default function SubjectDetail() {
                     borderRadius: 'var(--radius-md)'
                   }}
                 >
-                  <option value="GREEN">🟢 Verde - Completado exitosamente</option>
-                  <option value="YELLOW">🟡 Amarillo - Con observaciones</option>
-                  <option value="RED">🔴 Rojo - No completado</option>
+                  <option value="GREEN">🟢 Aprobado - Completado exitosamente</option>
+                  <option value="YELLOW">🟡 Suficiente - Con observaciones</option>
+                  <option value="RED">🔴 Reprobado - No completado</option>
                 </select>
               </div>
 

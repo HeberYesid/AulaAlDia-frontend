@@ -238,9 +238,9 @@ export default function MyResults() {
                 style={{ fontSize: 'var(--font-size-sm)' }}
               >
                 <option value="ALL">Todos</option>
-                <option value="GREEN">🟢 Verde</option>
-                <option value="YELLOW">🟡 Amarillo</option>
-                <option value="RED">🔴 Rojo</option>
+                <option value="GREEN">🟢 Aprobado</option>
+                <option value="YELLOW">🟡 Suficiente</option>
+                <option value="RED">🔴 Reprobado</option>
               </select>
             </div>
 

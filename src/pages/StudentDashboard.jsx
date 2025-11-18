@@ -354,9 +354,9 @@ export default function StudentDashboard() {
                       fontSize: 'var(--font-size-xs)',
                       fontWeight: 600
                     }}>
-                      {result.status === 'GREEN' && '🟢 Verde'}
-                      {result.status === 'YELLOW' && '🟡 Amarillo'}
-                      {result.status === 'RED' && '🔴 Rojo'}
+                      {result.status === 'GREEN' && '🟢 Aprobado'}
+                      {result.status === 'YELLOW' && '🟡 Suficiente'}
+                      {result.status === 'RED' && '🔴 Reprobado'}
                     </span>
                   </div>
                   <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
