@@ -34,6 +34,12 @@ export default function NavBar() {
           </Link>
         </div>
         
+        {/* Contenedor para iconos en móvil - visible solo cuando el menú está cerrado */}
+        <div className="navbar-mobile-icons">
+          {user && <NotificationBell />}
+          <ThemeToggle />
+        </div>
+        
         {/* Hamburger button - solo visible en móvil */}
         {user && (
           <button 

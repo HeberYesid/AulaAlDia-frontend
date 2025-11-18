@@ -207,6 +207,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 .navbar .brand a {
@@ -291,10 +292,19 @@ body {
   cursor: pointer;
   padding: var(--space-sm);
   transition: transform var(--transition-fast);
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .hamburger-btn:hover {
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Iconos móviles - ocultos en desktop */
+.navbar-mobile-icons {
+  display: none;
 }
 
 /* Nav icons container */
@@ -1228,7 +1238,19 @@ form {
   /* Navbar móvil - menú hamburguesa */
   .hamburger-btn {
     display: block;
-    z-index: 42;
+  }
+  
+  .navbar-mobile-icons {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .navbar-content {
     position: relative;
   }
   
@@ -1265,11 +1287,9 @@ form {
     border-bottom: 1px solid var(--border-primary);
   }
   
+  /* Ocultar iconos del nav cuando está en móvil */
   .navbar nav .nav-icons {
-    width: 100%;
-    justify-content: space-around;
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-primary);
+    display: none;
   }
   
   .navbar nav .logout-btn {
