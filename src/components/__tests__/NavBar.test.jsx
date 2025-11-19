@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NavBar from '../NavBar'
-import { renderWithProviders, mockUser } from '../../test/utils'
+import { renderWithProviders, mockUser, mockTeacher } from '../../test/utils'
 import * as AuthContext from '../../state/AuthContext'
 
 describe('NavBar Component', () => {
@@ -41,7 +41,7 @@ describe('NavBar Component', () => {
     
     renderWithProviders(<NavBar />)
     
-    expect(screen.getByText(mockUser.email)).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(mockUser.email, 'i'))).toBeInTheDocument()
   })
 
   it('shows logout option for authenticated user', () => {
@@ -53,7 +53,7 @@ describe('NavBar Component', () => {
     
     renderWithProviders(<NavBar />)
     
-    expect(screen.getByText(/cerrar sesión/i)).toBeInTheDocument()
+    expect(screen.getByText(/salir/i)).toBeInTheDocument()
   })
 
   it('calls logout function when logout is clicked', async () => {
@@ -68,7 +68,7 @@ describe('NavBar Component', () => {
     
     renderWithProviders(<NavBar />)
     
-    const logoutButton = screen.getByText(/cerrar sesión/i)
+    const logoutButton = screen.getByText(/salir/i)
     await user.click(logoutButton)
     
     expect(mockLogout).toHaveBeenCalledOnce()
@@ -76,13 +76,14 @@ describe('NavBar Component', () => {
 
   it('shows navigation links for authenticated users', () => {
     vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
-      user: mockUser,
+      user: mockTeacher,
       loading: false
     })
     
     renderWithProviders(<NavBar />)
     
     expect(screen.getByText(/materias/i)).toBeInTheDocument()
-    expect(screen.getByText(/notificaciones/i)).toBeInTheDocument()
+    // Check for notification bell by aria-label part
+    expect(screen.getByLabelText(/notificaciones/i)).toBeInTheDocument()
   })
 })

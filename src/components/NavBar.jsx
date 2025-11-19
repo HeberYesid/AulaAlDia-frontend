@@ -45,6 +45,11 @@ export default function NavBar() {
           </button>
         )}
 
+        {/* Overlay para cerrar menú al hacer click fuera */}
+        {menuOpen && (
+          <div className="menu-overlay" onClick={closeMenu}></div>
+        )}
+
         <nav className={menuOpen ? 'nav-open' : ''}>
           {user ? (
             <>

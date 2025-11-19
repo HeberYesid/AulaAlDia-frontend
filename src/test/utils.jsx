@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from '../state/AuthContext'
+import { ThemeProvider } from '../state/ThemeContext'
 
 /**
  * Custom render function that includes common providers
@@ -9,7 +10,9 @@ export function renderWithProviders(ui, options = {}) {
   const Wrapper = ({ children }) => (
     <BrowserRouter>
       <AuthProvider>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   )
