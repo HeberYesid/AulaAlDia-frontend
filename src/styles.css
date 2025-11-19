@@ -196,6 +196,11 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* Ocultar botón de cerrar menú en escritorio */
+.close-menu-btn {
+  display: none;
+}
+
 [data-theme="light"] .navbar {
   background: rgba(255, 255, 255, 0.85);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
