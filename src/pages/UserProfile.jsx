@@ -160,11 +160,12 @@ export default function UserProfile() {
   return (
     <div className="container" style={{ maxWidth: '900px' }}>
       {/* Header */}
-      <div style={{ 
+      <div className="profile-header" style={{ 
         marginBottom: 'var(--space-xl)',
         display: 'flex',
         alignItems: 'center',
-        gap: 'var(--space-md)'
+        gap: 'var(--space-md)',
+        flexWrap: 'wrap'
       }}>
         <button 
           onClick={() => navigate(-1)} 
@@ -192,13 +193,15 @@ export default function UserProfile() {
 
       {/* Profile Information Card */}
       <div className="card">
-        <div style={{ 
+        <div className="card-header" style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
           marginBottom: 'var(--space-xl)',
           paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--border-primary)'
+          borderBottom: '1px solid var(--border-primary)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-md)'
         }}>
           <h2 style={{ margin: 0 }}>📋 Información Personal</h2>
           {!editing && (
@@ -278,7 +281,7 @@ export default function UserProfile() {
         ) : (
           // View Mode
           <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
-            <div style={{ 
+            <div className="profile-info-grid" style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
               gap: 'var(--space-lg)' 
@@ -364,13 +367,15 @@ export default function UserProfile() {
 
       {/* Change Password Card */}
       <div className="card">
-        <div style={{ 
+        <div className="card-header" style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
           marginBottom: 'var(--space-xl)',
           paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--border-primary)'
+          borderBottom: '1px solid var(--border-primary)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-md)'
         }}>
           <h2 style={{ margin: 0 }}>🔒 Cambiar Contraseña</h2>
           {!changingPassword && (
@@ -467,13 +472,15 @@ export default function UserProfile() {
 
       {/* Session Timeout Card */}
       <div className="card">
-        <div style={{ 
+        <div className="card-header" style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
           marginBottom: 'var(--space-xl)',
           paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--border-primary)'
+          borderBottom: '1px solid var(--border-primary)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-md)'
         }}>
           <h2 style={{ margin: 0 }}>⏱️ Tiempo de Sesión</h2>
           {!editingTimeout && (

@@ -82,14 +82,14 @@ export default function NotificationsPage() {
 
   return (
     <div className="card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      <div className="notification-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
         <div>
           <h2 style={{ margin: 0 }}>🔔 Notificaciones</h2>
           <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
             {unread > 0 ? `Tienes ${unread} notificación${unread > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="notification-actions" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {unread > 0 && (
             <button className="btn secondary" onClick={markAll}>
               Marcar todas como leídas
@@ -110,7 +110,7 @@ export default function NotificationsPage() {
         </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-          <table className="table" style={{ marginTop: '1rem', width: '100%' }}>
+          <table className="table mobile-card-view" style={{ marginTop: '1rem', width: '100%' }}>
             <thead>
               <tr>
                 <th style={{ width: '100px' }}>Tipo</th>
@@ -127,7 +127,7 @@ export default function NotificationsPage() {
                   background: n.is_read ? 'transparent' : 'rgba(var(--primary-rgb, 59, 130, 246), 0.05)',
                   borderLeft: n.is_read ? 'none' : '3px solid var(--primary)'
                 }}>
-                  <td>
+                  <td data-label="Tipo">
                     <span style={{
                       display: 'inline-block',
                       padding: '0.3rem 0.6rem',
@@ -148,19 +148,19 @@ export default function NotificationsPage() {
                        n.notification_type === 'EXERCISE_CREATED' ? 'Ejercicio' : 'General'}
                     </span>
                   </td>
-                  <td style={{ 
+                  <td data-label="Título" style={{ 
                     fontWeight: n.is_read ? 'normal' : '600',
                     fontSize: '0.9rem'
                   }}>
                     {n.title}
                   </td>
-                  <td style={{ 
+                  <td data-label="Mensaje" style={{ 
                     fontSize: '0.85rem',
                     color: n.is_read ? 'var(--text-secondary)' : 'var(--text)'
                   }}>
                     {n.message}
                   </td>
-                  <td style={{ 
+                  <td data-label="Fecha" style={{ 
                     fontSize: '0.8rem', 
                     color: 'var(--text-secondary)',
                     whiteSpace: 'nowrap'
@@ -178,7 +178,7 @@ export default function NotificationsPage() {
                       })}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
+                  <td data-label="Estado" style={{ textAlign: 'center' }}>
                     <span style={{
                       display: 'inline-block',
                       padding: '0.25rem 0.6rem',
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
                       {n.is_read ? 'Leída' : 'Nueva'}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
+                  <td data-label="Acciones" style={{ textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                       <button 
                         className="btn sm"

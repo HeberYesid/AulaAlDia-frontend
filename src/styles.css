@@ -741,6 +741,90 @@ form {
   .table-container {
     font-size: var(--font-size-sm);
   }
+
+  /* Stack flex containers on mobile */
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: var(--space-lg);
+  }
+
+  /* Make buttons stack on mobile */
+  .dashboard-header > div:last-child {
+    width: 100%;
+  }
+
+  /* Stack form groups */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Responsive stat cards */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+
+  .stat-card {
+    padding: var(--space-md);
+  }
+
+  .stat-value {
+    font-size: var(--font-size-2xl) !important;
+  }
+
+  /* Make action buttons stack vertically */
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Responsive typography */
+  h1 {
+    font-size: var(--font-size-2xl) !important;
+  }
+
+  h2 {
+    font-size: var(--font-size-xl) !important;
+  }
+
+  /* Auth cards on mobile */
+  .auth-card {
+    padding: var(--space-lg);
+  }
+
+  .auth-header h1 {
+    font-size: var(--font-size-2xl) !important;
+  }
+
+  /* Profile and notifications responsive helpers */
+  .profile-header,
+  .notification-header {
+    flex-wrap: wrap !important;
+  }
+
+  .notification-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .notification-actions button {
+    width: 100%;
+  }
+
+  .profile-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .card-header {
+    flex-wrap: wrap !important;
+  }
+
+  .card-header button {
+    width: 100%;
+  }
 }
 
 /* Animations */
