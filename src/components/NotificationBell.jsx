@@ -13,7 +13,7 @@ export default function NotificationBell() {
   // Load unread count
   async function loadUnreadCount() {
     try {
-      const response = await api.get('/api/courses/notifications/unread-count/')
+      const response = await api.get('/api/courses/notifications/items/unread-count/')
       setUnreadCount(response.data.unread_count)
     } catch (err) {
       console.error('Error loading unread count:', err)
@@ -24,7 +24,7 @@ export default function NotificationBell() {
   async function loadNotifications() {
     setLoading(true)
     try {
-      const response = await api.get('/api/courses/notifications/')
+      const response = await api.get('/api/courses/notifications/items/')
       setNotifications(response.data.slice(0, 10)) // Only show last 10
     } catch (err) {
       console.error('Error loading notifications:', err)
@@ -36,7 +36,7 @@ export default function NotificationBell() {
   // Mark notification as read
   async function markAsRead(notificationId) {
     try {
-      await api.post(`/api/courses/notifications/${notificationId}/mark-read/`)
+      await api.post(`/api/courses/notifications/items/${notificationId}/mark-read/`)
       loadUnreadCount()
       loadNotifications()
     } catch (err) {
@@ -47,7 +47,7 @@ export default function NotificationBell() {
   // Mark all as read
   async function markAllAsRead() {
     try {
-      await api.post('/api/courses/notifications/mark-all-read/')
+      await api.post('/api/courses/notifications/items/mark-all-read/')
       loadUnreadCount()
       loadNotifications()
     } catch (err) {
