@@ -55,6 +55,32 @@ export default function NotificationBell() {
     }
   }
 
+  // Delete notification
+  async function deleteNotification(notificationId, event) {
+    event.stopPropagation() // Prevent notification click
+    try {
+      await api.delete(`/api/courses/notifications/${notificationId}/`)
+      loadUnreadCount()
+      loadNotifications()
+    } catch (err) {
+      console.error('Error deleting notification:', err)
+    }
+  }
+
+  // Delete all notifications
+  async function deleteAllNotifications() {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar todas las notificaciones?')) {
+      return
+    }
+    try {
+      await api.delete('/api/courses/notifications/delete-all/')
+      loadUnreadCount()
+      loadNotifications()
+    } catch (err) {
+      console.error('Error deleting all notifications:', err)
+    }
+  }
+
   // Handle notification click
   function handleNotificationClick(notification) {
     markAsRead(notification.id)
@@ -170,21 +196,39 @@ export default function NotificationBell() {
             }}
           >
             <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🔔 Notificaciones</h3>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--primary)',
-                  cursor: 'pointer',
-                  fontSize: '0.85rem',
-                  textDecoration: 'underline'
-                }}
-              >
-                Marcar todas leídas
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--primary)',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Marcar leídas
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button
+                  onClick={deleteAllNotifications}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--danger)',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    textDecoration: 'underline'
+                  }}
+                  title="Eliminar todas"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Notifications List */}
@@ -208,25 +252,44 @@ export default function NotificationBell() {
                     borderBottom: '1px solid var(--border-primary)',
                     cursor: 'pointer',
                     background: notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)',
-                    transition: 'background 0.2s ease'
+                    transition: 'background 0.2s ease',
+                    position: 'relative'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)'}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
                     <strong style={{ fontSize: '0.95rem', flex: 1 }}>{notification.title}</strong>
-                    {!notification.is_read && (
-                      <span
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        onClick={(e) => deleteNotification(notification.id, e)}
                         style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: 'var(--primary)',
-                          marginLeft: '0.5rem',
-                          flexShrink: 0
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '0.25rem',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.9rem',
+                          lineHeight: 1
                         }}
-                      ></span>
-                    )}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--danger)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+                        title="Eliminar notificación"
+                      >
+                        🗑️
+                      </button>
+                      {!notification.is_read && (
+                        <span
+                          style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: 'var(--primary)',
+                            flexShrink: 0
+                          }}
+                        ></span>
+                      )}
+                    </div>
                   </div>
                   <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     {notification.message}
