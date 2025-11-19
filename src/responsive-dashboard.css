@@ -2,12 +2,12 @@
    📱 RESPONSIVE DASHBOARD STYLES
    ======================================== */
 
-/* Stats Grid - Desktop: 3 filas x 2 columnas, Mobile: 3 columnas */
+/* Stats Grid - Desktop: 3 columnas x 2 filas, Mobile: 3 columnas */
 .stats-grid-responsive {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  max-width: 1200px;
+  max-width: 100%;
 }
 
 /* Stat cards más compactas en dashboard */
