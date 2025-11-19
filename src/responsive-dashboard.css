@@ -2,11 +2,31 @@
    📱 RESPONSIVE DASHBOARD STYLES
    ======================================== */
 
-/* Stats Grid - Desktop: 6 columnas, Mobile: 3 columnas */
+/* Stats Grid - Desktop: 3 filas x 2 columnas, Mobile: 3 columnas */
 .stats-grid-responsive {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 1200px;
+}
+
+/* Stat cards más compactas en dashboard */
+.stats-grid-responsive .stat-card {
+  padding: 1rem 1.25rem;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stats-grid-responsive .stat-value {
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.stats-grid-responsive .stat-label {
+  line-height: 1.2;
 }
 
 /* Subjects Grid - Desktop: 2 columnas, Mobile: 100% */
@@ -164,8 +184,23 @@
    🖥️ LARGE DESKTOP BREAKPOINT (> 1400px)
    ======================================== */
 @media (min-width: 1400px) {
+  /* Stats Grid: 3 columnas en pantallas grandes */
+  .stats-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   /* Subjects Grid: 3 columnas en pantallas grandes */
   .subjects-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ========================================
+   🖥️ MEDIUM DESKTOP BREAKPOINT (> 1024px)
+   ======================================== */
+@media (min-width: 1025px) {
+  /* Stats Grid: aprovechar espacio horizontal */
+  .stats-grid-responsive {
     grid-template-columns: repeat(3, 1fr);
   }
 }
