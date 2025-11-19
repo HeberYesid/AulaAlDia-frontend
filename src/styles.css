@@ -1235,11 +1235,6 @@ form {
     gap: var(--space-sm);
   }
   
-  .navbar nav {
-    width: 100%;
-    justify-content: space-around;
-  }
-  
   /* Navbar móvil - menú hamburguesa */
   .hamburger-btn {
     display: block;
