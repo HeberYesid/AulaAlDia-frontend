@@ -21,6 +21,13 @@ export default function SubjectDetail() {
   const [newExerciseDeadline, setNewExerciseDeadline] = useState('')
   const [newExerciseDescription, setNewExerciseDescription] = useState('')
   const [showExerciseForm, setShowExerciseForm] = useState(false)
+  
+  // Estados para editar ejercicio
+  const [editingExercise, setEditingExercise] = useState(null) // {id, name, deadline, description}
+  const [editExerciseName, setEditExerciseName] = useState('')
+  const [editExerciseDeadline, setEditExerciseDeadline] = useState('')
+  const [editExerciseDescription, setEditExerciseDescription] = useState('')
+  
   const [activeTab, setActiveTab] = useState('students') // 'students', 'exercises', 'results'
   const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, currentComment, studentEmail, exerciseName}
   const [newStatus, setNewStatus] = useState('')
@@ -246,6 +253,57 @@ export default function SubjectDetail() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError('No se pudo eliminar el ejercicio.')
+    }
+  }
+
+  function openEditExerciseModal(exercise) {
+    setEditingExercise(exercise)
+    setEditExerciseName(exercise.name)
+    setEditExerciseDeadline(exercise.deadline || '')
+    setEditExerciseDescription(exercise.description || '')
+    setError('')
+    setSuccess('')
+  }
+
+  function closeEditExerciseModal() {
+    setEditingExercise(null)
+    setEditExerciseName('')
+    setEditExerciseDeadline('')
+    setEditExerciseDescription('')
+    setError('')
+  }
+
+  async function updateExercise(e) {
+    e.preventDefault()
+    if (!editingExercise) return
+    
+    if (!editExerciseName.trim()) {
+      setError('El nombre del ejercicio es obligatorio')
+      return
+    }
+    
+    setError('')
+    setSuccess('')
+    
+    try {
+      const payload = {
+        name: editExerciseName.trim(),
+        deadline: editExerciseDeadline || null,
+        description: editExerciseDescription.trim() || ''
+      }
+      
+      await api.patch(`/api/courses/exercises/${editingExercise.id}/`, payload)
+      setSuccess(`✅ Ejercicio "${editExerciseName}" actualizado correctamente`)
+      closeEditExerciseModal()
+      loadAll()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('Error al actualizar ejercicio:', err.response?.data)
+      const errorMsg = err.response?.data?.detail ||
+                       err.response?.data?.name?.[0] ||
+                       err.response?.data?.non_field_errors?.[0] ||
+                       'No se pudo actualizar el ejercicio.'
+      setError(errorMsg)
     }
   }
 
@@ -821,13 +879,22 @@ export default function SubjectDetail() {
                             {getDeadlineBadge() || <em style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin fecha límite</em>}
                           </td>
                           <td>
-                            <button 
-                              className="btn secondary"
-                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', width: '100%' }}
-                              onClick={() => deleteExercise(ex.id, ex.name)}
-                            >
-                              🗑️ Eliminar
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button 
+                                className="btn"
+                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
+                                onClick={() => openEditExerciseModal(ex)}
+                              >
+                                ✏️ Editar
+                              </button>
+                              <button 
+                                className="btn danger"
+                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
+                                onClick={() => deleteExercise(ex.id, ex.name)}
+                              >
+                                🗑️ Eliminar
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       )
@@ -1086,6 +1153,137 @@ export default function SubjectDetail() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Exercise Modal */}
+      {editingExercise && (user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}
+          onClick={closeEditExerciseModal}
+        >
+          <div 
+            className="card" 
+            style={{ 
+              maxWidth: '600px', 
+              width: '100%',
+              margin: '0',
+              animation: 'fadeIn 0.2s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>✏️ Editar Ejercicio</h2>
+            
+            <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+              <p style={{ margin: '0.5rem 0' }}><strong>📚 Ejercicio Original:</strong> {editingExercise.name}</p>
+              {editingExercise.deadline && (
+                <p style={{ margin: '0.5rem 0' }}>
+                  <strong>📅 Fecha Límite Actual:</strong>{' '}
+                  {new Date(editingExercise.deadline).toLocaleDateString('es-CO', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              )}
+            </div>
+
+            <form onSubmit={updateExercise}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>📝 Nombre del Ejercicio *</strong></label>
+                <input
+                  type="text"
+                  value={editExerciseName}
+                  onChange={(e) => setEditExerciseName(e.target.value)}
+                  placeholder="Ej: Taller 1 - Variables"
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>📅 Fecha Límite (Opcional)</strong></label>
+                <input
+                  type="datetime-local"
+                  value={editExerciseDeadline}
+                  onChange={(e) => setEditExerciseDeadline(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+                <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  💡 Deja vacío si no tiene fecha límite
+                </p>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>📝 Descripción (Opcional)</strong></label>
+                <textarea
+                  value={editExerciseDescription}
+                  onChange={(e) => setEditExerciseDescription(e.target.value)}
+                  placeholder="Descripción detallada del ejercicio, objetivos, requisitos..."
+                  rows="4"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px',
+                    fontFamily: 'inherit',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {error && (
+                <p style={{ color: 'var(--danger)', marginTop: '0.75rem', padding: '0.5rem', background: 'rgba(244, 67, 54, 0.1)', borderRadius: '4px' }}>
+                  {error}
+                </p>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button 
+                  type="submit" 
+                  className="btn"
+                  style={{ flex: 1 }}
+                >
+                  ✅ Guardar Cambios
+                </button>
+                <button 
+                  type="button"
+                  className="btn secondary"
+                  onClick={closeEditExerciseModal}
+                  style={{ flex: 1 }}
+                >
+                  ❌ Cancelar
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
