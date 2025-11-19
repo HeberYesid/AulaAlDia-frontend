@@ -448,7 +448,7 @@ export default function SubjectDetail() {
       ) : (
         // Vista completa para profesores/admin con tabs
         <div className="card" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', borderBottom: '2px solid var(--border)' }}>
+          <div className="tabs-scrollable" style={{ display: 'flex', borderBottom: '2px solid var(--border)' }}>
             <button
               onClick={() => setActiveTab('students')}
               style={{
@@ -654,7 +654,7 @@ export default function SubjectDetail() {
               <p className="notice">No se encontraron estudiantes que coincidan con "{studentSearch}"</p>
             ) : (
               <div className="data-table">
-                <table className="table">
+                <table className="table mobile-card-view">
                   <thead>
                     <tr>
                       <th>#</th>
@@ -665,9 +665,9 @@ export default function SubjectDetail() {
                   <tbody>
                     {filteredEnrollments.map((e, index) => (
                       <tr key={e.id}>
-                        <td>{index + 1}</td>
-                        <td>{e.student.email}</td>
-                        <td>{e.student.first_name} {e.student.last_name}</td>
+                        <td data-label="#">{index + 1}</td>
+                        <td data-label="Correo">{e.student.email}</td>
+                        <td data-label="Nombre">{e.student.first_name} {e.student.last_name}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -804,7 +804,7 @@ export default function SubjectDetail() {
               <p className="notice">No se encontraron ejercicios que coincidan con "{exerciseSearch}"</p>
             ) : (
               <div className="data-table">
-                <table className="table">
+                <table className="table mobile-card-view">
                   <thead>
                     <tr>
                       <th style={{ width: '60px' }}>#</th>
@@ -868,18 +868,18 @@ export default function SubjectDetail() {
                       
                       return (
                         <tr key={ex.id}>
-                          <td><strong>{index + 1}</strong></td>
-                          <td>
+                          <td data-label="#"><strong>{index + 1}</strong></td>
+                          <td data-label="Nombre">
                             <strong>{ex.name}</strong>
                           </td>
-                          <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          <td data-label="Descripción" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                             {ex.description || <em>Sin descripción</em>}
                           </td>
-                          <td>
+                          <td data-label="Fecha Límite">
                             {getDeadlineBadge() || <em style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin fecha límite</em>}
                           </td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <td data-label="Acciones">
+                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                               <button 
                                 className="btn"
                                 style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
@@ -982,7 +982,7 @@ export default function SubjectDetail() {
                     </div>
 
                     <div className="data-table">
-                      <table className="table">
+                      <table className="table mobile-card-view">
                         <thead>
                           <tr>
                             <th>👤 Estudiante</th>
@@ -997,13 +997,13 @@ export default function SubjectDetail() {
                         <tbody>
                           {dash.enrollments.map((i) => (
                             <tr key={i.enrollment_id}>
-                              <td><strong>{i.student_email}</strong></td>
-                              <td>{i.total}</td>
-                              <td>{i.green}</td>
-                              <td>{i.yellow}</td>
-                              <td>{i.red}</td>
-                              <td><strong>{i.grade?.toFixed(2)}</strong></td>
-                              <td><StatusBadge status={i.semaphore} grade={i.grade} /></td>
+                              <td data-label="Estudiante"><strong>{i.student_email}</strong></td>
+                              <td data-label="Total">{i.total}</td>
+                              <td data-label="Verde">{i.green}</td>
+                              <td data-label="Amarillo">{i.yellow}</td>
+                              <td data-label="Rojo">{i.red}</td>
+                              <td data-label="Nota"><strong>{i.grade?.toFixed(2)}</strong></td>
+                              <td data-label="Estado"><StatusBadge status={i.semaphore} grade={i.grade} /></td>
                             </tr>
                           ))}
                         </tbody>
@@ -1083,7 +1083,7 @@ export default function SubjectDetail() {
                   <p className="notice">No se encontraron resultados con los filtros aplicados</p>
                 ) : (
                   <div className="data-table" style={{ maxHeight: '500px', overflowY: 'auto', overflowX: 'auto' }}>
-                    <table className="table" style={{ tableLayout: 'fixed', width: '100%', minWidth: user?.role === 'STUDENT' ? '700px' : '900px' }}>
+                    <table className="table mobile-card-view" style={{ tableLayout: 'fixed', width: '100%', minWidth: user?.role === 'STUDENT' ? '100%' : '100%' }}>
                       <thead style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1 }}>
                         <tr>
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>👤 Estudiante</th>}
@@ -1098,21 +1098,21 @@ export default function SubjectDetail() {
                         {filteredResults.map((result) => (
                           <tr key={result.id}>
                             {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
-                              <td style={{ 
+                              <td data-label="Estudiante" style={{ 
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap'
                               }} title={result.student_email}>{result.student_email}</td>
                             )}
-                            <td style={{ 
+                            <td data-label="Ejercicio" style={{ 
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap'
                             }} title={result.exercise_name}>{result.exercise_name}</td>
-                            <td>
+                            <td data-label="Estado">
                               <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
                             </td>
-                            <td style={{ 
+                            <td data-label="Comentarios" style={{ 
                               fontSize: '0.85rem', 
                               color: 'var(--text-secondary)', 
                               maxWidth: '250px',
@@ -1133,9 +1133,9 @@ export default function SubjectDetail() {
                                 <em style={{ color: 'var(--text-muted)' }}>Sin comentarios</em>
                               )}
                             </td>
-                            <td style={{ fontSize: '0.85rem' }}>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
+                            <td data-label="Actualizado" style={{ fontSize: '0.85rem' }}>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
                             {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
-                              <td>
+                              <td data-label="Acción">
                                 <button
                                   className="btn secondary"
                                   style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
@@ -1176,7 +1176,7 @@ export default function SubjectDetail() {
           onClick={closeEditExerciseModal}
         >
           <div 
-            className="card" 
+            className="card modal-responsive" 
             style={{ 
               maxWidth: '600px', 
               width: '100%',
@@ -1307,7 +1307,7 @@ export default function SubjectDetail() {
           onClick={closeEditModal}
         >
           <div 
-            className="card" 
+            className="card modal-responsive" 
             style={{ 
               maxWidth: '500px', 
               width: '100%',
@@ -1427,7 +1427,7 @@ export default function SubjectDetail() {
           onClick={closeCreateResultForm}
         >
           <div 
-            className="card" 
+            className="card modal-responsive" 
             style={{ 
               maxWidth: '600px', 
               width: '100%',

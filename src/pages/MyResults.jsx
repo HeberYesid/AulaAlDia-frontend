@@ -208,7 +208,7 @@ export default function MyResults() {
       )}
 
       {/* Layout responsive: lista completa cuando no hay selección, split cuando hay detalles */}
-      <div style={{ 
+      <div className="grid-stack-mobile" style={{ 
         display: 'grid',
         gridTemplateColumns: selected && details ? '1fr 1.2fr' : '1fr',
         gap: 'var(--space-lg)',
@@ -278,7 +278,7 @@ export default function MyResults() {
           </div>
         ) : (
           <div className="table-container" style={{ maxHeight: selected && details ? '600px' : 'none', overflowY: 'auto' }}>
-            <table className="table">
+            <table className="table mobile-card-view">
           <thead>
             <tr>
               <th style={{ width: '15%' }}>Código</th>
@@ -291,13 +291,13 @@ export default function MyResults() {
           <tbody>
             {filteredEnrs.map((e) => (
               <tr key={e.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => openDetails(e.enrollment_id)}>
-                <td><strong>{e.subject_code}</strong></td>
-                <td>{e.subject_name}</td>
-                <td style={{ textAlign: 'center', fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                <td data-label="Código"><strong>{e.subject_code}</strong></td>
+                <td data-label="Materia">{e.subject_name}</td>
+                <td data-label="Nota" style={{ textAlign: 'center', fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
                   {e.stats?.grade?.toFixed?.(2)}
                 </td>
-                <td style={{ textAlign: 'center' }}><StatusBadge status={e.stats?.semaphore} grade={e.stats?.grade} /></td>
-                <td style={{ textAlign: 'center' }}>
+                <td data-label="Estado" style={{ textAlign: 'center' }}><StatusBadge status={e.stats?.semaphore} grade={e.stats?.grade} /></td>
+                <td data-label="Acción" style={{ textAlign: 'center' }}>
                   <button 
                     className="btn secondary" 
                     onClick={(ev) => { ev.stopPropagation(); openDetails(e.enrollment_id); }}
@@ -414,7 +414,7 @@ export default function MyResults() {
               </div>
             ) : (
               <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <table className="table">
+                <table className="table mobile-card-view">
               <thead>
                 <tr>
                   <th style={{ width: '50%' }}>Ejercicio</th>
@@ -425,9 +425,9 @@ export default function MyResults() {
               <tbody>
                 {details.results.map((r) => (
                   <tr key={r.exercise_id}>
-                    <td><strong>{r.exercise_name}</strong></td>
-                    <td style={{ textAlign: 'center' }}><StatusBadge status={r.status} /></td>
-                    <td style={{ textAlign: 'center', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                    <td data-label="Ejercicio"><strong>{r.exercise_name}</strong></td>
+                    <td data-label="Estado" style={{ textAlign: 'center' }}><StatusBadge status={r.status} /></td>
+                    <td data-label="Fecha" style={{ textAlign: 'center', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                       {new Date(r.updated_at).toLocaleDateString('es-ES', { 
                         day: '2-digit', 
                         month: 'short', 

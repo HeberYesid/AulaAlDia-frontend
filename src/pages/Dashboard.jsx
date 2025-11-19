@@ -83,7 +83,7 @@ export default function Dashboard() {
               {user.role === 'ADMIN' ? 'Acceso completo al sistema' : 'Gestiona tus materias y estudiantes'}
             </p>
           </div>
-          <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
+          <div className="stats-grid grid-stack-mobile" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
             <div className="stat-card">
               <div className="stat-value">{subjects.length}</div>
               <div className="stat-label">📚 Materias</div>
@@ -98,7 +98,7 @@ export default function Dashboard() {
         <div className="card">
           <h2>📋 Mis Materias</h2>
           <div className="data-table">
-            <table className="table">
+            <table className="table mobile-card-view">
               <thead>
                 <tr>
                   <th>📝 Código</th>
@@ -110,11 +110,11 @@ export default function Dashboard() {
               <tbody>
                 {subjects.map((s) => (
                   <tr key={s.id}>
-                    <td><strong>{s.code}</strong></td>
-                    <td>{s.name}</td>
-                    <td>{s.enrollments_count || 0}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                    <td data-label="Código"><strong>{s.code}</strong></td>
+                    <td data-label="Nombre">{s.name}</td>
+                    <td data-label="Estudiantes">{s.enrollments_count || 0}</td>
+                    <td data-label="Acciones">
+                      <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
                         <Link 
                           className="btn secondary" 
                           to={`/subjects/${s.id}`}

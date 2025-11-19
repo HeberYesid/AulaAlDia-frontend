@@ -69,7 +69,7 @@ export default function Subjects() {
         </div>
       )}
 
-      <div className="grid cols-2">
+      <div className="grid cols-2 grid-stack-mobile">
         <div className="card">
           <h2>📝 Crear materia</h2>
           <form onSubmit={createSubject}>
@@ -93,7 +93,7 @@ export default function Subjects() {
             </div>
           ) : (
             <div className="table-container">
-              <table className="table">
+              <table className="table mobile-card-view">
                 <thead>
                   <tr>
                     <th>Código</th>
@@ -104,10 +104,10 @@ export default function Subjects() {
                 <tbody>
                   {items.map((s) => (
                     <tr key={s.id}>
-                      <td><strong>{s.code}</strong></td>
-                      <td>{s.name}</td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                      <td data-label="Código"><strong>{s.code}</strong></td>
+                      <td data-label="Nombre">{s.name}</td>
+                      <td data-label="Acciones">
+                        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
                           <Link 
                             className="btn secondary" 
                             to={`/subjects/${s.id}`}

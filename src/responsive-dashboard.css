@@ -154,3 +154,81 @@
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   }
 }
+
+/* ========================================
+   📱 GENERIC RESPONSIVE UTILITIES
+   ======================================== */
+
+/* Stack grids on mobile */
+@media (max-width: 768px) {
+  .grid-stack-mobile {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Make modals full screen/responsive on mobile */
+  .modal-responsive {
+    width: 95% !important;
+    max-width: none !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--space-md) !important;
+  }
+
+  /* Scrollable tabs container */
+  .tabs-scrollable {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px; /* Hide scrollbar visual if needed or give space */
+  }
+  
+  .tabs-scrollable button {
+    flex: 0 0 auto !important; /* Don't shrink */
+    padding: 0.75rem 1.25rem !important;
+  }
+
+  /* Mobile Card View for Tables */
+  .mobile-card-view thead {
+    display: none;
+  }
+
+  .mobile-card-view tbody,
+  .mobile-card-view tr,
+  .mobile-card-view td {
+    display: block;
+    width: 100%;
+  }
+
+  .mobile-card-view tr {
+    margin-bottom: var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .mobile-card-view td {
+    text-align: right;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--border-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mobile-card-view td:last-child {
+    border-bottom: none;
+    justify-content: flex-end;
+    padding-top: var(--space-md);
+  }
+
+  .mobile-card-view td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+  }
+}
