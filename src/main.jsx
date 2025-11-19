@@ -5,6 +5,7 @@ import App from './App'
 import { AuthProvider } from './state/AuthContext'
 import { ThemeProvider } from './state/ThemeContext'
 import './styles.css'
+import './responsive-dashboard.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
