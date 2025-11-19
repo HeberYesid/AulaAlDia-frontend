@@ -62,7 +62,7 @@ export default function NotificationsPage() {
       return
     }
     try {
-      await api.delete('/api/courses/notifications/delete-all/')
+      await api.post('/api/courses/notifications/delete-all/')
       load()
     } catch (err) {
       console.error('Error deleting all notifications:', err)
