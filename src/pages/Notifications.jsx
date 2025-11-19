@@ -10,7 +10,7 @@ export default function NotificationsPage() {
     setLoading(true)
     try {
       // Usar la misma API que NotificationBell
-      const response = await api.get('/api/courses/notifications/items/')
+      const response = await api.get('/api/courses/notifications/')
       setItems(response.data)
       
       // Contar las no leídas
@@ -29,7 +29,7 @@ export default function NotificationsPage() {
 
   async function markAll() {
     try {
-      await api.post('/api/courses/notifications/items/mark-all-read/')
+      await api.post('/api/courses/notifications/mark-all-read/')
       load()
     } catch (err) {
       console.error('Error marking all as read:', err)
@@ -38,7 +38,7 @@ export default function NotificationsPage() {
 
   async function toggleRead(item) {
     try {
-      await api.patch(`/api/courses/notifications/items/${item.id}/`, { is_read: !item.is_read })
+      await api.patch(`/api/courses/notifications/${item.id}/`, { is_read: !item.is_read })
       load()
     } catch (err) {
       console.error('Error toggling read status:', err)
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
       return
     }
     try {
-      await api.delete(`/api/courses/notifications/items/${id}/`)
+      await api.delete(`/api/courses/notifications/${id}/`)
       load()
     } catch (err) {
       console.error('Error deleting notification:', err)
@@ -62,7 +62,7 @@ export default function NotificationsPage() {
       return
     }
     try {
-      await api.post('/api/courses/notifications/items/delete-all/')
+      await api.post('/api/courses/notifications/delete-all/')
       load()
     } catch (err) {
       console.error('Error deleting all notifications:', err)
