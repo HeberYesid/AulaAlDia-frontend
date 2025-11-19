@@ -45,6 +45,30 @@ export default function NotificationsPage() {
     }
   }
 
+  async function deleteNotification(id) {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta notificación?')) {
+      return
+    }
+    try {
+      await api.delete(`/api/courses/notifications/${id}/`)
+      load()
+    } catch (err) {
+      console.error('Error deleting notification:', err)
+    }
+  }
+
+  async function deleteAll() {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar TODAS las notificaciones?')) {
+      return
+    }
+    try {
+      await api.delete('/api/courses/notifications/delete-all/')
+      load()
+    } catch (err) {
+      console.error('Error deleting all notifications:', err)
+    }
+  }
+
   if (loading) {
     return (
       <div className="card">
@@ -65,11 +89,18 @@ export default function NotificationsPage() {
             {unread > 0 ? `Tienes ${unread} notificación${unread > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
           </p>
         </div>
-        {unread > 0 && (
-          <button className="btn secondary" onClick={markAll}>
-            Marcar todas como leídas
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {unread > 0 && (
+            <button className="btn secondary" onClick={markAll}>
+              Marcar todas como leídas
+            </button>
+          )}
+          {items.length > 0 && (
+            <button className="btn danger" onClick={deleteAll}>
+              🗑️ Eliminar todas
+            </button>
+          )}
+        </div>
       </div>
 
       {items.length === 0 ? (
@@ -87,7 +118,7 @@ export default function NotificationsPage() {
                 <th>Mensaje</th>
                 <th style={{ width: '150px' }}>Fecha</th>
                 <th style={{ width: '100px', textAlign: 'center' }}>Estado</th>
-                <th style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
+                <th style={{ width: '180px', textAlign: 'center' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -162,19 +193,33 @@ export default function NotificationsPage() {
                     </span>
                   </td>
                   <td style={{ textAlign: 'center' }}>
-                    <button 
-                      className="btn sm"
-                      onClick={() => toggleRead(n)}
-                      title={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
-                      style={{
-                        padding: '0.3rem 0.6rem',
-                        fontSize: '0.75rem',
-                        whiteSpace: 'nowrap',
-                        minWidth: 'auto'
-                      }}
-                    >
-                      {n.is_read ? 'No leída' : 'Marcar'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                      <button 
+                        className="btn sm"
+                        onClick={() => toggleRead(n)}
+                        title={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
+                        style={{
+                          padding: '0.3rem 0.6rem',
+                          fontSize: '0.75rem',
+                          whiteSpace: 'nowrap',
+                          minWidth: 'auto'
+                        }}
+                      >
+                        {n.is_read ? 'No leída' : 'Marcar'}
+                      </button>
+                      <button 
+                        className="btn sm danger"
+                        onClick={() => deleteNotification(n.id)}
+                        title="Eliminar notificación"
+                        style={{
+                          padding: '0.3rem 0.6rem',
+                          fontSize: '0.75rem',
+                          minWidth: 'auto'
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
