@@ -9,10 +9,10 @@
   gap: 1.5rem;
 }
 
-/* Subjects Grid - Desktop: minmax(400px), Mobile: 100% */
+/* Subjects Grid - Desktop: 2 columnas, Mobile: 100% */
 .subjects-grid-responsive {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-lg);
 }
 
@@ -31,10 +31,10 @@
   gap: var(--space-sm);
 }
 
-/* Exercises Grid - Desktop: 2 columnas, Mobile: 1 columna */
+/* Exercises Grid - Desktop: 2 columnas siempre, Mobile: 1 columna */
 .exercises-grid-responsive {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-lg);
 }
 
@@ -149,9 +149,24 @@
     gap: 1rem;
   }
   
-  /* Subjects Grid: ajuste para tablet */
+  /* Subjects Grid: 1 columna en tablet */
   .subjects-grid-responsive {
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: 1fr;
+  }
+
+  /* Exercises Grid: 1 columna en tablet */
+  .exercises-grid-responsive {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   🖥️ LARGE DESKTOP BREAKPOINT (> 1400px)
+   ======================================== */
+@media (min-width: 1400px) {
+  /* Subjects Grid: 3 columnas en pantallas grandes */
+  .subjects-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
