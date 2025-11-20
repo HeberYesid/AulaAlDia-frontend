@@ -33,7 +33,7 @@
 .subjects-grid-responsive {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-lg);
+  gap: var(--space-xl);
 }
 
 /* Subject Header - Desktop: no wrap, Mobile: wrap */
@@ -41,14 +41,14 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 /* Subject Stats - Desktop: 5 columnas, Mobile: 3 columnas */
 .subject-stats-responsive {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-sm);
+  gap: var(--space-md);
 }
 
 /* Exercises Grid - Desktop: 2 columnas siempre, Mobile: 1 columna */

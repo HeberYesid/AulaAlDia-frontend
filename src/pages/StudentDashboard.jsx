@@ -129,7 +129,7 @@ export default function StudentDashboard() {
                 key={subject.subject_id}
                 className="card"
                 style={{
-                  padding: 'var(--space-lg)',
+                  padding: 'var(--space-xl)',
                   cursor: 'pointer',
                   transition: 'all var(--transition-fast)',
                   height: '100%'
@@ -147,24 +147,24 @@ export default function StudentDashboard() {
                 {/* Header de la materia */}
                 <div className="subject-header-responsive">
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700 }}>
+                    <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>
                       {subject.subject_name}
                     </h3>
-                    <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '1rem' }}>
                       📋 {subject.subject_code}
                     </p>
                   </div>
                   <div style={{
                     textAlign: 'right',
-                    padding: '0.75rem 1rem',
+                    padding: '1rem 1.5rem',
                     background: 'var(--bg-primary)',
                     borderRadius: 'var(--radius-md)',
-                    minWidth: '100px'
+                    minWidth: '120px'
                   }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
                       {subject.completion_rate}%
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
                       Completado
                     </div>
                   </div>
@@ -173,11 +173,11 @@ export default function StudentDashboard() {
                 {/* Barra de progreso */}
                 <div style={{
                   width: '100%',
-                  height: '10px',
+                  height: '12px',
                   background: 'var(--bg-primary)',
                   borderRadius: '999px',
                   overflow: 'hidden',
-                  marginBottom: '1.25rem',
+                  marginBottom: '1.5rem',
                   boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
                 }}>
                   <div style={{
@@ -192,11 +192,11 @@ export default function StudentDashboard() {
 
                 {/* Estadísticas */}
                 <div className="subject-stats-responsive">
-                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>
                       {subject.completed_exercises}/{subject.total_exercises}
                     </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 500 }}>
+                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
                       Ejercicios
                     </div>
                     <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
@@ -204,11 +204,11 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(76, 175, 80, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(76, 175, 80, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>
                       {subject.green_count}
                     </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 500 }}>
+                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
                       🟢 Verdes
                     </div>
                     <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
@@ -216,11 +216,11 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(255, 193, 7, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--warning)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(255, 193, 7, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--warning)' }}>
                       {subject.yellow_count}
                     </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 500 }}>
+                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
                       🟡 Amarillos
                     </div>
                     <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
@@ -228,11 +228,11 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(244, 67, 54, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--danger)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(244, 67, 54, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--danger)' }}>
                       {subject.red_count}
                     </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 500 }}>
+                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
                       🔴 Rojos
                     </div>
                     <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
@@ -240,11 +240,11 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'center', padding: 'var(--space-md)', background: 'rgba(25, 118, 210, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(25, 118, 210, 0.1)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)' }}>
                       {subject.success_rate}%
                     </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 500 }}>
+                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
                       ✅ Éxito
                     </div>
                     <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
