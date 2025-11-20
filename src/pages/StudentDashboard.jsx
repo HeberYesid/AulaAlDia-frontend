@@ -170,6 +170,51 @@ export default function StudentDashboard() {
                   </div>
                 </div>
 
+                {/* Estadísticas simplificadas */}
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr auto', 
+                  gap: 'var(--space-lg)', 
+                  alignItems: 'center',
+                  marginBottom: 'var(--space-lg)'
+                }}>
+                  {/* Total de ejercicios */}
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 'var(--space-md)',
+                    padding: 'var(--space-md)',
+                    background: 'var(--bg-primary)',
+                    borderRadius: 'var(--radius-md)'
+                  }}>
+                    <div style={{ fontSize: '2rem' }}>📝</div>
+                    <div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                        {subject.total_exercises} ejercicios
+                      </div>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        {subject.completed_exercises} completados
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nota/Calificación */}
+                  <div style={{
+                    padding: 'var(--space-lg)',
+                    background: 'var(--bg-primary)',
+                    borderRadius: 'var(--radius-md)',
+                    textAlign: 'center',
+                    minWidth: '120px'
+                  }}>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
+                      {subject.grade.toFixed(1)}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 600 }}>
+                      Nota
+                    </div>
+                  </div>
+                </div>
+
                 {/* Barra de progreso */}
                 <div style={{
                   width: '100%',
@@ -177,7 +222,6 @@ export default function StudentDashboard() {
                   background: 'var(--bg-primary)',
                   borderRadius: '999px',
                   overflow: 'hidden',
-                  marginBottom: '1.5rem',
                   boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
                 }}>
                   <div style={{
@@ -188,69 +232,6 @@ export default function StudentDashboard() {
                     transition: 'width 0.5s ease',
                     boxShadow: '0 0 8px rgba(25, 118, 210, 0.4)'
                   }} />
-                </div>
-
-                {/* Estadísticas */}
-                <div className="subject-stats-responsive">
-                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-                      {subject.completed_exercises}/{subject.total_exercises}
-                    </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
-                      Ejercicios
-                    </div>
-                    <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      📝
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(76, 175, 80, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>
-                      {subject.green_count}
-                    </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
-                      🟢 Verdes
-                    </div>
-                    <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      🟢
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(255, 193, 7, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--warning)' }}>
-                      {subject.yellow_count}
-                    </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
-                      🟡 Amarillos
-                    </div>
-                    <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      🟡
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(244, 67, 54, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--danger)' }}>
-                      {subject.red_count}
-                    </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
-                      🔴 Rojos
-                    </div>
-                    <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      🔴
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'rgba(25, 118, 210, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)' }}>
-                      {subject.success_rate}%
-                    </div>
-                    <div className="stat-text-desktop" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
-                      ✅ Éxito
-                    </div>
-                    <div className="stat-text-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      ✅
-                    </div>
-                  </div>
                 </div>
               </div>
             ))}
