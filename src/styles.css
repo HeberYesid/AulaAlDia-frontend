@@ -2584,4 +2584,130 @@ form {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-20deg) translateX(-150%);
+  animation: shimmer-progress 2s infinite;
+}
+
+@keyframes shimmer-progress {
+  0% { transform: skewX(-20deg) translateX(-150%); }
+  100% { transform: skewX(-20deg) translateX(150%); }
+}
+
+/* =========================================
+   DASHBOARD RESPONSIVE LAYOUT FIXES
+   ========================================= */
+
+/* Grid Layouts */
+.stats-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.subjects-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-lg);
+}
+
+.exercises-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* Subject Header & Stats */
+.subject-header-responsive {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-lg);
+  gap: var(--space-md);
+}
+
+.subject-stats-responsive {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+/* Stat Labels */
+.stat-label-desktop {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.stat-label-mobile {
+  display: none;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .stats-grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .subjects-grid-responsive {
+    grid-template-columns: 1fr;
+  }
+
+  .exercises-grid-responsive {
+    grid-template-columns: 1fr;
+  }
+
+  .subject-header-responsive {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .subject-header-responsive > div:last-child {
+    width: 100%;
+    margin-top: var(--space-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .subject-stats-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xs);
+  }
+  
+  .subject-stats-responsive > div {
+    padding: var(--space-xs) !important;
+  }
+
+  .stat-label-desktop {
+    display: none;
+  }
+
+  .stat-label-mobile {
+    display: block;
+    font-size: 1.2rem;
+    margin-top: var(--space-xs);
+  }
+  
+  .stat-text-desktop {
+    display: none;
+  }
+  
+  .stat-text-mobile {
+    display: block;
+  }
+}
+
+/* Desktop specific for stat text */
+@media (min-width: 769px) {
+  .stat-text-mobile {
+    display: none;
+  }
+  
+  .stat-text-desktop {
+    display: block;
+  }
+}
