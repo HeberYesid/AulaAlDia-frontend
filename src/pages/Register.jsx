@@ -64,6 +64,7 @@ export default function Register() {
       })
     } catch (err) {
       console.error('Error en registro:', err)
+      console.error('Error completo:', err.response?.data)
       
       // Detectar errores específicos del servidor
       let errorMessage = 'No se pudo registrar. Verifica los datos.'
@@ -71,8 +72,16 @@ export default function Register() {
       if (err.response?.data) {
         const errorData = err.response.data
         
+        // Error de Turnstile (CAPTCHA)
+        if (errorData.turnstile_token) {
+          if (Array.isArray(errorData.turnstile_token)) {
+            errorMessage = '🤖 ' + errorData.turnstile_token[0]
+          } else {
+            errorMessage = '🤖 ' + errorData.turnstile_token
+          }
+        }
         // Error de email duplicado
-        if (errorData.email) {
+        else if (errorData.email) {
           if (Array.isArray(errorData.email)) {
             errorMessage = errorData.email[0]
           } else {
@@ -105,6 +114,16 @@ export default function Register() {
           errorMessage = Array.isArray(errorData.non_field_errors) 
             ? errorData.non_field_errors[0] 
             : errorData.non_field_errors
+        }
+        // Mostrar todos los errores si no coincide con ningún caso
+        else {
+          const allErrors = Object.entries(errorData).map(([field, errors]) => {
+            const errorMsg = Array.isArray(errors) ? errors[0] : errors
+            return `${field}: ${errorMsg}`
+          }).join(', ')
+          if (allErrors) {
+            errorMessage = allErrors
+          }
         }
       }
       
