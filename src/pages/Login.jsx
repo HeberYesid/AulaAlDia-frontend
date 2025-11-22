@@ -73,13 +73,13 @@ export default function Login() {
     <div className="auth-container">
       <div className="auth-card fade-in">
         <div className="auth-header">
-          <h1><span className="auth-icon">🔐</span> Iniciar Sesión</h1>
+          <h1><span className="auth-icon"></span> Iniciar Sesión</h1>
           <p>Accede a tu cuenta de DevTrack</p>
         </div>
         
         <form onSubmit={onSubmit} className="auth-form">
           <div className="form-group">
-            <label>📧 Correo Electrónico</label>
+            <label>Correo Electrónico</label>
             <input 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
@@ -91,7 +91,7 @@ export default function Login() {
           
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label>🔒 Contraseña</label>
+              <label>Contraseña</label>
               <Link 
                 to="/forgot-password" 
                 style={{ fontSize: '0.85rem', color: 'var(--primary)' }}
@@ -127,7 +127,7 @@ export default function Login() {
                 }}
                 title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
           </div>
@@ -157,7 +157,7 @@ export default function Login() {
               color: 'var(--text-secondary)',
               textAlign: 'center'
             }}>
-              ⏳ Esperando verificación de seguridad...
+              Esperando verificación de seguridad...
             </div>
           )}
           
@@ -172,11 +172,11 @@ export default function Login() {
                 Iniciando sesión...
               </>
             ) : !isCaptchaReady ? (
-              <>⏳ Cargando...</>
+              <>Cargando...</>
             ) : !turnstileToken ? (
-              <>🔒 Completa el captcha</>
+              <>Completa el captcha</>
             ) : (
-              <>🚀 Entrar</>
+              <>Entrar</>
             )}
           </button>
           

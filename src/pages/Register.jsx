@@ -41,7 +41,7 @@ export default function Register() {
     
     // Validar que las contraseñas coincidan
     if (password !== confirmPassword) {
-      setError('🔒 Las contraseñas no coinciden. Por favor verifica.')
+      setError('Las contraseñas no coinciden. Por favor verifica.')
       setIsLoading(false)
       return
     }
@@ -90,19 +90,19 @@ export default function Register() {
           // Normalizar mensajes comunes de email duplicado
           if (errorMessage.toLowerCase().includes('already exists') || 
               errorMessage.toLowerCase().includes('unique')) {
-            errorMessage = '📧 Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?'
+            errorMessage = 'Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?'
           }
         }
         // Error de username duplicado
         else if (errorData.username) {
-          errorMessage = '👤 Este usuario ya existe.'
+          errorMessage = 'Este usuario ya existe.'
         }
         // Error de contraseña débil
         else if (errorData.password) {
           if (Array.isArray(errorData.password)) {
-            errorMessage = '🔒 ' + errorData.password.join(' ')
+            errorMessage = ' ' + errorData.password.join(' ')
           } else {
-            errorMessage = '🔒 ' + errorData.password
+            errorMessage = ' ' + errorData.password
           }
         }
         // Error general del servidor
@@ -143,14 +143,13 @@ export default function Register() {
     <div className="auth-container">
       <div className="auth-card fade-in">
         <div className="auth-header">
-          <h1><span className="auth-icon">📝</span> Crear Cuenta</h1>
-          <p>Únete a DevTrack y comienza tu seguimiento académico</p>
+          <h1><span className="auth-icon"></span> Crear Cuenta</h1>
         </div>
         
         <form onSubmit={onSubmit} className="auth-form">
           <div className="grid cols-2">
             <div className="form-group">
-              <label>👤 Nombres</label>
+              <label>Nombres</label>
               <input 
                 value={firstName} 
                 onChange={(e) => setFirstName(e.target.value)} 
@@ -160,7 +159,7 @@ export default function Register() {
               />
             </div>
             <div className="form-group">
-              <label>👥 Apellidos</label>
+              <label>Apellidos</label>
               <input 
                 value={lastName} 
                 onChange={(e) => setLastName(e.target.value)} 
@@ -172,7 +171,7 @@ export default function Register() {
           </div>
           
           <div className="form-group">
-            <label>📧 Correo Electrónico</label>
+            <label>Correo Electrónico</label>
             <input 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
@@ -183,7 +182,7 @@ export default function Register() {
           </div>
           
           <div className="form-group">
-            <label>🔒 Contraseña</label>
+            <label>Contraseña</label>
             <div style={{ position: 'relative' }}>
               <input 
                 value={password} 
@@ -213,7 +212,7 @@ export default function Register() {
                 }}
                 title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
             <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
@@ -222,7 +221,7 @@ export default function Register() {
           </div>
           
           <div className="form-group">
-            <label>🔒 Confirmar Contraseña</label>
+            <label>Confirmar Contraseña</label>
             <div style={{ position: 'relative' }}>
               <input 
                 value={confirmPassword} 
@@ -252,17 +251,17 @@ export default function Register() {
                 }}
                 title={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showConfirmPassword ? '🙈' : '👁️'}
+                {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
             {confirmPassword && password !== confirmPassword && (
               <small style={{ color: 'var(--danger)', fontSize: 'var(--font-size-xs)' }}>
-                ❌ Las contraseñas no coinciden
+                Las contraseñas no coinciden
               </small>
             )}
             {confirmPassword && password === confirmPassword && (
               <small style={{ color: 'var(--success)', fontSize: 'var(--font-size-xs)' }}>
-                ✅ Las contraseñas coinciden
+                Las contraseñas coinciden
               </small>
             )}
           </div>
@@ -307,11 +306,11 @@ export default function Register() {
                 Creando cuenta...
               </>
             ) : !isCaptchaReady ? (
-              <>⏳ Cargando...</>
+              <>Cargando...</>
             ) : !turnstileToken ? (
-              <>🔒 Completa el captcha</>
+              <>Completa el captcha</>
             ) : (
-              <>🚀 Crear Cuenta</>
+              <>Crear Cuenta</>
             )}
           </button>
           
