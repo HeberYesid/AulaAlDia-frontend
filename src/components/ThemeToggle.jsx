@@ -42,7 +42,7 @@ export default function ThemeToggle() {
       
       {/* 📝 Texto descriptivo del botón */}
       <span className="theme-text">
-        {isDark ? 'Claro' : 'Oscuro'}
+        {isDark ? '' : ''}
       </span>
     </button>
   )

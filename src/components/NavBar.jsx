@@ -29,7 +29,7 @@ export default function NavBar() {
       <div className="navbar-content">
         <div className="brand">
           <Link to="/" onClick={closeMenu}>
-            <span>📊</span>
+          
             <span className="brand-text">DevTrack</span>
           </Link>
         </div>
@@ -67,7 +67,7 @@ export default function NavBar() {
                 className={isActive('/') ? 'active' : ''}
                 onClick={closeMenu}
               >
-                🏠 Dashboard
+                Dashboard
               </Link>
               {(user.role === 'TEACHER' || user.role === 'ADMIN') && (
                 <Link 
@@ -75,7 +75,7 @@ export default function NavBar() {
                   className={isActive('/subjects') ? 'active' : ''}
                   onClick={closeMenu}
                 >
-                  📚 Materias
+                  Materias
                 </Link>
               )}
               {user.role === 'STUDENT' && (
@@ -84,7 +84,7 @@ export default function NavBar() {
                   className={isActive('/my') ? 'active' : ''}
                   onClick={closeMenu}
                 >
-                  📈 Mis Resultados
+                  Mis Resultados
                 </Link>
               )}
               <div className="nav-icons">
@@ -100,8 +100,7 @@ export default function NavBar() {
                 <span className="role-badge">{user.role}</span>
               </Link>
               <button onClick={onLogout} className="btn danger logout-btn">
-                🚪 Salir
-              </button>
+                Salir</button>
             </>
           ) : (
             <>
