@@ -3094,6 +3094,14 @@ form {
   gap: var(--space-lg);
 }
 
+.char-counter {
+  display: block;
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: right;
+}
+
 .btn-block {
   width: 100%;
 }

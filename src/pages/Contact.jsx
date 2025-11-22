@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { sendContactMessage } from '../api/contact'
+import TurnstileCaptcha from './TurnstileCaptcha'
 import '../styles.css'
 
 export default function Contact() {
@@ -11,6 +12,8 @@ export default function Contact() {
   })
   const [status, setStatus] = useState({ type: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const turnstileRef = useRef(null)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -35,6 +38,27 @@ export default function Contact() {
       return
     }
 
+    // Validar longitud del nombre
+    if (formData.name.length > 200) {
+      setStatus({
+        type: 'error',
+        message: 'El nombre no puede exceder 200 caracteres',
+      })
+      setIsSubmitting(false)
+      return
+    }
+
+    // Validar formato del nombre (solo letras, espacios, guiones, apóstrofes y acentos)
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/
+    if (!nameRegex.test(formData.name)) {
+      setStatus({
+        type: 'error',
+        message: 'El nombre solo puede contener letras, espacios y guiones',
+      })
+      setIsSubmitting(false)
+      return
+    }
+
     // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
@@ -46,9 +70,41 @@ export default function Contact() {
       return
     }
 
+    // Validar longitud del mensaje
+    if (formData.message.trim().length < 10) {
+      setStatus({
+        type: 'error',
+        message: 'El mensaje debe tener al menos 10 caracteres',
+      })
+      setIsSubmitting(false)
+      return
+    }
+
+    if (formData.message.length > 2000) {
+      setStatus({
+        type: 'error',
+        message: 'El mensaje no puede exceder 2000 caracteres',
+      })
+      setIsSubmitting(false)
+      return
+    }
+
+    // Validar captcha
+    if (!turnstileToken) {
+      setStatus({
+        type: 'error',
+        message: 'Por favor completa la verificación de seguridad',
+      })
+      setIsSubmitting(false)
+      return
+    }
+
     // Enviar mensaje al backend
     try {
-      const response = await sendContactMessage(formData)
+      const response = await sendContactMessage({
+        ...formData,
+        turnstile_token: turnstileToken
+      })
 
       setStatus({
         type: 'success',
@@ -62,20 +118,65 @@ export default function Contact() {
         subject: '',
         message: '',
       })
+      
+      // Resetear captcha
+      setTurnstileToken('')
+      if (turnstileRef.current) {
+        turnstileRef.current.reset()
+      }
     } catch (error) {
       console.error('Error al enviar mensaje:', error)
       
-      const errorMessage = error.response?.data?.error || 
-                          error.response?.data?.details?.message?.[0] ||
-                          'Hubo un error al enviar el mensaje. Por favor intenta de nuevo.'
+      // Extraer mensaje de error específico del backend
+      let errorMessage = 'Hubo un error al enviar el mensaje. Por favor intenta de nuevo.'
+      
+      if (error.response?.data) {
+        const errorData = error.response.data
+        
+        // Si hay errores de validación de campos
+        if (errorData.details) {
+          const firstError = Object.values(errorData.details)[0]
+          errorMessage = Array.isArray(firstError) ? firstError[0] : firstError
+        }
+        // Si hay un mensaje de error general
+        else if (errorData.error) {
+          errorMessage = errorData.error
+        }
+        // Si hay mensaje directo
+        else if (errorData.message) {
+          errorMessage = errorData.message
+        }
+      }
       
       setStatus({
         type: 'error',
         message: errorMessage,
       })
+      
+      // Resetear captcha en caso de error
+      if (turnstileRef.current) {
+        turnstileRef.current.reset()
+      }
+      setTurnstileToken('')
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleTurnstileVerify = (token) => {
+    setTurnstileToken(token)
+  }
+
+  const handleTurnstileError = () => {
+    setTurnstileToken('')
+    setStatus({
+      type: 'error',
+      message: 'Error en la verificación de seguridad. Por favor intenta de nuevo.',
+    })
+  }
+
+  const handleTurnstileExpire = () => {
+    setTurnstileToken('')
   }
 
   return (
@@ -155,9 +256,13 @@ export default function Contact() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Tu nombre"
+                placeholder="Ej: Juan Pérez"
                 disabled={isSubmitting}
+                maxLength={200}
               />
+              <small className="char-counter">
+                {formData.name.length}/200 caracteres (solo letras)
+              </small>
             </div>
 
             <div className="form-group">
@@ -203,13 +308,27 @@ export default function Contact() {
                 placeholder="Describe tu consulta o problema..."
                 rows="6"
                 disabled={isSubmitting}
+                maxLength={2000}
+              />
+              <small className="char-counter">
+                {formData.message.length}/2000 caracteres (mínimo 10)
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label>Verificación de seguridad *</label>
+              <TurnstileCaptcha
+                ref={turnstileRef}
+                onVerify={handleTurnstileVerify}
+                onError={handleTurnstileError}
+                onExpire={handleTurnstileExpire}
               />
             </div>
 
             <button
               type="submit"
               className="btn btn-primary btn-block"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !turnstileToken}
             >
               {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
             </button>
