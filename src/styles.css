@@ -2711,3 +2711,447 @@ form {
     display: block;
   }
 }
+
+/* 
+===============================================
+🏠 HOME PAGE STYLES
+===============================================
+*/
+.home-page {
+  padding: var(--space-lg) 0;
+}
+
+.hero {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: var(--space-md);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-xl);
+  opacity: 0.95;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.features {
+  margin-bottom: var(--space-2xl);
+}
+
+.features h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: var(--space-xl);
+  color: var(--text-primary);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.feature-card {
+  background: var(--bg-card);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+}
+
+.feature-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.cta-section {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+}
+
+.cta-section h2 {
+  font-size: 2rem;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+}
+
+.cta-section p {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-xl);
+  color: var(--text-secondary);
+}
+
+.cta-buttons {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-lg {
+  padding: var(--space-md) var(--space-xl);
+  font-size: 1.125rem;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* 
+===============================================
+❓ FAQ PAGE STYLES
+===============================================
+*/
+.faq-page {
+  padding: var(--space-lg) 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.faq-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+}
+
+.faq-header p {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
+
+.faq-section {
+  margin-bottom: var(--space-2xl);
+}
+
+.faq-category {
+  font-size: 1.75rem;
+  margin-bottom: var(--space-lg);
+  color: var(--primary);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: var(--space-sm);
+}
+
+.faq-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.faq-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.faq-question {
+  width: 100%;
+  padding: var(--space-lg);
+  background: var(--bg-card);
+  border: none;
+  text-align: left;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.faq-question:hover {
+  background: var(--bg-hover);
+}
+
+.faq-question.active {
+  color: var(--primary);
+}
+
+.faq-icon {
+  font-size: 1.5rem;
+  color: var(--primary);
+  min-width: 24px;
+  text-align: center;
+}
+
+.faq-answer {
+  padding: 0 var(--space-lg) var(--space-lg);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.faq-footer {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  margin-top: var(--space-2xl);
+}
+
+.faq-footer h3 {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.faq-footer p {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+/* 
+===============================================
+📧 CONTACT PAGE STYLES
+===============================================
+*/
+.contact-page {
+  padding: var(--space-lg) 0;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.contact-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+}
+
+.contact-header p {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
+
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.contact-info {
+  background: var(--bg-card);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  height: fit-content;
+}
+
+.contact-info h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+}
+
+.contact-info-item {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.contact-info-item:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.contact-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.contact-info-item h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-xs);
+  color: var(--text-primary);
+}
+
+.contact-info-item p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.contact-info-item a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.contact-info-item a:hover {
+  text-decoration: underline;
+}
+
+.contact-notice {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+}
+
+.contact-notice h3 {
+  font-size: 1rem;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.contact-notice p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.contact-notice a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contact-notice a:hover {
+  text-decoration: underline;
+}
+
+.contact-form-container {
+  background: var(--bg-card);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.contact-form-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.alert {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+}
+
+.alert-success {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.alert-error {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+/* 
+===============================================
+📱 RESPONSIVE STYLES FOR NEW PAGES
+===============================================
+*/
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .features h2,
+  .cta-section h2,
+  .faq-header h1,
+  .contact-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-content {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-buttons,
+  .cta-buttons {
+    flex-direction: column;
+  }
+
+  .btn-lg {
+    width: 100%;
+  }
+}
+

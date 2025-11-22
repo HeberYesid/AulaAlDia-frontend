@@ -17,6 +17,9 @@ import SubjectDetail from './pages/SubjectDetail'
 import NotificationsPage from './pages/Notifications'
 import MyResults from './pages/MyResults'
 import UserProfile from './pages/UserProfile'
+import Home from './pages/Home'
+import FAQ from './pages/FAQ'
+import Contact from './pages/Contact'
 
 export default function App() {
   return (
@@ -26,6 +29,10 @@ export default function App() {
       <TourDebugButton />
       <main className="container">
         <Routes>
+          <Route path="/home" element={<Home />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
+          
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/register-teacher" element={<RegisterTeacher />} />

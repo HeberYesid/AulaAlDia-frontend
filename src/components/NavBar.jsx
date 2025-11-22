@@ -105,6 +105,9 @@ export default function NavBar() {
             </>
           ) : (
             <>
+              <Link to="/home" onClick={closeMenu}>🏠 Inicio</Link>
+              <Link to="/faq" onClick={closeMenu}>❓ FAQ</Link>
+              <Link to="/contact" onClick={closeMenu}>📧 Contacto</Link>
               <ThemeToggle />
               <Link to="/login" onClick={closeMenu}>Iniciar sesión</Link>
               <Link to="/register" onClick={closeMenu}>Registrarse</Link>
