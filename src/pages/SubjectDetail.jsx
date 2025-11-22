@@ -611,7 +611,7 @@ export default function SubjectDetail() {
           </div>
 
           <div style={{ marginBottom: '2rem' }}>
-            <h3>📤 Carga Masiva de Estudiantes</h3>
+            <h3>Carga Masiva de Estudiantes</h3>
             <CSVUpload
               label="Cargar estudiantes desde CSV (columnas: email, first_name, last_name)"
               uploadUrl={`/api/courses/subjects/${id}/enrollments/upload-csv/`}
@@ -628,7 +628,7 @@ export default function SubjectDetail() {
               <div style={{ marginBottom: '1rem' }}>
                 <input
                   type="text"
-                  placeholder="🔍 Buscar por email, nombre o apellido..."
+                  placeholder="Buscar por email, nombre o apellido..."
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
                   style={{
@@ -774,7 +774,7 @@ export default function SubjectDetail() {
               <div style={{ marginBottom: '1rem' }}>
                 <input
                   type="text"
-                  placeholder="🔍 Buscar ejercicio por nombre..."
+                  placeholder="Buscar ejercicio por nombre..."
                   value={exerciseSearch}
                   onChange={(e) => setExerciseSearch(e.target.value)}
                   style={{
@@ -913,7 +913,7 @@ export default function SubjectDetail() {
           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
             <>
               <div style={{ marginBottom: '2rem' }}>
-                <h3>📤 Cargar Resultados desde CSV</h3>
+                <h3>Cargar Resultados desde CSV</h3>
                 <CSVUpload
                   label="Cargar resultados (columnas: student_email, exercise_name, status)"
                   uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
@@ -943,7 +943,7 @@ export default function SubjectDetail() {
             {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h3 style={{ margin: 0 }}>📈 Dashboard de Resultados</h3>
+                  <h3 style={{ margin: 0 }}>Dashboard de Resultados</h3>
                   {dash && dash.enrollments.length > 0 && (
                     <button 
                       className="btn secondary" 
