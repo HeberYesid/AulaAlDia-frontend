@@ -207,7 +207,7 @@ export default function StudentDashboard() {
                     minWidth: '120px'
                   }}>
                     <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
-                      {subject.grade.toFixed(1)}
+                      {subject.grade != null ? subject.grade.toFixed(1) : '0.0'}
                     </div>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 600 }}>
                       Nota
