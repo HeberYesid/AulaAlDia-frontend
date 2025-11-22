@@ -18,14 +18,9 @@ export default function Home() {
               Ir al Dashboard
             </Link>
           ) : (
-            <>
-              <Link to="/login" className="btn btn-primary">
-                Iniciar Sesión
-              </Link>
-              <Link to="/register" className="btn btn-secondary">
-                Registrarse
-              </Link>
-            </>
+            <Link to="/login" className="btn btn-primary">
+              Iniciar Sesión
+            </Link>
           )}
         </div>
       </section>
@@ -96,15 +91,18 @@ export default function Home() {
           {!isAuthenticated && (
             <>
               <Link to="/register" className="btn btn-primary btn-lg">
-                Crear Cuenta
+                Registrarse como Estudiante
               </Link>
               <Link to="/register-teacher" className="btn btn-secondary btn-lg">
-                Registro de Profesor
+                Registrarse como Profesor
               </Link>
             </>
           )}
           <Link to="/faq" className="btn btn-outline">
             Preguntas Frecuentes
+          </Link>
+          <Link to="/contact" className="btn btn-outline">
+            Contáctanos
           </Link>
         </div>
       </section>
