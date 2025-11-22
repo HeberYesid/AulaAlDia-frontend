@@ -96,46 +96,63 @@ export default function Dashboard() {
         </div>
 
         <div className="card">
-          <h2>Mis Materias</h2>
-          <div className="data-table">
-            <table className="table mobile-card-view">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>Estudiantes</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subjects.map((s) => (
-                  <tr key={s.id}>
-                    <td data-label="Código"><strong>{s.code}</strong></td>
-                    <td data-label="Nombre">{s.name}</td>
-                    <td data-label="Estudiantes">{s.enrollments_count || 0}</td>
-                    <td data-label="Acciones">
-                      <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
-                        <Link 
-                          className="btn secondary" 
-                          to={`/subjects/${s.id}`}
-                          style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                        >
-                          Ver Detalles
-                        </Link>
-                        <button
-                          onClick={() => deleteSubject(s)}
-                          className="btn danger"
-                          style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+            <h2>Mis Materias</h2>
+            <Link to="/subjects" className="btn primary">
+              + Nueva Materia
+            </Link>
           </div>
+
+          {subjects.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">📚</div>
+              <h3>No tienes materias creadas</h3>
+              <p>Comienza creando tu primera materia para gestionar estudiantes y ejercicios</p>
+              <Link to="/subjects" className="btn primary" style={{ marginTop: 'var(--space-md)' }}>
+                Crear mi primera materia
+              </Link>
+            </div>
+          ) : (
+            <div className="data-table">
+              <table className="table mobile-card-view">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Estudiantes</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjects.map((s) => (
+                    <tr key={s.id}>
+                      <td data-label="Código"><strong>{s.code}</strong></td>
+                      <td data-label="Nombre">{s.name}</td>
+                      <td data-label="Estudiantes">{s.enrollments_count || 0}</td>
+                      <td data-label="Acciones">
+                        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
+                          <Link 
+                            className="btn secondary" 
+                            to={`/subjects/${s.id}`}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                          >
+                            Ver Detalles
+                          </Link>
+                          <button
+                            onClick={() => deleteSubject(s)}
+                            className="btn danger"
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     )
