@@ -41,12 +41,12 @@ export default function Dashboard() {
     setSuccess('')
     try {
       await api.delete(`/api/courses/subjects/${subject.id}/`)
-      setSuccess(`✅ Materia "${subject.name}" eliminada exitosamente`)
+      setSuccess(`Materia "${subject.name}" eliminada exitosamente`)
       loadSubjects()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error deleting subject:', err)
-      setError(`❌ No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
+      setError(`No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
     }
   }
 
@@ -86,25 +86,25 @@ export default function Dashboard() {
           <div className="stats-grid grid-stack-mobile" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
             <div className="stat-card">
               <div className="stat-value">{subjects.length}</div>
-              <div className="stat-label">📚 Materias</div>
+              <div className="stat-label">Materias</div>
             </div>
             <div className="stat-card">
               <div className="stat-value">{subjects.reduce((acc, s) => acc + (s.enrollments_count || 0), 0)}</div>
-              <div className="stat-label">👥 Estudiantes</div>
+              <div className="stat-label">Estudiantes</div>
             </div>
           </div>
         </div>
 
         <div className="card">
-          <h2>📋 Mis Materias</h2>
+          <h2>Mis Materias</h2>
           <div className="data-table">
             <table className="table mobile-card-view">
               <thead>
                 <tr>
-                  <th>📝 Código</th>
-                  <th>📚 Nombre</th>
-                  <th>👥 Estudiantes</th>
-                  <th>⚡ Acciones</th>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                  <th>Estudiantes</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -120,14 +120,14 @@ export default function Dashboard() {
                           to={`/subjects/${s.id}`}
                           style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
                         >
-                          👁️ Ver Detalles
+                          Ver Detalles
                         </Link>
                         <button
                           onClick={() => deleteSubject(s)}
                           className="btn danger"
                           style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
                         >
-                          🗑️ Eliminar
+                          Eliminar
                         </button>
                       </div>
                     </td>

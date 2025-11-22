@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { api } from '../api/axios'
 
 export default function NotificationsPage() {
@@ -84,7 +84,7 @@ export default function NotificationsPage() {
     <div className="card">
       <div className="notification-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
         <div>
-          <h2 style={{ margin: 0 }}>🔔 Notificaciones</h2>
+          <h2 style={{ margin: 0 }}>Notificaciones</h2>
           <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
             {unread > 0 ? `Tienes ${unread} notificación${unread > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
           </p>
@@ -97,7 +97,7 @@ export default function NotificationsPage() {
           )}
           {items.length > 0 && (
             <button className="btn danger" onClick={deleteAll}>
-              🗑️ Eliminar todas
+              Eliminar todas
             </button>
           )}
         </div>
@@ -105,7 +105,7 @@ export default function NotificationsPage() {
 
       {items.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-          <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
+          <p style={{ fontSize: '3rem', margin: 0 }}></p>
           <p style={{ fontSize: '1.2rem', margin: '1rem 0 0 0' }}>No tienes notificaciones</p>
         </div>
       ) : (
@@ -217,7 +217,7 @@ export default function NotificationsPage() {
                           minWidth: 'auto'
                         }}
                       >
-                        🗑️
+                        Eliminar
                       </button>
                     </div>
                   </td>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+﻿import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
@@ -165,7 +165,7 @@ export default function SubjectDetail() {
     setSuccess('')
     try {
       await api.post(`/api/courses/subjects/${id}/enrollments/`, { student_email: email })
-      setSuccess(`✅ Estudiante ${email} inscrito correctamente`)
+      setSuccess(`Estudiante ${email} inscrito correctamente`)
       setEmail('')
       setUserExistsStatus(null)
       setUserExistsInfo(null)
@@ -225,7 +225,7 @@ export default function SubjectDetail() {
       }
       
       await api.post('/api/courses/exercises/', payload)
-      setSuccess(`✅ Ejercicio "${newExerciseName}" creado correctamente`)
+      setSuccess(`Ejercicio "${newExerciseName}" creado correctamente`)
       setNewExerciseName('')
       setNewExerciseDeadline('')
       setNewExerciseDescription('')
@@ -248,7 +248,7 @@ export default function SubjectDetail() {
     }
     try {
       await api.delete(`/api/courses/exercises/${exerciseId}/`)
-      setSuccess(`✅ Ejercicio eliminado correctamente`)
+      setSuccess(`Ejercicio eliminado correctamente`)
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -293,7 +293,7 @@ export default function SubjectDetail() {
       }
       
       await api.patch(`/api/courses/exercises/${editingExercise.id}/`, payload)
-      setSuccess(`✅ Ejercicio "${editExerciseName}" actualizado correctamente`)
+      setSuccess(`Ejercicio "${editExerciseName}" actualizado correctamente`)
       closeEditExerciseModal()
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
@@ -336,7 +336,7 @@ export default function SubjectDetail() {
         status: newStatus,
         comment: newComment
       })
-      setSuccess(`✅ Resultado actualizado: ${editingResult.studentEmail} - ${editingResult.exerciseName} → ${newStatus}`)
+      setSuccess(`Resultado actualizado: ${editingResult.studentEmail} - ${editingResult.exerciseName} → ${newStatus}`)
       closeEditModal()
       loadAll()
       setTimeout(() => setSuccess(''), 5000)
@@ -389,7 +389,7 @@ export default function SubjectDetail() {
       const enrollment = enrollments.find(e => e.id === parseInt(selectedEnrollmentId))
       const exercise = exercises.find(ex => ex.id === parseInt(selectedExerciseId))
       
-      setSuccess(`✅ Resultado asignado: ${enrollment?.student?.email} - ${exercise?.name} → ${createStatus}`)
+      setSuccess(`Resultado asignado: ${enrollment?.student?.email} - ${exercise?.name} → ${createStatus}`)
       closeCreateResultForm()
       loadAll()
       setTimeout(() => setSuccess(''), 5000)
@@ -412,16 +412,16 @@ export default function SubjectDetail() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h1 style={{ margin: 0, fontSize: '1.75rem' }}>{subject.code} - {subject.name}</h1>
-            <p className="notice" style={{ margin: '0.5rem 0 0 0' }}>👨‍🏫 Profesor: {subject.teacher?.email}</p>
+            <p className="notice" style={{ margin: '0.5rem 0 0 0' }}>Profesor: {subject.teacher?.email}</p>
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <div className="stat-card" style={{ minWidth: '120px' }}>
               <div className="stat-value">{enrollments.length}</div>
-              <div className="stat-label">👥 Estudiantes</div>
+              <div className="stat-label">Estudiantes</div>
             </div>
             <div className="stat-card" style={{ minWidth: '120px' }}>
               <div className="stat-value">{exercises.length}</div>
-              <div className="stat-label">📝 Ejercicios</div>
+              <div className="stat-label">Ejercicios</div>
             </div>
           </div>
         </div>
@@ -443,7 +443,7 @@ export default function SubjectDetail() {
       {user?.role === 'STUDENT' ? (
         // Vista simplificada para estudiantes - sin tabs
         <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--primary)', color: 'white' }}>
-          <h2 style={{ margin: 0 }}>📊 Mis Resultados en {subject.name}</h2>
+          <h2 style={{ margin: 0 }}>Mis Resultados en {subject.name}</h2>
         </div>
       ) : (
         // Vista completa para profesores/admin con tabs
@@ -464,7 +464,7 @@ export default function SubjectDetail() {
                 borderBottom: activeTab === 'students' ? '3px solid var(--primary)' : '3px solid transparent'
               }}
             >
-              👥 Estudiantes ({enrollments.length})
+              Estudiantes ({enrollments.length})
             </button>
             <button
               onClick={() => setActiveTab('exercises')}
@@ -481,7 +481,7 @@ export default function SubjectDetail() {
                 borderBottom: activeTab === 'exercises' ? '3px solid var(--primary)' : '3px solid transparent'
               }}
             >
-              📝 Ejercicios ({exercises.length})
+              Ejercicios ({exercises.length})
             </button>
             <button
               onClick={() => setActiveTab('results')}
@@ -498,7 +498,7 @@ export default function SubjectDetail() {
                 borderBottom: activeTab === 'results' ? '3px solid var(--primary)' : '3px solid transparent'
               }}
             >
-              📊 Resultados
+              Resultados
             </button>
           </div>
         </div>
@@ -507,10 +507,10 @@ export default function SubjectDetail() {
       {/* Tab Content */}
       {activeTab === 'students' && (
         <div className="card">
-          <h2>👥 Gestión de Estudiantes</h2>
+          <h2>Gestión de Estudiantes</h2>
           
           <div style={{ marginBottom: '2rem' }}>
-            <h3>➕ Inscribir Estudiante Individual</h3>
+            <h3>Inscribir Estudiante Individual</h3>
             <form onSubmit={addEnrollment} style={{ maxWidth: '500px' }}>
               <label>Correo electrónico del estudiante</label>
               <div style={{ position: 'relative' }}>
@@ -544,7 +544,7 @@ export default function SubjectDetail() {
                     fontSize: '1.2rem',
                     color: 'var(--success)'
                   }} title="Usuario encontrado">
-                    ✅
+                    ✓
                   </div>
                 )}
                 {userExistsStatus === 'not-exists' && (
@@ -556,7 +556,7 @@ export default function SubjectDetail() {
                     fontSize: '1.2rem',
                     color: 'var(--warning)'
                   }} title="Usuario no encontrado">
-                    ⚠️
+                    
                   </div>
                 )}
               </div>
@@ -572,14 +572,14 @@ export default function SubjectDetail() {
                   fontSize: '0.9rem'
                 }}>
                   <div style={{ fontWeight: 'bold', color: 'var(--success)', marginBottom: '0.25rem' }}>
-                    ✅ Usuario encontrado en la plataforma
+                    Usuario encontrado en la plataforma
                   </div>
                   <div style={{ color: 'var(--text-secondary)' }}>
-                    👤 {userExistsInfo.first_name} {userExistsInfo.last_name}
+                    {userExistsInfo.first_name} {userExistsInfo.last_name}
                   </div>
                   {userExistsInfo.role && (
                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                      🎓 Rol: {userExistsInfo.role === 'STUDENT' ? 'Estudiante' : userExistsInfo.role === 'TEACHER' ? 'Profesor' : 'Admin'}
+                      Rol: {userExistsInfo.role === 'STUDENT' ? 'Estudiante' : userExistsInfo.role === 'TEACHER' ? 'Profesor' : 'Admin'}
                     </div>
                   )}
                 </div>
@@ -596,7 +596,7 @@ export default function SubjectDetail() {
                   fontSize: '0.9rem'
                 }}>
                   <div style={{ fontWeight: 'bold', color: 'var(--warning)', marginBottom: '0.25rem' }}>
-                    ⚠️ Usuario no encontrado
+                     Usuario no encontrado
                   </div>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                     Se creará automáticamente una cuenta nueva con este correo. El estudiante deberá verificar su email para activarla.
@@ -605,7 +605,7 @@ export default function SubjectDetail() {
               )}
               
               <button className="btn" type="submit" style={{ marginTop: '0.75rem', width: '100%' }}>
-                {userExistsStatus === 'exists' ? '✅ Inscribir Estudiante Existente' : '➕ Inscribir Estudiante'}
+                {userExistsStatus === 'exists' ? 'Inscribir Estudiante Existente' : 'Inscribir Estudiante'}
               </button>
             </form>
           </div>
@@ -621,7 +621,7 @@ export default function SubjectDetail() {
 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>📋 Lista de Estudiantes Inscritos ({enrollments.length})</h3>
+              <h3 style={{ margin: 0 }}>Lista de Estudiantes Inscritos ({enrollments.length})</h3>
             </div>
             
             {enrollments.length > 0 && (
@@ -658,8 +658,8 @@ export default function SubjectDetail() {
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>📧 Correo</th>
-                      <th>👤 Nombre Completo</th>
+                      <th>Correo</th>
+                      <th>Nombre Completo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -680,16 +680,16 @@ export default function SubjectDetail() {
 
       {activeTab === 'exercises' && (
         <div className="card">
-          <h2>📝 Gestión de Ejercicios</h2>
+          <h2>Gestión de Ejercicios</h2>
           
           <div style={{ marginBottom: '2rem' }}>
-            <h3>➕ Crear Nuevo Ejercicio</h3>
+            <h3>Crear Nuevo Ejercicio</h3>
             {!showExerciseForm ? (
               <button 
                 className="btn" 
                 onClick={() => setShowExerciseForm(true)}
               >
-                ➕ Crear Ejercicio
+                Crear Ejercicio
               </button>
             ) : (
               <form onSubmit={createExercise} style={{ maxWidth: '700px', padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
@@ -744,7 +744,7 @@ export default function SubjectDetail() {
 
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button className="btn" type="submit" style={{ flex: 1 }}>
-                    ✅ Crear Ejercicio
+                    Crear Ejercicio
                   </button>
                   <button 
                     className="btn secondary" 
@@ -758,7 +758,7 @@ export default function SubjectDetail() {
                     }}
                     style={{ flex: 1 }}
                   >
-                    ❌ Cancelar
+                    Cancelar
                   </button>
                 </div>
               </form>
@@ -767,7 +767,7 @@ export default function SubjectDetail() {
 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>📋 Lista de Ejercicios ({exercises.length})</h3>
+              <h3 style={{ margin: 0 }}>Lista de Ejercicios ({exercises.length})</h3>
             </div>
 
             {exercises.length > 0 && (
@@ -796,7 +796,6 @@ export default function SubjectDetail() {
 
             {exercises.length === 0 ? (
               <div className="notice" style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                <p style={{ fontSize: '3rem', margin: '0' }}>📝</p>
                 <p style={{ fontSize: '1.1rem', margin: '1rem 0 0.5rem 0' }}>No hay ejercicios creados</p>
                 <p style={{ margin: '0', color: 'var(--text-secondary)' }}>Crea el primer ejercicio para empezar a cargar resultados</p>
               </div>
@@ -808,10 +807,10 @@ export default function SubjectDetail() {
                   <thead>
                     <tr>
                       <th style={{ width: '60px' }}>#</th>
-                      <th>📚 Nombre del Ejercicio</th>
-                      <th>📝 Descripción</th>
-                      <th style={{ width: '180px' }}>📅 Fecha Límite</th>
-                      <th style={{ width: '150px' }}>⚡ Acciones</th>
+                      <th>Nombre del Ejercicio</th>
+                      <th>Descripción</th>
+                      <th style={{ width: '180px' }}>Fecha Límite</th>
+                      <th style={{ width: '150px' }}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -825,12 +824,12 @@ export default function SubjectDetail() {
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
                         
                         let color = 'var(--success)'
-                        let icon = '✅'
+                        let icon = '✓'  // checkmark
                         let text = `${diffDays} días`
                         
                         if (diffDays < 0) {
                           color = 'var(--danger)'
-                          icon = '⚠️'
+                          icon = ''
                           text = `Vencido hace ${Math.abs(diffDays)} días`
                         } else if (diffDays === 0) {
                           color = 'var(--danger)'
@@ -838,7 +837,7 @@ export default function SubjectDetail() {
                           text = 'Vence HOY'
                         } else if (diffDays <= 3) {
                           color = 'var(--warning)'
-                          icon = '⏰'
+                          icon = '✗'  // X mark
                           text = `${diffDays} día${diffDays > 1 ? 's' : ''}`
                         }
                         
@@ -885,14 +884,14 @@ export default function SubjectDetail() {
                                 style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
                                 onClick={() => openEditExerciseModal(ex)}
                               >
-                                ✏️ Editar
+                                Editar
                               </button>
                               <button 
                                 className="btn danger"
                                 style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
                                 onClick={() => deleteExercise(ex.id, ex.name)}
                               >
-                                🗑️ Eliminar
+                                Eliminar
                               </button>
                             </div>
                           </td>
@@ -909,7 +908,7 @@ export default function SubjectDetail() {
 
       {(activeTab === 'results' || user?.role === 'STUDENT') && (
         <div className="card">
-          <h2>📊 {user?.role === 'STUDENT' ? 'Mis Resultados' : 'Resultados y Dashboard'}</h2>
+          <h2>{user?.role === 'STUDENT' ? 'Mis Resultados' : 'Resultados y Dashboard'}</h2>
           
           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
             <>
@@ -928,9 +927,9 @@ export default function SubjectDetail() {
               {/* Asignar Resultado Individual */}
               <div style={{ marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-                  <h3 style={{ margin: 0 }}>➕ Asignar Resultado Individual</h3>
+                  <h3 style={{ margin: 0 }}>Asignar Resultado Individual</h3>
                   <button className="btn" onClick={openCreateResultForm}>
-                    📝 Nuevo Resultado
+                    Nuevo Resultado
                   </button>
                 </div>
                 <p className="notice" style={{ margin: 0 }}>
@@ -951,7 +950,7 @@ export default function SubjectDetail() {
                       onClick={exportCSV}
                       disabled={exporting}
                     >
-                      {exporting ? '⏳ Exportando...' : '📥 Exportar CSV'}
+                      {exporting ? 'Exportando...' : 'Exportar CSV'}
                     </button>
                   )}
                 </div>
@@ -961,23 +960,23 @@ export default function SubjectDetail() {
                     <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: '1.5rem' }}>
                       <div className="stat-card">
                         <div className="stat-value">{dash.total_exercises}</div>
-                        <div className="stat-label">📝 Ejercicios</div>
+                        <div className="stat-label">Ejercicios</div>
                       </div>
                       <div className="stat-card">
                         <div className="stat-value">{dash.aggregates?.avg_grade?.toFixed(2) || '0.0'}</div>
-                        <div className="stat-label">📊 Promedio</div>
+                        <div className="stat-label">Promedio</div>
                       </div>
                       <div className="stat-card" style={{ background: 'var(--success)' }}>
                         <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_green?.toFixed(0) || '0'}%</div>
-                        <div className="stat-label" style={{ color: 'white' }}>🟢 Verde</div>
+                        <div className="stat-label" style={{ color: 'white' }}>Verde</div>
                       </div>
                       <div className="stat-card" style={{ background: 'var(--warning)' }}>
                         <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_yellow?.toFixed(0) || '0'}%</div>
-                        <div className="stat-label" style={{ color: 'white' }}>🟡 Amarillo</div>
+                        <div className="stat-label" style={{ color: 'white' }}>Amarillo</div>
                       </div>
                       <div className="stat-card" style={{ background: 'var(--danger)' }}>
                         <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_red?.toFixed(0) || '0'}%</div>
-                        <div className="stat-label" style={{ color: 'white' }}>🔴 Rojo</div>
+                        <div className="stat-label" style={{ color: 'white' }}>Rojo</div>
                       </div>
                     </div>
 
@@ -985,13 +984,13 @@ export default function SubjectDetail() {
                       <table className="table mobile-card-view">
                         <thead>
                           <tr>
-                            <th>👤 Estudiante</th>
-                            <th>📝 Total</th>
-                            <th>🟢 Verde</th>
-                            <th>🟡 Amarillo</th>
-                            <th>🔴 Rojo</th>
-                            <th>📊 Nota</th>
-                            <th>🚦 Estado</th>
+                            <th>Estudiante</th>
+                            <th>Total</th>
+                            <th>Verde</th>
+                            <th>Amarillo</th>
+                            <th>Rojo</th>
+                            <th>Nota</th>
+                            <th>Estado</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1012,7 +1011,6 @@ export default function SubjectDetail() {
                   </>
                 ) : (
                   <div className="notice" style={{ padding: '3rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                    <p style={{ fontSize: '3rem', margin: '0' }}>📊</p>
                     <p style={{ fontSize: '1.1rem', margin: '1rem 0 0.5rem 0' }}>No hay resultados cargados</p>
                     <p style={{ margin: '0', color: 'var(--text-secondary)' }}>
                       Asegúrate de tener estudiantes inscritos y ejercicios creados, luego carga los resultados vía CSV
@@ -1027,8 +1025,8 @@ export default function SubjectDetail() {
               <div style={{ marginTop: user?.role === 'STUDENT' ? '0' : '3rem' }}>
                 <h3>
                   {user?.role === 'STUDENT' 
-                    ? `📝 Mis Ejercicios y Resultados - ${filteredResults.length} ${filteredResults.length === 1 ? 'ejercicio' : 'ejercicios'}`
-                    : `✏️ Resultados Individuales (Editable) - ${detailedResults.length} resultados`
+                    ? `Mis Ejercicios y Resultados - ${filteredResults.length} ${filteredResults.length === 1 ? 'ejercicio' : 'ejercicios'}`
+                    : `Resultados Individuales (Editable) - ${detailedResults.length} resultados`
                   }
                 </h3>
                 {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
@@ -1064,10 +1062,10 @@ export default function SubjectDetail() {
                       cursor: 'pointer'
                     }}
                   >
-                    <option value="ALL">🚦 Todos los estados</option>
-                    <option value="GREEN">🟢 Aprobado</option>
-                    <option value="YELLOW">🟡 Suficiente</option>
-                    <option value="RED">🔴 Reprobado</option>
+                    <option value="ALL">Todos los estados</option>
+                    <option value="GREEN">Aprobado</option>
+                    <option value="YELLOW">Suficiente</option>
+                    <option value="RED">Reprobado</option>
                   </select>
                 </div>
 
@@ -1086,12 +1084,12 @@ export default function SubjectDetail() {
                     <table className="table mobile-card-view" style={{ tableLayout: 'fixed', width: '100%', minWidth: user?.role === 'STUDENT' ? '100%' : '100%' }}>
                       <thead style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1 }}>
                         <tr>
-                          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>👤 Estudiante</th>}
-                          <th>📚 Ejercicio</th>
-                          <th style={{ width: '120px' }}>🚦 Estado</th>
-                          <th style={{ width: '250px', maxWidth: '250px' }}>💬 Comentarios</th>
-                          <th style={{ width: '150px' }}>📅 Actualizado</th>
-                          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th style={{ width: '100px' }}>⚡ Acción</th>}
+                          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>Estudiante</th>}
+                          <th>Ejercicio</th>
+                          <th style={{ width: '120px' }}>Estado</th>
+                          <th style={{ width: '250px', maxWidth: '250px' }}>Comentarios</th>
+                          <th style={{ width: '150px' }}>Actualizado</th>
+                          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th style={{ width: '100px' }}>Acción</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -1141,7 +1139,7 @@ export default function SubjectDetail() {
                                   style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
                                   onClick={() => openEditModal(result)}
                                 >
-                                  ✏️ Editar
+                                  Editar
                                 </button>
                               </td>
                             )}
@@ -1185,13 +1183,13 @@ export default function SubjectDetail() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>✏️ Editar Ejercicio</h2>
+            <h2>Editar Ejercicio</h2>
             
             <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-              <p style={{ margin: '0.5rem 0' }}><strong>📚 Ejercicio Original:</strong> {editingExercise.name}</p>
+              <p style={{ margin: '0.5rem 0' }}><strong>Ejercicio Original:</strong> {editingExercise.name}</p>
               {editingExercise.deadline && (
                 <p style={{ margin: '0.5rem 0' }}>
-                  <strong>📅 Fecha Límite Actual:</strong>{' '}
+                  <strong>Fecha Límite Actual:</strong>{' '}
                   {new Date(editingExercise.deadline).toLocaleDateString('es-CO', { 
                     year: 'numeric', 
                     month: 'long', 
@@ -1205,7 +1203,7 @@ export default function SubjectDetail() {
 
             <form onSubmit={updateExercise}>
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>📝 Nombre del Ejercicio *</strong></label>
+                <label><strong>Nombre del Ejercicio *</strong></label>
                 <input
                   type="text"
                   value={editExerciseName}
@@ -1223,7 +1221,7 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>📅 Fecha Límite (Opcional)</strong></label>
+                <label><strong>Fecha Límite (Opcional)</strong></label>
                 <input
                   type="datetime-local"
                   value={editExerciseDeadline}
@@ -1242,7 +1240,7 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>📝 Descripción (Opcional)</strong></label>
+                <label><strong>Descripción (Opcional)</strong></label>
                 <textarea
                   value={editExerciseDescription}
                   onChange={(e) => setEditExerciseDescription(e.target.value)}
@@ -1272,7 +1270,7 @@ export default function SubjectDetail() {
                   className="btn"
                   style={{ flex: 1 }}
                 >
-                  ✅ Guardar Cambios
+                  Guardar Cambios
                 </button>
                 <button 
                   type="button"
@@ -1280,7 +1278,7 @@ export default function SubjectDetail() {
                   onClick={closeEditExerciseModal}
                   style={{ flex: 1 }}
                 >
-                  ❌ Cancelar
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -1316,11 +1314,11 @@ export default function SubjectDetail() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>✏️ Editar Resultado</h2>
+            <h2>Editar Resultado</h2>
             
             <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-              <p style={{ margin: '0.5rem 0' }}><strong>👤 Estudiante:</strong> {editingResult.studentEmail}</p>
-              <p style={{ margin: '0.5rem 0' }}><strong>📚 Ejercicio:</strong> {editingResult.exerciseName}</p>
+              <p style={{ margin: '0.5rem 0' }}><strong>Estudiante:</strong> {editingResult.studentEmail}</p>
+              <p style={{ margin: '0.5rem 0' }}><strong>Ejercicio:</strong> {editingResult.exerciseName}</p>
               <p style={{ margin: '0.5rem 0' }}>
                 <strong>Estado Actual:</strong>{' '}
                 <StatusBadge 
@@ -1330,7 +1328,7 @@ export default function SubjectDetail() {
               </p>
               {editingResult.currentComment && (
                 <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--bg)', borderRadius: '6px', borderLeft: '3px solid var(--primary)' }}>
-                  <strong>💬 Comentario Anterior:</strong>
+                  <strong>Comentario Anterior:</strong>
                   <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     {editingResult.currentComment}
                   </p>
@@ -1352,14 +1350,14 @@ export default function SubjectDetail() {
                     borderRadius: '8px'
                   }}
                 >
-                  <option value="GREEN">🟢 Aprobado - Completado exitosamente</option>
-                  <option value="YELLOW">🟡 Suficiente - Con observaciones</option>
-                  <option value="RED">🔴 Reprobado - No completado</option>
+                  <option value="GREEN">Aprobado - Completado exitosamente</option>
+                  <option value="YELLOW">Suficiente - Con observaciones</option>
+                  <option value="RED">Reprobado - No completado</option>
                 </select>
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>💬 Comentarios / Retroalimentación (Opcional)</strong></label>
+                <label><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
@@ -1392,7 +1390,7 @@ export default function SubjectDetail() {
                   className="btn"
                   style={{ flex: 1 }}
                 >
-                  ✅ Guardar Cambios
+                  Guardar Cambios
                 </button>
                 <button 
                   type="button"
@@ -1400,7 +1398,7 @@ export default function SubjectDetail() {
                   onClick={closeEditModal}
                   style={{ flex: 1 }}
                 >
-                  ❌ Cancelar
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -1436,7 +1434,7 @@ export default function SubjectDetail() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>📝 Asignar Resultado Individual</h2>
+            <h2>Asignar Resultado Individual</h2>
             
             <p className="notice" style={{ marginBottom: '1.5rem' }}>
               Selecciona un estudiante inscrito y un ejercicio existente para asignarle un resultado
@@ -1444,7 +1442,7 @@ export default function SubjectDetail() {
 
             <form onSubmit={createResult}>
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>👤 Estudiante</strong></label>
+                <label><strong>Estudiante</strong></label>
                 <select
                   value={selectedEnrollmentId}
                   onChange={(e) => setSelectedEnrollmentId(e.target.value)}
@@ -1466,7 +1464,7 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>📚 Ejercicio</strong></label>
+                <label><strong>Ejercicio</strong></label>
                 <select
                   value={selectedExerciseId}
                   onChange={(e) => setSelectedExerciseId(e.target.value)}
@@ -1488,7 +1486,7 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>🚦 Estado del Resultado</strong></label>
+                <label><strong>Estado del Resultado</strong></label>
                 <select
                   value={createStatus}
                   onChange={(e) => setCreateStatus(e.target.value)}
@@ -1500,14 +1498,14 @@ export default function SubjectDetail() {
                     borderRadius: 'var(--radius-md)'
                   }}
                 >
-                  <option value="GREEN">🟢 Aprobado - Completado exitosamente</option>
-                  <option value="YELLOW">🟡 Suficiente - Con observaciones</option>
-                  <option value="RED">🔴 Reprobado - No completado</option>
+                  <option value="GREEN">Aprobado - Completado exitosamente</option>
+                  <option value="YELLOW">Suficiente - Con observaciones</option>
+                  <option value="RED">Reprobado - No completado</option>
                 </select>
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>💬 Comentarios / Retroalimentación (Opcional)</strong></label>
+                <label><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
                 <textarea
                   value={createComment}
                   onChange={(e) => setCreateComment(e.target.value)}
@@ -1540,7 +1538,7 @@ export default function SubjectDetail() {
                   className="btn"
                   style={{ flex: 1 }}
                 >
-                  ✅ Asignar Resultado
+                  Asignar Resultado
                 </button>
                 <button 
                   type="button"
@@ -1548,7 +1546,7 @@ export default function SubjectDetail() {
                   onClick={closeCreateResultForm}
                   style={{ flex: 1 }}
                 >
-                  ❌ Cancelar
+                  Cancelar
                 </button>
               </div>
             </form>

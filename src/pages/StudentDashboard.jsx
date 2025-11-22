@@ -55,7 +55,7 @@ export default function StudentDashboard() {
       {/* Header */}
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">📊 Mi Dashboard</h1>
+          <h1 className="dashboard-title">Mi Dashboard</h1>
           <p className="dashboard-subtitle">Resumen de tu progreso académico</p>
         </div>
       </div>
@@ -66,60 +66,59 @@ export default function StudentDashboard() {
           <div className="stat-value" style={{ color: 'var(--text-primary)' }}>
             {summary.total_results}
           </div>
-          <div className="stat-label stat-label-desktop">📊 Total Resultados</div>
-          <div className="stat-label stat-label-mobile">📊 Total</div>
+          <div className="stat-label stat-label-desktop">Total Resultados</div>
+          <div className="stat-label stat-label-mobile">Total</div>
         </div>
 
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--success)' }}>
             {summary.green_count}
           </div>
-          <div className="stat-label stat-label-desktop">🟢 Verdes</div>
-          <div className="stat-label stat-label-mobile">🟢</div>
+          <div className="stat-label stat-label-desktop">Verdes</div>
+          <div className="stat-label stat-label-mobile">Verdes</div>
         </div>
 
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--warning)' }}>
             {summary.yellow_count}
           </div>
-          <div className="stat-label stat-label-desktop">🟡 Amarillos</div>
-          <div className="stat-label stat-label-mobile">🟡</div>
+          <div className="stat-label stat-label-desktop">Amarillos</div>
+          <div className="stat-label stat-label-mobile">Amarillos</div>
         </div>
 
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--danger)' }}>
             {summary.red_count}
           </div>
-          <div className="stat-label stat-label-desktop">🔴 Rojos</div>
-          <div className="stat-label stat-label-mobile">🔴</div>
+          <div className="stat-label stat-label-desktop">Rojos</div>
+          <div className="stat-label stat-label-mobile">Rojos</div>
         </div>
 
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.1), rgba(25, 118, 210, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--primary)' }}>
             {summary.success_rate}%
           </div>
-          <div className="stat-label stat-label-desktop">✅ Tasa de Éxito</div>
-          <div className="stat-label stat-label-mobile">✅</div>
+          <div className="stat-label stat-label-desktop">Tasa de Éxito</div>
+          <div className="stat-label stat-label-mobile">Éxito</div>
         </div>
 
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.1), rgba(156, 39, 176, 0.05))' }}>
           <div className="stat-value" style={{ color: 'var(--text-accent)' }}>
             {summary.total_pending}
           </div>
-          <div className="stat-label stat-label-desktop">⏳ Pendientes</div>
-          <div className="stat-label stat-label-mobile">⏳</div>
+          <div className="stat-label stat-label-desktop">Pendientes</div>
+          <div className="stat-label stat-label-mobile">Pendientes</div>
         </div>
       </div>
 
       {/* Progreso por Materia */}
       <div style={{ marginBottom: 'var(--space-xl)' }}>
         <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: '1.5rem', fontWeight: 'bold' }}>
-          📚 Progreso por Materia
+          Progreso por Materia
         </h2>
 
         {subjects_progress.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
             <p>No estás inscrito en ninguna materia</p>
           </div>
         ) : (
@@ -151,7 +150,7 @@ export default function StudentDashboard() {
                       {subject.subject_name}
                     </h3>
                     <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '1rem' }}>
-                      📋 {subject.subject_code}
+                      {subject.subject_code}
                     </p>
                   </div>
                   <div style={{
@@ -187,7 +186,6 @@ export default function StudentDashboard() {
                     background: 'var(--bg-primary)',
                     borderRadius: 'var(--radius-md)'
                   }}>
-                    <div style={{ fontSize: '2rem' }}>📝</div>
                     <div>
                       <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
                         {subject.total_exercises} ejercicios
@@ -243,11 +241,10 @@ export default function StudentDashboard() {
       <div className="exercises-grid-responsive">
         {/* Ejercicios Pendientes */}
         <div className="card">
-          <h2 style={{ marginBottom: 'var(--space-lg)' }}>⏳ Ejercicios Pendientes</h2>
+          <h2 style={{ marginBottom: 'var(--space-lg)' }}>Ejercicios Pendientes</h2>
 
           {pending_exercises.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: '3rem', margin: 0 }}>🎉</p>
               <p>¡No tienes ejercicios pendientes!</p>
             </div>
           ) : (
@@ -276,10 +273,10 @@ export default function StudentDashboard() {
                   }}
                 >
                   <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                    📝 {exercise.name}
+                    {exercise.name}
                   </div>
                   <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                    📚 {exercise.subject_name} <span style={{ color: 'var(--text-muted)' }}>({exercise.subject_code})</span>
+                    {exercise.subject_name} <span style={{ color: 'var(--text-muted)' }}>({exercise.subject_code})</span>
                   </div>
                   {exercise.deadline ? (
                     <div style={{
@@ -290,7 +287,7 @@ export default function StudentDashboard() {
                       borderRadius: 'var(--radius-sm)',
                       display: 'inline-block'
                     }}>
-                      ⏰ Entrega: {exercise.deadline}
+                      Entrega: {exercise.deadline}
                     </div>
                   ) : (
                     <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
@@ -305,11 +302,10 @@ export default function StudentDashboard() {
 
         {/* Últimos Resultados */}
         <div className="card">
-          <h2 style={{ marginBottom: 'var(--space-lg)' }}>🕐 Últimos Resultados</h2>
+          <h2 style={{ marginBottom: 'var(--space-lg)' }}>Últimos Resultados</h2>
 
           {recent_results.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
               <p>No tienes resultados aún</p>
             </div>
           ) : (
@@ -335,13 +331,13 @@ export default function StudentDashboard() {
                       fontSize: 'var(--font-size-xs)',
                       fontWeight: 600
                     }}>
-                      {result.status === 'GREEN' && '🟢 Aprobado'}
-                      {result.status === 'YELLOW' && '🟡 Suficiente'}
-                      {result.status === 'RED' && '🔴 Reprobado'}
+                      {result.status === 'GREEN' && 'Aprobado'}
+                      {result.status === 'YELLOW' && 'Suficiente'}
+                      {result.status === 'RED' && 'Reprobado'}
                     </span>
                   </div>
                   <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                    📚 {result.subject_name}
+                    {result.subject_name}
                   </div>
                   {result.comment && (
                     <div style={{
@@ -354,7 +350,7 @@ export default function StudentDashboard() {
                       borderRadius: 'var(--radius-sm)',
                       borderLeft: '3px solid var(--primary)'
                     }}>
-                      💬 {result.comment}
+                      {result.comment}
                     </div>
                   )}
                   <div style={{
@@ -364,7 +360,7 @@ export default function StudentDashboard() {
                     paddingTop: '0.5rem',
                     borderTop: '1px solid var(--border-primary)'
                   }}>
-                    📅 {result.created_at}
+                    {result.created_at}
                   </div>
                 </div>
               ))}

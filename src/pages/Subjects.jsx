@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 
@@ -26,11 +26,11 @@ export default function Subjects() {
       await api.post('/api/courses/subjects/', { name, code })
       setName('')
       setCode('')
-      setSuccess('✅ Materia creada exitosamente')
+      setSuccess('Materia creada exitosamente')
       load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      setError('❌ No se pudo crear la materia. Verifica que el código sea único.')
+      setError('No se pudo crear la materia. Verifica que el código sea único.')
     }
   }
 
@@ -46,12 +46,12 @@ export default function Subjects() {
     setSuccess('')
     try {
       await api.delete(`/api/courses/subjects/${subject.id}/`)
-      setSuccess(`✅ Materia "${subject.name}" eliminada exitosamente`)
+      setSuccess(`Materia "${subject.name}" eliminada exitosamente`)
       load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error deleting subject:', err)
-      setError(`❌ No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
+      setError(`No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
     }
   }
 
@@ -71,7 +71,7 @@ export default function Subjects() {
 
       <div className="grid cols-2 grid-stack-mobile">
         <div className="card">
-          <h2>📝 Crear materia</h2>
+          <h2>Crear materia</h2>
           <form onSubmit={createSubject}>
             <div>
               <label>Código</label>
@@ -81,14 +81,14 @@ export default function Subjects() {
               <label>Nombre</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Programación Web" />
             </div>
-            <button className="btn" type="submit">✅ Crear Materia</button>
+            <button className="btn" type="submit">Crear Materia</button>
           </form>
         </div>
         <div className="card">
-          <h2>📚 Mis materias</h2>
+          <h2>Mis materias</h2>
           {items.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
+              <p style={{ fontSize: '3rem', margin: 0 }}></p>
               <p>No tienes materias creadas</p>
             </div>
           ) : (
@@ -113,14 +113,14 @@ export default function Subjects() {
                             to={`/subjects/${s.id}`}
                             style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
                           >
-                            👁️ Ver
+                            Ver
                           </Link>
                           <button
                             onClick={() => deleteSubject(s)}
                             className="btn danger"
                             style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
                           >
-                            🗑️ Eliminar
+                            Eliminar
                           </button>
                         </div>
                       </td>

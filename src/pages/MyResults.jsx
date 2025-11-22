@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+﻿import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/axios'
 import StatusBadge from '../components/StatusBadge'
 
@@ -150,7 +150,6 @@ export default function MyResults() {
     return (
       <div className="card">
         <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
-          <p style={{ fontSize: '4rem', margin: 0 }}>📚</p>
           <h2 style={{ margin: '1rem 0', color: 'var(--text-primary)' }}>No estás inscrito en ninguna materia</h2>
           <p>Contacta con tu profesor para que te inscriba en las materias correspondientes</p>
         </div>
@@ -165,7 +164,7 @@ export default function MyResults() {
         <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: 'var(--font-size-3xl)', color: 'var(--text-primary)' }}>📊 Mis Resultados</h1>
+              <h1 style={{ margin: 0, fontSize: 'var(--font-size-3xl)', color: 'var(--text-primary)' }}>Mis Resultados</h1>
               <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>Resumen completo de tu rendimiento académico</p>
             </div>
             <button 
@@ -173,7 +172,7 @@ export default function MyResults() {
               onClick={exportToCSV}
               style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}
             >
-              📥 Exportar CSV
+              Exportar CSV
             </button>
           </div>
 
@@ -181,27 +180,27 @@ export default function MyResults() {
           <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--primary)' }}>{globalStats.totalMaterias}</div>
-              <div className="stat-label">📚 Materias</div>
+              <div className="stat-label">Materias</div>
             </div>
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--text-primary)' }}>{globalStats.avgGrade}</div>
-              <div className="stat-label">📈 Nota Promedio</div>
+              <div className="stat-label">Nota Promedio</div>
             </div>
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--success)' }}>{globalStats.totalGreen}</div>
-              <div className="stat-label">🟢 Verdes</div>
+              <div className="stat-label">Verdes</div>
             </div>
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--warning)' }}>{globalStats.totalYellow}</div>
-              <div className="stat-label">🟡 Amarillos</div>
+              <div className="stat-label">Amarillos</div>
             </div>
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--danger)' }}>{globalStats.totalRed}</div>
-              <div className="stat-label">🔴 Rojos</div>
+              <div className="stat-label">Rojos</div>
             </div>
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--accent)' }}>{globalStats.successRate}%</div>
-              <div className="stat-label">✅ Tasa de Éxito</div>
+              <div className="stat-label">Tasa de Éxito</div>
             </div>
           </div>
         </div>
@@ -216,7 +215,7 @@ export default function MyResults() {
       }}>
       <div className="card">
         <div style={{ marginBottom: 'var(--space-lg)' }}>
-          <h2 style={{ marginBottom: 'var(--space-md)' }}>📚 Mis Materias</h2>
+          <h2 style={{ marginBottom: 'var(--space-md)' }}>Mis Materias</h2>
           
           {/* Filtros y búsqueda */}
           <div style={{ 
@@ -237,21 +236,21 @@ export default function MyResults() {
             </div>
 
             <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontSize: 'var(--font-size-sm)' }}>🚦 Filtrar por estado</label>
+              <label style={{ fontSize: 'var(--font-size-sm)' }}>Filtrar por estado</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 style={{ fontSize: 'var(--font-size-sm)' }}
               >
                 <option value="ALL">Todos</option>
-                <option value="GREEN">🟢 Aprobado</option>
-                <option value="YELLOW">🟡 Suficiente</option>
-                <option value="RED">🔴 Reprobado</option>
+                <option value="GREEN">Aprobado</option>
+                <option value="YELLOW">Suficiente</option>
+                <option value="RED">Reprobado</option>
               </select>
             </div>
 
             <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontSize: 'var(--font-size-sm)' }}>📊 Ordenar por</label>
+              <label style={{ fontSize: 'var(--font-size-sm)' }}>Ordenar por</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -303,7 +302,7 @@ export default function MyResults() {
                     onClick={(ev) => { ev.stopPropagation(); openDetails(e.enrollment_id); }}
                     style={{ padding: '0.4rem 0.8rem', fontSize: 'var(--font-size-sm)' }}
                   >
-                    👁️ Ver
+                    Ver
                   </button>
                 </td>
               </tr>
@@ -317,7 +316,7 @@ export default function MyResults() {
       {(selected && details) && (
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-          <h2 style={{ margin: 0 }}>📋 Detalle de Resultados</h2>
+          <h2 style={{ margin: 0 }}>Detalle de Resultados</h2>
           <button 
             className="btn secondary"
             onClick={() => { setSelected(null); setDetails(null); }}
@@ -338,11 +337,11 @@ export default function MyResults() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
                 <div>
-                  <p style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>📧 Estudiante</p>
+                  <p style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>Estudiante</p>
                   <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{details.student_email}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>📊 Nota Final</p>
+                  <p style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>Nota Final</p>
                   <p style={{ 
                     margin: 0, 
                     fontWeight: 700, 
@@ -369,25 +368,25 @@ export default function MyResults() {
                     <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--success)' }}>
                       {details.stats.green_count || 0}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>🟢 Verdes</div>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Verdes</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--warning)' }}>
                       {details.stats.yellow_count || 0}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>🟡 Amarillos</div>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Amarillos</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--danger)' }}>
                       {details.stats.red_count || 0}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>🔴 Rojos</div>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Rojos</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>
                       {details.stats.total_exercises || 0}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>📝 Total</div>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Total</div>
                   </div>
                 </div>
               )}
@@ -395,7 +394,7 @@ export default function MyResults() {
 
             {/* Tabla de ejercicios */}
             <h3 style={{ marginBottom: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-              📝 Ejercicios 
+              Ejercicios 
               <span style={{ 
                 fontSize: 'var(--font-size-sm)', 
                 padding: '0.25rem 0.5rem', 
@@ -409,7 +408,7 @@ export default function MyResults() {
             
             {details.results?.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
-                <p style={{ fontSize: '2rem', margin: 0 }}>📭</p>
+                <p style={{ fontSize: '2rem', margin: 0 }}></p>
                 <p>No hay resultados registrados para esta materia</p>
               </div>
             ) : (

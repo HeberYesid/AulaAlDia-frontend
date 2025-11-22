@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 
@@ -110,8 +110,12 @@ export default function NotificationBell() {
         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         aria-label={`Notificaciones (${unreadCount} no leídas)`}
+        title="Notificaciones"
       >
-        🔔
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
         {unreadCount > 0 && (
           <span
             style={{
@@ -169,7 +173,7 @@ export default function NotificationBell() {
               borderTopRightRadius: '12px'
             }}
           >
-            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🔔 Notificaciones</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Notificaciones</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
@@ -195,7 +199,7 @@ export default function NotificationBell() {
               </div>
             ) : notifications.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                <p style={{ fontSize: '2rem', margin: 0 }}>📭</p>
+                <p style={{ fontSize: '2rem', margin: 0 }}></p>
                 <p>No tienes notificaciones</p>
               </div>
             ) : (

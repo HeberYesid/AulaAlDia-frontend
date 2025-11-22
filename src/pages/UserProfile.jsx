@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import { showPasswordChangeToast } from '../utils/toast'
@@ -61,7 +61,7 @@ export default function UserProfile() {
         last_name: lastName
       })
       setUser(response.data)
-      setSuccess('✅ Perfil actualizado correctamente')
+      setSuccess('Perfil actualizado correctamente')
       setEditing(false)
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -76,12 +76,12 @@ export default function UserProfile() {
     setSuccess('')
 
     if (newPassword !== confirmPassword) {
-      setError('❌ Las contraseñas no coinciden')
+      setError('Las contraseñas no coinciden')
       return
     }
 
     if (newPassword.length < 8) {
-      setError('❌ La contraseña debe tener al menos 8 caracteres')
+      setError('La contraseña debe tener al menos 8 caracteres')
       return
     }
 
@@ -101,7 +101,7 @@ export default function UserProfile() {
       setConfirmPassword('')
       
       // Mensaje de éxito temporal
-      setSuccess('✅ Contraseña cambiada correctamente')
+      setSuccess('Contraseña cambiada correctamente')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error changing password:', err)
@@ -115,7 +115,7 @@ export default function UserProfile() {
     setSuccess('')
 
     if (sessionTimeout < 5 || sessionTimeout > 120) {
-      setError('❌ El timeout debe estar entre 5 y 120 minutos')
+      setError('El timeout debe estar entre 5 y 120 minutos')
       return
     }
 
@@ -125,7 +125,7 @@ export default function UserProfile() {
       })
       setUser(response.data)
       updateUser(response.data) // Actualizar en AuthContext
-      setSuccess('✅ Tiempo de sesión actualizado correctamente')
+      setSuccess('Tiempo de sesión actualizado correctamente')
       setEditingTimeout(false)
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -175,7 +175,7 @@ export default function UserProfile() {
           ← Volver
         </button>
         <h1 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 'var(--font-size-3xl)' }}>
-          👤 Mi Perfil
+          Mi Perfil
         </h1>
       </div>
 
@@ -203,14 +203,14 @@ export default function UserProfile() {
           flexWrap: 'wrap',
           gap: 'var(--space-md)'
         }}>
-          <h2 style={{ margin: 0 }}>📋 Información Personal</h2>
+          <h2 style={{ margin: 0 }}>Información Personal</h2>
           {!editing && (
             <button 
               onClick={() => setEditing(true)} 
               className="btn secondary"
               style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
             >
-              ✏️ Editar
+              Editar
             </button>
           )}
         </div>
@@ -254,13 +254,13 @@ export default function UserProfile() {
                   }}
                 />
                 <p className="notice" style={{ marginTop: '0.5rem' }}>
-                  ℹ️ El email no se puede modificar
+                  El email no se puede modificar
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
                 <button type="submit" className="btn" style={{ flex: 1 }}>
-                  ✅ Guardar Cambios
+                  Guardar Cambios
                 </button>
                 <button 
                   type="button" 
@@ -273,7 +273,7 @@ export default function UserProfile() {
                   className="btn secondary"
                   style={{ flex: 1 }}
                 >
-                  ❌ Cancelar
+                  Cancelar
                 </button>
               </div>
             </div>
@@ -357,7 +357,7 @@ export default function UserProfile() {
                   fontWeight: 600,
                   margin: 0
                 }}>
-                  {user.role === 'TEACHER' ? '👨‍🏫 Profesor' : '👨‍🎓 Estudiante'}
+                  {user.role === 'TEACHER' ? 'Profesor' : 'Estudiante'}
                 </p>
               </div>
             </div>
@@ -377,14 +377,14 @@ export default function UserProfile() {
           flexWrap: 'wrap',
           gap: 'var(--space-md)'
         }}>
-          <h2 style={{ margin: 0 }}>🔒 Cambiar Contraseña</h2>
+          <h2 style={{ margin: 0 }}>Cambiar Contraseña</h2>
           {!changingPassword && (
             <button 
               onClick={() => setChangingPassword(true)} 
               className="btn secondary"
               style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
             >
-              🔑 Cambiar
+              Cambiar
             </button>
           )}
         </div>
@@ -427,7 +427,7 @@ export default function UserProfile() {
 
               <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
                 <button type="submit" className="btn" style={{ flex: 1 }}>
-                  ✅ Cambiar Contraseña
+                  Cambiar Contraseña
                 </button>
                 <button 
                   type="button" 
@@ -441,7 +441,7 @@ export default function UserProfile() {
                   className="btn secondary"
                   style={{ flex: 1 }}
                 >
-                  ❌ Cancelar
+                  Cancelar
                 </button>
               </div>
             </div>
@@ -458,7 +458,7 @@ export default function UserProfile() {
               fontSize: '3rem', 
               margin: '0 0 var(--space-md) 0' 
             }}>
-              🔐
+              
             </p>
             <p style={{ 
               color: 'var(--text-secondary)', 
@@ -482,14 +482,14 @@ export default function UserProfile() {
           flexWrap: 'wrap',
           gap: 'var(--space-md)'
         }}>
-          <h2 style={{ margin: 0 }}>⏱️ Tiempo de Sesión</h2>
+          <h2 style={{ margin: 0 }}>Tiempo de Sesión</h2>
           {!editingTimeout && (
             <button 
               onClick={() => setEditingTimeout(true)} 
               className="btn secondary"
               style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
             >
-              ⚙️ Configurar
+              Configurar
             </button>
           )}
         </div>
@@ -509,7 +509,7 @@ export default function UserProfile() {
                   required
                 />
                 <p className="notice" style={{ marginTop: '0.5rem' }}>
-                  ℹ️ Tu sesión se cerrará automáticamente después de este tiempo sin actividad (mínimo 5, máximo 120 minutos)
+                  Tu sesión se cerrará automáticamente después de este tiempo sin actividad (mínimo 5, máximo 120 minutos)
                 </p>
               </div>
 
@@ -531,7 +531,7 @@ export default function UserProfile() {
 
               <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
                 <button type="submit" className="btn" style={{ flex: 1 }}>
-                  ✅ Guardar
+                  Guardar
                 </button>
                 <button 
                   type="button" 
@@ -543,7 +543,7 @@ export default function UserProfile() {
                   className="btn secondary"
                   style={{ flex: 1 }}
                 >
-                  ❌ Cancelar
+                  Cancelar
                 </button>
               </div>
             </div>
@@ -556,12 +556,6 @@ export default function UserProfile() {
             border: '1px solid var(--border-primary)',
             textAlign: 'center'
           }}>
-            <p style={{ 
-              fontSize: '3rem', 
-              margin: '0 0 var(--space-md) 0' 
-            }}>
-              ⏱️
-            </p>
             <p style={{ 
               color: 'var(--text-primary)', 
               margin: '0 0 var(--space-sm) 0',
@@ -583,7 +577,7 @@ export default function UserProfile() {
 
       {/* Account Info */}
       <div className="card">
-        <h2 style={{ marginBottom: 'var(--space-lg)' }}>📊 Información de la Cuenta</h2>
+        <h2 style={{ marginBottom: 'var(--space-lg)' }}>Información de la Cuenta</h2>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -598,14 +592,14 @@ export default function UserProfile() {
             color: user.is_verified ? 'var(--success)' : 'var(--warning)',
             fontWeight: 600
           }}>
-            {user.is_verified ? '✅ Verificado' : '⏳ Pendiente'}
+            {user.is_verified ? 'Verificado' : 'Pendiente'}
           </span>
         </div>
       </div>
 
       {/* Tour Guide */}
       <div className="card">
-        <h2 style={{ marginBottom: 'var(--space-lg)' }}>🎓 Tour de Bienvenida</h2>
+        <h2 style={{ marginBottom: 'var(--space-lg)' }}>Tour de Bienvenida</h2>
         <p style={{ 
           color: 'var(--text-secondary)', 
           marginBottom: 'var(--space-lg)',
@@ -621,7 +615,7 @@ export default function UserProfile() {
           className="btn secondary"
           style={{ width: '100%' }}
         >
-          🔄 Reiniciar Tour de Bienvenida
+          Reiniciar Tour de Bienvenida
         </button>
       </div>
     </div>
