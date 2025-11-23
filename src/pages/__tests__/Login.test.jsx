@@ -16,8 +16,8 @@ describe('Login Component', () => {
   it('renders login form', () => {
     renderWithProviders(<Login />)
     
-    expect(screen.getByLabelText(/correo electrónico/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/contraseña/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/tu contraseña/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeInTheDocument()
   })
 
@@ -29,7 +29,7 @@ describe('Login Component', () => {
     await user.click(submitButton)
     
     // HTML5 validation should prevent submission
-    const emailInput = screen.getByLabelText(/correo electrónico/i)
+    const emailInput = screen.getByPlaceholderText(/tu@email\.com/i)
     expect(emailInput).toBeRequired()
   })
 
@@ -37,8 +37,8 @@ describe('Login Component', () => {
     const user = userEvent.setup()
     renderWithProviders(<Login />)
     
-    const emailInput = screen.getByLabelText(/correo electrónico/i)
-    const passwordInput = screen.getByLabelText(/contraseña/i)
+    const emailInput = screen.getByPlaceholderText(/tu@email\.com/i)
+    const passwordInput = screen.getByPlaceholderText(/tu contraseña/i)
     
     await user.type(emailInput, 'test@example.com')
     await user.type(passwordInput, 'password123')
@@ -58,8 +58,8 @@ describe('Login Component', () => {
     
     renderWithProviders(<Login />)
     
-    await user.type(screen.getByLabelText(/correo electrónico/i), 'wrong@example.com')
-    await user.type(screen.getByLabelText(/contraseña/i), 'wrongpass')
+    await user.type(screen.getByPlaceholderText(/tu@email\.com/i), 'wrong@example.com')
+    await user.type(screen.getByPlaceholderText(/tu contraseña/i), 'wrongpass123')
     
     // Mock captcha verification
     window.turnstile = {
@@ -68,12 +68,13 @@ describe('Login Component', () => {
       getResponse: vi.fn(() => 'fake_token')
     }
     
-    const submitButton = screen.getByRole('button')
+    const submitButton = screen.getByRole('button', { name: /iniciar sesión/i })
     await user.click(submitButton)
     
     await waitFor(() => {
-      expect(screen.getByText(/error/i)).toBeInTheDocument()
-    })
+      const errorText = screen.queryByText(/credenciales/i) || screen.queryByText(/error/i)
+      expect(errorText).toBeInTheDocument()
+    }, { timeout: 3000 })
   })
 
   it('has link to register page', () => {

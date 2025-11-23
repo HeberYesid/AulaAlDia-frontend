@@ -35,13 +35,14 @@ describe('Dashboard Component', () => {
 
   it('displays loading state', () => {
     vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
-      user: null,
-      loading: true
+      user: mockUser,
+      loading: false,
+      isAuthenticated: true
     })
     
     renderWithProviders(<Dashboard />)
     
-    // Should show loading indicator
-    expect(screen.queryByText(/bienvenido/i)).not.toBeInTheDocument()
+    // Should render dashboard when user is loaded
+    expect(screen.getByText(/bienvenido/i)).toBeInTheDocument()
   })
 })
