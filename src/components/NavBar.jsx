@@ -27,23 +27,15 @@ export default function NavBar() {
   return (
     <header className="navbar">
       <div className="navbar-content">
-        <div className="brand">
-          <Link to="/" onClick={closeMenu}>
-          
-            <span className="brand-text">DevTrack</span>
-          </Link>
-        </div>
         
         {/* Hamburger button - solo visible en móvil */}
-        {user && (
-          <button 
-            className={`hamburger-btn ${menuOpen ? 'menu-open' : ''}`}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menú"
-          >
-            <span>☰</span>
-          </button>
-        )}
+        <button 
+          className={`hamburger-btn ${menuOpen ? 'menu-open' : ''}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Menú"
+        >
+          <span>☰</span>
+        </button>
 
         {/* Overlay para cerrar menú al hacer click fuera */}
         {menuOpen && (
@@ -84,7 +76,7 @@ export default function NavBar() {
                   className={isActive('/my') ? 'active' : ''}
                   onClick={closeMenu}
                 >
-                  Mis Resultados
+                  Resultados
                 </Link>
               )}
               <div className="nav-icons">
@@ -96,17 +88,16 @@ export default function NavBar() {
                 className={`user-link ${isActive('/profile') ? 'active' : ''}`}
                 onClick={closeMenu}
               >
-                <span className="user-email">👤 {user.email}</span>
-                <span className="role-badge">{user.role}</span>
+                <span className="user-email">Perfil</span>
               </Link>
               <button onClick={onLogout} className="btn danger logout-btn">
                 Salir</button>
             </>
           ) : (
             <>
-              <Link to="/home" onClick={closeMenu}>🏠 Inicio</Link>
-              <Link to="/faq" onClick={closeMenu}>❓ FAQ</Link>
-              <Link to="/contact" onClick={closeMenu}>📧 Contacto</Link>
+              <Link to="/home" onClick={closeMenu}>Inicio</Link>
+              <Link to="/faq" onClick={closeMenu}>FAQ</Link>
+              <Link to="/contact" onClick={closeMenu}>Contacto</Link>
               <ThemeToggle />
               <Link to="/login" onClick={closeMenu}>Iniciar sesión</Link>
               <Link to="/register" onClick={closeMenu}>Registrarse</Link>

@@ -443,7 +443,7 @@ export default function SubjectDetail() {
       {user?.role === 'STUDENT' ? (
         // Vista simplificada para estudiantes - sin tabs
         <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--primary)', color: 'white' }}>
-          <h2 style={{ margin: 0 }}>Mis Resultados en {subject.name}</h2>
+          <h2 style={{ margin: 0 }}>Resultados en {subject.name}</h2>
         </div>
       ) : (
         // Vista completa para profesores/admin con tabs
