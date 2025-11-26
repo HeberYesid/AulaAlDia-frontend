@@ -1,11 +1,11 @@
 ﻿import { useEffect, useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import StatusBadge from '../components/StatusBadge'
 
 export default function MyResults() {
+  const navigate = useNavigate()
   const [enrs, setEnrs] = useState([])
-  const [selected, setSelected] = useState(null)
-  const [details, setDetails] = useState(null)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
@@ -24,13 +24,6 @@ export default function MyResults() {
   useEffect(() => {
     load()
   }, [])
-
-  async function openDetails(enrollmentId) {
-    setSelected(enrollmentId)
-    setDetails(null)
-    const { data } = await api.get(`/api/courses/enrollments/${enrollmentId}/results/`)
-    setDetails(data)
-  }
 
   // Calcular estadísticas generales
   const globalStats = useMemo(() => {
@@ -161,13 +154,8 @@ export default function MyResults() {
     <div className="fade-in">
 
 
-      {/* Layout responsive: lista completa cuando no hay selección, split cuando hay detalles */}
-      <div className="grid-stack-mobile" style={{ 
-        display: 'grid',
-        gridTemplateColumns: selected && details ? '1fr 1.2fr' : '1fr',
-        gap: 'var(--space-lg)',
-        transition: 'grid-template-columns 0.3s ease'
-      }}>
+      {/* Layout responsive: lista completa */}
+      <div style={{ marginBottom: 'var(--space-lg)' }}>
       <div className="card">
         <div style={{ marginBottom: 'var(--space-lg)' }}>
           <h2 style={{ marginBottom: 'var(--space-md)' }}>Mis Materias</h2>
@@ -231,7 +219,7 @@ export default function MyResults() {
             <p>No se encontraron materias con los filtros aplicados</p>
           </div>
         ) : (
-          <div className="table-container" style={{ maxHeight: selected && details ? '600px' : 'none', overflowY: 'auto' }}>
+          <div className="table-container">
             <table className="table mobile-card-view">
           <thead>
             <tr>
@@ -244,7 +232,7 @@ export default function MyResults() {
           </thead>
           <tbody>
             {filteredEnrs.map((e) => (
-              <tr key={e.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => openDetails(e.enrollment_id)}>
+              <tr key={e.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/subjects/${e.subject_id}`)}>
                 <td data-label="Código"><strong>{e.subject_code}</strong></td>
                 <td data-label="Materia">{e.subject_name}</td>
                 <td data-label="Nota" style={{ textAlign: 'center', fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
@@ -254,7 +242,7 @@ export default function MyResults() {
                 <td data-label="Acción" style={{ textAlign: 'center' }}>
                   <button 
                     className="btn secondary" 
-                    onClick={(ev) => { ev.stopPropagation(); openDetails(e.enrollment_id); }}
+                    onClick={(ev) => { ev.stopPropagation(); navigate(`/subjects/${e.subject_id}`); }}
                     style={{ padding: '0.4rem 0.8rem', fontSize: 'var(--font-size-sm)' }}
                   >
                     Ver
@@ -267,137 +255,6 @@ export default function MyResults() {
           </div>
         )}
       </div>
-
-      {(selected && details) && (
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-          <h2 style={{ margin: 0 }}>Detalle de Resultados</h2>
-          <button 
-            className="btn secondary"
-            onClick={() => { setSelected(null); setDetails(null); }}
-            style={{ fontSize: 'var(--font-size-sm)' }}
-          >
-            ✕ Cerrar
-          </button>
-        </div>
-        {details && (
-          <>
-            {/* Info del estudiante y materia */}
-            <div style={{ 
-              padding: 'var(--space-md)', 
-              background: 'var(--bg-secondary)', 
-              borderRadius: 'var(--radius-md)',
-              marginBottom: 'var(--space-lg)',
-              border: '1px solid var(--border-primary)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
-                <div>
-                  <p style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>Estudiante</p>
-                  <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{details.student_email}</p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>Nota Final</p>
-                  <p style={{ 
-                    margin: 0, 
-                    fontWeight: 700, 
-                    fontSize: 'var(--font-size-xl)',
-                    color: details.stats?.semaphore === 'GREEN' ? 'var(--success)' : 
-                           details.stats?.semaphore === 'YELLOW' ? 'var(--warning)' : 'var(--danger)'
-                  }}>
-                    {details.stats?.grade?.toFixed(2) || 'N/A'}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Mini estadísticas de la materia */}
-              {details.stats && (
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', 
-                  gap: 'var(--space-sm)',
-                  marginTop: 'var(--space-md)',
-                  paddingTop: 'var(--space-md)',
-                  borderTop: '1px solid var(--border-primary)'
-                }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--success)' }}>
-                      {details.stats.green_count || 0}
-                    </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Verdes</div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--warning)' }}>
-                      {details.stats.yellow_count || 0}
-                    </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Amarillos</div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--danger)' }}>
-                      {details.stats.red_count || 0}
-                    </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Rojos</div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {details.stats.total_exercises || 0}
-                    </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>Total</div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Tabla de ejercicios */}
-            <h3 style={{ marginBottom: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-              Ejercicios 
-              <span style={{ 
-                fontSize: 'var(--font-size-sm)', 
-                padding: '0.25rem 0.5rem', 
-                background: 'var(--bg-secondary)', 
-                borderRadius: 'var(--radius-sm)',
-                fontWeight: 'normal'
-              }}>
-                {details.results?.length || 0}
-              </span>
-            </h3>
-            
-            {details.results?.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
-                <p style={{ fontSize: '2rem', margin: 0 }}></p>
-                <p>No hay resultados registrados para esta materia</p>
-              </div>
-            ) : (
-              <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <table className="table mobile-card-view">
-              <thead>
-                <tr>
-                  <th style={{ width: '50%' }}>Ejercicio</th>
-                  <th style={{ width: '25%', textAlign: 'center' }}>Estado</th>
-                  <th style={{ width: '25%', textAlign: 'center' }}>Fecha</th>
-                </tr>
-              </thead>
-              <tbody>
-                {details.results.map((r) => (
-                  <tr key={r.exercise_id}>
-                    <td data-label="Ejercicio"><strong>{r.exercise_name}</strong></td>
-                    <td data-label="Estado" style={{ textAlign: 'center' }}><StatusBadge status={r.status} /></td>
-                    <td data-label="Fecha" style={{ textAlign: 'center', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
-                      {new Date(r.updated_at).toLocaleDateString('es-ES', { 
-                        day: '2-digit', 
-                        month: 'short', 
-                        year: 'numeric' 
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-      )}
       </div>
 
       {/* Header con estadísticas globales */}

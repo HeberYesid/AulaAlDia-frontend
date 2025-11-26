@@ -130,6 +130,12 @@ export default function SubjectDetail() {
     return filtered
   }, [detailedResults, statusFilter, resultSearch, user])
 
+  // Obtener estadísticas del estudiante actual
+  const studentStats = useMemo(() => {
+    if (user?.role !== 'STUDENT' || !dash?.enrollments) return null
+    return dash.enrollments.find(e => e.student_email === user.email)
+  }, [dash, user])
+
   // Verificar si el usuario existe en la plataforma
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
@@ -442,9 +448,43 @@ export default function SubjectDetail() {
       {/* Tabs Navigation */}
       {user?.role === 'STUDENT' ? (
         // Vista simplificada para estudiantes - sin tabs
-        <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--primary)', color: 'white' }}>
-          <h2 style={{ margin: 0 }}>Resultados en {subject.name}</h2>
-        </div>
+        <>
+          <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--primary)', color: 'white' }}>
+            <h2 style={{ margin: 0 }}>Resultados en {subject.name}</h2>
+          </div>
+
+          {studentStats && (
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}>Nota Final</h3>
+                  <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: studentStats.grade >= 3.0 ? 'var(--success)' : 'var(--danger)' }}>
+                    {studentStats.grade?.toFixed(2)}
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success)' }}>{studentStats.green}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Verdes</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--warning)' }}>{studentStats.yellow}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Amarillos</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--danger)' }}>{studentStats.red}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Rojos</div>
+                  </div>
+                  <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border)', paddingLeft: '1.5rem' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{studentStats.total}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         // Vista completa para profesores/admin con tabs
         <div className="card" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
