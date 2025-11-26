@@ -159,52 +159,7 @@ export default function MyResults() {
 
   return (
     <div className="fade-in">
-      {/* Header con estadísticas globales */}
-      {globalStats && (
-        <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-            <div>
-              <h1 style={{ margin: 0, fontSize: 'var(--font-size-3xl)', color: 'var(--text-primary)' }}>Mis Resultados</h1>
-              <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>Resumen completo de tu rendimiento académico</p>
-            </div>
-            <button 
-              className="btn secondary"
-              onClick={exportToCSV}
-              style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}
-            >
-              Exportar CSV
-            </button>
-          </div>
 
-          {/* Tarjetas de estadísticas */}
-          <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: 'var(--primary)' }}>{globalStats.totalMaterias}</div>
-              <div className="stat-label">Materias</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: 'var(--text-primary)' }}>{globalStats.avgGrade}</div>
-              <div className="stat-label">Nota Promedio</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: 'var(--success)' }}>{globalStats.totalGreen}</div>
-              <div className="stat-label">Verdes</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: 'var(--warning)' }}>{globalStats.totalYellow}</div>
-              <div className="stat-label">Amarillos</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: 'var(--danger)' }}>{globalStats.totalRed}</div>
-              <div className="stat-label">Rojos</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: 'var(--accent)' }}>{globalStats.successRate}%</div>
-              <div className="stat-label">Tasa de Éxito</div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Layout responsive: lista completa cuando no hay selección, split cuando hay detalles */}
       <div className="grid-stack-mobile" style={{ 
@@ -444,6 +399,53 @@ export default function MyResults() {
       </div>
       )}
       </div>
+
+      {/* Header con estadísticas globales */}
+      {globalStats && (
+        <div className="card" style={{ marginTop: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 'var(--font-size-3xl)', color: 'var(--text-primary)' }}>Mis Resultados</h1>
+              <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>Resumen completo de tu rendimiento académico</p>
+            </div>
+            <button 
+              className="btn secondary"
+              onClick={exportToCSV}
+              style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}
+            >
+              Exportar CSV
+            </button>
+          </div>
+
+          {/* Tarjetas de estadísticas */}
+          <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+            <div className="stat-card">
+              <div className="stat-value" style={{ color: 'var(--primary)' }}>{globalStats.totalMaterias}</div>
+              <div className="stat-label">Materias</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value" style={{ color: 'var(--text-primary)' }}>{globalStats.avgGrade}</div>
+              <div className="stat-label">Nota Promedio</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value" style={{ color: 'var(--success)' }}>{globalStats.totalGreen}</div>
+              <div className="stat-label">Verdes</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value" style={{ color: 'var(--warning)' }}>{globalStats.totalYellow}</div>
+              <div className="stat-label">Amarillos</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value" style={{ color: 'var(--danger)' }}>{globalStats.totalRed}</div>
+              <div className="stat-label">Rojos</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value" style={{ color: 'var(--accent)' }}>{globalStats.successRate}%</div>
+              <div className="stat-label">Tasa de Éxito</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
