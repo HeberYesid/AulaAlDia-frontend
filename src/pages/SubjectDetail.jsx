@@ -20,6 +20,7 @@ export default function SubjectDetail() {
   const [newExerciseName, setNewExerciseName] = useState('')
   const [newExerciseDeadline, setNewExerciseDeadline] = useState('')
   const [newExerciseDescription, setNewExerciseDescription] = useState('')
+  const [newExerciseFile, setNewExerciseFile] = useState(null)
   const [showExerciseForm, setShowExerciseForm] = useState(false)
   
   // Estados para editar ejercicio
@@ -27,6 +28,7 @@ export default function SubjectDetail() {
   const [editExerciseName, setEditExerciseName] = useState('')
   const [editExerciseDeadline, setEditExerciseDeadline] = useState('')
   const [editExerciseDescription, setEditExerciseDescription] = useState('')
+  const [editExerciseFile, setEditExerciseFile] = useState(null)
   
   const [activeTab, setActiveTab] = useState('students') // 'students', 'exercises', 'results'
   const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, currentComment, studentEmail, exerciseName}
@@ -220,25 +222,29 @@ export default function SubjectDetail() {
     setError('')
     setSuccess('')
     try {
-      const payload = {
-        subject: id,
-        name: newExerciseName,
-        order: exercises.length
-      }
+      const formData = new FormData()
+      formData.append('subject', id)
+      formData.append('name', newExerciseName)
+      formData.append('order', exercises.length)
       
-      // Add optional fields if provided
       if (newExerciseDeadline) {
-        payload.deadline = newExerciseDeadline
+        formData.append('deadline', newExerciseDeadline)
       }
       if (newExerciseDescription) {
-        payload.description = newExerciseDescription
+        formData.append('description', newExerciseDescription)
+      }
+      if (newExerciseFile) {
+        formData.append('attachment', newExerciseFile)
       }
       
-      await api.post('/api/courses/exercises/', payload)
+      await api.post('/api/courses/exercises/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       setSuccess(`Ejercicio "${newExerciseName}" creado correctamente`)
       setNewExerciseName('')
       setNewExerciseDeadline('')
       setNewExerciseDescription('')
+      setNewExerciseFile(null)
       setShowExerciseForm(false)
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
@@ -280,6 +286,7 @@ export default function SubjectDetail() {
     setEditExerciseName('')
     setEditExerciseDeadline('')
     setEditExerciseDescription('')
+    setEditExerciseFile(null)
     setError('')
   }
 
@@ -296,13 +303,22 @@ export default function SubjectDetail() {
     setSuccess('')
     
     try {
-      const payload = {
-        name: editExerciseName.trim(),
-        deadline: editExerciseDeadline || null,
-        description: editExerciseDescription.trim() || ''
+      const formData = new FormData()
+      formData.append('name', editExerciseName.trim())
+      if (editExerciseDeadline) {
+        formData.append('deadline', editExerciseDeadline)
+      } else {
+        formData.append('deadline', '')
+      }
+      formData.append('description', editExerciseDescription.trim() || '')
+      
+      if (editExerciseFile) {
+        formData.append('attachment', editExerciseFile)
       }
       
-      await api.patch(`/api/courses/exercises/${editingExercise.id}/`, payload)
+      await api.patch(`/api/courses/exercises/${editingExercise.id}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       setSuccess(`Ejercicio "${editExerciseName}" actualizado correctamente`)
       closeEditExerciseModal()
       loadAll()
@@ -825,6 +841,24 @@ export default function SubjectDetail() {
                   </p>
                 </div>
 
+                <div style={{ marginBottom: '1rem' }}>
+                  <label><strong>Archivo Adjunto (Opcional)</strong></label>
+                  <input 
+                    type="file" 
+                    onChange={(e) => setNewExerciseFile(e.target.files[0])}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                  <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                    💡 Sube un archivo guía para los estudiantes (PDF, DOCX, etc.)
+                  </p>
+                </div>
+
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button className="btn" type="submit" style={{ flex: 1 }}>
                     Crear Ejercicio
@@ -837,6 +871,7 @@ export default function SubjectDetail() {
                       setNewExerciseName('')
                       setNewExerciseDeadline('')
                       setNewExerciseDescription('')
+                      setNewExerciseFile(null)
                       setError('')
                     }}
                     style={{ flex: 1 }}
@@ -892,6 +927,7 @@ export default function SubjectDetail() {
                       <th style={{ width: '60px' }}>#</th>
                       <th>Nombre del Ejercicio</th>
                       <th>Descripción</th>
+                      <th>Archivo</th>
                       <th style={{ width: '180px' }}>Fecha Límite</th>
                       <th style={{ width: '150px' }}>Acciones</th>
                     </tr>
@@ -956,6 +992,15 @@ export default function SubjectDetail() {
                           </td>
                           <td data-label="Descripción" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                             {ex.description || <em>Sin descripción</em>}
+                          </td>
+                          <td data-label="Archivo">
+                            {ex.attachment ? (
+                              <a href={ex.attachment} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>
+                                Descargar
+                              </a>
+                            ) : (
+                              <span style={{color: 'var(--text-muted)', fontSize: '0.85rem'}}>-</span>
+                            )}
                           </td>
                           <td data-label="Fecha Límite">
                             {getDeadlineBadge() || <em style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin fecha límite</em>}
@@ -1114,7 +1159,8 @@ export default function SubjectDetail() {
                         <th>Ejercicio</th>
                         <th>Fecha Límite</th>
                         <th>Estado</th>
-                        <th>Archivo</th>
+                        <th>Adjunto</th>
+                        <th>Mi Entrega</th>
                         <th>Acción</th>
                       </tr>
                     </thead>
@@ -1135,7 +1181,12 @@ export default function SubjectDetail() {
                                <span className="badge" style={{background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem'}}>Pendiente</span>
                             )}
                           </td>
-                          <td data-label="Archivo">
+                          <td data-label="Adjunto">
+                             {item.attachment ? (
+                               <a href={item.attachment} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>Descargar</a>
+                             ) : '-'}
+                          </td>
+                          <td data-label="Mi Entrega">
                              {item.result?.submission_file ? (
                                <a href={item.result.submission_file} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>Ver Archivo</a>
                              ) : '-'}
@@ -1400,6 +1451,24 @@ export default function SubjectDetail() {
                     resize: 'vertical'
                   }}
                 />
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>Archivo Adjunto (Opcional)</strong></label>
+                <input 
+                  type="file" 
+                  onChange={(e) => setEditExerciseFile(e.target.files[0])}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
+                />
+                <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  💡 Sube un nuevo archivo para reemplazar el anterior (si existe)
+                </p>
               </div>
 
               {error && (
