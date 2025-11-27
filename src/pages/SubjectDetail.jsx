@@ -51,6 +51,10 @@ export default function SubjectDetail() {
   const [userExistsStatus, setUserExistsStatus] = useState(null) // null, 'checking', 'exists', 'not-exists'
   const [userExistsInfo, setUserExistsInfo] = useState(null)
 
+  // Estado para subida de archivos
+  const [uploadingExercise, setUploadingExercise] = useState(null)
+  const [submissionFile, setSubmissionFile] = useState(null)
+
   async function loadAll() {
     setLoading(true)
     try {
@@ -407,6 +411,45 @@ export default function SubjectDetail() {
       setError(errorMsg)
     }
   }
+
+  async function submitSolution(e) {
+    e.preventDefault()
+    if (!uploadingExercise || !submissionFile) return
+    
+    if (submissionFile.size > 1024 * 1024) {
+        setError('El archivo no puede superar 1MB')
+        return
+    }
+    
+    const formData = new FormData()
+    formData.append('submission_file', submissionFile)
+    
+    try {
+        await api.post(`/api/courses/exercises/${uploadingExercise.id}/submit/`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        setSuccess('Solución subida correctamente')
+        setUploadingExercise(null)
+        setSubmissionFile(null)
+        loadAll()
+        setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+        console.error(err)
+        setError(err.response?.data?.detail || 'Error al subir la solución')
+    }
+  }
+
+  const studentExercisesList = useMemo(() => {
+    if (user?.role !== 'STUDENT') return []
+    
+    return exercises.map(ex => {
+      const result = detailedResults.find(r => r.exercise === ex.id)
+      return {
+        ...ex,
+        result: result || null
+      }
+    })
+  }, [exercises, detailedResults, user])
 
   if (loading) return <div className="card">Cargando...</div>
   if (!subject) return <div className="card">Materia no encontrada</div>
@@ -1060,15 +1103,66 @@ export default function SubjectDetail() {
               </>
             )}
 
-            {/* Detailed Results Table with Edit */}
-            {detailedResults.length > 0 && (
-              <div style={{ marginTop: user?.role === 'STUDENT' ? '0' : '3rem' }}>
-                <h3>
-                  {user?.role === 'STUDENT' 
-                    ? `Mis Ejercicios y Resultados - ${filteredResults.length} ${filteredResults.length === 1 ? 'ejercicio' : 'ejercicios'}`
-                    : `Resultados Individuales (Editable) - ${detailedResults.length} resultados`
-                  }
-                </h3>
+            {/* Student View: List of Exercises */}
+            {user?.role === 'STUDENT' && (
+              <div style={{ marginTop: '0' }}>
+                <h3>Mis Ejercicios ({studentExercisesList.length})</h3>
+                <div className="data-table">
+                  <table className="table mobile-card-view">
+                    <thead>
+                      <tr>
+                        <th>Ejercicio</th>
+                        <th>Fecha Límite</th>
+                        <th>Estado</th>
+                        <th>Archivo</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentExercisesList.map(item => (
+                        <tr key={item.id}>
+                          <td data-label="Ejercicio">
+                            <strong>{item.name}</strong>
+                            {item.description && <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)'}}>{item.description}</div>}
+                          </td>
+                          <td data-label="Fecha Límite">
+                            {item.deadline ? new Date(item.deadline).toLocaleDateString() : '-'}
+                          </td>
+                          <td data-label="Estado">
+                            {item.result ? (
+                               <StatusBadge status={item.result.status} grade={item.result.status === 'GREEN' ? 5.0 : item.result.status === 'YELLOW' ? 3.0 : 1.0} />
+                            ) : (
+                               <span className="badge" style={{background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem'}}>Pendiente</span>
+                            )}
+                          </td>
+                          <td data-label="Archivo">
+                             {item.result?.submission_file ? (
+                               <a href={item.result.submission_file} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>Ver Archivo</a>
+                             ) : '-'}
+                          </td>
+                          <td data-label="Acción">
+                             {(!item.result || item.result.status === 'SUBMITTED' || item.result.status === 'RED') && (
+                               <button 
+                                 className="btn secondary" 
+                                 style={{padding: '0.3rem 0.6rem', fontSize: '0.85rem'}}
+                                 onClick={() => setUploadingExercise(item)}
+                               >
+                                 {item.result ? 'Reenviar' : 'Subir Solución'}
+                               </button>
+                             )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Teacher/Admin View: Detailed Results Table */}
+            {user?.role !== 'STUDENT' && detailedResults.length > 0 && (
+              <div style={{ marginTop: '3rem' }}>
+                <h3>Resultados Individuales (Editable) - {detailedResults.length} resultados</h3>
                 {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
                   <p className="notice" style={{ marginBottom: '1rem' }}>
                     Haz clic en "Editar" para cambiar el estado de cualquier resultado individual
@@ -1127,6 +1221,7 @@ export default function SubjectDetail() {
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>Estudiante</th>}
                           <th>Ejercicio</th>
                           <th style={{ width: '120px' }}>Estado</th>
+                          <th style={{ width: '100px' }}>Archivo</th>
                           <th style={{ width: '250px', maxWidth: '250px' }}>Comentarios</th>
                           <th style={{ width: '150px' }}>Actualizado</th>
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th style={{ width: '100px' }}>Acción</th>}
@@ -1149,6 +1244,15 @@ export default function SubjectDetail() {
                             }} title={result.exercise_name}>{result.exercise_name}</td>
                             <td data-label="Estado">
                               <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
+                            </td>
+                            <td data-label="Archivo">
+                                {result.submission_file ? (
+                                    <a href={result.submission_file} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>
+                                        Descargar
+                                    </a>
+                                ) : (
+                                    <span style={{color: 'var(--text-muted)', fontSize: '0.85rem'}}>-</span>
+                                )}
                             </td>
                             <td data-label="Comentarios" style={{ 
                               fontSize: '0.85rem', 
@@ -1584,6 +1688,76 @@ export default function SubjectDetail() {
                   type="button"
                   className="btn secondary"
                   onClick={closeCreateResultForm}
+                  style={{ flex: 1 }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Solution Modal */}
+      {uploadingExercise && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}
+          onClick={() => setUploadingExercise(null)}
+        >
+          <div 
+            className="card modal-responsive" 
+            style={{ 
+              maxWidth: '500px', 
+              width: '100%',
+              margin: '0',
+              animation: 'fadeIn 0.2s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Subir Solución</h2>
+            <p><strong>Ejercicio:</strong> {uploadingExercise.name}</p>
+            
+            <form onSubmit={submitSolution}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>Seleccionar Archivo (PDF, DOCX, XLSX - Máx 1MB)</strong></label>
+                <input 
+                  type="file" 
+                  accept=".pdf,.docx,.xlsx"
+                  onChange={(e) => setSubmissionFile(e.target.files[0])}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+              </div>
+              
+              {error && (
+                <div className="alert error" style={{ marginBottom: '1rem' }}>
+                  {error}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button type="submit" className="btn" style={{ flex: 1 }}>Subir</button>
+                <button 
+                  type="button" 
+                  className="btn secondary" 
+                  onClick={() => setUploadingExercise(null)}
                   style={{ flex: 1 }}
                 >
                   Cancelar

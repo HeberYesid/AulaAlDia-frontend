@@ -635,6 +635,12 @@ form {
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.badge.SUBMITTED {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
 /* Utilities */
 .notice {
   color: var(--text-muted);
