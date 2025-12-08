@@ -20,6 +20,7 @@ export default function SubjectDetail() {
   const [newExerciseName, setNewExerciseName] = useState('')
   const [newExerciseDeadline, setNewExerciseDeadline] = useState('')
   const [newExerciseDescription, setNewExerciseDescription] = useState('')
+  const [newExerciseFile, setNewExerciseFile] = useState(null)
   const [showExerciseForm, setShowExerciseForm] = useState(false)
   
   // Estados para editar ejercicio
@@ -27,6 +28,7 @@ export default function SubjectDetail() {
   const [editExerciseName, setEditExerciseName] = useState('')
   const [editExerciseDeadline, setEditExerciseDeadline] = useState('')
   const [editExerciseDescription, setEditExerciseDescription] = useState('')
+  const [editExerciseFile, setEditExerciseFile] = useState(null)
   
   const [activeTab, setActiveTab] = useState('students') // 'students', 'exercises', 'results'
   const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, currentComment, studentEmail, exerciseName}
@@ -50,6 +52,10 @@ export default function SubjectDetail() {
   // Verificación de existencia de usuario
   const [userExistsStatus, setUserExistsStatus] = useState(null) // null, 'checking', 'exists', 'not-exists'
   const [userExistsInfo, setUserExistsInfo] = useState(null)
+
+  // Estado para subida de archivos
+  const [uploadingExercise, setUploadingExercise] = useState(null)
+  const [submissionFile, setSubmissionFile] = useState(null)
 
   async function loadAll() {
     setLoading(true)
@@ -129,6 +135,12 @@ export default function SubjectDetail() {
 
     return filtered
   }, [detailedResults, statusFilter, resultSearch, user])
+
+  // Obtener estadísticas del estudiante actual
+  const studentStats = useMemo(() => {
+    if (user?.role !== 'STUDENT' || !dash?.enrollments) return null
+    return dash.enrollments.find(e => e.student_email === user.email)
+  }, [dash, user])
 
   // Verificar si el usuario existe en la plataforma
   useEffect(() => {
@@ -210,25 +222,29 @@ export default function SubjectDetail() {
     setError('')
     setSuccess('')
     try {
-      const payload = {
-        subject: id,
-        name: newExerciseName,
-        order: exercises.length
-      }
+      const formData = new FormData()
+      formData.append('subject', id)
+      formData.append('name', newExerciseName)
+      formData.append('order', exercises.length)
       
-      // Add optional fields if provided
       if (newExerciseDeadline) {
-        payload.deadline = newExerciseDeadline
+        formData.append('deadline', newExerciseDeadline)
       }
       if (newExerciseDescription) {
-        payload.description = newExerciseDescription
+        formData.append('description', newExerciseDescription)
+      }
+      if (newExerciseFile) {
+        formData.append('attachment', newExerciseFile)
       }
       
-      await api.post('/api/courses/exercises/', payload)
+      await api.post('/api/courses/exercises/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       setSuccess(`Ejercicio "${newExerciseName}" creado correctamente`)
       setNewExerciseName('')
       setNewExerciseDeadline('')
       setNewExerciseDescription('')
+      setNewExerciseFile(null)
       setShowExerciseForm(false)
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
@@ -270,6 +286,7 @@ export default function SubjectDetail() {
     setEditExerciseName('')
     setEditExerciseDeadline('')
     setEditExerciseDescription('')
+    setEditExerciseFile(null)
     setError('')
   }
 
@@ -286,13 +303,22 @@ export default function SubjectDetail() {
     setSuccess('')
     
     try {
-      const payload = {
-        name: editExerciseName.trim(),
-        deadline: editExerciseDeadline || null,
-        description: editExerciseDescription.trim() || ''
+      const formData = new FormData()
+      formData.append('name', editExerciseName.trim())
+      if (editExerciseDeadline) {
+        formData.append('deadline', editExerciseDeadline)
+      } else {
+        formData.append('deadline', '')
+      }
+      formData.append('description', editExerciseDescription.trim() || '')
+      
+      if (editExerciseFile) {
+        formData.append('attachment', editExerciseFile)
       }
       
-      await api.patch(`/api/courses/exercises/${editingExercise.id}/`, payload)
+      await api.patch(`/api/courses/exercises/${editingExercise.id}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       setSuccess(`Ejercicio "${editExerciseName}" actualizado correctamente`)
       closeEditExerciseModal()
       loadAll()
@@ -402,6 +428,45 @@ export default function SubjectDetail() {
     }
   }
 
+  async function submitSolution(e) {
+    e.preventDefault()
+    if (!uploadingExercise || !submissionFile) return
+    
+    if (submissionFile.size > 1024 * 1024) {
+        setError('El archivo no puede superar 1MB')
+        return
+    }
+    
+    const formData = new FormData()
+    formData.append('submission_file', submissionFile)
+    
+    try {
+        await api.post(`/api/courses/exercises/${uploadingExercise.id}/submit/`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        setSuccess('Solución subida correctamente')
+        setUploadingExercise(null)
+        setSubmissionFile(null)
+        loadAll()
+        setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+        console.error(err)
+        setError(err.response?.data?.detail || 'Error al subir la solución')
+    }
+  }
+
+  const studentExercisesList = useMemo(() => {
+    if (user?.role !== 'STUDENT') return []
+    
+    return exercises.map(ex => {
+      const result = detailedResults.find(r => r.exercise === ex.id)
+      return {
+        ...ex,
+        result: result || null
+      }
+    })
+  }, [exercises, detailedResults, user])
+
   if (loading) return <div className="card">Cargando...</div>
   if (!subject) return <div className="card">Materia no encontrada</div>
 
@@ -442,9 +507,43 @@ export default function SubjectDetail() {
       {/* Tabs Navigation */}
       {user?.role === 'STUDENT' ? (
         // Vista simplificada para estudiantes - sin tabs
-        <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--primary)', color: 'white' }}>
-          <h2 style={{ margin: 0 }}>Mis Resultados en {subject.name}</h2>
-        </div>
+        <>
+          <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--primary)', color: 'white' }}>
+            <h2 style={{ margin: 0 }}>Resultados en {subject.name}</h2>
+          </div>
+
+          {studentStats && (
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}>Nota Final</h3>
+                  <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: studentStats.grade >= 3.0 ? 'var(--success)' : 'var(--danger)' }}>
+                    {studentStats.grade?.toFixed(2)}
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success)' }}>{studentStats.green}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Verdes</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--warning)' }}>{studentStats.yellow}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Amarillos</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--danger)' }}>{studentStats.red}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Rojos</div>
+                  </div>
+                  <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border)', paddingLeft: '1.5rem' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{studentStats.total}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         // Vista completa para profesores/admin con tabs
         <div className="card" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
@@ -742,6 +841,24 @@ export default function SubjectDetail() {
                   </p>
                 </div>
 
+                <div style={{ marginBottom: '1rem' }}>
+                  <label><strong>Archivo Adjunto (Opcional)</strong></label>
+                  <input 
+                    type="file" 
+                    onChange={(e) => setNewExerciseFile(e.target.files[0])}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                  <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                    💡 Sube un archivo guía para los estudiantes (PDF, DOCX, etc.)
+                  </p>
+                </div>
+
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button className="btn" type="submit" style={{ flex: 1 }}>
                     Crear Ejercicio
@@ -754,6 +871,7 @@ export default function SubjectDetail() {
                       setNewExerciseName('')
                       setNewExerciseDeadline('')
                       setNewExerciseDescription('')
+                      setNewExerciseFile(null)
                       setError('')
                     }}
                     style={{ flex: 1 }}
@@ -809,6 +927,7 @@ export default function SubjectDetail() {
                       <th style={{ width: '60px' }}>#</th>
                       <th>Nombre del Ejercicio</th>
                       <th>Descripción</th>
+                      <th>Archivo</th>
                       <th style={{ width: '180px' }}>Fecha Límite</th>
                       <th style={{ width: '150px' }}>Acciones</th>
                     </tr>
@@ -873,6 +992,15 @@ export default function SubjectDetail() {
                           </td>
                           <td data-label="Descripción" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                             {ex.description || <em>Sin descripción</em>}
+                          </td>
+                          <td data-label="Archivo">
+                            {ex.attachment ? (
+                              <a href={ex.attachment} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>
+                                Descargar
+                              </a>
+                            ) : (
+                              <span style={{color: 'var(--text-muted)', fontSize: '0.85rem'}}>-</span>
+                            )}
                           </td>
                           <td data-label="Fecha Límite">
                             {getDeadlineBadge() || <em style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin fecha límite</em>}
@@ -1020,15 +1148,72 @@ export default function SubjectDetail() {
               </>
             )}
 
-            {/* Detailed Results Table with Edit */}
-            {detailedResults.length > 0 && (
-              <div style={{ marginTop: user?.role === 'STUDENT' ? '0' : '3rem' }}>
-                <h3>
-                  {user?.role === 'STUDENT' 
-                    ? `Mis Ejercicios y Resultados - ${filteredResults.length} ${filteredResults.length === 1 ? 'ejercicio' : 'ejercicios'}`
-                    : `Resultados Individuales (Editable) - ${detailedResults.length} resultados`
-                  }
-                </h3>
+            {/* Student View: List of Exercises */}
+            {user?.role === 'STUDENT' && (
+              <div style={{ marginTop: '0' }}>
+                <h3>Mis Ejercicios ({studentExercisesList.length})</h3>
+                <div className="data-table">
+                  <table className="table mobile-card-view">
+                    <thead>
+                      <tr>
+                        <th>Ejercicio</th>
+                        <th>Fecha Límite</th>
+                        <th>Estado</th>
+                        <th>Adjunto</th>
+                        <th>Mi Entrega</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentExercisesList.map(item => (
+                        <tr key={item.id}>
+                          <td data-label="Ejercicio">
+                            <strong>{item.name}</strong>
+                            {item.description && <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)'}}>{item.description}</div>}
+                          </td>
+                          <td data-label="Fecha Límite">
+                            {item.deadline ? new Date(item.deadline).toLocaleDateString() : '-'}
+                          </td>
+                          <td data-label="Estado">
+                            {item.result ? (
+                               <StatusBadge status={item.result.status} grade={item.result.status === 'GREEN' ? 5.0 : item.result.status === 'YELLOW' ? 3.0 : 1.0} />
+                            ) : (
+                               <span className="badge" style={{background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem'}}>Pendiente</span>
+                            )}
+                          </td>
+                          <td data-label="Adjunto">
+                             {item.attachment ? (
+                               <a href={item.attachment} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>Descargar</a>
+                             ) : '-'}
+                          </td>
+                          <td data-label="Mi Entrega">
+                             {item.result?.submission_file ? (
+                               <a href={item.result.submission_file} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>Ver Archivo</a>
+                             ) : '-'}
+                          </td>
+                          <td data-label="Acción">
+                             {(!item.result || item.result.status === 'SUBMITTED' || item.result.status === 'RED') && (
+                               <button 
+                                 className="btn secondary" 
+                                 style={{padding: '0.3rem 0.6rem', fontSize: '0.85rem'}}
+                                 onClick={() => setUploadingExercise(item)}
+                               >
+                                 {item.result ? 'Reenviar' : 'Subir Solución'}
+                               </button>
+                             )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Teacher/Admin View: Detailed Results Table */}
+            {user?.role !== 'STUDENT' && detailedResults.length > 0 && (
+              <div style={{ marginTop: '3rem' }}>
+                <h3>Resultados Individuales (Editable) - {detailedResults.length} resultados</h3>
                 {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
                   <p className="notice" style={{ marginBottom: '1rem' }}>
                     Haz clic en "Editar" para cambiar el estado de cualquier resultado individual
@@ -1087,6 +1272,7 @@ export default function SubjectDetail() {
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>Estudiante</th>}
                           <th>Ejercicio</th>
                           <th style={{ width: '120px' }}>Estado</th>
+                          <th style={{ width: '100px' }}>Archivo</th>
                           <th style={{ width: '250px', maxWidth: '250px' }}>Comentarios</th>
                           <th style={{ width: '150px' }}>Actualizado</th>
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th style={{ width: '100px' }}>Acción</th>}
@@ -1109,6 +1295,15 @@ export default function SubjectDetail() {
                             }} title={result.exercise_name}>{result.exercise_name}</td>
                             <td data-label="Estado">
                               <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
+                            </td>
+                            <td data-label="Archivo">
+                                {result.submission_file ? (
+                                    <a href={result.submission_file} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>
+                                        Descargar
+                                    </a>
+                                ) : (
+                                    <span style={{color: 'var(--text-muted)', fontSize: '0.85rem'}}>-</span>
+                                )}
                             </td>
                             <td data-label="Comentarios" style={{ 
                               fontSize: '0.85rem', 
@@ -1256,6 +1451,24 @@ export default function SubjectDetail() {
                     resize: 'vertical'
                   }}
                 />
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>Archivo Adjunto (Opcional)</strong></label>
+                <input 
+                  type="file" 
+                  onChange={(e) => setEditExerciseFile(e.target.files[0])}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
+                />
+                <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  💡 Sube un nuevo archivo para reemplazar el anterior (si existe)
+                </p>
               </div>
 
               {error && (
@@ -1544,6 +1757,76 @@ export default function SubjectDetail() {
                   type="button"
                   className="btn secondary"
                   onClick={closeCreateResultForm}
+                  style={{ flex: 1 }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Solution Modal */}
+      {uploadingExercise && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}
+          onClick={() => setUploadingExercise(null)}
+        >
+          <div 
+            className="card modal-responsive" 
+            style={{ 
+              maxWidth: '500px', 
+              width: '100%',
+              margin: '0',
+              animation: 'fadeIn 0.2s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Subir Solución</h2>
+            <p><strong>Ejercicio:</strong> {uploadingExercise.name}</p>
+            
+            <form onSubmit={submitSolution}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>Seleccionar Archivo (PDF, DOCX, XLSX - Máx 1MB)</strong></label>
+                <input 
+                  type="file" 
+                  accept=".pdf,.docx,.xlsx"
+                  onChange={(e) => setSubmissionFile(e.target.files[0])}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+              </div>
+              
+              {error && (
+                <div className="alert error" style={{ marginBottom: '1rem' }}>
+                  {error}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button type="submit" className="btn" style={{ flex: 1 }}>Subir</button>
+                <button 
+                  type="button" 
+                  className="btn secondary" 
+                  onClick={() => setUploadingExercise(null)}
                   style={{ flex: 1 }}
                 >
                   Cancelar

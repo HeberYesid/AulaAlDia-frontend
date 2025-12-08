@@ -3,7 +3,8 @@ export default function StatusBadge({ status, grade }) {
   const statusText = {
     'GREEN': 'Aprobado',
     'YELLOW': 'Suficiente',
-    'RED': 'Reprobado'
+    'RED': 'Reprobado',
+    'SUBMITTED': 'Entregado'
   }
 
   const currentStatus = status || 'RED'

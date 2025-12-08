@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /subjects
+Disallow: /notifications
+Disallow: /my
+Disallow: /profile
+
+Sitemap: https://dev-track-lyart.vercel.app/sitemap.xml

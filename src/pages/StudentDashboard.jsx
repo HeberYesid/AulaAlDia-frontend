@@ -56,65 +56,15 @@ export default function StudentDashboard() {
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Mi Dashboard</h1>
-          <p className="dashboard-subtitle">Resumen de tu progreso académico</p>
         </div>
       </div>
 
-      {/* Resumen General */}
-      <div className="stats-grid-responsive" style={{ marginBottom: 'var(--space-xl)' }}>
-        <div className="stat-card">
-          <div className="stat-value" style={{ color: 'var(--text-primary)' }}>
-            {summary.total_results}
-          </div>
-          <div className="stat-label stat-label-desktop">Total Resultados</div>
-          <div className="stat-label stat-label-mobile">Total</div>
-        </div>
 
-        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05))' }}>
-          <div className="stat-value" style={{ color: 'var(--success)' }}>
-            {summary.green_count}
-          </div>
-          <div className="stat-label stat-label-desktop">Verdes</div>
-          <div className="stat-label stat-label-mobile">Verdes</div>
-        </div>
 
-        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05))' }}>
-          <div className="stat-value" style={{ color: 'var(--warning)' }}>
-            {summary.yellow_count}
-          </div>
-          <div className="stat-label stat-label-desktop">Amarillos</div>
-          <div className="stat-label stat-label-mobile">Amarillos</div>
-        </div>
-
-        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.05))' }}>
-          <div className="stat-value" style={{ color: 'var(--danger)' }}>
-            {summary.red_count}
-          </div>
-          <div className="stat-label stat-label-desktop">Rojos</div>
-          <div className="stat-label stat-label-mobile">Rojos</div>
-        </div>
-
-        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.1), rgba(25, 118, 210, 0.05))' }}>
-          <div className="stat-value" style={{ color: 'var(--primary)' }}>
-            {summary.success_rate}%
-          </div>
-          <div className="stat-label stat-label-desktop">Tasa de Éxito</div>
-          <div className="stat-label stat-label-mobile">Éxito</div>
-        </div>
-
-        <div className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.1), rgba(156, 39, 176, 0.05))' }}>
-          <div className="stat-value" style={{ color: 'var(--text-accent)' }}>
-            {summary.total_pending}
-          </div>
-          <div className="stat-label stat-label-desktop">Pendientes</div>
-          <div className="stat-label stat-label-mobile">Pendientes</div>
-        </div>
-      </div>
-
-      {/* Progreso por Materia */}
+      {/* Mis Materias */}
       <div style={{ marginBottom: 'var(--space-xl)' }}>
         <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: '1.5rem', fontWeight: 'bold' }}>
-          Progreso por Materia
+          Mis Materias
         </h2>
 
         {subjects_progress.length === 0 ? (
@@ -144,92 +94,12 @@ export default function StudentDashboard() {
                 }}
               >
                 {/* Header de la materia */}
-                <div className="subject-header-responsive">
-                  <div style={{ flex: 1 }}>
+                <div className="subject-header-responsive" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                  <div style={{ textAlign: 'center', width: '100%' }}>
                     <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>
                       {subject.subject_name}
                     </h3>
-                    <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '1rem' }}>
-                      {subject.subject_code}
-                    </p>
                   </div>
-                  <div style={{
-                    textAlign: 'right',
-                    padding: '1rem 1.5rem',
-                    background: 'var(--bg-primary)',
-                    borderRadius: 'var(--radius-md)',
-                    minWidth: '120px'
-                  }}>
-                    <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
-                      {subject.completion_rate}%
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                      Completado
-                    </div>
-                  </div>
-                </div>
-
-                {/* Estadísticas simplificadas */}
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '1fr auto', 
-                  gap: 'var(--space-lg)', 
-                  alignItems: 'center',
-                  marginBottom: 'var(--space-lg)'
-                }}>
-                  {/* Total de ejercicios */}
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 'var(--space-md)',
-                    padding: 'var(--space-md)',
-                    background: 'var(--bg-primary)',
-                    borderRadius: 'var(--radius-md)'
-                  }}>
-                    <div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-                        {subject.total_exercises} ejercicios
-                      </div>
-                      <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                        {subject.completed_exercises} completados
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Nota/Calificación */}
-                  <div style={{
-                    padding: 'var(--space-lg)',
-                    background: 'var(--bg-primary)',
-                    borderRadius: 'var(--radius-md)',
-                    textAlign: 'center',
-                    minWidth: '120px'
-                  }}>
-                    <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
-                      {subject.grade != null ? subject.grade.toFixed(1) : '0.0'}
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 600 }}>
-                      Nota
-                    </div>
-                  </div>
-                </div>
-
-                {/* Barra de progreso */}
-                <div style={{
-                  width: '100%',
-                  height: '12px',
-                  background: 'var(--bg-primary)',
-                  borderRadius: '999px',
-                  overflow: 'hidden',
-                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
-                }}>
-                  <div style={{
-                    width: `${subject.completion_rate}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, var(--primary), var(--primary-light))',
-                    borderRadius: '999px',
-                    transition: 'width 0.5s ease',
-                    boxShadow: '0 0 8px rgba(25, 118, 210, 0.4)'
-                  }} />
                 </div>
               </div>
             ))}
