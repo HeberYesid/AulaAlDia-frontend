@@ -697,7 +697,64 @@ export default function SubjectDetail() {
         <div className="card">
           <h2>Gestión de Estudiantes</h2>
           
-          <div style={{ marginBottom: '2rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>Lista de Estudiantes Inscritos ({enrollments.length})</h3>
+            </div>
+            
+            {enrollments.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  placeholder="Buscar por email, nombre o apellido..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    maxWidth: '500px',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+                {studentSearch && (
+                  <p className="notice" style={{ marginTop: '0.5rem' }}>
+                    Mostrando {filteredEnrollments.length} de {enrollments.length} estudiantes
+                  </p>
+                )}
+              </div>
+            )}
+
+            {enrollments.length === 0 ? (
+              <p className="notice">No hay estudiantes inscritos en esta materia. Inscribe al primero usando el formulario abajo.</p>
+            ) : filteredEnrollments.length === 0 ? (
+              <p className="notice">No se encontraron estudiantes que coincidan con "{studentSearch}"</p>
+            ) : (
+              <div className="data-table">
+                <table className="table mobile-card-view">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Correo</th>
+                      <th>Nombre Completo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredEnrollments.map((e, index) => (
+                      <tr key={e.id}>
+                        <td data-label="#">{index + 1}</td>
+                        <td data-label="Correo">{e.student.email}</td>
+                        <td data-label="Nombre">{e.student.first_name} {e.student.last_name}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: '3rem', marginBottom: '2rem' }}>
             <h3>Inscribir Estudiante Individual</h3>
             <form onSubmit={addEnrollment} style={{ maxWidth: '500px' }}>
               <label>Correo electrónico del estudiante</label>
@@ -805,63 +862,6 @@ export default function SubjectDetail() {
               uploadUrl={`/api/courses/subjects/${id}/enrollments/upload-csv/`}
               onComplete={loadAll}
             />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>Lista de Estudiantes Inscritos ({enrollments.length})</h3>
-            </div>
-            
-            {enrollments.length > 0 && (
-              <div style={{ marginBottom: '1rem' }}>
-                <input
-                  type="text"
-                  placeholder="Buscar por email, nombre o apellido..."
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    padding: '0.75rem',
-                    fontSize: '1rem',
-                    border: '2px solid var(--border)',
-                    borderRadius: '8px'
-                  }}
-                />
-                {studentSearch && (
-                  <p className="notice" style={{ marginTop: '0.5rem' }}>
-                    Mostrando {filteredEnrollments.length} de {enrollments.length} estudiantes
-                  </p>
-                )}
-              </div>
-            )}
-
-            {enrollments.length === 0 ? (
-              <p className="notice">No hay estudiantes inscritos en esta materia. Inscribe al primero usando el formulario arriba.</p>
-            ) : filteredEnrollments.length === 0 ? (
-              <p className="notice">No se encontraron estudiantes que coincidan con "{studentSearch}"</p>
-            ) : (
-              <div className="data-table">
-                <table className="table mobile-card-view">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Correo</th>
-                      <th>Nombre Completo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredEnrollments.map((e, index) => (
-                      <tr key={e.id}>
-                        <td data-label="#">{index + 1}</td>
-                        <td data-label="Correo">{e.student.email}</td>
-                        <td data-label="Nombre">{e.student.first_name} {e.student.last_name}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -1127,35 +1127,6 @@ export default function SubjectDetail() {
         <div className="card">
           <h2>{user?.role === 'STUDENT' ? 'Mis Resultados' : 'Resultados y Dashboard'}</h2>
           
-          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
-            <>
-              <div style={{ marginBottom: '2rem' }}>
-                <h3>Cargar Resultados desde CSV</h3>
-                <CSVUpload
-                  label="Cargar resultados (columnas: student_email, exercise_name, status)"
-                  uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
-                  onComplete={loadAll}
-                />
-                <p className="notice" style={{ marginTop: '0.5rem' }}>
-                  💡 Los ejercicios se crean automáticamente si no existen al subir el CSV
-                </p>
-              </div>
-
-              {/* Asignar Resultado Individual */}
-              <div style={{ marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-                  <h3 style={{ margin: 0 }}>Asignar Resultado Individual</h3>
-                  <button className="btn" onClick={openCreateResultForm}>
-                    Nuevo Resultado
-                  </button>
-                </div>
-                <p className="notice" style={{ margin: 0 }}>
-                  Asigna resultados manualmente seleccionando un estudiante y un ejercicio
-                </p>
-              </div>
-            </>
-          )}
-
           <div>
             {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
               <>
@@ -1458,6 +1429,35 @@ export default function SubjectDetail() {
                   </div>
                 )}
               </div>
+            )}
+
+            {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+              <>
+                {/* Asignar Resultado Individual */}
+                <div style={{ marginTop: '3rem', marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+                    <h3 style={{ margin: 0 }}>Asignar Resultado Individual</h3>
+                    <button className="btn" onClick={openCreateResultForm}>
+                      Nuevo Resultado
+                    </button>
+                  </div>
+                  <p className="notice" style={{ margin: 0 }}>
+                    Asigna resultados manualmente seleccionando un estudiante y un ejercicio
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '2rem' }}>
+                  <h3>Cargar Resultados desde CSV</h3>
+                  <CSVUpload
+                    label="Cargar resultados (columnas: student_email, exercise_name, status)"
+                    uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
+                    onComplete={loadAll}
+                  />
+                  <p className="notice" style={{ marginTop: '0.5rem' }}>
+                    💡 Los ejercicios se crean automáticamente si no existen al subir el CSV
+                  </p>
+                </div>
+              </>
             )}
           </div>
         </div>
