@@ -56,6 +56,86 @@ export default function SubjectDetail() {
   // Estado para subida de archivos
   const [uploadingExercise, setUploadingExercise] = useState(null)
   const [submissionFile, setSubmissionFile] = useState(null)
+  const [submissionText, setSubmissionText] = useState('')
+  
+  // Estado para ver solución de texto
+  const [viewingSubmission, setViewingSubmission] = useState(null)
+
+  // Estado para IA
+  const [generatingAI, setGeneratingAI] = useState(false)
+
+  async function generateAIFeedback() {
+    if (!newStatus) {
+      setError('Selecciona un estado primero para generar feedback acorde.')
+      return
+    }
+    
+    setGeneratingAI(true)
+    setError('')
+    
+    try {
+      // Buscar el ejercicio ID desde editingResult (que tiene exerciseName, pero necesitamos ID)
+      // editingResult viene de detailedResults que tiene exercise_id
+      // Vamos a buscar el resultado original en detailedResults
+      const originalResult = detailedResults.find(r => r.id === editingResult.resultId)
+      
+      if (!originalResult) {
+        throw new Error('No se encontró el resultado original')
+      }
+
+      const response = await api.post('/api/courses/results/generate-ai-feedback/', {
+        exercise_id: originalResult.exercise, // Corregido: el serializer devuelve 'exercise' como ID
+        status: newStatus,
+        current_comment: newComment || editingResult.currentComment,
+        student_email: editingResult.studentEmail
+      })
+      
+      setNewComment(response.data.feedback)
+    } catch (err) {
+      console.error(err)
+      setError('Error al generar feedback con IA. Intenta de nuevo.')
+    } finally {
+      setGeneratingAI(false)
+    }
+  }
+
+  async function generateAICreateFeedback() {
+    if (!createStatus) {
+      setError('Selecciona un estado primero para generar feedback acorde.')
+      return
+    }
+    if (!selectedExerciseId) {
+      setError('Selecciona un ejercicio primero.')
+      return
+    }
+    if (!selectedEnrollmentId) {
+      setError('Selecciona un estudiante primero.')
+      return
+    }
+    
+    setGeneratingAI(true)
+    setError('')
+    
+    try {
+      // Find student email
+      const enrollment = enrollments.find(e => e.id == selectedEnrollmentId)
+      const studentEmail = enrollment ? enrollment.student.email : ''
+
+      const response = await api.post('/api/courses/results/generate-ai-feedback/', {
+        exercise_id: selectedExerciseId,
+        status: createStatus,
+        current_comment: createComment,
+        student_email: studentEmail
+      })
+      
+      setCreateComment(response.data.feedback)
+    } catch (err) {
+      console.error(err)
+      setError('Error al generar feedback con IA. Intenta de nuevo.')
+    } finally {
+      setGeneratingAI(false)
+    }
+  }
 
   async function loadAll() {
     setLoading(true)
@@ -339,7 +419,9 @@ export default function SubjectDetail() {
       currentStatus: result.status,
       currentComment: result.comment || '',
       studentEmail: result.student_email,
-      exerciseName: result.exercise_name
+      exerciseName: result.exercise_name,
+      submissionText: result.submission_text,
+      submissionFile: result.submission_file
     })
     setNewStatus(result.status)
     setNewComment(result.comment || '')
@@ -430,15 +512,21 @@ export default function SubjectDetail() {
 
   async function submitSolution(e) {
     e.preventDefault()
-    if (!uploadingExercise || !submissionFile) return
+    if (!uploadingExercise) return
     
-    if (submissionFile.size > 1024 * 1024) {
+    if (!submissionFile && !submissionText) {
+        setError('Debes subir un archivo o escribir una respuesta')
+        return
+    }
+    
+    if (submissionFile && submissionFile.size > 1024 * 1024) {
         setError('El archivo no puede superar 1MB')
         return
     }
     
     const formData = new FormData()
-    formData.append('submission_file', submissionFile)
+    if (submissionFile) formData.append('submission_file', submissionFile)
+    if (submissionText) formData.append('submission_text', submissionText)
     
     try {
         await api.post(`/api/courses/exercises/${uploadingExercise.id}/submit/`, formData, {
@@ -447,6 +535,7 @@ export default function SubjectDetail() {
         setSuccess('Solución subida correctamente')
         setUploadingExercise(null)
         setSubmissionFile(null)
+        setSubmissionText('')
         loadAll()
         setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -608,7 +697,64 @@ export default function SubjectDetail() {
         <div className="card">
           <h2>Gestión de Estudiantes</h2>
           
-          <div style={{ marginBottom: '2rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>Lista de Estudiantes Inscritos ({enrollments.length})</h3>
+            </div>
+            
+            {enrollments.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  placeholder="Buscar por email, nombre o apellido..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    maxWidth: '500px',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px'
+                  }}
+                />
+                {studentSearch && (
+                  <p className="notice" style={{ marginTop: '0.5rem' }}>
+                    Mostrando {filteredEnrollments.length} de {enrollments.length} estudiantes
+                  </p>
+                )}
+              </div>
+            )}
+
+            {enrollments.length === 0 ? (
+              <p className="notice">No hay estudiantes inscritos en esta materia. Inscribe al primero usando el formulario abajo.</p>
+            ) : filteredEnrollments.length === 0 ? (
+              <p className="notice">No se encontraron estudiantes que coincidan con "{studentSearch}"</p>
+            ) : (
+              <div className="data-table">
+                <table className="table mobile-card-view">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Correo</th>
+                      <th>Nombre Completo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredEnrollments.map((e, index) => (
+                      <tr key={e.id}>
+                        <td data-label="#">{index + 1}</td>
+                        <td data-label="Correo">{e.student.email}</td>
+                        <td data-label="Nombre">{e.student.first_name} {e.student.last_name}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: '3rem', marginBottom: '2rem' }}>
             <h3>Inscribir Estudiante Individual</h3>
             <form onSubmit={addEnrollment} style={{ maxWidth: '500px' }}>
               <label>Correo electrónico del estudiante</label>
@@ -716,63 +862,6 @@ export default function SubjectDetail() {
               uploadUrl={`/api/courses/subjects/${id}/enrollments/upload-csv/`}
               onComplete={loadAll}
             />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>Lista de Estudiantes Inscritos ({enrollments.length})</h3>
-            </div>
-            
-            {enrollments.length > 0 && (
-              <div style={{ marginBottom: '1rem' }}>
-                <input
-                  type="text"
-                  placeholder="Buscar por email, nombre o apellido..."
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    padding: '0.75rem',
-                    fontSize: '1rem',
-                    border: '2px solid var(--border)',
-                    borderRadius: '8px'
-                  }}
-                />
-                {studentSearch && (
-                  <p className="notice" style={{ marginTop: '0.5rem' }}>
-                    Mostrando {filteredEnrollments.length} de {enrollments.length} estudiantes
-                  </p>
-                )}
-              </div>
-            )}
-
-            {enrollments.length === 0 ? (
-              <p className="notice">No hay estudiantes inscritos en esta materia. Inscribe al primero usando el formulario arriba.</p>
-            ) : filteredEnrollments.length === 0 ? (
-              <p className="notice">No se encontraron estudiantes que coincidan con "{studentSearch}"</p>
-            ) : (
-              <div className="data-table">
-                <table className="table mobile-card-view">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Correo</th>
-                      <th>Nombre Completo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredEnrollments.map((e, index) => (
-                      <tr key={e.id}>
-                        <td data-label="#">{index + 1}</td>
-                        <td data-label="Correo">{e.student.email}</td>
-                        <td data-label="Nombre">{e.student.first_name} {e.student.last_name}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -1038,35 +1127,6 @@ export default function SubjectDetail() {
         <div className="card">
           <h2>{user?.role === 'STUDENT' ? 'Mis Resultados' : 'Resultados y Dashboard'}</h2>
           
-          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
-            <>
-              <div style={{ marginBottom: '2rem' }}>
-                <h3>Cargar Resultados desde CSV</h3>
-                <CSVUpload
-                  label="Cargar resultados (columnas: student_email, exercise_name, status)"
-                  uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
-                  onComplete={loadAll}
-                />
-                <p className="notice" style={{ marginTop: '0.5rem' }}>
-                  💡 Los ejercicios se crean automáticamente si no existen al subir el CSV
-                </p>
-              </div>
-
-              {/* Asignar Resultado Individual */}
-              <div style={{ marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-                  <h3 style={{ margin: 0 }}>Asignar Resultado Individual</h3>
-                  <button className="btn" onClick={openCreateResultForm}>
-                    Nuevo Resultado
-                  </button>
-                </div>
-                <p className="notice" style={{ margin: 0 }}>
-                  Asigna resultados manualmente seleccionando un estudiante y un ejercicio
-                </p>
-              </div>
-            </>
-          )}
-
           <div>
             {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
               <>
@@ -1272,7 +1332,7 @@ export default function SubjectDetail() {
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>Estudiante</th>}
                           <th>Ejercicio</th>
                           <th style={{ width: '120px' }}>Estado</th>
-                          <th style={{ width: '100px' }}>Archivo</th>
+                          <th style={{ width: '200px' }}>Solución</th>
                           <th style={{ width: '250px', maxWidth: '250px' }}>Comentarios</th>
                           <th style={{ width: '150px' }}>Actualizado</th>
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th style={{ width: '100px' }}>Acción</th>}
@@ -1296,14 +1356,38 @@ export default function SubjectDetail() {
                             <td data-label="Estado">
                               <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
                             </td>
-                            <td data-label="Archivo">
-                                {result.submission_file ? (
-                                    <a href={result.submission_file} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline'}}>
-                                        Descargar
-                                    </a>
-                                ) : (
-                                    <span style={{color: 'var(--text-muted)', fontSize: '0.85rem'}}>-</span>
-                                )}
+                            <td data-label="Solución">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                  {result.submission_file && (
+                                      <a href={result.submission_file} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary)', textDecoration: 'underline', fontSize: '0.9rem'}}>
+                                          📄 Descargar Archivo
+                                      </a>
+                                  )}
+                                  {result.submission_text && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setViewingSubmission(result)}
+                                        style={{
+                                          background: 'none',
+                                          border: 'none',
+                                          padding: 0,
+                                          color: 'var(--primary)',
+                                          textDecoration: 'underline',
+                                          cursor: 'pointer',
+                                          fontSize: '0.9rem',
+                                          textAlign: 'left',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '0.25rem'
+                                        }}
+                                      >
+                                        📝 Ver Texto
+                                      </button>
+                                  )}
+                                  {!result.submission_file && !result.submission_text && (
+                                      <span style={{color: 'var(--text-muted)', fontSize: '0.85rem'}}>-</span>
+                                  )}
+                                </div>
                             </td>
                             <td data-label="Comentarios" style={{ 
                               fontSize: '0.85rem', 
@@ -1345,6 +1429,35 @@ export default function SubjectDetail() {
                   </div>
                 )}
               </div>
+            )}
+
+            {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+              <>
+                {/* Asignar Resultado Individual */}
+                <div style={{ marginTop: '3rem', marginBottom: '2rem', padding: 'var(--space-lg)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-primary)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+                    <h3 style={{ margin: 0 }}>Asignar Resultado Individual</h3>
+                    <button className="btn" onClick={openCreateResultForm}>
+                      Nuevo Resultado
+                    </button>
+                  </div>
+                  <p className="notice" style={{ margin: 0 }}>
+                    Asigna resultados manualmente seleccionando un estudiante y un ejercicio
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '2rem' }}>
+                  <h3>Cargar Resultados desde CSV</h3>
+                  <CSVUpload
+                    label="Cargar resultados (columnas: student_email, exercise_name, status)"
+                    uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
+                    onComplete={loadAll}
+                  />
+                  <p className="notice" style={{ marginTop: '0.5rem' }}>
+                    💡 Los ejercicios se crean automáticamente si no existen al subir el CSV
+                  </p>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -1547,6 +1660,44 @@ export default function SubjectDetail() {
                   </p>
                 </div>
               )}
+
+              {(editingResult.submissionText || editingResult.submissionFile) && (
+                <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--bg)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                  <strong>Entrega del Estudiante:</strong>
+                  
+                  {editingResult.submissionFile && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <a 
+                        href={editingResult.submissionFile} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ color: 'var(--primary)', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        📄 Ver Archivo Adjunto
+                      </a>
+                    </div>
+                  )}
+
+                  {editingResult.submissionText && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Respuesta de Texto:</label>
+                      <div style={{ 
+                        marginTop: '0.25rem', 
+                        padding: '0.5rem', 
+                        background: 'var(--bg-card)', 
+                        borderRadius: '4px',
+                        whiteSpace: 'pre-wrap',
+                        fontSize: '0.9rem',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        border: '1px solid var(--border)'
+                      }}>
+                        {editingResult.submissionText}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <form onSubmit={updateResultStatus}>
@@ -1570,7 +1721,25 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <label style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
+                  <button
+                    type="button"
+                    onClick={generateAIFeedback}
+                    disabled={generatingAI}
+                    className="btn secondary"
+                    style={{ 
+                      padding: '0.25rem 0.75rem', 
+                      fontSize: '0.8rem',
+                      background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+                      color: 'white',
+                      border: 'none'
+                    }}
+                    title="Generar sugerencia usando IA basada en el estado seleccionado"
+                  >
+                    {generatingAI ? '✨ Generando...' : '✨ Generar con IA'}
+                  </button>
+                </div>
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
@@ -1718,7 +1887,25 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <label style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
+                  <button
+                    type="button"
+                    onClick={generateAICreateFeedback}
+                    disabled={generatingAI}
+                    className="btn secondary"
+                    style={{ 
+                      padding: '0.25rem 0.75rem', 
+                      fontSize: '0.8rem',
+                      background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+                      color: 'white',
+                      border: 'none'
+                    }}
+                    title="Generar sugerencia usando IA basada en el estado seleccionado"
+                  >
+                    {generatingAI ? '✨ Generando...' : '✨ Generar con IA'}
+                  </button>
+                </div>
                 <textarea
                   value={createComment}
                   onChange={(e) => setCreateComment(e.target.value)}
@@ -1805,12 +1992,35 @@ export default function SubjectDetail() {
                   type="file" 
                   accept=".pdf,.docx,.xlsx"
                   onChange={(e) => setSubmissionFile(e.target.files[0])}
-                  required
                   style={{
                     width: '100%',
                     padding: '0.75rem',
                     border: '2px solid var(--border)',
                     borderRadius: '8px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <span>- O -</span>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label><strong>Respuesta de Texto (Máx 5000 caracteres)</strong></label>
+                <textarea
+                  value={submissionText}
+                  onChange={(e) => setSubmissionText(e.target.value)}
+                  placeholder="Escribe tu respuesta aquí..."
+                  rows="6"
+                  maxLength={5000}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '1rem',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px',
+                    fontFamily: 'inherit',
+                    resize: 'vertical'
                   }}
                 />
               </div>
@@ -1833,6 +2043,77 @@ export default function SubjectDetail() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* View Submission Text Modal */}
+      {viewingSubmission && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}
+          onClick={() => setViewingSubmission(null)}
+        >
+          <div 
+            className="card modal-responsive" 
+            style={{ 
+              maxWidth: '600px', 
+              width: '100%',
+              margin: '0',
+              animation: 'fadeIn 0.2s ease',
+              maxHeight: '80vh',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ margin: 0 }}>Solución de Texto</h2>
+              <button 
+                onClick={() => setViewingSubmission(null)}
+                style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <p><strong>Estudiante:</strong> {viewingSubmission.student_email}</p>
+              <p><strong>Ejercicio:</strong> {viewingSubmission.exercise_name}</p>
+            </div>
+
+            <div style={{ 
+              flex: 1, 
+              overflowY: 'auto', 
+              padding: '1rem', 
+              background: 'var(--bg-secondary)', 
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              whiteSpace: 'pre-wrap',
+              fontFamily: 'monospace',
+              fontSize: '0.9rem'
+            }}>
+              {viewingSubmission.submission_text}
+            </div>
+
+            <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
+              <button 
+                className="btn secondary" 
+                onClick={() => setViewingSubmission(null)}
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}
