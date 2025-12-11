@@ -79,6 +79,13 @@ export default function NavBar() {
                   Resultados
                 </Link>
               )}
+              <Link 
+                to="/calendar" 
+                className={isActive('/calendar') ? 'active' : ''}
+                onClick={closeMenu}
+              >
+                Calendario
+              </Link>
               <div className="nav-icons">
                 <NotificationBell />
                 <ThemeToggle />

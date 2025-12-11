@@ -20,6 +20,7 @@ import UserProfile from './pages/UserProfile'
 import Home from './pages/Home'
 import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
+import CalendarPage from './pages/Calendar'
 
 export default function App() {
   return (
@@ -73,6 +74,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <CalendarPage />
               </ProtectedRoute>
             }
           />
