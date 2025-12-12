@@ -21,6 +21,7 @@ import Home from './pages/Home'
 import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
 import CalendarPage from './pages/Calendar'
+import Messages from './pages/messaging/Messages'
 
 export default function App() {
   return (
@@ -42,6 +43,14 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/"
             element={

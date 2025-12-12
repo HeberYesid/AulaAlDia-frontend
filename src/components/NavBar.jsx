@@ -80,6 +80,13 @@ export default function NavBar() {
                 </Link>
               )}
               <Link 
+                to="/messages" 
+                className={isActive('/messages') ? 'active' : ''}
+                onClick={closeMenu}
+              >
+                Mensajes
+              </Link>
+              <Link 
                 to="/calendar" 
                 className={isActive('/calendar') ? 'active' : ''}
                 onClick={closeMenu}
