@@ -65,6 +65,11 @@ export function AuthProvider({ children }) {
     saveAuth(data)
   }
 
+  async function googleLogin(id_token) {
+    const { data } = await api.post('/api/auth/google-login/', { id_token })
+    saveAuth(data)
+  }
+
   async function register(payload) {
     await api.post('/api/auth/register/', payload)
   }
@@ -93,6 +98,7 @@ export function AuthProvider({ children }) {
     refresh, 
     isAuthenticated,
     login, 
+    googleLogin,
     register, 
     logout, 
     updateUser, 

@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import TurnstileCaptcha from './TurnstileCaptcha'
+import { GoogleLogin } from '@react-oauth/google'
 
 export default function Login() {
-  const { login, user } = useAuth()
+  const { login, googleLogin, user } = useAuth()
   const captchaRef = useRef(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,6 +19,24 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setIsLoading(true)
+      await googleLogin(credentialResponse.credential)
+      navigate(from)
+    } catch (err) {
+      console.error('Google Login Error:', err)
+      const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'Error al iniciar sesión con Google'
+      setError(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleError = () => {
+    setError('Error al iniciar sesión con Google')
+  }
 
   // Redirigir al dashboard si ya está autenticado
   useEffect(() => {
@@ -203,6 +222,24 @@ export default function Login() {
             </div>
           )}
         </form>
+
+        <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+          <span style={{ padding: '0 10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>O</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+        </div>
+
+        <div className="google-login-container" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="filled_blue"
+            shape="pill"
+            text="signin_with"
+            locale="es"
+            width="250"
+          />
+        </div>
         
         <div className="auth-footer">
           <p>
