@@ -12,9 +12,12 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.12.2",
     "axios": "1.6.7",
+    "date-fns": "^4.1.0",
     "jwt-decode": "4.0.0",
     "react": "18.2.0",
+    "react-big-calendar": "^1.19.4",
     "react-dom": "18.2.0",
     "react-joyride": "^2.9.3",
     "react-router-dom": "6.22.3"
