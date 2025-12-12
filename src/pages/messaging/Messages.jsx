@@ -159,7 +159,14 @@ const Messages = () => {
                     </>
                 ) : (
                     <div className="no-chat-selected">
-                        Selecciona una conversación o inicia una nueva
+                        <div className="empty-state-content">
+                            <div className="empty-state-icon">💬</div>
+                            <h3>Tus Mensajes</h3>
+                            <p>Selecciona una conversación o inicia una nueva para comenzar a chatear.</p>
+                            <button className="start-chat-btn" onClick={() => setShowNewChatModal(true)}>
+                                Iniciar nueva conversación
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

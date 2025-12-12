@@ -1956,3 +1956,96 @@ form {
   }
 }
 
+/* 
+===============================================
+📅 CALENDAR OVERRIDES (React Big Calendar)
+===============================================
+*/
+
+[data-theme="dark"] .rbc-calendar {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .rbc-off-range-bg {
+  background-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .rbc-today {
+  background-color: var(--bg-hover);
+}
+
+[data-theme="dark"] .rbc-header {
+  border-bottom-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-month-view,
+[data-theme="dark"] .rbc-time-view,
+[data-theme="dark"] .rbc-agenda-view {
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-day-bg + .rbc-day-bg,
+[data-theme="dark"] .rbc-month-row + .rbc-month-row {
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-day-slot .rbc-time-slot {
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-timeslot-group {
+  border-bottom-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-time-content > * + * > * {
+  border-left-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-time-header-content {
+  border-left-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-toolbar button {
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-toolbar button:hover,
+[data-theme="dark"] .rbc-toolbar button:active,
+[data-theme="dark"] .rbc-toolbar button.rbc-active {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .rbc-event {
+  background-color: var(--primary);
+}
+
+/* Fix for the white background in week view today column */
+[data-theme="dark"] .rbc-day-slot.rbc-today {
+  background-color: var(--bg-hover);
+}
+
+/* Fix for off-range text color */
+[data-theme="dark"] .rbc-off-range {
+  color: var(--text-muted);
+}
+
+/* Borders */
+[data-theme="dark"] .rbc-header + .rbc-header,
+[data-theme="dark"] .rbc-day-bg + .rbc-day-bg {
+    border-left-color: var(--border-primary);
+}
+
+/* Current time indicator */
+[data-theme="dark"] .rbc-current-time-indicator {
+  background-color: var(--accent);
+}
+
+/* Show more link */
+[data-theme="dark"] .rbc-show-more {
+  color: var(--accent);
+  background-color: transparent;
+}
+
