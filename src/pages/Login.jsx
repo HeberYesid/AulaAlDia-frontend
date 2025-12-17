@@ -16,6 +16,8 @@ export default function Login() {
   const [turnstileToken, setTurnstileToken] = useState('')
   const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isTeacher, setIsTeacher] = useState(false)
+  const [invitationCode, setInvitationCode] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
@@ -23,7 +25,8 @@ export default function Login() {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setIsLoading(true)
-      await googleLogin(credentialResponse.credential)
+      const role = isTeacher ? 'TEACHER' : 'STUDENT'
+      await googleLogin(credentialResponse.credential, role, invitationCode)
       navigate(from)
     } catch (err) {
       console.error('Google Login Error:', err)
@@ -227,6 +230,38 @@ export default function Login() {
           <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
           <span style={{ padding: '0 10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>O</span>
           <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+        </div>
+
+        {/* Teacher Registration Toggle */}
+        <div style={{ marginBottom: '1rem', padding: '0 1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <input 
+              type="checkbox" 
+              id="teacher-mode" 
+              checked={isTeacher} 
+              onChange={(e) => setIsTeacher(e.target.checked)}
+              style={{ width: 'auto' }}
+            />
+            <label htmlFor="teacher-mode" style={{ cursor: 'pointer', userSelect: 'none' }}>
+              Registrarme como Profesor con Google
+            </label>
+          </div>
+          
+          {isTeacher && (
+            <div className="fade-in" style={{ marginBottom: '1rem' }}>
+              <input 
+                type="text" 
+                placeholder="Código de invitación (Requerido)" 
+                value={invitationCode}
+                onChange={(e) => setInvitationCode(e.target.value)}
+                className="form-control"
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+              />
+              <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.25rem' }}>
+                Ingresa el código de invitación que recibiste para registrarte como profesor.
+              </small>
+            </div>
+          )}
         </div>
 
         <div className="google-login-container" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>

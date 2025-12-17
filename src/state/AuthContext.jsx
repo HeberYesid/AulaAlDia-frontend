@@ -65,8 +65,12 @@ export function AuthProvider({ children }) {
     saveAuth(data)
   }
 
-  async function googleLogin(id_token) {
-    const { data } = await api.post('/api/auth/google-login/', { id_token })
+  async function googleLogin(id_token, role = 'STUDENT', invitation_code = '') {
+    const { data } = await api.post('/api/auth/google-login/', { 
+      id_token,
+      role,
+      invitation_code
+    })
     saveAuth(data)
   }
 
