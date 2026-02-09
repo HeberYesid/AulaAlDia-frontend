@@ -61,7 +61,7 @@ api.interceptors.response.use(
       }
       isRefreshing = true
       try {
-        const { data } = await axios.post(`${API_BASE}/api/auth/token/refresh/`, {
+        const { data } = await axios.post(`${API_BASE}/api/v1/auth/token/refresh/`, {
           refresh: auth.refresh,
         })
         setTokens({ access: data.access })

@@ -49,7 +49,7 @@ export default function RegisterTeacher() {
     }
     
     try {
-      await api.post('/api/auth/register-teacher/', { 
+      await api.post('/api/v1/auth/register-teacher/', { 
         email, 
         password, 
         first_name: firstName, 

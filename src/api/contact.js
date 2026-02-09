@@ -10,6 +10,6 @@ import { api } from './axios'
  * @returns {Promise} - Respuesta del servidor
  */
 export async function sendContactMessage(data) {
-  const response = await api.post('/api/auth/contact/', data)
+  const response = await api.post('/api/v1/auth/contact/', data)
   return response.data
 }

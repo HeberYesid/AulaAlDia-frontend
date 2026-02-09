@@ -61,12 +61,12 @@ export function AuthProvider({ children }) {
   }
 
   async function login(email, password, turnstile_token) {
-    const { data } = await api.post('/api/auth/login/', { email, password, turnstile_token })
+    const { data } = await api.post('/api/v1/auth/login/', { email, password, turnstile_token })
     saveAuth(data)
   }
 
   async function googleLogin(id_token, role = 'STUDENT', invitation_code = '') {
-    const { data } = await api.post('/api/auth/google-login/', { 
+    const { data } = await api.post('/api/v1/auth/google-login/', { 
       id_token,
       role,
       invitation_code
@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
   }
 
   async function register(payload) {
-    await api.post('/api/auth/register/', payload)
+    await api.post('/api/v1/auth/register/', payload)
   }
 
   function logout() {

@@ -83,7 +83,7 @@ export default function SubjectDetail() {
         throw new Error('No se encontró el resultado original')
       }
 
-      const response = await api.post('/api/courses/results/generate-ai-feedback/', {
+      const response = await api.post('/api/v1/courses/results/generate-ai-feedback/', {
         exercise_id: originalResult.exercise, // Corregido: el serializer devuelve 'exercise' como ID
         status: newStatus,
         current_comment: newComment || editingResult.currentComment,
@@ -121,7 +121,7 @@ export default function SubjectDetail() {
       const enrollment = enrollments.find(e => e.id == selectedEnrollmentId)
       const studentEmail = enrollment ? enrollment.student.email : ''
 
-      const response = await api.post('/api/courses/results/generate-ai-feedback/', {
+      const response = await api.post('/api/v1/courses/results/generate-ai-feedback/', {
         exercise_id: selectedExerciseId,
         status: createStatus,
         current_comment: createComment,
@@ -141,11 +141,11 @@ export default function SubjectDetail() {
     setLoading(true)
     try {
       const [s, e, d, ex, results] = await Promise.all([
-        api.get(`/api/courses/subjects/${id}/`),
-        api.get(`/api/courses/subjects/${id}/enrollments/`),
-        api.get(`/api/courses/subjects/${id}/dashboard/`),
-        api.get(`/api/courses/exercises/?subject=${id}`),
-        api.get(`/api/courses/results/?subject=${id}`),
+        api.get(`/api/v1/courses/subjects/${id}/`),
+        api.get(`/api/v1/courses/subjects/${id}/enrollments/`),
+        api.get(`/api/v1/courses/subjects/${id}/dashboard/`),
+        api.get(`/api/v1/courses/exercises/?subject=${id}`),
+        api.get(`/api/v1/courses/results/?subject=${id}`),
       ])
       setSubject(s.data)
       setEnrollments(e.data)
@@ -234,7 +234,7 @@ export default function SubjectDetail() {
       setUserExistsStatus('checking')
       
       try {
-        const response = await api.get(`/api/auth/check-user-exists/?email=${encodeURIComponent(email)}`)
+        const response = await api.get(`/api/v1/auth/check-user-exists/?email=${encodeURIComponent(email)}`)
         setUserExistsStatus('exists')
         setUserExistsInfo(response.data)
       } catch (err) {
@@ -256,7 +256,7 @@ export default function SubjectDetail() {
     setError('')
     setSuccess('')
     try {
-      await api.post(`/api/courses/subjects/${id}/enrollments/`, { student_email: email })
+      await api.post(`/api/v1/courses/subjects/${id}/enrollments/`, { student_email: email })
       setSuccess(`Estudiante ${email} inscrito correctamente`)
       setEmail('')
       setUserExistsStatus(null)
@@ -277,7 +277,7 @@ export default function SubjectDetail() {
   async function exportCSV() {
     setExporting(true)
     try {
-      const response = await api.get(`/api/courses/subjects/${id}/export-csv/`, {
+      const response = await api.get(`/api/v1/courses/subjects/${id}/export-csv/`, {
         responseType: 'blob'
       })
       
@@ -317,7 +317,7 @@ export default function SubjectDetail() {
         formData.append('attachment', newExerciseFile)
       }
       
-      await api.post('/api/courses/exercises/', formData, {
+      await api.post('/api/v1/courses/exercises/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setSuccess(`Ejercicio "${newExerciseName}" creado correctamente`)
@@ -343,7 +343,7 @@ export default function SubjectDetail() {
       return
     }
     try {
-      await api.delete(`/api/courses/exercises/${exerciseId}/`)
+      await api.delete(`/api/v1/courses/exercises/${exerciseId}/`)
       setSuccess(`Ejercicio eliminado correctamente`)
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
@@ -396,7 +396,7 @@ export default function SubjectDetail() {
         formData.append('attachment', editExerciseFile)
       }
       
-      await api.patch(`/api/courses/exercises/${editingExercise.id}/`, formData, {
+      await api.patch(`/api/v1/courses/exercises/${editingExercise.id}/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setSuccess(`Ejercicio "${editExerciseName}" actualizado correctamente`)
@@ -440,7 +440,7 @@ export default function SubjectDetail() {
     if (!editingResult) return
     
     try {
-      await api.patch(`/api/courses/results/${editingResult.resultId}/`, {
+      await api.patch(`/api/v1/courses/results/${editingResult.resultId}/`, {
         status: newStatus,
         comment: newComment
       })
@@ -487,7 +487,7 @@ export default function SubjectDetail() {
     }
     
     try {
-      await api.post('/api/courses/results/', {
+      await api.post('/api/v1/courses/results/', {
         enrollment: selectedEnrollmentId,
         exercise: selectedExerciseId,
         status: createStatus,
@@ -529,7 +529,7 @@ export default function SubjectDetail() {
     if (submissionText) formData.append('submission_text', submissionText)
     
     try {
-        await api.post(`/api/courses/exercises/${uploadingExercise.id}/submit/`, formData, {
+        await api.post(`/api/v1/courses/exercises/${uploadingExercise.id}/submit/`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
         setSuccess('Solución subida correctamente')

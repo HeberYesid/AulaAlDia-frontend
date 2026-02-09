@@ -15,7 +15,7 @@ export default function StudentDashboard() {
   async function loadDashboard() {
     setLoading(true)
     try {
-      const response = await api.get('/api/courses/student-dashboard/')
+      const response = await api.get('/api/v1/courses/student-dashboard/')
       setDashboard(response.data)
     } catch (err) {
       console.error('Error loading dashboard:', err)

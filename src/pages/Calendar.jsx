@@ -39,7 +39,7 @@ export default function CalendarPage() {
 
   const fetchSubjects = async () => {
     try {
-      const { data } = await api.get('/api/courses/subjects/')
+      const { data } = await api.get('/api/v1/courses/subjects/')
       setSubjects(data.results || data)
     } catch (error) {
       console.error('Error fetching subjects:', error)
@@ -53,7 +53,7 @@ export default function CalendarPage() {
       if (selectedSubject) {
         params.subject = selectedSubject
       }
-      const { data } = await api.get('/api/courses/calendar/all_events/', { params })
+      const { data } = await api.get('/api/v1/courses/calendar/all_events/', { params })
       
       // Convert string dates to Date objects
       const formattedEvents = data.map(event => ({

@@ -13,7 +13,7 @@ export default function Verify() {
     }
     async function run() {
       try {
-        await api.get(`/api/auth/verify/?token=${encodeURIComponent(token)}`)
+        await api.get(`/api/v1/auth/verify/?token=${encodeURIComponent(token)}`)
         setStatus('Correo verificado exitosamente. Ya puedes iniciar sesión.')
       } catch (err) {
         setStatus('Token inválido o expirado.')

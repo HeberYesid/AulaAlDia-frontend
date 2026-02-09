@@ -53,7 +53,7 @@ export default function VerifyCode() {
     setMessage('')
 
     try {
-      const response = await api.post('/api/auth/verify-code/', {
+      const response = await api.post('/api/v1/auth/verify-code/', {
         email: email.trim(),
         code: code.trim()
       })
@@ -91,7 +91,7 @@ export default function VerifyCode() {
     setMessage('')
 
     try {
-      const response = await api.post('/api/auth/resend-code/', {
+      const response = await api.post('/api/v1/auth/resend-code/', {
         email: email.trim()
       })
       

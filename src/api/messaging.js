@@ -1,22 +1,22 @@
 import { api } from './axios';
 
 export const getConversations = async () => {
-    const { data } = await api.get('/api/messaging/conversations/');
+    const { data } = await api.get('/api/v1/messaging/conversations/');
     return data;
 };
 
 export const getConversation = async (id) => {
-    const { data } = await api.get(`/api/messaging/conversations/${id}/`);
+    const { data } = await api.get(`/api/v1/messaging/conversations/${id}/`);
     return data;
 };
 
 export const startConversation = async (recipientId) => {
-    const { data } = await api.post('/api/messaging/conversations/start/', { recipient_id: recipientId });
+    const { data } = await api.post('/api/v1/messaging/conversations/start/', { recipient_id: recipientId });
     return data;
 };
 
 export const markAsRead = async (conversationId) => {
-    const { data } = await api.post(`/api/messaging/conversations/${conversationId}/read_all/`);
+    const { data } = await api.post(`/api/v1/messaging/conversations/${conversationId}/read_all/`);
     return data;
 };
 
@@ -34,16 +34,16 @@ export const getMessages = async (conversationId) => {
     // But for the chat window, we need ALL messages.
     // Let's assume we can filter by conversation in the MessageViewSet.
     // I'll update the backend view to support filtering.
-    const { data } = await api.get(`/api/messaging/messages/?conversation=${conversationId}`);
+    const { data } = await api.get(`/api/v1/messaging/messages/?conversation=${conversationId}`);
     return data;
 };
 
 export const sendMessage = async (conversationId, content) => {
-    const { data } = await api.post('/api/messaging/messages/', { conversation_id: conversationId, content });
+    const { data } = await api.post('/api/v1/messaging/messages/', { conversation_id: conversationId, content });
     return data;
 };
 
 export const searchUsers = async (query) => {
-    const { data } = await api.get(`/api/messaging/users/?search=${query}`);
+    const { data } = await api.get(`/api/v1/messaging/users/?search=${query}`);
     return data;
 };

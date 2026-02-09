@@ -14,7 +14,7 @@ export default function MyResults() {
   async function load() {
     setLoading(true)
     try {
-      const { data } = await api.get('/api/courses/my-enrollments/')
+      const { data } = await api.get('/api/v1/courses/my-enrollments/')
       setEnrs(data.enrollments || [])
     } finally {
       setLoading(false)

@@ -29,7 +29,7 @@ export default function ResetPassword() {
     setLoading(true)
 
     try {
-      await api.post('/api/auth/reset-password/', {
+      await api.post('/api/v1/auth/reset-password/', {
         email,
         code,
         new_password: newPassword

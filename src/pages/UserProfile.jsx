@@ -36,7 +36,7 @@ export default function UserProfile() {
   async function loadUserProfile() {
     setLoading(true)
     try {
-      const response = await api.get('/api/auth/profile/')
+      const response = await api.get('/api/v1/auth/profile/')
       setUser(response.data)
       setFirstName(response.data.first_name)
       setLastName(response.data.last_name)
@@ -56,7 +56,7 @@ export default function UserProfile() {
     setSuccess('')
     
     try {
-      const response = await api.patch('/api/auth/profile/', {
+      const response = await api.patch('/api/v1/auth/profile/', {
         first_name: firstName,
         last_name: lastName
       })
@@ -86,7 +86,7 @@ export default function UserProfile() {
     }
 
     try {
-      await api.post('/api/auth/change-password/', {
+      await api.post('/api/v1/auth/change-password/', {
         current_password: currentPassword,
         new_password: newPassword
       })
@@ -120,7 +120,7 @@ export default function UserProfile() {
     }
 
     try {
-      const response = await api.patch('/api/auth/profile/', {
+      const response = await api.patch('/api/v1/auth/profile/', {
         session_timeout: sessionTimeout
       })
       setUser(response.data)

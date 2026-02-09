@@ -20,7 +20,7 @@ export default function Dashboard() {
   async function loadSubjects() {
     setLoading(true)
     try {
-      const { data } = await api.get('/api/courses/subjects/')
+      const { data } = await api.get('/api/v1/courses/subjects/')
       setSubjects(data)
     } finally {
       setLoading(false)
@@ -41,7 +41,7 @@ export default function Dashboard() {
     setError('')
     setSuccess('')
     try {
-      await api.delete(`/api/courses/subjects/${subject.id}/`)
+      await api.delete(`/api/v1/courses/subjects/${subject.id}/`)
       setSuccess(`Materia "${subject.name}" eliminada exitosamente`)
       loadSubjects()
       setTimeout(() => setSuccess(''), 3000)
