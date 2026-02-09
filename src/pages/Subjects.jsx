@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
+import Alert from '../components/Alert'
 
 export default function Subjects() {
   const [items, setItems] = useState([])
@@ -58,16 +59,8 @@ export default function Subjects() {
   return (
     <div>
       {/* Mensajes de éxito/error */}
-      {success && (
-        <div className="alert success" style={{ marginBottom: 'var(--space-lg)' }}>
-          {success}
-        </div>
-      )}
-      {error && (
-        <div className="alert error" style={{ marginBottom: 'var(--space-lg)' }}>
-          {error}
-        </div>
-      )}
+      <Alert type="success" message={success} />
+      <Alert type="error" message={error} />
 
       <div className="grid cols-2 grid-stack-mobile">
         <div className="card">
