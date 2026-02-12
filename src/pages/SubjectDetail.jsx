@@ -859,7 +859,7 @@ export default function SubjectDetail() {
             <h3>Carga Masiva de Estudiantes</h3>
             <CSVUpload
               label="Cargar estudiantes desde CSV (columnas: email, first_name, last_name)"
-              uploadUrl={`/api/courses/subjects/${id}/enrollments/upload-csv/`}
+              uploadUrl={`/api/v1/courses/subjects/${id}/enrollments/upload-csv/`}
               onComplete={loadAll}
             />
           </div>
@@ -1450,7 +1450,7 @@ export default function SubjectDetail() {
                   <h3>Cargar Resultados desde CSV</h3>
                   <CSVUpload
                     label="Cargar resultados (columnas: student_email, exercise_name, status)"
-                    uploadUrl={`/api/courses/subjects/${id}/results/upload-csv/`}
+                    uploadUrl={`/api/v1/courses/subjects/${id}/results/upload-csv/`}
                     onComplete={loadAll}
                   />
                   <p className="notice" style={{ marginTop: '0.5rem' }}>
