@@ -149,8 +149,9 @@ export default function Register() {
         <form onSubmit={onSubmit} className="auth-form">
           <div className="grid cols-2">
             <div className="form-group">
-              <label>Nombres</label>
+              <label htmlFor="reg-first-name">Nombres</label>
               <input 
+                id="reg-first-name"
                 value={firstName} 
                 onChange={(e) => setFirstName(e.target.value)} 
                 type="text"
@@ -159,8 +160,9 @@ export default function Register() {
               />
             </div>
             <div className="form-group">
-              <label>Apellidos</label>
+              <label htmlFor="reg-last-name">Apellidos</label>
               <input 
+                id="reg-last-name"
                 value={lastName} 
                 onChange={(e) => setLastName(e.target.value)} 
                 type="text"
@@ -171,8 +173,9 @@ export default function Register() {
           </div>
           
           <div className="form-group">
-            <label>Correo Electrónico</label>
+            <label htmlFor="reg-email">Correo Electrónico</label>
             <input 
+              id="reg-email"
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               type="email"
@@ -182,9 +185,10 @@ export default function Register() {
           </div>
           
           <div className="form-group">
-            <label>Contraseña</label>
+            <label htmlFor="reg-password">Contraseña</label>
             <div style={{ position: 'relative' }}>
               <input 
+                id="reg-password"
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 type={showPassword ? "text" : "password"}
@@ -210,7 +214,7 @@ export default function Register() {
                   alignItems: 'center',
                   color: 'var(--text-secondary)'
                 }}
-                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
@@ -221,9 +225,10 @@ export default function Register() {
           </div>
           
           <div className="form-group">
-            <label>Confirmar Contraseña</label>
+            <label htmlFor="reg-confirm-password">Confirmar Contraseña</label>
             <div style={{ position: 'relative' }}>
               <input 
+                id="reg-confirm-password"
                 value={confirmPassword} 
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 type={showConfirmPassword ? "text" : "password"}
@@ -249,7 +254,7 @@ export default function Register() {
                   alignItems: 'center',
                   color: 'var(--text-secondary)'
                 }}
-                title={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
               </button>

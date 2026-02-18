@@ -54,8 +54,8 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="loading">
-        <div className="spinner"></div>
-        Cargando dashboard...
+        <div className="spinner" role="status" aria-label="Cargando dashboard..."></div>
+        <span aria-hidden="true">Cargando dashboard...</span>
       </div>
     )
   }

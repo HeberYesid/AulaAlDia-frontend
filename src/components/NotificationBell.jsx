@@ -110,6 +110,7 @@ export default function NotificationBell() {
         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         aria-label={`Notificaciones (${unreadCount} no leídas)`}
+        aria-expanded={showDropdown}
         title="Notificaciones"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -118,6 +119,7 @@ export default function NotificationBell() {
         </svg>
         {unreadCount > 0 && (
           <span
+            aria-hidden="true"
             style={{
               position: 'absolute',
               top: '-5px',
@@ -192,56 +194,63 @@ export default function NotificationBell() {
           </div>
 
           {/* Notifications List */}
-          <div style={{ overflowY: 'auto', flex: 1, background: 'var(--bg-card)' }}>
+          <ul role="list" style={{ overflowY: 'auto', flex: 1, background: 'var(--bg-card)', margin: 0, padding: 0, listStyle: 'none' }}>
             {loading ? (
-              <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <div className="spinner"></div>
-              </div>
+              <li style={{ padding: '2rem', textAlign: 'center' }}>
+                <div className="spinner" role="status" aria-label="Cargando notificaciones"></div>
+              </li>
             ) : notifications.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                <p style={{ fontSize: '2rem', margin: 0 }}></p>
+              <li style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <p style={{ fontSize: '2rem', margin: 0 }} aria-hidden="true"></p>
                 <p>No tienes notificaciones</p>
-              </div>
+              </li>
             ) : (
               notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  onClick={() => handleNotificationClick(notification)}
-                  style={{
-                    padding: '1rem',
-                    borderBottom: '1px solid var(--border-primary)',
-                    cursor: 'pointer',
-                    background: notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)',
-                    transition: 'background 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)'}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                    <strong style={{ fontSize: '0.95rem', flex: 1 }}>{notification.title}</strong>
-                    {!notification.is_read && (
-                      <span
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: 'var(--primary)',
-                          marginLeft: '0.5rem',
-                          flexShrink: 0
-                        }}
-                      ></span>
-                    )}
-                  </div>
-                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {notification.message}
-                  </p>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    {notification.time_ago}
-                  </p>
-                </div>
+                <li key={notification.id} style={{ borderBottom: '1px solid var(--border-primary)' }}>
+                  <button
+                    onClick={() => handleNotificationClick(notification)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '1rem',
+                      cursor: 'pointer',
+                      background: notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)',
+                      transition: 'background 0.2s ease',
+                      border: 'none',
+                      display: 'block',
+                      color: 'inherit',
+                      font: 'inherit'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)'}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                      <strong style={{ fontSize: '0.95rem', flex: 1 }}>{notification.title}</strong>
+                      {!notification.is_read && (
+                        <span
+                          aria-label="No leída"
+                          style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: 'var(--primary)',
+                            marginLeft: '0.5rem',
+                            flexShrink: 0
+                          }}
+                        ></span>
+                      )}
+                    </div>
+                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      {notification.message}
+                    </p>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {notification.time_ago}
+                    </p>
+                  </button>
+                </li>
               ))
             )}
-          </div>
+          </ul>
 
           {/* Footer */}
           {notifications.length > 0 && (

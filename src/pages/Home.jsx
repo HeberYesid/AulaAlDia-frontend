@@ -29,7 +29,7 @@ export default function Home() {
         <h2>Características principales</h2>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">📚</div>
+            <div className="feature-icon" aria-hidden="true">📚</div>
             <h3>Gestión de Asignaturas</h3>
             <p>
               Organiza y administra todas tus asignaturas en un solo lugar.
@@ -38,7 +38,7 @@ export default function Home() {
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">📊</div>
+            <div className="feature-icon" aria-hidden="true">📊</div>
             <h3>Seguimiento de Resultados</h3>
             <p>
               Registra y visualiza el progreso de los estudiantes en tiempo real.
@@ -47,7 +47,7 @@ export default function Home() {
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">✍️</div>
+            <div className="feature-icon" aria-hidden="true">✍️</div>
             <h3>Ejercicios y Evaluaciones</h3>
             <p>
               Crea ejercicios, asigna tareas y evalúa el desempeño de los
@@ -56,7 +56,7 @@ export default function Home() {
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">🔔</div>
+            <div className="feature-icon" aria-hidden="true">🔔</div>
             <h3>Notificaciones en Tiempo Real</h3>
             <p>
               Mantente informado con notificaciones sobre inscripciones,
@@ -65,7 +65,7 @@ export default function Home() {
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">📤</div>
+            <div className="feature-icon" aria-hidden="true">📤</div>
             <h3>Importación CSV</h3>
             <p>
               Carga masiva de estudiantes y resultados mediante archivos CSV
@@ -74,7 +74,7 @@ export default function Home() {
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">👥</div>
+            <div className="feature-icon" aria-hidden="true">👥</div>
             <h3>Roles y Permisos</h3>
             <p>
               Sistema de roles (Estudiante, Profesor, Administrador) con

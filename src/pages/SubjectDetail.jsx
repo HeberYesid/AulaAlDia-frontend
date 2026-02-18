@@ -757,9 +757,10 @@ export default function SubjectDetail() {
           <div style={{ marginTop: '3rem', marginBottom: '2rem' }}>
             <h3>Inscribir Estudiante Individual</h3>
             <form onSubmit={addEnrollment} style={{ maxWidth: '500px' }}>
-              <label>Correo electrónico del estudiante</label>
+              <label htmlFor="enrollment-email">Correo electrónico del estudiante</label>
               <div style={{ position: 'relative' }}>
                 <input 
+                  id="enrollment-email"
                   type="email" 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
@@ -882,8 +883,9 @@ export default function SubjectDetail() {
             ) : (
               <form onSubmit={createExercise} style={{ maxWidth: '700px', padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
                 <div style={{ marginBottom: '1rem' }}>
-                  <label><strong>Nombre del Ejercicio *</strong></label>
+                  <label htmlFor="create-exercise-name"><strong>Nombre del Ejercicio *</strong></label>
                   <input 
+                    id="create-exercise-name"
                     type="text" 
                     value={newExerciseName} 
                     onChange={(e) => setNewExerciseName(e.target.value)} 
@@ -893,8 +895,9 @@ export default function SubjectDetail() {
                 </div>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label><strong>Descripción (Opcional)</strong></label>
+                  <label htmlFor="create-exercise-desc"><strong>Descripción (Opcional)</strong></label>
                   <textarea 
+                    id="create-exercise-desc"
                     value={newExerciseDescription} 
                     onChange={(e) => setNewExerciseDescription(e.target.value)} 
                     placeholder="Describe en qué consiste este ejercicio..."
@@ -912,8 +915,9 @@ export default function SubjectDetail() {
                 </div>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label><strong>Fecha Límite (Opcional)</strong></label>
+                  <label htmlFor="create-exercise-deadline"><strong>Fecha Límite (Opcional)</strong></label>
                   <input 
+                    id="create-exercise-deadline"
                     type="datetime-local" 
                     value={newExerciseDeadline} 
                     onChange={(e) => setNewExerciseDeadline(e.target.value)}
@@ -931,8 +935,9 @@ export default function SubjectDetail() {
                 </div>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label><strong>Archivo Adjunto (Opcional)</strong></label>
+                  <label htmlFor="create-exercise-file"><strong>Archivo Adjunto (Opcional)</strong></label>
                   <input 
+                    id="create-exercise-file"
                     type="file" 
                     onChange={(e) => setNewExerciseFile(e.target.files[0])}
                     style={{
@@ -1480,9 +1485,14 @@ export default function SubjectDetail() {
             padding: '1rem'
           }}
           onClick={closeEditExerciseModal}
+          onKeyDown={(e) => e.key === 'Escape' && closeEditExerciseModal()}
         >
           <div 
-            className="card modal-responsive" 
+            className="card modal-responsive"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-exercise-modal-title"
+            tabIndex={-1}
             style={{ 
               maxWidth: '600px', 
               width: '100%',
@@ -1491,7 +1501,7 @@ export default function SubjectDetail() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>Editar Ejercicio</h2>
+            <h2 id="edit-exercise-modal-title">Editar Ejercicio</h2>
             
             <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
               <p style={{ margin: '0.5rem 0' }}><strong>Ejercicio Original:</strong> {editingExercise.name}</p>
@@ -1511,8 +1521,9 @@ export default function SubjectDetail() {
 
             <form onSubmit={updateExercise}>
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Nombre del Ejercicio *</strong></label>
+                <label htmlFor="edit-exercise-name"><strong>Nombre del Ejercicio *</strong></label>
                 <input
+                  id="edit-exercise-name"
                   type="text"
                   value={editExerciseName}
                   onChange={(e) => setEditExerciseName(e.target.value)}
@@ -1529,8 +1540,9 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Fecha Límite (Opcional)</strong></label>
+                <label htmlFor="edit-exercise-deadline"><strong>Fecha Límite (Opcional)</strong></label>
                 <input
+                  id="edit-exercise-deadline"
                   type="datetime-local"
                   value={editExerciseDeadline}
                   onChange={(e) => setEditExerciseDeadline(e.target.value)}
@@ -1548,8 +1560,9 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Descripción (Opcional)</strong></label>
+                <label htmlFor="edit-exercise-desc"><strong>Descripción (Opcional)</strong></label>
                 <textarea
+                  id="edit-exercise-desc"
                   value={editExerciseDescription}
                   onChange={(e) => setEditExerciseDescription(e.target.value)}
                   placeholder="Descripción detallada del ejercicio, objetivos, requisitos..."
@@ -1567,8 +1580,9 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Archivo Adjunto (Opcional)</strong></label>
+                <label htmlFor="edit-exercise-file"><strong>Archivo Adjunto (Opcional)</strong></label>
                 <input 
+                  id="edit-exercise-file"
                   type="file" 
                   onChange={(e) => setEditExerciseFile(e.target.files[0])}
                   style={{
@@ -1629,9 +1643,14 @@ export default function SubjectDetail() {
             padding: '1rem'
           }}
           onClick={closeEditModal}
+          onKeyDown={(e) => e.key === 'Escape' && closeEditModal()}
         >
           <div 
-            className="card modal-responsive" 
+            className="card modal-responsive"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-result-modal-title"
+            tabIndex={-1}
             style={{ 
               maxWidth: '500px', 
               width: '100%',
@@ -1640,7 +1659,7 @@ export default function SubjectDetail() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>Editar Resultado</h2>
+            <h2 id="edit-result-modal-title">Editar Resultado</h2>
             
             <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
               <p style={{ margin: '0.5rem 0' }}><strong>Estudiante:</strong> {editingResult.studentEmail}</p>
@@ -1702,8 +1721,9 @@ export default function SubjectDetail() {
 
             <form onSubmit={updateResultStatus}>
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Nuevo Estado</strong></label>
+                <label htmlFor="edit-result-status"><strong>Nuevo Estado</strong></label>
                 <select
+                  id="edit-result-status"
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
                   required
@@ -1741,6 +1761,7 @@ export default function SubjectDetail() {
                   </button>
                 </div>
                 <textarea
+                  id="edit-result-comment"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Escribe observaciones, sugerencias o felicitaciones para el estudiante..."
@@ -1805,9 +1826,14 @@ export default function SubjectDetail() {
             padding: '1rem'
           }}
           onClick={closeCreateResultForm}
+          onKeyDown={(e) => e.key === 'Escape' && closeCreateResultForm()}
         >
           <div 
-            className="card modal-responsive" 
+            className="card modal-responsive"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-result-modal-title"
+            tabIndex={-1}
             style={{ 
               maxWidth: '600px', 
               width: '100%',
@@ -1816,7 +1842,7 @@ export default function SubjectDetail() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>Asignar Resultado Individual</h2>
+            <h2 id="create-result-modal-title">Asignar Resultado Individual</h2>
             
             <p className="notice" style={{ marginBottom: '1.5rem' }}>
               Selecciona un estudiante inscrito y un ejercicio existente para asignarle un resultado
@@ -1824,8 +1850,9 @@ export default function SubjectDetail() {
 
             <form onSubmit={createResult}>
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Estudiante</strong></label>
+                <label htmlFor="create-result-student"><strong>Estudiante</strong></label>
                 <select
+                  id="create-result-student"
                   value={selectedEnrollmentId}
                   onChange={(e) => setSelectedEnrollmentId(e.target.value)}
                   required
@@ -1846,8 +1873,9 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Ejercicio</strong></label>
+                <label htmlFor="create-result-exercise"><strong>Ejercicio</strong></label>
                 <select
+                  id="create-result-exercise"
                   value={selectedExerciseId}
                   onChange={(e) => setSelectedExerciseId(e.target.value)}
                   required
@@ -1868,8 +1896,9 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Estado del Resultado</strong></label>
+                <label htmlFor="create-result-status"><strong>Estado del Resultado</strong></label>
                 <select
+                  id="create-result-status"
                   value={createStatus}
                   onChange={(e) => setCreateStatus(e.target.value)}
                   required
@@ -1888,7 +1917,7 @@ export default function SubjectDetail() {
 
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <label style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
+                  <label htmlFor="create-result-comment" style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
                   <button
                     type="button"
                     onClick={generateAICreateFeedback}
@@ -1907,6 +1936,7 @@ export default function SubjectDetail() {
                   </button>
                 </div>
                 <textarea
+                  id="create-result-comment"
                   value={createComment}
                   onChange={(e) => setCreateComment(e.target.value)}
                   placeholder="Escribe observaciones, sugerencias o felicitaciones para el estudiante..."

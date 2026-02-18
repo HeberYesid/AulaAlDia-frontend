@@ -28,8 +28,8 @@ export default function CSVUpload({ label, uploadUrl, onComplete }) {
 
   return (
     <form onSubmit={onSubmit} className="card">
-      <label>{label}</label>
-      <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0])} />
+      <label htmlFor="csv-file-input">{label}</label>
+      <input id="csv-file-input" type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0])} />
       <div className="form-actions">
         <button className="btn" disabled={!file || loading}>{loading ? 'Cargando...' : 'Subir CSV'}</button>
         {message && <span className="notice">{message}</span>}

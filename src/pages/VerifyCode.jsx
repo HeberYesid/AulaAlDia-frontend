@@ -126,8 +126,9 @@ export default function VerifyCode() {
         
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>📧 Correo Electrónico</label>
+            <label htmlFor="verify-email">Correo Electrónico</label>
             <input
+              id="verify-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -137,8 +138,9 @@ export default function VerifyCode() {
           </div>
 
           <div className="form-group">
-            <label>🔢 Código de Verificación</label>
+            <label htmlFor="verify-code">Código de Verificación</label>
             <input
+              id="verify-code"
               type="text"
               value={code}
               onChange={handleCodeChange}

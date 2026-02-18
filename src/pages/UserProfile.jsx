@@ -220,8 +220,9 @@ export default function UserProfile() {
           <form onSubmit={handleUpdateProfile}>
             <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
               <div className="form-group">
-                <label><strong>Nombre</strong></label>
+                <label htmlFor="profile-first-name"><strong>Nombre</strong></label>
                 <input
+                  id="profile-first-name"
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -231,8 +232,9 @@ export default function UserProfile() {
               </div>
 
               <div className="form-group">
-                <label><strong>Apellido</strong></label>
+                <label htmlFor="profile-last-name"><strong>Apellido</strong></label>
                 <input
+                  id="profile-last-name"
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -242,8 +244,9 @@ export default function UserProfile() {
               </div>
 
               <div className="form-group">
-                <label><strong>Email</strong></label>
+                <label htmlFor="profile-email"><strong>Email</strong></label>
                 <input
+                  id="profile-email"
                   type="email"
                   value={email}
                   disabled
@@ -393,8 +396,9 @@ export default function UserProfile() {
           <form onSubmit={handleChangePassword}>
             <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
               <div className="form-group">
-                <label><strong>Contraseña Actual</strong></label>
+                <label htmlFor="profile-current-password"><strong>Contraseña Actual</strong></label>
                 <input
+                  id="profile-current-password"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
@@ -404,8 +408,9 @@ export default function UserProfile() {
               </div>
 
               <div className="form-group">
-                <label><strong>Nueva Contraseña</strong></label>
+                <label htmlFor="profile-new-password"><strong>Nueva Contraseña</strong></label>
                 <input
+                  id="profile-new-password"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -415,8 +420,9 @@ export default function UserProfile() {
               </div>
 
               <div className="form-group">
-                <label><strong>Confirmar Nueva Contraseña</strong></label>
+                <label htmlFor="profile-confirm-password"><strong>Confirmar Nueva Contraseña</strong></label>
                 <input
+                  id="profile-confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -498,8 +504,9 @@ export default function UserProfile() {
           <form onSubmit={handleUpdateTimeout}>
             <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
               <div className="form-group">
-                <label><strong>Tiempo de inactividad (minutos)</strong></label>
+                <label htmlFor="profile-session-timeout"><strong>Tiempo de inactividad (minutos)</strong></label>
                 <input
+                  id="profile-session-timeout"
                   type="number"
                   min="5"
                   max="120"

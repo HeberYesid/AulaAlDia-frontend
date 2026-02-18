@@ -26,10 +26,11 @@ import Messages from './pages/messaging/Messages'
 export default function App() {
   return (
     <div className="app">
+      <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <NavBar />
       <AppTour />
       <TourDebugButton />
-      <main className="container">
+      <main id="main-content" className="container">
         <Routes>
           <Route path="/home" element={<Home />} />
           <Route path="/faq" element={<FAQ />} />

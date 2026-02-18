@@ -77,6 +77,8 @@ export default function StudentDashboard() {
               <div
                 key={subject.subject_id}
                 className="card"
+                role="button"
+                tabIndex={0}
                 style={{
                   padding: 'var(--space-xl)',
                   cursor: 'pointer',
@@ -84,6 +86,7 @@ export default function StudentDashboard() {
                   height: '100%'
                 }}
                 onClick={() => navigate(`/subjects/${subject.subject_id}`)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/subjects/${subject.subject_id}`) } }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)'
                   e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)'
@@ -91,8 +94,7 @@ export default function StudentDashboard() {
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)'
                   e.currentTarget.style.boxShadow = ''
-                }}
-              >
+                }}>
                 {/* Header de la materia */}
                 <div className="subject-header-responsive" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                   <div style={{ textAlign: 'center', width: '100%' }}>
@@ -122,6 +124,8 @@ export default function StudentDashboard() {
               {pending_exercises.map((exercise) => (
                 <div
                   key={exercise.id}
+                  role="button"
+                  tabIndex={0}
                   style={{
                     padding: 'var(--space-md)',
                     background: 'var(--bg-secondary)',
@@ -131,6 +135,7 @@ export default function StudentDashboard() {
                     transition: 'all var(--transition-fast)'
                   }}
                   onClick={() => navigate(`/subjects/${exercise.subject_id}`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/subjects/${exercise.subject_id}`) } }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'var(--bg-hover)'
                     e.currentTarget.style.borderColor = 'var(--primary)'

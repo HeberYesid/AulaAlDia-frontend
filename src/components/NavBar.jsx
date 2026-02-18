@@ -32,8 +32,8 @@ export default function NavBar() {
         <button 
           className={`hamburger-btn ${menuOpen ? 'menu-open' : ''}`}
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Menú"
-        >
+          aria-label="Menú"          aria-expanded={menuOpen}
+          aria-controls="main-nav"        >
           <span>☰</span>
         </button>
 
@@ -42,7 +42,7 @@ export default function NavBar() {
           <div className="menu-overlay" onClick={closeMenu}></div>
         )}
 
-        <nav className={menuOpen ? 'nav-open' : ''}>
+        <nav id="main-nav" className={menuOpen ? 'nav-open' : ''} aria-label="Navegación principal">
           {user ? (
             <>
               {/* Botón de cerrar dentro del menú - solo móvil */}
@@ -57,6 +57,7 @@ export default function NavBar() {
               <Link 
                 to="/" 
                 className={isActive('/') ? 'active' : ''}
+                aria-current={isActive('/') ? 'page' : undefined}
                 onClick={closeMenu}
               >
                 Dashboard
@@ -65,6 +66,7 @@ export default function NavBar() {
                 <Link 
                   to="/subjects" 
                   className={isActive('/subjects') ? 'active' : ''}
+                  aria-current={isActive('/subjects') ? 'page' : undefined}
                   onClick={closeMenu}
                 >
                   Materias
@@ -74,6 +76,7 @@ export default function NavBar() {
                 <Link 
                   to="/my" 
                   className={isActive('/my') ? 'active' : ''}
+                  aria-current={isActive('/my') ? 'page' : undefined}
                   onClick={closeMenu}
                 >
                   Resultados
@@ -82,6 +85,7 @@ export default function NavBar() {
               <Link 
                 to="/messages" 
                 className={isActive('/messages') ? 'active' : ''}
+                aria-current={isActive('/messages') ? 'page' : undefined}
                 onClick={closeMenu}
               >
                 Mensajes
@@ -89,6 +93,7 @@ export default function NavBar() {
               <Link 
                 to="/calendar" 
                 className={isActive('/calendar') ? 'active' : ''}
+                aria-current={isActive('/calendar') ? 'page' : undefined}
                 onClick={closeMenu}
               >
                 Calendario

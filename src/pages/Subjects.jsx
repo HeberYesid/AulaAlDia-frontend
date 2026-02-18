@@ -67,12 +67,12 @@ export default function Subjects() {
           <h2>Crear materia</h2>
           <form onSubmit={createSubject}>
             <div>
-              <label>Código</label>
-              <input value={code} onChange={(e) => setCode(e.target.value)} required placeholder="Ej: PW-2024" />
+              <label htmlFor="subject-code">Código</label>
+              <input id="subject-code" value={code} onChange={(e) => setCode(e.target.value)} required placeholder="Ej: PW-2024" />
             </div>
             <div>
-              <label>Nombre</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Programación Web" />
+              <label htmlFor="subject-name">Nombre</label>
+              <input id="subject-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Programación Web" />
             </div>
             <button className="btn" type="submit">Crear Materia</button>
           </form>

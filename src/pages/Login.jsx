@@ -101,8 +101,9 @@ export default function Login() {
         
         <form onSubmit={onSubmit} className="auth-form">
           <div className="form-group">
-            <label>Correo Electrónico</label>
+            <label htmlFor="login-email">Correo Electrónico</label>
             <input 
+              id="login-email"
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               type="email" 
@@ -113,7 +114,7 @@ export default function Login() {
           
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label>Contraseña</label>
+              <label htmlFor="login-password">Contraseña</label>
               <Link 
                 to="/forgot-password" 
                 style={{ fontSize: '0.85rem', color: 'var(--primary)' }}
@@ -123,6 +124,7 @@ export default function Login() {
             </div>
             <div style={{ position: 'relative' }}>
               <input 
+                id="login-password"
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 type={showPassword ? "text" : "password"}
@@ -147,7 +149,7 @@ export default function Login() {
                   alignItems: 'center',
                   color: 'var(--text-secondary)'
                 }}
-                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
