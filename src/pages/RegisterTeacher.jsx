@@ -118,8 +118,9 @@ export default function RegisterTeacher() {
         
         <form onSubmit={onSubmit} className="auth-form">
           <div className="form-group">
-            <label>🎟️ Código de Invitación</label>
+            <label htmlFor="invitation-code">🎟️ Código de Invitación</label>
             <input 
+              id="invitation-code"
               value={invitationCode} 
               onChange={(e) => setInvitationCode(e.target.value)} 
               type="text"
@@ -139,8 +140,9 @@ export default function RegisterTeacher() {
 
           <div className="grid cols-2">
             <div className="form-group">
-              <label>👤 Nombres</label>
+              <label htmlFor="first-name">👤 Nombres</label>
               <input 
+                id="first-name"
                 value={firstName} 
                 onChange={(e) => setFirstName(e.target.value)} 
                 type="text"
@@ -149,8 +151,9 @@ export default function RegisterTeacher() {
               />
             </div>
             <div className="form-group">
-              <label>👥 Apellidos</label>
+              <label htmlFor="last-name">👥 Apellidos</label>
               <input 
+                id="last-name"
                 value={lastName} 
                 onChange={(e) => setLastName(e.target.value)} 
                 type="text"
@@ -161,8 +164,9 @@ export default function RegisterTeacher() {
           </div>
           
           <div className="form-group">
-            <label>📧 Correo Electrónico</label>
+            <label htmlFor="email">📧 Correo Electrónico</label>
             <input 
+              id="email"
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               type="email"
@@ -175,9 +179,10 @@ export default function RegisterTeacher() {
           </div>
           
           <div className="form-group">
-            <label>🔒 Contraseña</label>
+            <label htmlFor="password">🔒 Contraseña</label>
             <div style={{ position: 'relative' }}>
               <input 
+                id="password"
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 type={showPassword ? "text" : "password"}
@@ -214,9 +219,10 @@ export default function RegisterTeacher() {
           </div>
           
           <div className="form-group">
-            <label>🔒 Confirmar Contraseña</label>
+            <label htmlFor="confirm-password">🔒 Confirmar Contraseña</label>
             <div style={{ position: 'relative' }}>
               <input 
+                id="confirm-password"
                 value={confirmPassword} 
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 type={showConfirmPassword ? "text" : "password"}

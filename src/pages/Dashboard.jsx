@@ -12,11 +12,6 @@ export default function Dashboard() {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
 
-  // Si es estudiante, mostrar StudentDashboard
-  if (user.role === 'STUDENT') {
-    return <StudentDashboard />
-  }
-
   async function loadSubjects() {
     setLoading(true)
     try {
@@ -28,8 +23,16 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
+    if (user.role === 'STUDENT') {
+      return
+    }
     loadSubjects()
   }, [user])
+
+  // Si es estudiante, mostrar StudentDashboard
+  if (user.role === 'STUDENT') {
+    return <StudentDashboard />
+  }
 
   async function deleteSubject(subject) {
     const confirmMessage = `¿Estás seguro de que deseas eliminar la materia "${subject.name}" (${subject.code})?\n\nEsta acción eliminará:\n- Todos los estudiantes inscritos\n- Todos los ejercicios\n- Todos los resultados\n\nEsta acción NO se puede deshacer.`

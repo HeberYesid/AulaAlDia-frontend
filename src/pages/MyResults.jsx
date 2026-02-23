@@ -168,8 +168,9 @@ export default function MyResults() {
             marginBottom: 'var(--space-md)'
           }}>
             <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontSize: 'var(--font-size-sm)' }}>🔍 Buscar</label>
+              <label htmlFor="results-search" style={{ fontSize: 'var(--font-size-sm)' }}>🔍 Buscar</label>
               <input
+                id="results-search"
                 type="text"
                 placeholder="Nombre o código..."
                 value={searchTerm}
@@ -179,8 +180,9 @@ export default function MyResults() {
             </div>
 
             <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontSize: 'var(--font-size-sm)' }}>Filtrar por estado</label>
+              <label htmlFor="results-status-filter" style={{ fontSize: 'var(--font-size-sm)' }}>Filtrar por estado</label>
               <select
+                id="results-status-filter"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 style={{ fontSize: 'var(--font-size-sm)' }}
@@ -193,8 +195,9 @@ export default function MyResults() {
             </div>
 
             <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontSize: 'var(--font-size-sm)' }}>Ordenar por</label>
+              <label htmlFor="results-sort-by" style={{ fontSize: 'var(--font-size-sm)' }}>Ordenar por</label>
               <select
+                id="results-sort-by"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 style={{ fontSize: 'var(--font-size-sm)' }}

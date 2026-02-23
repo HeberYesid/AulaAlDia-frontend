@@ -1486,6 +1486,9 @@ export default function SubjectDetail() {
           }}
           onClick={closeEditExerciseModal}
           onKeyDown={(e) => e.key === 'Escape' && closeEditExerciseModal()}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de editar ejercicio"
         >
           <div 
             className="card modal-responsive"
@@ -1644,6 +1647,9 @@ export default function SubjectDetail() {
           }}
           onClick={closeEditModal}
           onKeyDown={(e) => e.key === 'Escape' && closeEditModal()}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de editar resultado"
         >
           <div 
             className="card modal-responsive"
@@ -1742,7 +1748,7 @@ export default function SubjectDetail() {
 
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <label style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
+                  <label htmlFor="edit-result-comment" style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
                   <button
                     type="button"
                     onClick={generateAIFeedback}
@@ -1827,6 +1833,9 @@ export default function SubjectDetail() {
           }}
           onClick={closeCreateResultForm}
           onKeyDown={(e) => e.key === 'Escape' && closeCreateResultForm()}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de crear resultado"
         >
           <div 
             className="card modal-responsive"
@@ -2001,6 +2010,10 @@ export default function SubjectDetail() {
             padding: '1rem'
           }}
           onClick={() => setUploadingExercise(null)}
+          onKeyDown={(e) => e.key === 'Escape' && setUploadingExercise(null)}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de subir solución"
         >
           <div 
             className="card modal-responsive" 
@@ -2017,8 +2030,9 @@ export default function SubjectDetail() {
             
             <form onSubmit={submitSolution}>
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Seleccionar Archivo (PDF, DOCX, XLSX - Máx 1MB)</strong></label>
+                <label htmlFor="submission-file"><strong>Seleccionar Archivo (PDF, DOCX, XLSX - Máx 1MB)</strong></label>
                 <input 
+                  id="submission-file"
                   type="file" 
                   accept=".pdf,.docx,.xlsx"
                   onChange={(e) => setSubmissionFile(e.target.files[0])}
@@ -2036,8 +2050,9 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label><strong>Respuesta de Texto (Máx 5000 caracteres)</strong></label>
+                <label htmlFor="submission-text"><strong>Respuesta de Texto (Máx 5000 caracteres)</strong></label>
                 <textarea
+                  id="submission-text"
                   value={submissionText}
                   onChange={(e) => setSubmissionText(e.target.value)}
                   placeholder="Escribe tu respuesta aquí..."
@@ -2093,6 +2108,10 @@ export default function SubjectDetail() {
             padding: '1rem'
           }}
           onClick={() => setViewingSubmission(null)}
+          onKeyDown={(e) => e.key === 'Escape' && setViewingSubmission(null)}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de ver solución"
         >
           <div 
             className="card modal-responsive" 

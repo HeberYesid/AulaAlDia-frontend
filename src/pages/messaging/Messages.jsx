@@ -113,10 +113,11 @@ const Messages = () => {
                     {conversations.map(conv => {
                         const other = getOtherParticipant(conv);
                         return (
-                            <div 
+                            <button 
                                 key={conv.id} 
                                 className={`conversation-item ${selectedConversation?.id === conv.id ? 'active' : ''} ${conv.unread_count > 0 ? 'unread' : ''}`}
                                 onClick={() => setSelectedConversation(conv)}
+                                type="button"
                             >
                                 <div className="avatar">{other.first_name?.[0] || other.email?.[0]}</div>
                                 <div className="conv-info">
@@ -126,7 +127,7 @@ const Messages = () => {
                                     </div>
                                 </div>
                                 {conv.unread_count > 0 && <div className="unread-badge">{conv.unread_count}</div>}
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
@@ -172,21 +173,40 @@ const Messages = () => {
             </div>
 
             {showNewChatModal && (
-                <div className="modal-overlay" onClick={() => setShowNewChatModal(false)}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div
+                    className="modal-overlay"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setShowNewChatModal(false);
+                        }
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+                            setShowNewChatModal(false);
+                        }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Cerrar modal de nueva conversación"
+                >
+                    <div className="modal-content">
                         <h3>Nueva Conversación</h3>
                         <input 
                             type="text" 
                             placeholder="Buscar usuario..." 
                             value={searchQuery}
                             onChange={handleSearchUsers}
-                            autoFocus
                         />
                         <div className="search-results">
                             {searchResults.map(u => (
-                                <div key={u.id} className="search-result-item" onClick={() => handleStartConversation(u.id)}>
+                                <button
+                                    key={u.id}
+                                    className="search-result-item"
+                                    onClick={() => handleStartConversation(u.id)}
+                                    type="button"
+                                >
                                     {u.first_name} {u.last_name} ({u.email})
-                                </div>
+                                </button>
                             ))}
                         </div>
                         <button className="close-modal" onClick={() => setShowNewChatModal(false)}>Cerrar</button>

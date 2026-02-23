@@ -39,7 +39,18 @@ export default function NavBar() {
 
         {/* Overlay para cerrar menú al hacer click fuera */}
         {menuOpen && (
-          <div className="menu-overlay" onClick={closeMenu}></div>
+          <div
+            className="menu-overlay"
+            onClick={closeMenu}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+                closeMenu()
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Cerrar menú"
+          ></div>
         )}
 
         <nav id="main-nav" className={menuOpen ? 'nav-open' : ''} aria-label="Navegación principal">
