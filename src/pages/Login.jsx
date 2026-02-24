@@ -282,6 +282,9 @@ export default function Login() {
           <p>
             ¿No tienes cuenta? <Link to="/register" className="link">Regístrate aquí</Link>
           </p>
+          <p>
+            ¿Invitación de padre/tutor? <Link to="/register-tutor" className="link">Regístrate aquí</Link>
+          </p>
         </div>
       </div>
     </div>

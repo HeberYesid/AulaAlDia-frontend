@@ -63,7 +63,7 @@ export default function Dashboard() {
     )
   }
 
-  if (user.role === 'TEACHER' || user.role === 'ADMIN') {
+  if (user.role === 'TEACHER' || user.role === 'ADMIN' || user.role === 'TUTOR') {
     return (
       <div className="fade-in">
         {/* Mensajes de éxito/error */}
@@ -73,10 +73,10 @@ export default function Dashboard() {
         <div className="dashboard-header">
           <div>
             <h1 className="dashboard-title">
-              {user.role === 'ADMIN' ? 'Panel de Administrador' : 'Panel de Profesor'}
+              {user.role === 'ADMIN' ? 'Panel de Administrador' : user.role === 'TEACHER' ? 'Panel de Profesor' : 'Panel de Padre/Tutor'}
             </h1>
             <p className="dashboard-subtitle">
-              {user.role === 'ADMIN' ? 'Acceso completo al sistema' : 'Gestiona tus materias y estudiantes'}
+              {user.role === 'ADMIN' ? 'Acceso completo al sistema' : user.role === 'TEACHER' ? 'Gestiona tus materias y estudiantes' : 'Monitorea el progreso de estudiantes vinculados'}
             </p>
           </div>
           <div className="stats-grid grid-stack-mobile" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
@@ -93,20 +93,24 @@ export default function Dashboard() {
 
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-            <h2>Mis Materias</h2>
-            <Link to="/subjects" className="btn primary">
-              + Nueva Materia
-            </Link>
+            <h2>{user.role === 'TUTOR' ? 'Materias Vinculadas' : 'Mis Materias'}</h2>
+            {(user.role === 'TEACHER' || user.role === 'ADMIN') && (
+              <Link to="/subjects" className="btn primary">
+                + Nueva Materia
+              </Link>
+            )}
           </div>
 
           {subjects.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-icon">📚</div>
-              <h3>No tienes materias creadas</h3>
-              <p>Comienza creando tu primera materia para gestionar estudiantes y ejercicios</p>
-              <Link to="/subjects" className="btn primary" style={{ marginTop: 'var(--space-md)' }}>
-                Crear mi primera materia
-              </Link>
+              <h3>{user.role === 'TUTOR' ? 'No hay materias vinculadas' : 'No tienes materias creadas'}</h3>
+              <p>{user.role === 'TUTOR' ? 'Solicita al administrador vincular estudiantes a tu cuenta de tutor.' : 'Comienza creando tu primera materia para gestionar estudiantes y ejercicios'}</p>
+              {(user.role === 'TEACHER' || user.role === 'ADMIN') && (
+                <Link to="/subjects" className="btn primary" style={{ marginTop: 'var(--space-md)' }}>
+                  Crear mi primera materia
+                </Link>
+              )}
             </div>
           ) : (
             <div className="data-table">
@@ -134,13 +138,15 @@ export default function Dashboard() {
                           >
                             Ver Detalles
                           </Link>
-                          <button
-                            onClick={() => deleteSubject(s)}
-                            className="btn danger"
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                          >
-                            Eliminar
-                          </button>
+                          {(user.role === 'TEACHER' || user.role === 'ADMIN') && (
+                            <button
+                              onClick={() => deleteSubject(s)}
+                              className="btn danger"
+                              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                            >
+                              Eliminar
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

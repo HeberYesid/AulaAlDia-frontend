@@ -352,6 +352,9 @@ export default function Register() {
           <p>
             ¿Eres profesor? <Link to="/register-teacher" className="link">Regístrate con código de invitación</Link>
           </p>
+          <p>
+            ¿Eres padre/tutor? <Link to="/register-tutor" className="link">Regístrate con código de invitación</Link>
+          </p>
         </div>
       </div>
     </div>

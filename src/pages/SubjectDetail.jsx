@@ -165,7 +165,7 @@ export default function SubjectDetail() {
 
   // Establecer tab inicial basado en rol
   useEffect(() => {
-    if (user?.role === 'STUDENT') {
+    if (user?.role === 'STUDENT' || user?.role === 'TUTOR') {
       setActiveTab('results')
     }
   }, [user])
@@ -754,9 +754,10 @@ export default function SubjectDetail() {
             )}
           </div>
 
-          <div style={{ marginTop: '3rem', marginBottom: '2rem' }}>
-            <h3>Inscribir Estudiante Individual</h3>
-            <form onSubmit={addEnrollment} style={{ maxWidth: '500px' }}>
+          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+            <div style={{ marginTop: '3rem', marginBottom: '2rem' }}>
+              <h3>Inscribir Estudiante Individual</h3>
+              <form onSubmit={addEnrollment} style={{ maxWidth: '500px' }}>
               <label htmlFor="enrollment-email">Correo electrónico del estudiante</label>
               <div style={{ position: 'relative' }}>
                 <input 
@@ -850,20 +851,23 @@ export default function SubjectDetail() {
                 </div>
               )}
               
-              <button className="btn" type="submit" style={{ marginTop: '0.75rem', width: '100%' }}>
-                {userExistsStatus === 'exists' ? 'Inscribir Estudiante Existente' : 'Inscribir Estudiante'}
-              </button>
-            </form>
-          </div>
+                <button className="btn" type="submit" style={{ marginTop: '0.75rem', width: '100%' }}>
+                  {userExistsStatus === 'exists' ? 'Inscribir Estudiante Existente' : 'Inscribir Estudiante'}
+                </button>
+              </form>
+            </div>
+          )}
 
-          <div style={{ marginBottom: '2rem' }}>
-            <h3>Carga Masiva de Estudiantes</h3>
-            <CSVUpload
-              label="Cargar estudiantes desde CSV (columnas: email, first_name, last_name)"
-              uploadUrl={`/api/v1/courses/subjects/${id}/enrollments/upload-csv/`}
-              onComplete={loadAll}
-            />
-          </div>
+          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+            <div style={{ marginBottom: '2rem' }}>
+              <h3>Carga Masiva de Estudiantes</h3>
+              <CSVUpload
+                label="Cargar estudiantes desde CSV (columnas: email, first_name, last_name)"
+                uploadUrl={`/api/v1/courses/subjects/${id}/enrollments/upload-csv/`}
+                onComplete={loadAll}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -871,16 +875,17 @@ export default function SubjectDetail() {
         <div className="card">
           <h2>Gestión de Ejercicios</h2>
           
-          <div style={{ marginBottom: '2rem' }}>
-            <h3>Crear Nuevo Ejercicio</h3>
-            {!showExerciseForm ? (
-              <button 
-                className="btn" 
-                onClick={() => setShowExerciseForm(true)}
-              >
-                Crear Ejercicio
-              </button>
-            ) : (
+          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+            <div style={{ marginBottom: '2rem' }}>
+              <h3>Crear Nuevo Ejercicio</h3>
+              {!showExerciseForm ? (
+                <button 
+                  className="btn" 
+                  onClick={() => setShowExerciseForm(true)}
+                >
+                  Crear Ejercicio
+                </button>
+              ) : (
               <form onSubmit={createExercise} style={{ maxWidth: '700px', padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
                 <div style={{ marginBottom: '1rem' }}>
                   <label htmlFor="create-exercise-name"><strong>Nombre del Ejercicio *</strong></label>
@@ -974,8 +979,9 @@ export default function SubjectDetail() {
                   </button>
                 </div>
               </form>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -1100,22 +1106,26 @@ export default function SubjectDetail() {
                             {getDeadlineBadge() || <em style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin fecha límite</em>}
                           </td>
                           <td data-label="Acciones">
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                              <button 
-                                className="btn"
-                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
-                                onClick={() => openEditExerciseModal(ex)}
-                              >
-                                Editar
-                              </button>
-                              <button 
-                                className="btn danger"
-                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
-                                onClick={() => deleteExercise(ex.id, ex.name)}
-                              >
-                                Eliminar
-                              </button>
-                            </div>
+                            {(user?.role === 'TEACHER' || user?.role === 'ADMIN') ? (
+                              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                <button 
+                                  className="btn"
+                                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
+                                  onClick={() => openEditExerciseModal(ex)}
+                                >
+                                  Editar
+                                </button>
+                                <button 
+                                  className="btn danger"
+                                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
+                                  onClick={() => deleteExercise(ex.id, ex.name)}
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            ) : (
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Solo lectura</span>
+                            )}
                           </td>
                         </tr>
                       )

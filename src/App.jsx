@@ -7,6 +7,7 @@ import TourDebugButton from './components/TourDebugButton'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import RegisterTeacher from './pages/RegisterTeacher'
+import RegisterTutor from './pages/RegisterTutor'
 import Verify from './pages/Verify'
 import VerifyCode from './pages/VerifyCode'
 import ForgotPassword from './pages/ForgotPassword'
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/register-teacher" element={<RegisterTeacher />} />
+          <Route path="/register-tutor" element={<RegisterTutor />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/verify-code" element={<VerifyCode />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -47,7 +49,7 @@ export default function App() {
           <Route
             path="/messages"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]}>
                 <Messages />
               </ProtectedRoute>
             }
@@ -100,7 +102,7 @@ export default function App() {
           <Route
             path="/my"
             element={
-              <ProtectedRoute roles={["STUDENT"]}>
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
                 <MyResults />
               </ProtectedRoute>
             }

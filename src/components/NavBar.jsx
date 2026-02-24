@@ -83,24 +83,26 @@ export default function NavBar() {
                   Materias
                 </Link>
               )}
-              {user.role === 'STUDENT' && (
+              {(user.role === 'STUDENT' || user.role === 'TUTOR') && (
                 <Link 
                   to="/my" 
                   className={isActive('/my') ? 'active' : ''}
                   aria-current={isActive('/my') ? 'page' : undefined}
                   onClick={closeMenu}
                 >
-                  Resultados
+                  {user.role === 'TUTOR' ? 'Progreso' : 'Resultados'}
                 </Link>
               )}
-              <Link 
-                to="/messages" 
-                className={isActive('/messages') ? 'active' : ''}
-                aria-current={isActive('/messages') ? 'page' : undefined}
-                onClick={closeMenu}
-              >
-                Mensajes
-              </Link>
+              {user.role !== 'TUTOR' && (
+                <Link 
+                  to="/messages" 
+                  className={isActive('/messages') ? 'active' : ''}
+                  aria-current={isActive('/messages') ? 'page' : undefined}
+                  onClick={closeMenu}
+                >
+                  Mensajes
+                </Link>
+              )}
               <Link 
                 to="/calendar" 
                 className={isActive('/calendar') ? 'active' : ''}
