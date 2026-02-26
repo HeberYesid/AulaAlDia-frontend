@@ -8,7 +8,7 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   const [unreadCount, setUnreadCount] = useState(0)
   const [showDropdown, setShowDropdown] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [dropdownPos, setDropdownPos] = useState({ top: 70, left: 'auto', right: 10 })
+  const [dropdownStyle, setDropdownStyle] = useState({})
   const dropdownRef = useRef(null)
   const buttonRef = useRef(null)
   const navigate = useNavigate()
@@ -71,13 +71,52 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   function toggleDropdown() {
     if (!showDropdown) {
       loadNotifications()
-      if (sidebarMode && buttonRef.current) {
+      if (buttonRef.current) {
         const rect = buttonRef.current.getBoundingClientRect()
-        setDropdownPos({
-          top: Math.max(8, rect.top),
-          left: rect.right + 8,
-          right: 'auto',
-        })
+        const PANEL_WIDTH = 380
+        const MARGIN = 8
+        const vh = window.innerHeight
+
+        if (sidebarMode) {
+          // Open to the right of the sidebar
+          const left = rect.right + MARGIN
+          const spaceBelow = vh - rect.bottom
+          const spaceAbove = rect.bottom // bottom of button = space above if we open upward
+          const panelMaxHeight = Math.min(520, Math.max(spaceAbove, spaceBelow) - 16)
+
+          if (spaceBelow >= 200 || spaceBelow >= spaceAbove) {
+            // open downward from button top
+            setDropdownStyle({
+              position: 'fixed',
+              top: Math.max(8, rect.top),
+              left,
+              bottom: 'auto',
+              width: PANEL_WIDTH,
+              maxHeight: Math.min(520, vh - rect.top - 16),
+            })
+          } else {
+            // open upward from button bottom
+            setDropdownStyle({
+              position: 'fixed',
+              bottom: vh - rect.bottom,
+              left,
+              top: 'auto',
+              width: PANEL_WIDTH,
+              maxHeight: Math.min(520, rect.bottom - 16),
+            })
+          }
+        } else {
+          // Standalone mode: open below the button, aligned right
+          const right = window.innerWidth - rect.right
+          setDropdownStyle({
+            position: 'fixed',
+            top: rect.bottom + MARGIN,
+            right: Math.max(8, right),
+            left: 'auto',
+            width: PANEL_WIDTH,
+            maxHeight: Math.min(520, vh - rect.bottom - MARGIN - 8),
+          })
+        }
       }
     }
     setShowDropdown(!showDropdown)
@@ -212,21 +251,16 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
       {showDropdown && (
         <div
           style={{
-            position: 'fixed',
-            top: sidebarMode ? dropdownPos.top : 70,
-            left: sidebarMode ? dropdownPos.left : 'auto',
-            right: sidebarMode ? 'auto' : 10,
-            width: '400px',
-            maxWidth: 'calc(100vw - 20px)',
+            ...dropdownStyle,
             background: 'var(--bg-card)',
             border: '1px solid var(--border-primary)',
             borderRadius: '12px',
             boxShadow: 'var(--shadow-xl)',
             zIndex: 1000,
-            maxHeight: 'calc(100vh - 90px)',
             display: 'flex',
             flexDirection: 'column',
-            animation: 'fadeIn 0.2s ease'
+            animation: 'fadeIn 0.2s ease',
+            overflow: 'hidden',
           }}
         >
           {/* Header */}
