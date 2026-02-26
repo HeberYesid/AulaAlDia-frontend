@@ -1,13 +1,16 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Bell } from 'lucide-react'
 import { api } from '../api/axios'
 
-export default function NotificationBell() {
+export default function NotificationBell({ sidebarMode = false, collapsed = false }) {
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [showDropdown, setShowDropdown] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [dropdownPos, setDropdownPos] = useState({ top: 70, left: 'auto', right: 10 })
   const dropdownRef = useRef(null)
+  const buttonRef = useRef(null)
   const navigate = useNavigate()
 
   // Load unread count
@@ -68,6 +71,14 @@ export default function NotificationBell() {
   function toggleDropdown() {
     if (!showDropdown) {
       loadNotifications()
+      if (sidebarMode && buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect()
+        setDropdownPos({
+          top: Math.max(8, rect.top),
+          left: rect.right + 8,
+          right: 'auto',
+        })
+      }
     }
     setShowDropdown(!showDropdown)
   }
@@ -95,60 +106,116 @@ export default function NotificationBell() {
 
   return (
     <div ref={dropdownRef} style={{ position: 'relative' }} className="notification-bell">
-      {/* Bell Icon */}
-      <button
-        onClick={toggleDropdown}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          position: 'relative',
-          fontSize: '1.5rem',
-          color: 'var(--text)',
-          transition: 'transform 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        aria-label={`Notificaciones (${unreadCount} no leídas)`}
-        aria-expanded={showDropdown}
-        title="Notificaciones"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-        {unreadCount > 0 && (
-          <span
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: '-5px',
-              right: '-5px',
-              background: 'var(--danger)',
-              color: 'white',
-              borderRadius: '50%',
-              width: '20px',
-              height: '20px',
-              fontSize: '0.7rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              animation: 'pulse 2s infinite'
-            }}
-          >
-            {unreadCount > 9 ? '9+' : unreadCount}
+      {/* Trigger button — sidebar style or standalone style */}
+      {sidebarMode ? (
+        <button
+          ref={buttonRef}
+          onClick={toggleDropdown}
+          className={`sidebar__nav-item${showDropdown ? ' sidebar__nav-item--active' : ''}`}
+          aria-label={`Notificaciones (${unreadCount} no leídas)`}
+          aria-expanded={showDropdown}
+          title={collapsed ? 'Notificaciones' : undefined}
+          style={{ width: '100%' }}
+        >
+          <span className="sidebar__nav-icon" style={{ position: 'relative', flexShrink: 0 }}>
+            <Bell size={20} strokeWidth={1.75} />
+            {unreadCount > 0 && (
+              <span
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: '-6px',
+                  right: '-6px',
+                  background: 'var(--danger)',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '16px',
+                  height: '16px',
+                  fontSize: '0.6rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                }}
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </span>
-        )}
-      </button>
+          {!collapsed && (
+            <span className="sidebar__nav-label">
+              Notificaciones
+              {unreadCount > 0 && (
+                <span style={{
+                  marginLeft: '0.5rem',
+                  background: 'var(--danger)',
+                  color: 'white',
+                  borderRadius: '999px',
+                  padding: '1px 6px',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  verticalAlign: 'middle',
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </span>
+          )}
+        </button>
+      ) : (
+        <button
+          ref={buttonRef}
+          onClick={toggleDropdown}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            position: 'relative',
+            fontSize: '1.5rem',
+            color: 'var(--text)',
+            transition: 'transform 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          aria-label={`Notificaciones (${unreadCount} no leídas)`}
+          aria-expanded={showDropdown}
+          title="Notificaciones"
+        >
+          <Bell size={24} strokeWidth={1.75} />
+          {unreadCount > 0 && (
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-5px',
+                background: 'var(--danger)',
+                color: 'white',
+                borderRadius: '50%',
+                width: '20px',
+                height: '20px',
+                fontSize: '0.7rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                animation: 'pulse 2s infinite'
+              }}
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Dropdown */}
       {showDropdown && (
         <div
           style={{
             position: 'fixed',
-            top: '70px',
-            right: '10px',
+            top: sidebarMode ? dropdownPos.top : 70,
+            left: sidebarMode ? dropdownPos.left : 'auto',
+            right: sidebarMode ? 'auto' : 10,
             width: '400px',
             maxWidth: 'calc(100vw - 20px)',
             background: 'var(--bg-card)',

@@ -4,9 +4,12 @@ import { api } from '../api/axios'
 import { showPasswordChangeToast } from '../utils/toast'
 import { useAuth } from '../state/AuthContext'
 import { resetTour } from '../components/AppTour'
+import ThemeToggle from '../components/ThemeToggle'
+import { useTheme } from '../state/ThemeContext'
 
 export default function UserProfile() {
   const { updateUser } = useAuth()
+  const { isDark } = useTheme()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -601,6 +604,32 @@ export default function UserProfile() {
           }}>
             {user.is_verified ? 'Verificado' : 'Pendiente'}
           </span>
+        </div>
+      </div>
+
+      {/* Appearance Card */}
+      <div className="card">
+        <h2 style={{ marginBottom: 'var(--space-lg)' }}>Apariencia</h2>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: 'var(--space-lg)',
+          background: 'var(--bg-secondary)',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-primary)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-md)'
+        }}>
+          <div>
+            <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Tema de la interfaz
+            </p>
+            <p style={{ margin: '0.25rem 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+              Actualmente: {isDark ? 'Modo oscuro' : 'Modo claro'}
+            </p>
+          </div>
+          <ThemeToggle />
         </div>
       </div>
 

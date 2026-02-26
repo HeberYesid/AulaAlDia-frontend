@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import NavBar from './components/NavBar'
+import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppTour from './components/AppTour'
 import TourDebugButton from './components/TourDebugButton'
@@ -26,10 +26,11 @@ export default function App() {
   return (
     <div className="app">
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
-      <NavBar />
+      <Sidebar />
       <AppTour />
       <TourDebugButton />
-      <main id="main-content" className="container">
+      <div className="app-body">
+        <main id="main-content" className="container">
         <Routes>
           <Route path="/home" element={<Home />} />
           <Route path="/faq" element={<FAQ />} />
@@ -128,6 +129,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      </div>
     </div>
   )
 }
