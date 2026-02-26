@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { sendContactMessage } from '../api/contact'
-import TurnstileCaptcha from './TurnstileCaptcha'
+import TurnstileCaptcha from '../components/TurnstileCaptcha'
 import '../styles.css'
 
 export default function Contact() {

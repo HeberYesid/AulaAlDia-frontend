@@ -2093,3 +2093,282 @@ form {
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
+
+
+/* ========================================
+   RESPONSIVE DASHBOARD STYLES
+   ======================================== */
+
+/* Stats Grid - Desktop: 3 columnas x 2 filas, Mobile: 3 columnas */
+.stats-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  max-width: 100%;
+}
+
+/* Stat cards más compactas en dashboard */
+.stats-grid-responsive .stat-card {
+  padding: 1rem 1.25rem;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stats-grid-responsive .stat-value {
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.stats-grid-responsive .stat-label {
+  line-height: 1.2;
+}
+
+/* Subjects Grid - Desktop: 2 columnas, Mobile: 100% */
+.subjects-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-xl);
+}
+
+/* Subject Header - Desktop: no wrap, Mobile: wrap */
+.subject-header-responsive {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+/* Subject Stats - Desktop: 5 columnas, Mobile: 3 columnas */
+.subject-stats-responsive {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-md);
+}
+
+/* Exercises Grid - Desktop: 2 columnas siempre, Mobile: 1 columna */
+.exercises-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}
+
+/* Text labels - Desktop: texto completo, Mobile: solo emojis */
+.stat-label-desktop,
+.stat-text-desktop {
+  display: block;
+}
+
+.stat-label-mobile,
+.stat-text-mobile {
+  display: none;
+}
+
+/* Mobile Breakpoint (< 768px) */
+@media (max-width: 768px) {
+  .stats-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .stats-grid-responsive .stat-card {
+    padding: var(--space-sm);
+  }
+  
+  .stats-grid-responsive .stat-value {
+    font-size: 1.5rem !important;
+  }
+  
+  .subjects-grid-responsive {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .subject-header-responsive {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .subject-header-responsive > div:first-child {
+    min-width: 200px;
+  }
+  
+  .subject-header-responsive h3 {
+    font-size: 1.1rem !important;
+  }
+  
+  .subject-header-responsive p {
+    font-size: 0.8rem !important;
+  }
+  
+  .subject-header-responsive > div:last-child {
+    min-width: 80px;
+    padding: var(--space-sm) var(--space-md) !important;
+  }
+  
+  .subject-header-responsive > div:last-child > div:first-child {
+    font-size: 1.5rem !important;
+  }
+  
+  .subject-header-responsive > div:last-child > div:last-child {
+    font-size: 0.65rem !important;
+  }
+  
+  .subject-stats-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: var(--space-xs);
+  }
+  
+  .subject-stats-responsive > div {
+    padding: var(--space-sm) !important;
+  }
+  
+  .subject-stats-responsive > div > div:first-child {
+    font-size: 1rem !important;
+  }
+  
+  .exercises-grid-responsive {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .stat-label-desktop,
+  .stat-text-desktop {
+    display: none;
+  }
+  
+  .stat-label-mobile,
+  .stat-text-mobile {
+    display: block;
+  }
+
+  /* Stack grids on mobile */
+  .grid-stack-mobile {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .modal-responsive {
+    width: 95% !important;
+    max-width: none !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--space-md) !important;
+  }
+
+  .tabs-scrollable {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+  }
+  
+  .tabs-scrollable button {
+    flex: 0 0 auto !important;
+    padding: 0.75rem 1.25rem !important;
+  }
+
+  /* Mobile Card View for Tables */
+  .mobile-card-view thead {
+    display: none;
+  }
+
+  .mobile-card-view tbody,
+  .mobile-card-view tr,
+  .mobile-card-view td {
+    display: block;
+    width: 100%;
+  }
+
+  .mobile-card-view tr {
+    margin-bottom: var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .mobile-card-view td {
+    text-align: right;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--border-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mobile-card-view td:last-child {
+    border-bottom: none;
+    justify-content: space-between;
+    padding-top: var(--space-md);
+  }
+
+  .mobile-card-view td[data-label="Acción"],
+  .mobile-card-view td[data-label="Acciones"],
+  .mobile-card-view td[data-label="Action"] {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .mobile-card-view td[data-label="Acción"]::before,
+  .mobile-card-view td[data-label="Acciones"]::before,
+  .mobile-card-view td[data-label="Action"]::before {
+    display: none;
+  }
+
+  .mobile-card-view td[data-label="Acción"] .btn,
+  .mobile-card-view td[data-label="Acciones"] .btn,
+  .mobile-card-view td[data-label="Action"] .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mobile-card-view td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Tablet Breakpoint (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .stats-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  
+  .subjects-grid-responsive {
+    grid-template-columns: 1fr;
+  }
+
+  .exercises-grid-responsive {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Large Desktop Breakpoint (> 1400px) */
+@media (min-width: 1400px) {
+  .stats-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .subjects-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Medium Desktop Breakpoint (> 1025px) */
+@media (min-width: 1025px) {
+  .stats-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

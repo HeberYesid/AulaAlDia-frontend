@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api } from '../api/axios'
-import TurnstileCaptcha from './TurnstileCaptcha'
+import TurnstileCaptcha from '../components/TurnstileCaptcha'
 
 const ROLES = [
   { value: 'STUDENT', label: 'Estudiante' },

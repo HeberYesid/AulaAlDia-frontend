@@ -6,7 +6,6 @@ import { AuthProvider } from './state/AuthContext'
 import { ThemeProvider } from './state/ThemeContext'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import './styles.css'
-import './responsive-dashboard.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
