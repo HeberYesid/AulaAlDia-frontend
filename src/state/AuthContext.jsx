@@ -60,18 +60,15 @@ export function AuthProvider({ children }) {
     setLastActivity(Date.now()) // Resetear actividad al guardar auth
   }
 
-  async function login(email, password, turnstile_token) {
-    const { data } = await api.post('/api/v1/auth/login/', { email, password, turnstile_token })
+  async function login(email, password) {
+    const { data } = await api.post('/api/v1/auth/login/', { email, password })
     saveAuth(data)
   }
 
-  async function googleLogin(id_token, role = 'STUDENT', invitation_code = '') {
-    const { data } = await api.post('/api/v1/auth/google-login/', { 
-      id_token,
-      role,
-      invitation_code
-    })
+  async function googleLogin(id_token) {
+    const { data } = await api.post('/api/v1/auth/google-login/', { id_token })
     saveAuth(data)
+    return data  // caller can read is_new_user
   }
 
   async function register(payload) {

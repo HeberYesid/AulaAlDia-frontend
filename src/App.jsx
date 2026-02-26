@@ -6,9 +6,7 @@ import TourDebugButton from './components/TourDebugButton'
 
 import Login from './pages/Login'
 import Register from './pages/Register'
-import RegisterTeacher from './pages/RegisterTeacher'
-import RegisterTutor from './pages/RegisterTutor'
-import Verify from './pages/Verify'
+import CompleteRegistration from './pages/CompleteRegistration'
 import VerifyCode from './pages/VerifyCode'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
@@ -39,12 +37,22 @@ export default function App() {
           
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/register-teacher" element={<RegisterTeacher />} />
-          <Route path="/register-tutor" element={<RegisterTutor />} />
-          <Route path="/verify" element={<Verify />} />
+          {/* Legacy registration paths — redirect to the unified register page */}
+          <Route path="/register-teacher" element={<Navigate to="/register" replace />} />
+          <Route path="/register-tutor" element={<Navigate to="/register" replace />} />
+          {/* Legacy token-based email verification — no longer used */}
+          <Route path="/verify" element={<Navigate to="/verify-code" replace />} />
           <Route path="/verify-code" element={<VerifyCode />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/complete-registration"
+            element={
+              <ProtectedRoute>
+                <CompleteRegistration />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/messages"

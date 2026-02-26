@@ -1,139 +1,92 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+import { api } from '../api/axios'
 import TurnstileCaptcha from './TurnstileCaptcha'
 
+const ROLES = [
+  { value: 'STUDENT', label: 'Estudiante' },
+  { value: 'TEACHER', label: 'Profesor' },
+  { value: 'TUTOR',   label: 'Padre / Tutor' },
+]
+
+const ENDPOINTS = {
+  STUDENT: '/api/v1/auth/register/',
+  TEACHER: '/api/v1/auth/register-teacher/',
+  TUTOR:   '/api/v1/auth/register-tutor/',
+}
+
 export default function Register() {
-  const { register, user } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const captchaRef = useRef(null)
+
+  const [role, setRole] = useState('STUDENT')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
+  const [invitationCode, setInvitationCode] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  // Redirigir al dashboard si ya está autenticado
   useEffect(() => {
-    if (user) {
-      navigate('/', { replace: true })
-    }
+    if (user) navigate('/', { replace: true })
   }, [user, navigate])
+
+  const needsInvitation = role === 'TEACHER' || role === 'TUTOR'
 
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
-    setMessage('')
-    setIsLoading(true)
-    
+
     if (!turnstileToken) {
-      setError('Por favor completa la verificación de seguridad.')
-      setIsLoading(false)
+      setError('Por favor completa la verificacion de seguridad.')
       return
     }
-    
-    // Validar que las contraseñas coincidan
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden. Por favor verifica.')
-      setIsLoading(false)
+      setError('Las contrasenas no coinciden.')
       return
     }
-    
+
+    setIsLoading(true)
     try {
-      await register({ 
-        email, 
-        password, 
-        first_name: firstName, 
+      const payload = {
+        email,
+        password,
+        first_name: firstName,
         last_name: lastName,
-        turnstile_token: turnstileToken
-      })
-      
-      // Redirigir a la página de verificación por código
-      navigate('/verify-code', { 
-        state: { 
-          email: email,
-          message: 'Registro exitoso. Hemos enviado un código de verificación a tu correo.'
-        }
+        turnstile_token: turnstileToken,
+        ...(needsInvitation && { invitation_code: invitationCode }),
+      }
+      await api.post(ENDPOINTS[role], payload)
+      navigate('/verify-code', {
+        state: {
+          email,
+          message: 'Registro exitoso. Hemos enviado un codigo de verificacion a tu correo.',
+        },
       })
     } catch (err) {
-      console.error('Error en registro:', err)
-      console.error('Error completo:', err.response?.data)
-      
-      // Detectar errores específicos del servidor
-      let errorMessage = 'No se pudo registrar. Verifica los datos.'
-      
-      if (err.response?.data) {
-        const errorData = err.response.data
-        
-        // Error de Turnstile (CAPTCHA)
-        if (errorData.turnstile_token) {
-          if (Array.isArray(errorData.turnstile_token)) {
-            errorMessage = '🤖 ' + errorData.turnstile_token[0]
-          } else {
-            errorMessage = '🤖 ' + errorData.turnstile_token
-          }
-        }
-        // Error de email duplicado
-        else if (errorData.email) {
-          if (Array.isArray(errorData.email)) {
-            errorMessage = errorData.email[0]
-          } else {
-            errorMessage = errorData.email
-          }
-          // Normalizar mensajes comunes de email duplicado
-          if (errorMessage.toLowerCase().includes('already exists') || 
-              errorMessage.toLowerCase().includes('unique')) {
-            errorMessage = 'Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?'
-          }
-        }
-        // Error de username duplicado
-        else if (errorData.username) {
-          errorMessage = 'Este usuario ya existe.'
-        }
-        // Error de contraseña débil
-        else if (errorData.password) {
-          if (Array.isArray(errorData.password)) {
-            errorMessage = ' ' + errorData.password.join(' ')
-          } else {
-            errorMessage = ' ' + errorData.password
-          }
-        }
-        // Error general del servidor
-        else if (errorData.detail) {
-          errorMessage = errorData.detail
-        }
-        // Otros errores de campos
-        else if (errorData.non_field_errors) {
-          errorMessage = Array.isArray(errorData.non_field_errors) 
-            ? errorData.non_field_errors[0] 
-            : errorData.non_field_errors
-        }
-        // Mostrar todos los errores si no coincide con ningún caso
-        else {
-          const allErrors = Object.entries(errorData).map(([field, errors]) => {
-            const errorMsg = Array.isArray(errors) ? errors[0] : errors
-            return `${field}: ${errorMsg}`
-          }).join(', ')
-          if (allErrors) {
-            errorMessage = allErrors
-          }
-        }
+      const d = err.response?.data
+      let msg = 'No se pudo registrar. Verifica los datos.'
+      if (d?.invitation_code) msg = d.invitation_code[0] ?? d.invitation_code
+      else if (d?.email) {
+        msg = d.email[0] ?? d.email
+        if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('unique'))
+          msg = 'Este correo ya esta registrado. Olvidaste tu contrasena?'
       }
-      
-      setError(errorMessage)
-      
-      // Reset captcha on error
+      else if (d?.password) msg = Array.isArray(d.password) ? d.password.join(' ') : d.password
+      else if (d?.turnstile_token) msg = Array.isArray(d.turnstile_token) ? d.turnstile_token[0] : d.turnstile_token
+      else if (d?.detail) msg = d.detail
+      else if (d?.non_field_errors) msg = Array.isArray(d.non_field_errors) ? d.non_field_errors[0] : d.non_field_errors
+      setError(msg)
       setTurnstileToken('')
-      if (captchaRef.current?.reset) {
-        captchaRef.current.reset()
-      }
+      captchaRef.current?.reset?.()
     } finally {
       setIsLoading(false)
     }
@@ -145,216 +98,185 @@ export default function Register() {
         <div className="auth-header">
           <h1><span className="auth-icon"></span> Crear Cuenta</h1>
         </div>
-        
+
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          {ROLES.map((r) => (
+            <button
+              key={r.value}
+              type="button"
+              onClick={() => { setRole(r.value); setError('') }}
+              style={{
+                flex: 1,
+                padding: '0.5rem',
+                borderRadius: 'var(--radius-md)',
+                border: '2px solid',
+                borderColor: role === r.value ? 'var(--primary)' : 'var(--border-color)',
+                background: role === r.value ? 'var(--primary)' : 'var(--bg-card)',
+                color: role === r.value ? '#fff' : 'var(--text-primary)',
+                fontWeight: role === r.value ? '600' : '400',
+                cursor: 'pointer',
+                fontSize: 'var(--font-size-sm)',
+                transition: 'all 0.15s',
+              }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
         <form onSubmit={onSubmit} className="auth-form">
+          {needsInvitation && (
+            <div className="form-group fade-in">
+              <label htmlFor="invitation-code">Codigo de Invitacion</label>
+              <input
+                id="invitation-code"
+                value={invitationCode}
+                onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
+                type="text"
+                placeholder="Codigo recibido por email"
+                required={needsInvitation}
+                style={{ fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '2px' }}
+              />
+              <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
+                Debe coincidir con el email al que fue enviado el codigo
+              </small>
+            </div>
+          )}
+
           <div className="grid cols-2">
             <div className="form-group">
               <label htmlFor="reg-first-name">Nombres</label>
-              <input 
+              <input
                 id="reg-first-name"
-                value={firstName} 
-                onChange={(e) => setFirstName(e.target.value)} 
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 type="text"
                 placeholder="Tu nombre"
-                required 
+                required
               />
             </div>
             <div className="form-group">
               <label htmlFor="reg-last-name">Apellidos</label>
-              <input 
+              <input
                 id="reg-last-name"
-                value={lastName} 
-                onChange={(e) => setLastName(e.target.value)} 
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 type="text"
                 placeholder="Tus apellidos"
-                required 
+                required
               />
             </div>
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="reg-email">Correo Electrónico</label>
-            <input 
+            <label htmlFor="reg-email">Correo Electronico</label>
+            <input
               id="reg-email"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="tu@email.com"
-              required 
+              required
             />
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="reg-password">Contraseña</label>
+            <label htmlFor="reg-password">Contrasena</label>
             <div style={{ position: 'relative' }}>
-              <input 
+              <input
                 id="reg-password"
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                type={showPassword ? "text" : "password"}
-                placeholder="Mínimo 8 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Minimo 8 caracteres"
                 style={{ paddingRight: '2.5rem' }}
                 minLength={8}
-                required 
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '0.5rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '1.2rem',
-                  padding: '0.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: 'var(--text-secondary)'
-                }}
-                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
               >
                 {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
-            <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
-              La contraseña debe tener al menos 8 caracteres
-            </small>
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="reg-confirm-password">Confirmar Contraseña</label>
+            <label htmlFor="reg-confirm-password">Confirmar Contrasena</label>
             <div style={{ position: 'relative' }}>
-              <input 
+              <input
                 id="reg-confirm-password"
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Ingresa la contraseña nuevamente"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Ingresa la contrasena nuevamente"
                 style={{ paddingRight: '2.5rem' }}
                 minLength={8}
-                required 
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '0.5rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '1.2rem',
-                  padding: '0.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: 'var(--text-secondary)'
-                }}
-                aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                aria-label={showConfirmPassword ? 'Ocultar confirmacion' : 'Mostrar confirmacion'}
               >
                 {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
-            {confirmPassword && password !== confirmPassword && (
-              <small style={{ color: 'var(--danger)', fontSize: 'var(--font-size-xs)' }}>
-                Las contraseñas no coinciden
-              </small>
-            )}
-            {confirmPassword && password === confirmPassword && (
-              <small style={{ color: 'var(--success)', fontSize: 'var(--font-size-xs)' }}>
-                Las contraseñas coinciden
+            {confirmPassword && (
+              <small style={{ color: password === confirmPassword ? 'var(--success)' : 'var(--danger)', fontSize: 'var(--font-size-xs)' }}>
+                {password === confirmPassword ? 'Las contrasenas coinciden' : 'Las contrasenas no coinciden'}
               </small>
             )}
           </div>
-          
+
           <div className="form-group">
             <TurnstileCaptcha
               ref={captchaRef}
               onVerify={setTurnstileToken}
-              onError={() => {
-                setTurnstileToken('')
-                setIsCaptchaReady(false)
-              }}
-              onExpire={() => {
-                setTurnstileToken('')
-                setIsCaptchaReady(false)
-              }}
+              onError={() => { setTurnstileToken(''); setIsCaptchaReady(false) }}
+              onExpire={() => { setTurnstileToken(''); setIsCaptchaReady(false) }}
               onReady={() => setIsCaptchaReady(true)}
             />
           </div>
-          
+
           {!isCaptchaReady && (
-            <div style={{ 
-              padding: 'var(--space-sm)', 
-              backgroundColor: 'var(--bg-secondary)', 
-              borderRadius: 'var(--radius-md)',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--text-secondary)',
-              textAlign: 'center'
-            }}>
-              ⏳ Esperando verificación de seguridad...
+            <div style={{ padding: 'var(--space-sm)', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', textAlign: 'center' }}>
+              Esperando verificacion de seguridad...
             </div>
           )}
-          
-          <button 
-            className="btn auth-btn" 
+
+          <button
+            className="btn auth-btn"
             type="submit"
             disabled={isLoading || !isCaptchaReady || !turnstileToken}
           >
             {isLoading ? (
-              <>
-                <div className="spinner"></div>
-                Creando cuenta...
-              </>
-            ) : !isCaptchaReady ? (
-              <>Cargando...</>
-            ) : !turnstileToken ? (
-              <>Completa el captcha</>
-            ) : (
-              <>Crear Cuenta</>
-            )}
+              <><div className="spinner"></div>Creando cuenta...</>
+            ) : !isCaptchaReady ? <>Cargando...</>
+            : !turnstileToken ? <>Completa el captcha</>
+            : <>Crear Cuenta</>}
           </button>
-          
-          {message && (
-            <div className="alert success">
-              ✅ {message}
-            </div>
-          )}
-          
+
           {error && (
             <div className="alert error">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div>❌ {error}</div>
-                {error.includes('ya está registrado') && (
-                  <div style={{ fontSize: '0.9rem' }}>
-                    <Link to="/forgot-password" className="link" style={{ color: 'white', textDecoration: 'underline' }}>
-                      → Recuperar contraseña
-                    </Link>
-                    {' o '}
-                    <Link to="/login" className="link" style={{ color: 'white', textDecoration: 'underline' }}>
-                      → Iniciar sesión
-                    </Link>
-                  </div>
-                )}
-              </div>
+              {error}
+              {error.includes('ya esta registrado') && (
+                <div style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                  <Link to="/forgot-password" style={{ color: 'white', textDecoration: 'underline' }}>Recuperar contrasena</Link>
+                  {' o '}
+                  <Link to="/login" style={{ color: 'white', textDecoration: 'underline' }}>Iniciar sesion</Link>
+                </div>
+              )}
             </div>
           )}
         </form>
-        
+
         <div className="auth-footer">
-          <p>
-            ¿Ya tienes cuenta? <Link to="/login" className="link">Inicia sesión aquí</Link>
-          </p>
-          <p>
-            ¿Eres profesor? <Link to="/register-teacher" className="link">Regístrate con código de invitación</Link>
-          </p>
-          <p>
-            ¿Eres padre/tutor? <Link to="/register-tutor" className="link">Regístrate con código de invitación</Link>
-          </p>
+          <p>Ya tienes cuenta? <Link to="/login" className="link">Inicia sesion aqui</Link></p>
         </div>
       </div>
     </div>
