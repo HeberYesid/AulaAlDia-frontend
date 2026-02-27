@@ -418,8 +418,15 @@ body.sidebar-collapsed .app-body {
 }
 
 .sidebar--collapsed .sidebar__brand {
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: var(--space-md) var(--space-sm);
+  padding: var(--space-sm);
+  gap: var(--space-xs);
+}
+
+.sidebar--collapsed .sidebar__logo {
+  flex: unset;
 }
 
 
