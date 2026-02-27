@@ -5,6 +5,7 @@ import NotificationBell from './NotificationBell'
 import {
   LayoutDashboard,
   BookOpen,
+  BookMarked,
   BarChart2,
   MessageSquare,
   Calendar,
@@ -66,7 +67,7 @@ export default function Sidebar() {
 
   function isActive(path) {
     if (path === '/') return location.pathname === '/'
-    return location.pathname.startsWith(path)
+    return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
   // Don't render sidebar on public/auth pages
@@ -89,6 +90,12 @@ export default function Sidebar() {
       to: '/my',
       label: user.role === 'TUTOR' ? 'Progreso' : 'Resultados',
       icon: BarChart2,
+      show: user.role === 'STUDENT' || user.role === 'TUTOR',
+    },
+    {
+      to: '/my-subjects',
+      label: 'Mis Materias',
+      icon: BookMarked,
       show: user.role === 'STUDENT' || user.role === 'TUTOR',
     },
     {

@@ -15,6 +15,7 @@ import Subjects from './pages/Subjects'
 import SubjectDetail from './pages/SubjectDetail'
 import NotificationsPage from './pages/Notifications'
 import MyResults from './pages/MyResults'
+import MySubjects from './pages/MySubjects'
 import UserProfile from './pages/UserProfile'
 import Home from './pages/Home'
 import FAQ from './pages/FAQ'
@@ -113,6 +114,15 @@ export default function App() {
             element={
               <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
                 <MyResults />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/my-subjects"
+            element={
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
+                <MySubjects />
               </ProtectedRoute>
             }
           />
