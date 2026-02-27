@@ -9,6 +9,7 @@ import {
   BarChart2,
   MessageSquare,
   Calendar,
+  ClipboardList,
   User,
   LogOut,
   ChevronLeft,
@@ -108,6 +109,12 @@ export default function Sidebar() {
       to: '/calendar',
       label: 'Calendario',
       icon: Calendar,
+      show: true,
+    },
+    {
+      to: '/observer',
+      label: 'Observador',
+      icon: ClipboardList,
       show: true,
     },
   ].filter((item) => item.show)

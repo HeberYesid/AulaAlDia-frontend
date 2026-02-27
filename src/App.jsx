@@ -22,6 +22,7 @@ import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
 import CalendarPage from './pages/Calendar'
 import Messages from './pages/messaging/Messages'
+import Observer from './pages/Observer'
 
 export default function App() {
   return (
@@ -105,6 +106,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CalendarPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/observer"
+            element={
+              <ProtectedRoute>
+                <Observer />
               </ProtectedRoute>
             }
           />
