@@ -8,6 +8,8 @@ export function AuthProvider({ children }) {
   const [access, setAccess] = useState(null)
   const [refresh, setRefresh] = useState(null)
   const [lastActivity, setLastActivity] = useState(Date.now())
+  const [lastLoginAt, setLastLoginAt] = useState(null)
+  const [lastLoginIp, setLastLoginIp] = useState(null)
 
   useEffect(() => {
     const raw = localStorage.getItem('auth')
@@ -16,6 +18,8 @@ export function AuthProvider({ children }) {
       setUser(data.user || null)
       setAccess(data.access || null)
       setRefresh(data.refresh || null)
+      setLastLoginAt(data.last_login_at || null)
+      setLastLoginIp(data.last_login_ip || null)
     }
   }, [])
 
@@ -51,12 +55,14 @@ export function AuthProvider({ children }) {
     }
   }, [user, lastActivity])
 
-  function saveAuth({ user, access, refresh }) {
-    const payload = { user, access, refresh }
+  function saveAuth({ user, access, refresh, last_login_at, last_login_ip }) {
+    const payload = { user, access, refresh, last_login_at, last_login_ip }
     localStorage.setItem('auth', JSON.stringify(payload))
     setUser(user)
     setAccess(access)
     setRefresh(refresh)
+    setLastLoginAt(last_login_at || null)
+    setLastLoginIp(last_login_ip || null)
     setLastActivity(Date.now()) // Resetear actividad al guardar auth
   }
 
@@ -98,6 +104,8 @@ export function AuthProvider({ children }) {
     access, 
     refresh, 
     isAuthenticated,
+    lastLoginAt,
+    lastLoginIp,
     login, 
     googleLogin,
     register, 

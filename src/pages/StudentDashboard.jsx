@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
+import WelcomePanel from '../components/WelcomePanel'
 
 export default function StudentDashboard() {
   const [dashboard, setDashboard] = useState(null)
@@ -52,6 +53,8 @@ export default function StudentDashboard() {
 
   return (
     <div className="fade-in">
+      <WelcomePanel />
+
       {/* Header */}
       <div className="dashboard-header">
         <div>

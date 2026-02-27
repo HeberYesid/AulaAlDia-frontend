@@ -4,6 +4,7 @@ import { useAuth } from '../state/AuthContext'
 import { api } from '../api/axios'
 import StudentDashboard from './StudentDashboard'
 import Alert from '../components/Alert'
+import WelcomePanel from '../components/WelcomePanel'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -69,6 +70,8 @@ export default function Dashboard() {
         {/* Mensajes de éxito/error */}
         <Alert type="success" message={success} />
         <Alert type="error" message={error} />
+
+        <WelcomePanel />
 
         <div className="dashboard-header">
           <div>
