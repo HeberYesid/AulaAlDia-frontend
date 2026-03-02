@@ -178,7 +178,7 @@ export default function Observer() {
               aria-expanded={showForm}
               aria-controls="observation-form"
             >
-              {showForm ? 'Cancelar' : '+ Nueva Observación'}
+              {showForm ? 'Cancelar' : ' Nueva Observación'}
             </button>
           )}
         </div>

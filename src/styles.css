@@ -519,6 +519,7 @@ Componente interactivo para alternar entre modo oscuro/claro
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   border: none;
   color: white;
+  text-decoration: none;
   padding: 0.625rem 1.5rem;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -537,6 +538,7 @@ Componente interactivo para alternar entre modo oscuro/claro
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  text-decoration: none;
 }
 
 .btn:active {
