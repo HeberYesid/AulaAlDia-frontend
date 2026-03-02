@@ -53,17 +53,6 @@ export default function StudentDashboard() {
 
   return (
     <div className="fade-in">
-      <WelcomePanel />
-
-      {/* Header */}
-      <div className="dashboard-header">
-        <div>
-          <h1 className="dashboard-title">Mi Dashboard</h1>
-        </div>
-      </div>
-
-
-
       {/* Mis Materias */}
       <div style={{ marginBottom: 'var(--space-xl)' }}>
         <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: '1.5rem', fontWeight: 'bold' }}>
@@ -256,6 +245,8 @@ export default function StudentDashboard() {
           )}
         </div>
       </div>
+
+      <WelcomePanel />
     </div>
   )
 }
