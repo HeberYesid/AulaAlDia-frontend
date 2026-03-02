@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { BookMarked, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
+import StatusBadge from '../components/StatusBadge'
 
 export default function MySubjects() {
+  const navigate = useNavigate()
   const [enrollments, setEnrollments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -27,55 +28,74 @@ export default function MySubjects() {
   }, [])
 
   return (
-    <div className="my-subjects">
-      <header className="my-subjects__header">
-        <BookMarked size={22} strokeWidth={1.75} className="my-subjects__header-icon" />
-        <h1 className="my-subjects__title">Mis Materias</h1>
-      </header>
-
+    <div className="fade-in">
       {loading && (
-        <div className="my-subjects__loading" aria-live="polite">
-          <Loader2 size={24} className="my-subjects__spinner" />
-          <span>Cargando materias…</span>
+        <div className="card">
+          <div className="loading" aria-live="polite">
+            <div className="spinner"></div>
+            <span>Cargando materias...</span>
+          </div>
         </div>
       )}
 
       {!loading && error && (
-        <p className="my-subjects__error" role="alert">
-          {error}
-        </p>
+        <div className="card">
+          <p className="notice" role="alert">{error}</p>
+        </div>
       )}
 
       {!loading && !error && enrollments.length === 0 && (
-        <p className="my-subjects__empty">Aún no estás inscrito en ninguna materia.</p>
+        <div className="card">
+          <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
+            <h2 style={{ margin: '1rem 0', color: 'var(--text-primary)' }}>No estás inscrito en ninguna materia</h2>
+            <p>Contacta con tu profesor para que te inscriba en las materias correspondientes</p>
+          </div>
+        </div>
       )}
 
       {!loading && !error && enrollments.length > 0 && (
-        <ul className="my-subjects__list">
-          {enrollments.map((enr) => {
-            const grade = enr.stats?.grade ?? null
-            return (
-              <li key={enr.enrollment_id} className="my-subjects__card">
-                <Link
-                  to={`/subjects/${enr.subject_id}`}
-                  className="my-subjects__card-link"
-                  aria-label={`Ver materia ${enr.subject_name}`}
-                >
-                  <div className="my-subjects__card-body">
-                    <p className="my-subjects__subject-code">{enr.subject_code}</p>
-                    <p className="my-subjects__subject-name">{enr.subject_name}</p>
-                  </div>
-                  <span
-                    className={`badge ${grade !== null ? 'SCORE' : 'PENDING'} my-subjects__grade-badge`}
-                    title={`Nota: ${grade ?? '-'}`}
-                  >
-                    {grade !== null ? grade.toFixed(1) : '-'} · Nota final
-                  </span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+        <div style={{ marginBottom: 'var(--space-lg)' }}>
+          <div className="card">
+            <div style={{ marginBottom: 'var(--space-lg)' }}>
+              <h2 style={{ marginBottom: 'var(--space-md)' }}>Mis Materias</h2>
+            </div>
+
+            <div className="table-container">
+              <table className="table mobile-card-view">
+                <thead>
+                  <tr>
+                    <th style={{ width: '15%' }}>Código</th>
+                    <th style={{ width: '40%' }}>Materia</th>
+                    <th style={{ width: '12%', textAlign: 'center' }}>Nota</th>
+                    <th style={{ width: '18%', textAlign: 'center' }}>Promedio ejercicios</th>
+                    <th style={{ width: '15%', textAlign: 'center' }}>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enrollments.map((enr) => (
+                    <tr key={enr.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/subjects/${enr.subject_id}`)}>
+                      <td data-label="Código"><strong>{enr.subject_code}</strong></td>
+                      <td data-label="Materia">{enr.subject_name}</td>
+                      <td data-label="Nota" style={{ textAlign: 'center', fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                        {enr.stats?.grade?.toFixed?.(2)}
+                      </td>
+                      <td data-label="Promedio" style={{ textAlign: 'center' }}><StatusBadge status={null} grade={enr.stats?.average_score} /></td>
+                      <td data-label="Acción" style={{ textAlign: 'center' }}>
+                        <button
+                          className="btn secondary"
+                          onClick={(ev) => { ev.stopPropagation(); navigate(`/subjects/${enr.subject_id}`) }}
+                          style={{ padding: '0.4rem 0.8rem', fontSize: 'var(--font-size-sm)' }}
+                        >
+                          Ver
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

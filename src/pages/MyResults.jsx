@@ -1,10 +1,7 @@
 ﻿import { useEffect, useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
-import StatusBadge from '../components/StatusBadge'
 
 export default function MyResults() {
-  const navigate = useNavigate()
   const [enrs, setEnrs] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -125,52 +122,6 @@ export default function MyResults() {
 
   return (
     <div className="fade-in">
-
-
-      {/* Layout responsive: lista completa */}
-      <div style={{ marginBottom: 'var(--space-lg)' }}>
-      <div className="card">
-        <div style={{ marginBottom: 'var(--space-lg)' }}>
-          <h2 style={{ marginBottom: 'var(--space-md)' }}>Mis Materias</h2>
-        </div>
-
-        <div className="table-container">
-            <table className="table mobile-card-view">
-          <thead>
-            <tr>
-              <th style={{ width: '15%' }}>Código</th>
-              <th style={{ width: '40%' }}>Materia</th>
-              <th style={{ width: '12%', textAlign: 'center' }}>Nota</th>
-              <th style={{ width: '18%', textAlign: 'center' }}>Promedio ejercicios</th>
-              <th style={{ width: '15%', textAlign: 'center' }}>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {enrs.map((e) => (
-              <tr key={e.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/subjects/${e.subject_id}`)}>
-                <td data-label="Código"><strong>{e.subject_code}</strong></td>
-                <td data-label="Materia">{e.subject_name}</td>
-                <td data-label="Nota" style={{ textAlign: 'center', fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
-                  {e.stats?.grade?.toFixed?.(2)}
-                </td>
-                <td data-label="Promedio" style={{ textAlign: 'center' }}><StatusBadge status={null} grade={e.stats?.average_score} /></td>
-                <td data-label="Acción" style={{ textAlign: 'center' }}>
-                  <button 
-                    className="btn secondary" 
-                    onClick={(ev) => { ev.stopPropagation(); navigate(`/subjects/${e.subject_id}`); }}
-                    style={{ padding: '0.4rem 0.8rem', fontSize: 'var(--font-size-sm)' }}
-                  >
-                    Ver
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-      </div>
-      </div>
-
       {/* Header con estadísticas globales */}
       {globalStats && (
         <div className="card" style={{ marginTop: 'var(--space-lg)' }}>
