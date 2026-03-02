@@ -7,9 +7,6 @@ export default function MyResults() {
   const navigate = useNavigate()
   const [enrs, setEnrs] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('ALL')
-  const [sortBy, setSortBy] = useState('name') // name, grade, status
 
   async function load() {
     setLoading(true)
@@ -69,41 +66,6 @@ export default function MyResults() {
       unjustifiedAbsences
     }
   }, [enrs])
-
-  // Filtrar y ordenar materias
-  const filteredEnrs = useMemo(() => {
-    let filtered = [...enrs]
-    
-    // Filtro por búsqueda
-    if (searchTerm) {
-      filtered = filtered.filter(e => 
-        e.subject_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.subject_code.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
-    
-    if (statusFilter === 'SCORED') {
-      filtered = filtered.filter(e => (e.stats?.graded_count || 0) > 0)
-    }
-
-    if (statusFilter === 'SUBMITTED') {
-      filtered = filtered.filter(e => (e.stats?.submitted_count || 0) > 0)
-    }
-    
-    // Ordenar
-    filtered.sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.subject_name.localeCompare(b.subject_name)
-      } else if (sortBy === 'grade') {
-        return (b.stats?.grade || 0) - (a.stats?.grade || 0)
-      } else if (sortBy === 'status') {
-        return (b.stats?.average_score || 0) - (a.stats?.average_score || 0)
-      }
-      return 0
-    })
-    
-    return filtered
-  }, [enrs, searchTerm, statusFilter, sortBy])
 
   // Exportar resultados a CSV
   async function exportToCSV() {
@@ -170,69 +132,9 @@ export default function MyResults() {
       <div className="card">
         <div style={{ marginBottom: 'var(--space-lg)' }}>
           <h2 style={{ marginBottom: 'var(--space-md)' }}>Mis Materias</h2>
-          
-          {/* Filtros y búsqueda */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-            gap: 'var(--space-md)',
-            marginBottom: 'var(--space-md)'
-          }}>
-            <div className="form-group" style={{ margin: 0 }}>
-              <label htmlFor="results-search" style={{ fontSize: 'var(--font-size-sm)' }}>🔍 Buscar</label>
-              <input
-                id="results-search"
-                type="text"
-                placeholder="Nombre o código..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ fontSize: 'var(--font-size-sm)' }}
-              />
-            </div>
-
-            <div className="form-group" style={{ margin: 0 }}>
-              <label htmlFor="results-status-filter" style={{ fontSize: 'var(--font-size-sm)' }}>Filtrar por estado</label>
-              <select
-                id="results-status-filter"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                style={{ fontSize: 'var(--font-size-sm)' }}
-              >
-                <option value="ALL">Todos</option>
-                <option value="SCORED">Con notas</option>
-                <option value="SUBMITTED">Con entregas pendientes</option>
-              </select>
-            </div>
-
-            <div className="form-group" style={{ margin: 0 }}>
-              <label htmlFor="results-sort-by" style={{ fontSize: 'var(--font-size-sm)' }}>Ordenar por</label>
-              <select
-                id="results-sort-by"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                style={{ fontSize: 'var(--font-size-sm)' }}
-              >
-                <option value="name">Nombre</option>
-                <option value="grade">Nota (mayor a menor)</option>
-                <option value="status">Promedio ejercicios (mayor a menor)</option>
-              </select>
-            </div>
-          </div>
-
-          {filteredEnrs.length !== enrs.length && (
-            <p className="notice" style={{ margin: '0 0 var(--space-md) 0' }}>
-              Mostrando {filteredEnrs.length} de {enrs.length} materias
-            </p>
-          )}
         </div>
 
-        {filteredEnrs.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: '2rem', margin: 0 }}>🔍</p>
-            <p>No se encontraron materias con los filtros aplicados</p>
-          </div>
-        ) : (
-          <div className="table-container">
+        <div className="table-container">
             <table className="table mobile-card-view">
           <thead>
             <tr>
@@ -244,7 +146,7 @@ export default function MyResults() {
             </tr>
           </thead>
           <tbody>
-            {filteredEnrs.map((e) => (
+            {enrs.map((e) => (
               <tr key={e.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/subjects/${e.subject_id}`)}>
                 <td data-label="Código"><strong>{e.subject_code}</strong></td>
                 <td data-label="Materia">{e.subject_name}</td>
@@ -265,8 +167,7 @@ export default function MyResults() {
             ))}
           </tbody>
         </table>
-          </div>
-        )}
+        </div>
       </div>
       </div>
 
