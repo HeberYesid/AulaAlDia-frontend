@@ -98,8 +98,8 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
             <h2>{user.role === 'TUTOR' ? 'Materias Vinculadas' : 'Mis Materias'}</h2>
             {(user.role === 'TEACHER' || user.role === 'ADMIN') && (
-              <Link to="/subjects" className="btn primary">
-                + Nueva Materia
+              <Link to="/subjects" className="btn primary" style={{ textDecoration: 'none' }}>
+                Nueva Materia
               </Link>
             )}
           </div>
@@ -137,7 +137,7 @@ export default function Dashboard() {
                           <Link 
                             className="btn secondary" 
                             to={`/subjects/${s.id}`}
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', textDecoration: 'none' }}
                           >
                             Ver Detalles
                           </Link>
