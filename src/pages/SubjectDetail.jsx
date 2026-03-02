@@ -22,6 +22,8 @@ export default function SubjectDetail() {
   const [newExerciseDescription, setNewExerciseDescription] = useState('')
   const [newExerciseFile, setNewExerciseFile] = useState(null)
   const [showExerciseForm, setShowExerciseForm] = useState(false)
+  const [academicPeriods, setAcademicPeriods] = useState([])
+  const [selectedPeriod, setSelectedPeriod] = useState('')
   
   // Estados para editar ejercicio
   const [editingExercise, setEditingExercise] = useState(null) // {id, name, deadline, description}
@@ -140,18 +142,27 @@ export default function SubjectDetail() {
   async function loadAll() {
     setLoading(true)
     try {
-      const [s, e, d, ex, results] = await Promise.all([
+      const promises = [
         api.get(`/api/v1/courses/subjects/${id}/`),
         api.get(`/api/v1/courses/subjects/${id}/enrollments/`),
         api.get(`/api/v1/courses/subjects/${id}/dashboard/`),
         api.get(`/api/v1/courses/exercises/?subject=${id}`),
         api.get(`/api/v1/courses/results/?subject=${id}`),
-      ])
+      ]
+      // Teachers/admins also need academic periods for the exercise form
+      if (user?.role === 'TEACHER' || user?.role === 'ADMIN') {
+        promises.push(api.get('/api/v1/courses/academic-periods/?is_closed=false'))
+      }
+      const results = await Promise.all(promises)
+      const [s, e, d, ex, res] = results
       setSubject(s.data)
       setEnrollments(e.data)
       setDash(d.data)
       setExercises(ex.data)
-      setDetailedResults(results.data)
+      setDetailedResults(res.data)
+      if (results[5]) {
+        setAcademicPeriods(results[5].data || [])
+      }
     } catch (err) {
       setError('No se pudo cargar la información de la materia.')
     } finally {
@@ -316,6 +327,9 @@ export default function SubjectDetail() {
       if (newExerciseFile) {
         formData.append('attachment', newExerciseFile)
       }
+      if (selectedPeriod) {
+        formData.append('academic_period', selectedPeriod)
+      }
       
       await api.post('/api/v1/courses/exercises/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -325,6 +339,7 @@ export default function SubjectDetail() {
       setNewExerciseDeadline('')
       setNewExerciseDescription('')
       setNewExerciseFile(null)
+      setSelectedPeriod('')
       setShowExerciseForm(false)
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
@@ -958,6 +973,35 @@ export default function SubjectDetail() {
                   </p>
                 </div>
 
+                {academicPeriods.length > 0 && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label htmlFor="create-exercise-period"><strong>Periodo Académico (Opcional)</strong></label>
+                    <select
+                      id="create-exercise-period"
+                      value={selectedPeriod}
+                      onChange={(e) => setSelectedPeriod(e.target.value)}
+                      aria-label="Seleccionar periodo académico"
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        border: '2px solid var(--border)',
+                        borderRadius: '8px',
+                        fontSize: '1rem'
+                      }}
+                    >
+                      <option value="">Sin periodo asignado</option>
+                      {academicPeriods.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="notice" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                      💡 Asocia este ejercicio a un periodo para que aparezca en los boletines
+                    </p>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button className="btn" type="submit" style={{ flex: 1 }}>
                     Crear Ejercicio
@@ -971,6 +1015,7 @@ export default function SubjectDetail() {
                       setNewExerciseDeadline('')
                       setNewExerciseDescription('')
                       setNewExerciseFile(null)
+                      setSelectedPeriod('')
                       setError('')
                     }}
                     style={{ flex: 1 }}

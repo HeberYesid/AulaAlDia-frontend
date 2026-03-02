@@ -93,6 +93,16 @@ export default function NavBar() {
                   {user.role === 'TUTOR' ? 'Progreso' : 'Resultados'}
                 </Link>
               )}
+              {(user.role === 'STUDENT' || user.role === 'TUTOR') && (
+                <Link 
+                  to="/my-bulletins" 
+                  className={isActive('/my-bulletins') ? 'active' : ''}
+                  aria-current={isActive('/my-bulletins') ? 'page' : undefined}
+                  onClick={closeMenu}
+                >
+                  Boletines
+                </Link>
+              )}
               {user.role !== 'TUTOR' && (
                 <Link 
                   to="/messages" 

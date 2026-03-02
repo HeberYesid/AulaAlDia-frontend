@@ -16,6 +16,7 @@ import SubjectDetail from './pages/SubjectDetail'
 import NotificationsPage from './pages/Notifications'
 import MyResults from './pages/MyResults'
 import MySubjects from './pages/MySubjects'
+import MyBulletins from './pages/MyBulletins'
 import UserProfile from './pages/UserProfile'
 import Home from './pages/Home'
 import FAQ from './pages/FAQ'
@@ -23,6 +24,7 @@ import Contact from './pages/Contact'
 import CalendarPage from './pages/Calendar'
 import Messages from './pages/messaging/Messages'
 import Observer from './pages/Observer'
+import Absences from './pages/Absences'
 
 export default function App() {
   return (
@@ -120,6 +122,15 @@ export default function App() {
           />
 
           <Route
+            path="/absences"
+            element={
+              <ProtectedRoute>
+                <Absences />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/my"
             element={
               <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
@@ -133,6 +144,15 @@ export default function App() {
             element={
               <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
                 <MySubjects />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/my-bulletins"
+            element={
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
+                <MyBulletins />
               </ProtectedRoute>
             }
           />

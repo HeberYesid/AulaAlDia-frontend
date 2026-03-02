@@ -1,0 +1,495 @@
+import { useEffect, useState, useMemo } from 'react'
+import { api } from '../api/axios'
+import StatusBadge from '../components/StatusBadge'
+
+export default function MyBulletins() {
+  const [bulletins, setBulletins] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [selectedYear, setSelectedYear] = useState('ALL')
+  const [expandedBulletinId, setExpandedBulletinId] = useState(null)
+  const [bulletinDetail, setBulletinDetail] = useState(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
+
+  useEffect(() => {
+    loadBulletins()
+  }, [])
+
+  const loadBulletins = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const { data } = await api.get('/api/v1/courses/my-bulletins/')
+      setBulletins(data.bulletins || [])
+    } catch (err) {
+      console.error('Error loading bulletins:', err)
+      setError('No se pudieron cargar los boletines.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadBulletinDetail = async (bulletinId) => {
+    if (expandedBulletinId === bulletinId) {
+      setExpandedBulletinId(null)
+      setBulletinDetail(null)
+      return
+    }
+
+    setLoadingDetail(true)
+    setExpandedBulletinId(bulletinId)
+    try {
+      const { data } = await api.get(`/api/v1/courses/my-bulletins/${bulletinId}/`)
+      setBulletinDetail(data)
+    } catch (err) {
+      console.error('Error loading bulletin detail:', err)
+      setError('No se pudo cargar el detalle del boletín.')
+      setExpandedBulletinId(null)
+    } finally {
+      setLoadingDetail(false)
+    }
+  }
+
+  // Extract unique years for the filter
+  const availableYears = useMemo(() => {
+    const years = [...new Set(bulletins.map((b) => b.year))].sort((a, b) => b - a)
+    return years
+  }, [bulletins])
+
+  // Group bulletins by year
+  const groupedBulletins = useMemo(() => {
+    let filtered = bulletins
+    if (selectedYear !== 'ALL') {
+      filtered = bulletins.filter((b) => b.year === Number(selectedYear))
+    }
+
+    const groups = {}
+    filtered.forEach((b) => {
+      if (!groups[b.year]) {
+        groups[b.year] = []
+      }
+      groups[b.year].push(b)
+    })
+
+    // Sort periods within each year
+    Object.keys(groups).forEach((year) => {
+      groups[year].sort((a, b) => a.period_number - b.period_number)
+    })
+
+    // Return sorted by year descending
+    return Object.entries(groups).sort(([a], [b]) => Number(b) - Number(a))
+  }, [bulletins, selectedYear])
+
+  const handleKeyDownCard = (event, bulletinId) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      loadBulletinDetail(bulletinId)
+    }
+  }
+
+  const getSemaphoreColor = (semaphore) => {
+    switch (semaphore) {
+      case 'GREEN':
+        return 'var(--success)'
+      case 'YELLOW':
+        return 'var(--warning)'
+      case 'RED':
+        return 'var(--danger)'
+      default:
+        return 'var(--text-muted)'
+    }
+  }
+
+  const getGradeColor = (grade) => {
+    const g = parseFloat(grade)
+    if (g >= 4.5) return 'var(--success)'
+    if (g >= 3.0) return 'var(--warning)'
+    return 'var(--danger)'
+  }
+
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="loading">
+          <div className="spinner"></div>
+          <span>Cargando boletines...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error && bulletins.length === 0) {
+    return (
+      <div className="card">
+        <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--danger)' }}>
+          <p style={{ fontSize: '2rem', margin: 0 }}>⚠️</p>
+          <p>{error}</p>
+          <button className="btn primary" onClick={loadBulletins}>
+            Reintentar
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (bulletins.length === 0) {
+    return (
+      <div className="card">
+        <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
+          <p style={{ fontSize: '3rem', margin: 0 }}>📋</p>
+          <h2 style={{ margin: '1rem 0', color: 'var(--text-primary)' }}>
+            No tienes boletines disponibles
+          </h2>
+          <p>Los boletines se generan cuando el administrador cierra un periodo académico.</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fade-in">
+      {/* Header */}
+      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 'var(--space-md)',
+          }}
+        >
+          <div>
+            <h1 style={{ margin: 0, fontSize: 'var(--font-size-3xl)', color: 'var(--text-primary)' }}>
+              📋 Mis Boletines
+            </h1>
+            <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
+              Historial de notas por periodo académico
+            </p>
+          </div>
+
+          {availableYears.length > 1 && (
+            <div className="form-group" style={{ margin: 0, minWidth: '160px' }}>
+              <label htmlFor="year-filter" style={{ fontSize: 'var(--font-size-sm)' }}>
+                Filtrar por año
+              </label>
+              <select
+                id="year-filter"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                aria-label="Filtrar boletines por año"
+              >
+                <option value="ALL">Todos los años</option>
+                {availableYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {error && (
+        <div className="notice danger" style={{ marginBottom: 'var(--space-lg)' }}>
+          {error}
+        </div>
+      )}
+
+      {/* Bulletins grouped by year */}
+      {groupedBulletins.map(([year, yearBulletins]) => (
+        <div key={year} style={{ marginBottom: 'var(--space-xl)' }}>
+          <h2
+            style={{
+              fontSize: 'var(--font-size-xl)',
+              color: 'var(--text-primary)',
+              marginBottom: 'var(--space-md)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-sm)',
+            }}
+          >
+            📅 Año {year}
+          </h2>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: 'var(--space-md)',
+            }}
+          >
+            {yearBulletins.map((bulletin) => (
+              <div key={bulletin.id}>
+                {/* Period card */}
+                <div
+                  className="card"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver boletín ${bulletin.period_label}`}
+                  aria-expanded={expandedBulletinId === bulletin.id}
+                  onClick={() => loadBulletinDetail(bulletin.id)}
+                  onKeyDown={(e) => handleKeyDownCard(e, bulletin.id)}
+                  style={{
+                    cursor: 'pointer',
+                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                    border:
+                      expandedBulletinId === bulletin.id
+                        ? '2px solid var(--primary)'
+                        : '2px solid transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
+                        Periodo {bulletin.period_number}
+                      </h3>
+                      <p
+                        style={{
+                          margin: '0.25rem 0 0 0',
+                          fontSize: 'var(--font-size-sm)',
+                          color: 'var(--text-muted)',
+                        }}
+                      >
+                        {new Date(bulletin.created_at).toLocaleDateString('es-CO', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div
+                        style={{
+                          fontSize: 'var(--font-size-2xl)',
+                          fontWeight: 700,
+                          color: getGradeColor(bulletin.average_grade),
+                        }}
+                      >
+                        {bulletin.average_grade?.toFixed(2) ?? '—'}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 'var(--font-size-sm)',
+                          color: 'var(--text-muted)',
+                        }}
+                      >
+                        Promedio
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 'var(--space-sm)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 'var(--font-size-sm)',
+                        color: 'var(--text-secondary)',
+                      }}
+                    >
+                      {bulletin.total_subjects}{' '}
+                      {bulletin.total_subjects === 1 ? 'materia' : 'materias'}
+                    </span>
+                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+                      {expandedBulletinId === bulletin.id ? '▲ Ocultar' : '▼ Ver detalle'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Expanded detail */}
+                {expandedBulletinId === bulletin.id && (
+                  <div
+                    className="card fade-in"
+                    style={{
+                      marginTop: 'var(--space-sm)',
+                      borderLeft: '4px solid var(--primary)',
+                    }}
+                  >
+                    {loadingDetail ? (
+                      <div className="loading">
+                        <div className="spinner"></div>
+                        <span>Cargando detalle...</span>
+                      </div>
+                    ) : bulletinDetail ? (
+                      <>
+                        <h4
+                          style={{
+                            margin: '0 0 var(--space-md) 0',
+                            color: 'var(--text-primary)',
+                          }}
+                        >
+                          Detalle — {bulletinDetail.period_label}
+                        </h4>
+
+                        <div className="table-container">
+                          <table className="table mobile-card-view">
+                            <thead>
+                              <tr>
+                                <th>Código</th>
+                                <th>Materia</th>
+                                <th style={{ textAlign: 'center' }}>Nota</th>
+                                <th style={{ textAlign: 'center' }}>Estado</th>
+                                <th style={{ textAlign: 'center' }}>🟢</th>
+                                <th style={{ textAlign: 'center' }}>🟡</th>
+                                <th style={{ textAlign: 'center' }}>🔴</th>
+                                <th style={{ textAlign: 'center' }}>Faltas</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {bulletinDetail.entries.map((entry) => (
+                                <tr key={entry.id}>
+                                  <td data-label="Código">
+                                    <strong>{entry.subject_code}</strong>
+                                  </td>
+                                  <td data-label="Materia">{entry.subject_name}</td>
+                                  <td
+                                    data-label="Nota"
+                                    style={{
+                                      textAlign: 'center',
+                                      fontWeight: 700,
+                                      fontSize: 'var(--font-size-lg)',
+                                      color: getGradeColor(entry.grade),
+                                    }}
+                                  >
+                                    {parseFloat(entry.grade).toFixed(2)}
+                                  </td>
+                                  <td data-label="Estado" style={{ textAlign: 'center' }}>
+                                    <StatusBadge status={entry.semaphore} grade={parseFloat(entry.grade)} />
+                                  </td>
+                                  <td data-label="Verdes" style={{ textAlign: 'center', color: 'var(--success)' }}>
+                                    {entry.green_count}
+                                  </td>
+                                  <td data-label="Amarillos" style={{ textAlign: 'center', color: 'var(--warning)' }}>
+                                    {entry.yellow_count}
+                                  </td>
+                                  <td data-label="Rojos" style={{ textAlign: 'center', color: 'var(--danger)' }}>
+                                    {entry.red_count}
+                                  </td>
+                                  <td data-label="Faltas" style={{ textAlign: 'center' }}>
+                                    {entry.absence_count > 0 ? (
+                                      <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
+                                        {entry.absence_count}
+                                        {entry.unjustified_absence_count > 0 && (
+                                          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', display: 'block' }}>
+                                            ({entry.unjustified_absence_count} inj.)
+                                          </span>
+                                        )}
+                                      </span>
+                                    ) : (
+                                      <span style={{ color: 'var(--text-muted)' }}>0</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Observations section */}
+                        {bulletinDetail.entries.some((e) => e.observations_summary) && (
+                          <div style={{ marginTop: 'var(--space-lg)' }}>
+                            <h4
+                              style={{
+                                margin: '0 0 var(--space-md) 0',
+                                color: 'var(--text-primary)',
+                              }}
+                            >
+                              📝 Observaciones
+                            </h4>
+                            {bulletinDetail.entries
+                              .filter((e) => e.observations_summary)
+                              .map((entry) => (
+                                <div
+                                  key={`obs-${entry.id}`}
+                                  style={{
+                                    marginBottom: 'var(--space-md)',
+                                    padding: 'var(--space-md)',
+                                    backgroundColor: 'var(--bg-secondary)',
+                                    borderRadius: 'var(--radius-md)',
+                                    borderLeft: `3px solid ${getSemaphoreColor(entry.semaphore)}`,
+                                  }}
+                                >
+                                  <strong style={{ color: 'var(--text-primary)' }}>
+                                    {entry.subject_code} — {entry.subject_name}
+                                  </strong>
+                                  <pre
+                                    style={{
+                                      margin: '0.5rem 0 0 0',
+                                      whiteSpace: 'pre-wrap',
+                                      fontFamily: 'inherit',
+                                      fontSize: 'var(--font-size-sm)',
+                                      color: 'var(--text-secondary)',
+                                    }}
+                                  >
+                                    {entry.observations_summary}
+                                  </pre>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+
+                        {/* Summary stats */}
+                        <div
+                          className="stats-grid"
+                          style={{
+                            marginTop: 'var(--space-lg)',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                          }}
+                        >
+                          <div className="stat-card">
+                            <div className="stat-value" style={{ color: 'var(--primary)' }}>
+                              {bulletinDetail.entries.length}
+                            </div>
+                            <div className="stat-label">Materias</div>
+                          </div>
+                          <div className="stat-card">
+                            <div
+                              className="stat-value"
+                              style={{
+                                color: getGradeColor(bulletinDetail.average_grade),
+                              }}
+                            >
+                              {bulletinDetail.average_grade?.toFixed(2) ?? '—'}
+                            </div>
+                            <div className="stat-label">Promedio</div>
+                          </div>
+                          <div className="stat-card">
+                            <div className="stat-value" style={{ color: 'var(--success)' }}>
+                              {bulletinDetail.entries.filter((e) => e.semaphore === 'GREEN').length}
+                            </div>
+                            <div className="stat-label">Aprobadas</div>
+                          </div>
+                          <div className="stat-card">
+                            <div className="stat-value" style={{ color: 'var(--danger)' }}>
+                              {bulletinDetail.entries.filter((e) => e.semaphore === 'RED').length}
+                            </div>
+                            <div className="stat-label">Reprobadas</div>
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}

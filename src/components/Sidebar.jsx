@@ -10,6 +10,8 @@ import {
   MessageSquare,
   Calendar,
   ClipboardList,
+  UserX,
+  FileText,
   User,
   LogOut,
   ChevronLeft,
@@ -100,6 +102,12 @@ export default function Sidebar() {
       show: user.role === 'STUDENT' || user.role === 'TUTOR',
     },
     {
+      to: '/my-bulletins',
+      label: 'Boletines',
+      icon: FileText,
+      show: user.role === 'STUDENT' || user.role === 'TUTOR',
+    },
+    {
       to: '/messages',
       label: 'Mensajes',
       icon: MessageSquare,
@@ -115,6 +123,12 @@ export default function Sidebar() {
       to: '/observer',
       label: 'Observador',
       icon: ClipboardList,
+      show: true,
+    },
+    {
+      to: '/absences',
+      label: 'Asistencia',
+      icon: UserX,
       show: true,
     },
   ].filter((item) => item.show)
