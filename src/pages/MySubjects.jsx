@@ -3,19 +3,6 @@ import { Link } from 'react-router-dom'
 import { BookMarked, Loader2 } from 'lucide-react'
 import { api } from '../api/axios'
 
-function gradeStatus(grade) {
-  if (grade === null || grade === undefined) return 'RED'
-  if (grade >= 4.5) return 'GREEN'
-  if (grade >= 3.0) return 'YELLOW'
-  return 'RED'
-}
-
-const STATUS_LABEL = {
-  GREEN: 'Aprobado',
-  YELLOW: 'Suficiente',
-  RED: 'Reprobado',
-}
-
 export default function MySubjects() {
   const [enrollments, setEnrollments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -67,7 +54,6 @@ export default function MySubjects() {
         <ul className="my-subjects__list">
           {enrollments.map((enr) => {
             const grade = enr.stats?.grade ?? null
-            const status = gradeStatus(grade)
             return (
               <li key={enr.enrollment_id} className="my-subjects__card">
                 <Link
@@ -80,10 +66,10 @@ export default function MySubjects() {
                     <p className="my-subjects__subject-name">{enr.subject_name}</p>
                   </div>
                   <span
-                    className={`badge ${status} my-subjects__grade-badge`}
+                    className={`badge ${grade !== null ? 'SCORE' : 'PENDING'} my-subjects__grade-badge`}
                     title={`Nota: ${grade ?? '-'}`}
                   >
-                    {grade !== null ? grade.toFixed(1) : '-'} · {STATUS_LABEL[status]}
+                    {grade !== null ? grade.toFixed(1) : '-'} · Nota final
                   </span>
                 </Link>
               </li>

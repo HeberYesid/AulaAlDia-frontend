@@ -28,21 +28,7 @@ describe('CSVUpload Component', () => {
     renderWithProviders(<CSVUpload label="Cargar Notas" uploadUrl="/test-url" />)
     
     const file = new File(['header1,header2\nval1,val2'], 'test.csv', { type: 'text/csv' })
-    const input = screen.getByLabelText(/Cargar Notas/i).querySelector('input[type="file"]') || screen.getByRole('presentation').querySelector('input[type="file"]')
-    
-    // Simpler way to find the file input if label association is tricky
-    // Note: In the component code: <label>{label}</label><input type="file" ... />
-    // The label is not wrapping the input nor linked by htmlFor/id.
-    // So we need to find it by selector usually. But testing-library prefers semantic queries.
-    // Let's rely on the DOM structure shown in the file read previously.
-    
-    // Re-reading component structure:
-    // <form ...>
-    //   <label>{label}</label>
-    //   <input type="file" ... />
-    // </form>
-    // We can't use getByLabelText because there is no connection.
-    const fileInput = document.querySelector('input[type="file"]')
+    const fileInput = screen.getByLabelText(/Cargar Notas/i)
     
     await user.upload(fileInput, file)
     
@@ -63,7 +49,7 @@ describe('CSVUpload Component', () => {
     )
     
     const file = new File(['content'], 'test.csv', { type: 'text/csv' })
-    const fileInput = document.querySelector('input[type="file"]')
+    const fileInput = screen.getByLabelText(/Cargar Notas/i)
     await user.upload(fileInput, file)
     
     const submitBtn = screen.getByText('Subir CSV')
@@ -86,7 +72,6 @@ describe('CSVUpload Component', () => {
       expect(screen.getByText('Carga realizada con éxito')).toBeInTheDocument()
     })
     
-    expect(loading => loading === false)
     expect(onCompleteMock).toHaveBeenCalledWith({ imported: 5 })
   })
 
@@ -97,7 +82,7 @@ describe('CSVUpload Component', () => {
     renderWithProviders(<CSVUpload label="Cargar Notas" uploadUrl="/test-url" />)
     
     const file = new File(['content'], 'test.csv', { type: 'text/csv' })
-    const fileInput = document.querySelector('input[type="file"]')
+    const fileInput = screen.getByLabelText(/Cargar Notas/i)
     await user.upload(fileInput, file)
     
     const submitBtn = screen.getByText('Subir CSV')

@@ -1,17 +1,25 @@
 export default function StatusBadge({ status, grade }) {
-  // Mapear estados a textos en español
-  const statusText = {
-    'GREEN': 'Aprobado',
-    'YELLOW': 'Suficiente',
-    'RED': 'Reprobado',
-    'SUBMITTED': 'Entregado'
+  const hasScore = grade !== null && grade !== undefined && grade !== ''
+  const parsedScore = hasScore ? Number(grade) : null
+
+  const getBadgeState = () => {
+    if (status === 'SUBMITTED') return 'SUBMITTED'
+    if (hasScore && !Number.isNaN(parsedScore)) return 'SCORE'
+    return 'PENDING'
   }
 
-  const currentStatus = status || 'RED'
-  const displayText = statusText[currentStatus] || 'Reprobado'
+  const getDisplayText = () => {
+    const state = getBadgeState()
+    if (state === 'SUBMITTED') return 'Entregado'
+    if (state === 'SCORE') return `Nota: ${parsedScore.toFixed(2)}`
+    return 'Pendiente'
+  }
+
+  const currentState = getBadgeState()
+  const displayText = getDisplayText()
 
   return (
-    <span className={`badge ${currentStatus}`} title={`Nota: ${grade ?? '-'}`}>
+    <span className={`badge ${currentState}`} title={`Nota: ${hasScore ? parsedScore.toFixed(2) : '-'}`}>
       {displayText}
     </span>
   )

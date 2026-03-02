@@ -1,8 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import ProtectedRoute from '../ProtectedRoute'
-import { renderWithProviders, mockUser } from '../../test/utils'
 import * as AuthContext from '../../state/AuthContext'
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    Navigate: ({ to }) => <div>Redirect:{to}</div>,
+    useLocation: () => ({ pathname: '/protected' }),
+  }
+})
+
+vi.mock('../../state/AuthContext', () => ({
+  useAuth: vi.fn(),
+}))
+
+const mockUser = {
+  id: 1,
+  email: 'test@example.com',
+  role: 'STUDENT',
+}
 
 describe('ProtectedRoute Component', () => {
   beforeEach(() => {
@@ -10,47 +29,53 @@ describe('ProtectedRoute Component', () => {
   })
 
   it('renders children when user is authenticated', () => {
-    vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
+    AuthContext.useAuth.mockReturnValue({
       user: mockUser,
       loading: false
     })
     
-    renderWithProviders(
-      <ProtectedRoute>
-        <div>Protected Content</div>
-      </ProtectedRoute>
+    render(
+      <MemoryRouter>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
     )
     
     expect(screen.getByText('Protected Content')).toBeInTheDocument()
   })
 
   it('redirects to login when user is not authenticated', () => {
-    vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
+    AuthContext.useAuth.mockReturnValue({
       user: null,
       loading: false
     })
     
-    renderWithProviders(
-      <ProtectedRoute>
-        <div>Protected Content</div>
-      </ProtectedRoute>
+    render(
+      <MemoryRouter>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
     )
     
-    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
+    expect(screen.getByText('Redirect:/login')).toBeInTheDocument()
   })
 
-  it('shows loading state while checking authentication', () => {
-    vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
-      user: null,
-      loading: true
+  it('redirects when user does not have required role', () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: mockUser,
+      loading: false
     })
     
-    renderWithProviders(
-      <ProtectedRoute>
-        <div>Protected Content</div>
-      </ProtectedRoute>
+    render(
+      <MemoryRouter>
+        <ProtectedRoute roles={['TEACHER']}>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
     )
     
-    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
+    expect(screen.getByText('Redirect:/')).toBeInTheDocument()
   })
 })

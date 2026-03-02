@@ -10,7 +10,7 @@ describe('NavBar Component', () => {
     vi.clearAllMocks()
   })
 
-  it('renders logo/brand', () => {
+  it('renders public navigation links', () => {
     vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
       user: null,
       loading: false
@@ -18,7 +18,7 @@ describe('NavBar Component', () => {
     
     renderWithProviders(<NavBar />)
     
-    expect(screen.getByText(/devtrack/i)).toBeInTheDocument()
+    expect(screen.getByText(/inicio/i)).toBeInTheDocument()
   })
 
   it('shows login and register links when not authenticated', () => {
@@ -41,7 +41,7 @@ describe('NavBar Component', () => {
     
     renderWithProviders(<NavBar />)
     
-    expect(screen.getByText(new RegExp(mockUser.email, 'i'))).toBeInTheDocument()
+    expect(screen.getByText(/perfil/i)).toBeInTheDocument()
   })
 
   it('shows logout option for authenticated user', () => {

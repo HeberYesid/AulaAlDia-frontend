@@ -13,11 +13,11 @@ vi.mock('../../api/axios', () => ({
   }
 }))
 
-vi.mock('../components/AppTour', () => ({
+vi.mock('../../components/AppTour', () => ({
   resetTour: vi.fn()
 }))
 
-vi.mock('../utils/toast', () => ({
+vi.mock('../../utils/toast', () => ({
   showPasswordChangeToast: vi.fn()
 }))
 
@@ -40,10 +40,9 @@ describe('UserProfile Component', () => {
     renderWithProviders(<UserProfile />)
     
     await waitFor(() => {
-      // Inputs should have values
-      expect(screen.getByDisplayValue('Test')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('User')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
+      expect(screen.getByText('Mi Perfil')).toBeInTheDocument()
+      expect(screen.getByText('Test User')).toBeInTheDocument()
+      expect(screen.getByText('test@example.com')).toBeInTheDocument()
     })
   })
 
@@ -52,13 +51,13 @@ describe('UserProfile Component', () => {
     renderWithProviders(<UserProfile />)
     
     // Wait for load
-    await waitFor(() => expect(screen.getByDisplayValue('Test')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Test User')).toBeInTheDocument())
     
     // Enable editing
-    await user.click(screen.getByText(/editar perfil/i))
+    await user.click(screen.getByRole('button', { name: /^Editar$/i }))
     
     // Change name
-    const nameInput = screen.getByDisplayValue('Test')
+    const nameInput = screen.getByLabelText(/Nombre/i)
     await user.clear(nameInput)
     await user.type(nameInput, 'Updated Name')
     
@@ -74,7 +73,7 @@ describe('UserProfile Component', () => {
         first_name: 'Updated Name',
         last_name: 'User'
       })
-      expect(screen.getByText(/perfil actualizado/i)).toBeInTheDocument()
+      expect(screen.getByText(/perfil actualizado correctamente/i)).toBeInTheDocument()
     })
   })
 
@@ -82,22 +81,22 @@ describe('UserProfile Component', () => {
     const user = userEvent.setup()
     renderWithProviders(<UserProfile />)
     
-    await waitFor(() => expect(screen.queryByText(/cargando/i)).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText(/cargando perfil/i)).not.toBeInTheDocument())
     
     // Open password form
-    await user.click(screen.getByText(/cambiar contraseña/i))
+    await user.click(screen.getByRole('button', { name: /^Cambiar$/i }))
     
     // Type mismatched passwords
-    const newPassInput = screen.getByPlaceholderText(/^nueva contraseña$/i)
-    const confirmPassInput = screen.getByPlaceholderText(/confirmar nueva/i)
-    const currentPassInput = screen.getByPlaceholderText(/contraseña actual/i)
+    const newPassInput = screen.getByLabelText(/^Nueva Contraseña$/i)
+    const confirmPassInput = screen.getByLabelText(/^Confirmar Nueva Contraseña$/i)
+    const currentPassInput = screen.getByLabelText(/Contraseña Actual/i)
     
     await user.type(currentPassInput, 'oldpass')
     await user.type(newPassInput, 'newpass123')
     await user.type(confirmPassInput, 'mismatch')
     
     // Submit
-    await user.click(screen.getByRole('button', { name: /actualizar contraseña/i }))
+    await user.click(screen.getByRole('button', { name: /Cambiar Contraseña/i }))
     
     expect(screen.getByText(/las contraseñas no coinciden/i)).toBeInTheDocument()
     expect(api.post).not.toHaveBeenCalled()

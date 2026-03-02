@@ -87,19 +87,6 @@ export default function MyBulletins() {
     }
   }
 
-  const getSemaphoreColor = (semaphore) => {
-    switch (semaphore) {
-      case 'GREEN':
-        return 'var(--success)'
-      case 'YELLOW':
-        return 'var(--warning)'
-      case 'RED':
-        return 'var(--danger)'
-      default:
-        return 'var(--text-muted)'
-    }
-  }
-
   const getGradeColor = (grade) => {
     const g = parseFloat(grade)
     if (g >= 4.5) return 'var(--success)'
@@ -343,10 +330,9 @@ export default function MyBulletins() {
                                 <th>Código</th>
                                 <th>Materia</th>
                                 <th style={{ textAlign: 'center' }}>Nota</th>
-                                <th style={{ textAlign: 'center' }}>Estado</th>
-                                <th style={{ textAlign: 'center' }}>🟢</th>
-                                <th style={{ textAlign: 'center' }}>🟡</th>
-                                <th style={{ textAlign: 'center' }}>🔴</th>
+                                <th style={{ textAlign: 'center' }}>Promedio ejercicios</th>
+                                <th style={{ textAlign: 'center' }}>Calificados</th>
+                                <th style={{ textAlign: 'center' }}>Entregados</th>
                                 <th style={{ textAlign: 'center' }}>Faltas</th>
                               </tr>
                             </thead>
@@ -368,17 +354,14 @@ export default function MyBulletins() {
                                   >
                                     {parseFloat(entry.grade).toFixed(2)}
                                   </td>
-                                  <td data-label="Estado" style={{ textAlign: 'center' }}>
-                                    <StatusBadge status={entry.semaphore} grade={parseFloat(entry.grade)} />
+                                  <td data-label="Promedio" style={{ textAlign: 'center' }}>
+                                    <StatusBadge status={null} grade={parseFloat(entry.average_score)} />
                                   </td>
-                                  <td data-label="Verdes" style={{ textAlign: 'center', color: 'var(--success)' }}>
-                                    {entry.green_count}
+                                  <td data-label="Calificados" style={{ textAlign: 'center', color: 'var(--success)' }}>
+                                    {entry.graded_count}
                                   </td>
-                                  <td data-label="Amarillos" style={{ textAlign: 'center', color: 'var(--warning)' }}>
-                                    {entry.yellow_count}
-                                  </td>
-                                  <td data-label="Rojos" style={{ textAlign: 'center', color: 'var(--danger)' }}>
-                                    {entry.red_count}
+                                  <td data-label="Entregados" style={{ textAlign: 'center', color: 'var(--warning)' }}>
+                                    {entry.submitted_count}
                                   </td>
                                   <td data-label="Faltas" style={{ textAlign: 'center' }}>
                                     {entry.absence_count > 0 ? (
@@ -421,7 +404,7 @@ export default function MyBulletins() {
                                     padding: 'var(--space-md)',
                                     backgroundColor: 'var(--bg-secondary)',
                                     borderRadius: 'var(--radius-md)',
-                                    borderLeft: `3px solid ${getSemaphoreColor(entry.semaphore)}`,
+                                    borderLeft: `3px solid ${getGradeColor(entry.grade)}`,
                                   }}
                                 >
                                   <strong style={{ color: 'var(--text-primary)' }}>
@@ -470,15 +453,15 @@ export default function MyBulletins() {
                           </div>
                           <div className="stat-card">
                             <div className="stat-value" style={{ color: 'var(--success)' }}>
-                              {bulletinDetail.entries.filter((e) => e.semaphore === 'GREEN').length}
+                              {bulletinDetail.entries.reduce((acc, e) => acc + (e.graded_count || 0), 0)}
                             </div>
-                            <div className="stat-label">Aprobadas</div>
+                            <div className="stat-label">Calificados</div>
                           </div>
                           <div className="stat-card">
                             <div className="stat-value" style={{ color: 'var(--danger)' }}>
-                              {bulletinDetail.entries.filter((e) => e.semaphore === 'RED').length}
+                              {bulletinDetail.entries.reduce((acc, e) => acc + (e.submitted_count || 0), 0)}
                             </div>
-                            <div className="stat-label">Reprobadas</div>
+                            <div className="stat-label">Entregados</div>
                           </div>
                         </div>
                       </>

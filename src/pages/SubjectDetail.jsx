@@ -33,8 +33,8 @@ export default function SubjectDetail() {
   const [editExerciseFile, setEditExerciseFile] = useState(null)
   
   const [activeTab, setActiveTab] = useState('students') // 'students', 'exercises', 'results'
-  const [editingResult, setEditingResult] = useState(null) // {resultId, currentStatus, currentComment, studentEmail, exerciseName}
-  const [newStatus, setNewStatus] = useState('')
+  const [editingResult, setEditingResult] = useState(null) // {resultId, currentScore, currentComment, studentEmail, exerciseName}
+  const [newScore, setNewScore] = useState('')
   const [newComment, setNewComment] = useState('')
   const [detailedResults, setDetailedResults] = useState([])
   
@@ -42,13 +42,13 @@ export default function SubjectDetail() {
   const [showCreateResultForm, setShowCreateResultForm] = useState(false)
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState('')
   const [selectedExerciseId, setSelectedExerciseId] = useState('')
-  const [createStatus, setCreateStatus] = useState('GREEN')
+  const [createScore, setCreateScore] = useState('3.0')
   const [createComment, setCreateComment] = useState('')
   
   // Filtros y búsqueda
   const [studentSearch, setStudentSearch] = useState('')
   const [exerciseSearch, setExerciseSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('ALL') // 'ALL', 'GREEN', 'YELLOW', 'RED'
+  const [statusFilter, setStatusFilter] = useState('ALL') // 'ALL', 'SCORED', 'SUBMITTED'
   const [resultSearch, setResultSearch] = useState('')
   
   // Verificación de existencia de usuario
@@ -67,8 +67,8 @@ export default function SubjectDetail() {
   const [generatingAI, setGeneratingAI] = useState(false)
 
   async function generateAIFeedback() {
-    if (!newStatus) {
-      setError('Selecciona un estado primero para generar feedback acorde.')
+    if (!newScore) {
+      setError('Ingresa una nota primero para generar feedback acorde.')
       return
     }
     
@@ -87,7 +87,7 @@ export default function SubjectDetail() {
 
       const response = await api.post('/api/v1/courses/results/generate-ai-feedback/', {
         exercise_id: originalResult.exercise, // Corregido: el serializer devuelve 'exercise' como ID
-        status: newStatus,
+        score: Number(newScore),
         current_comment: newComment || editingResult.currentComment,
         student_email: editingResult.studentEmail
       })
@@ -102,8 +102,8 @@ export default function SubjectDetail() {
   }
 
   async function generateAICreateFeedback() {
-    if (!createStatus) {
-      setError('Selecciona un estado primero para generar feedback acorde.')
+    if (!createScore) {
+      setError('Ingresa una nota primero para generar feedback acorde.')
       return
     }
     if (!selectedExerciseId) {
@@ -125,7 +125,7 @@ export default function SubjectDetail() {
 
       const response = await api.post('/api/v1/courses/results/generate-ai-feedback/', {
         exercise_id: selectedExerciseId,
-        status: createStatus,
+        score: Number(createScore),
         current_comment: createComment,
         student_email: studentEmail
       })
@@ -209,9 +209,12 @@ export default function SubjectDetail() {
       filtered = filtered.filter(r => r.student_email === user.email)
     }
 
-    // Filtrar por estado
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(r => r.status === statusFilter)
+    if (statusFilter === 'SCORED') {
+      filtered = filtered.filter(r => r.score !== null && r.score !== undefined)
+    }
+
+    if (statusFilter === 'SUBMITTED') {
+      filtered = filtered.filter(r => r.status === 'SUBMITTED')
     }
 
     // Filtrar por búsqueda
@@ -431,23 +434,21 @@ export default function SubjectDetail() {
   function openEditModal(result) {
     setEditingResult({
       resultId: result.id,
-      currentStatus: result.status,
+      currentScore: result.score,
       currentComment: result.comment || '',
       studentEmail: result.student_email,
       exerciseName: result.exercise_name,
       submissionText: result.submission_text,
       submissionFile: result.submission_file
     })
-    // Default to GREEN when current status is SUBMITTED so the select always
-    // starts on a valid grade option (the dropdown has no SUBMITTED option).
-    setNewStatus(result.status === 'SUBMITTED' ? 'GREEN' : result.status)
+    setNewScore(result.score != null ? String(result.score) : '3.0')
     setNewComment(result.comment || '')
     setError('')
   }
 
   function closeEditModal() {
     setEditingResult(null)
-    setNewStatus('')
+    setNewScore('')
     setNewComment('')
     setError('')
   }
@@ -458,17 +459,18 @@ export default function SubjectDetail() {
     
     try {
       await api.patch(`/api/v1/courses/results/${editingResult.resultId}/`, {
-        status: newStatus,
+        score: Number(newScore),
+        status: null,
         comment: newComment
       })
-      setSuccess(`Resultado actualizado: ${editingResult.studentEmail} - ${editingResult.exerciseName} → ${newStatus}`)
+      setSuccess(`Resultado actualizado: ${editingResult.studentEmail} - ${editingResult.exerciseName} → Nota ${Number(newScore).toFixed(2)}`)
       closeEditModal()
       loadAll()
       setTimeout(() => setSuccess(''), 5000)
     } catch (err) {
       console.error('Error al actualizar resultado:', err.response?.data)
       const errorMsg = err.response?.data?.detail || 
-                       err.response?.data?.status?.[0] ||
+                       err.response?.data?.score?.[0] ||
                        'No se pudo actualizar el resultado.'
       setError(errorMsg)
     }
@@ -478,7 +480,7 @@ export default function SubjectDetail() {
     setShowCreateResultForm(true)
     setSelectedEnrollmentId('')
     setSelectedExerciseId('')
-    setCreateStatus('GREEN')
+    setCreateScore('3.0')
     setCreateComment('')
     setError('')
     setSuccess('')
@@ -488,7 +490,7 @@ export default function SubjectDetail() {
     setShowCreateResultForm(false)
     setSelectedEnrollmentId('')
     setSelectedExerciseId('')
-    setCreateStatus('GREEN')
+    setCreateScore('3.0')
     setCreateComment('')
     setError('')
   }
@@ -507,21 +509,21 @@ export default function SubjectDetail() {
       await api.post('/api/v1/courses/results/', {
         enrollment: selectedEnrollmentId,
         exercise: selectedExerciseId,
-        status: createStatus,
+        score: Number(createScore),
         comment: createComment
       })
       
       const enrollment = enrollments.find(e => e.id === parseInt(selectedEnrollmentId))
       const exercise = exercises.find(ex => ex.id === parseInt(selectedExerciseId))
       
-      setSuccess(`Resultado asignado: ${enrollment?.student?.email} - ${exercise?.name} → ${createStatus}`)
+      setSuccess(`Resultado asignado: ${enrollment?.student?.email} - ${exercise?.name} → Nota ${Number(createScore).toFixed(2)}`)
       closeCreateResultForm()
       loadAll()
       setTimeout(() => setSuccess(''), 5000)
     } catch (err) {
       console.error('Error al crear resultado:', err.response?.data)
       const errorMsg = err.response?.data?.detail || 
-                       err.response?.data?.status?.[0] ||
+                       err.response?.data?.score?.[0] ||
                        'No se pudo crear el resultado.'
       setError(errorMsg)
     }
@@ -630,19 +632,15 @@ export default function SubjectDetail() {
                 
                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success)' }}>{studentStats.green}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Verdes</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success)' }}>{studentStats.graded_count}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Calificados</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--warning)' }}>{studentStats.yellow}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Amarillos</div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--danger)' }}>{studentStats.red}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Rojos</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>{studentStats.submitted_count}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Entregados</div>
                   </div>
                   <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border)', paddingLeft: '1.5rem' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{studentStats.total}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{studentStats.total_exercises}</div>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total</div>
                   </div>
                 </div>
@@ -1214,19 +1212,19 @@ export default function SubjectDetail() {
                       </div>
                       <div className="stat-card">
                         <div className="stat-value">{dash.aggregates?.avg_grade?.toFixed(2) || '0.0'}</div>
-                        <div className="stat-label">Promedio</div>
+                        <div className="stat-label">Nota final promedio</div>
                       </div>
                       <div className="stat-card" style={{ background: 'var(--success)' }}>
-                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_green?.toFixed(0) || '0'}%</div>
-                        <div className="stat-label" style={{ color: 'white' }}>Verde</div>
+                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.avg_score?.toFixed(2) || '0.0'}</div>
+                        <div className="stat-label" style={{ color: 'white' }}>Promedio ejercicios</div>
                       </div>
                       <div className="stat-card" style={{ background: 'var(--warning)' }}>
-                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_yellow?.toFixed(0) || '0'}%</div>
-                        <div className="stat-label" style={{ color: 'white' }}>Amarillo</div>
+                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.total_graded_results || 0}</div>
+                        <div className="stat-label" style={{ color: 'white' }}>Resultados calificados</div>
                       </div>
                       <div className="stat-card" style={{ background: 'var(--danger)' }}>
-                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.pct_red?.toFixed(0) || '0'}%</div>
-                        <div className="stat-label" style={{ color: 'white' }}>Rojo</div>
+                        <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.total_submitted_results || 0}</div>
+                        <div className="stat-label" style={{ color: 'white' }}>Pendientes por revisar</div>
                       </div>
                     </div>
 
@@ -1236,23 +1234,21 @@ export default function SubjectDetail() {
                           <tr>
                             <th>Estudiante</th>
                             <th>Total</th>
-                            <th>Verde</th>
-                            <th>Amarillo</th>
-                            <th>Rojo</th>
-                            <th>Nota</th>
-                            <th>Estado</th>
+                            <th>Calificados</th>
+                            <th>Entregados</th>
+                            <th>Promedio ejercicios</th>
+                            <th>Nota final</th>
                           </tr>
                         </thead>
                         <tbody>
                           {dash.enrollments.map((i) => (
                             <tr key={i.enrollment_id}>
                               <td data-label="Estudiante"><strong>{i.student_email}</strong></td>
-                              <td data-label="Total">{i.total}</td>
-                              <td data-label="Verde">{i.green}</td>
-                              <td data-label="Amarillo">{i.yellow}</td>
-                              <td data-label="Rojo">{i.red}</td>
-                              <td data-label="Nota"><strong>{i.grade?.toFixed(2)}</strong></td>
-                              <td data-label="Estado"><StatusBadge status={i.semaphore} grade={i.grade} /></td>
+                              <td data-label="Total">{i.total_exercises}</td>
+                              <td data-label="Calificados">{i.graded_count}</td>
+                              <td data-label="Entregados">{i.submitted_count}</td>
+                              <td data-label="Promedio"><strong>{i.average_score?.toFixed(2)}</strong></td>
+                              <td data-label="Nota final"><StatusBadge status={null} grade={i.grade} /></td>
                             </tr>
                           ))}
                         </tbody>
@@ -1298,7 +1294,7 @@ export default function SubjectDetail() {
                           </td>
                           <td data-label="Estado">
                             {item.result ? (
-                               <StatusBadge status={item.result.status} grade={item.result.status === 'GREEN' ? 5.0 : item.result.status === 'YELLOW' ? 3.0 : 1.0} />
+                               <StatusBadge status={item.result.status} grade={item.result.score} />
                             ) : (
                                <span className="badge" style={{background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem'}}>Pendiente</span>
                             )}
@@ -1314,7 +1310,7 @@ export default function SubjectDetail() {
                              ) : '-'}
                           </td>
                           <td data-label="Acción">
-                             {(!item.result || item.result.status === 'SUBMITTED' || item.result.status === 'RED') && (
+                             {(!item.result || item.result.status === 'SUBMITTED') && (
                                <button 
                                  className="btn secondary" 
                                  style={{padding: '0.3rem 0.6rem', fontSize: '0.85rem'}}
@@ -1369,10 +1365,9 @@ export default function SubjectDetail() {
                       cursor: 'pointer'
                     }}
                   >
-                    <option value="ALL">Todos los estados</option>
-                    <option value="GREEN">Aprobado</option>
-                    <option value="YELLOW">Suficiente</option>
-                    <option value="RED">Reprobado</option>
+                    <option value="ALL">Todos los resultados</option>
+                    <option value="SCORED">Con nota</option>
+                    <option value="SUBMITTED">Entregado sin calificar</option>
                   </select>
                 </div>
 
@@ -1380,7 +1375,7 @@ export default function SubjectDetail() {
                   <p className="notice" style={{ marginBottom: '1rem' }}>
                     Mostrando {filteredResults.length} de {detailedResults.length} resultados
                     {resultSearch && ` con búsqueda "${resultSearch}"`}
-                    {statusFilter !== 'ALL' && ` filtrados por estado: ${statusFilter}`}
+                    {statusFilter !== 'ALL' && ` filtrados por tipo: ${statusFilter}`}
                   </p>
                 )}
 
@@ -1393,7 +1388,7 @@ export default function SubjectDetail() {
                         <tr>
                           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <th>Estudiante</th>}
                           <th>Ejercicio</th>
-                          <th style={{ width: '120px' }}>Estado</th>
+                          <th style={{ width: '120px' }}>Resultado</th>
                           <th style={{ width: '200px' }}>Solución</th>
                           <th style={{ width: '250px', maxWidth: '250px' }}>Comentarios</th>
                           <th style={{ width: '150px' }}>Actualizado</th>
@@ -1415,8 +1410,8 @@ export default function SubjectDetail() {
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap'
                             }} title={result.exercise_name}>{result.exercise_name}</td>
-                            <td data-label="Estado">
-                              <StatusBadge status={result.status} grade={result.status === 'GREEN' ? 5.0 : result.status === 'YELLOW' ? 3.0 : 1.0} />
+                            <td data-label="Resultado">
+                              <StatusBadge status={result.status} grade={result.score} />
                             </td>
                             <td data-label="Solución">
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -1511,7 +1506,7 @@ export default function SubjectDetail() {
                 <div style={{ marginBottom: '2rem' }}>
                   <h3>Cargar Resultados desde CSV</h3>
                   <CSVUpload
-                    label="Cargar resultados (columnas: student_email, exercise_name, status)"
+                    label="Cargar resultados (columnas: student_email, exercise_name, score[, comment])"
                     uploadUrl={`/api/v1/courses/subjects/${id}/results/upload-csv/`}
                     onComplete={loadAll}
                   />
@@ -1728,10 +1723,10 @@ export default function SubjectDetail() {
               <p style={{ margin: '0.5rem 0' }}><strong>Estudiante:</strong> {editingResult.studentEmail}</p>
               <p style={{ margin: '0.5rem 0' }}><strong>Ejercicio:</strong> {editingResult.exerciseName}</p>
               <p style={{ margin: '0.5rem 0' }}>
-                <strong>Estado Actual:</strong>{' '}
+                <strong>Resultado Actual:</strong>{' '}
                 <StatusBadge 
-                  status={editingResult.currentStatus} 
-                  grade={editingResult.currentStatus === 'GREEN' ? 5.0 : editingResult.currentStatus === 'YELLOW' ? 3.0 : 1.0} 
+                  status={editingResult.currentScore == null ? 'SUBMITTED' : null} 
+                  grade={editingResult.currentScore} 
                 />
               </p>
               {editingResult.currentComment && (
@@ -1784,23 +1779,24 @@ export default function SubjectDetail() {
 
             <form onSubmit={updateResultStatus}>
               <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="edit-result-status"><strong>Nuevo Estado</strong></label>
-                <select
-                  id="edit-result-status"
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
+                <label htmlFor="edit-result-score"><strong>Nueva Nota (1.0 - 5.0)</strong></label>
+                <input
+                  id="edit-result-score"
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.01"
+                  value={newScore}
+                  onChange={(e) => setNewScore(e.target.value)}
                   required
                   style={{ 
+                    width: '100%',
                     padding: '0.75rem',
                     fontSize: '1rem',
                     border: '2px solid var(--border)',
                     borderRadius: '8px'
                   }}
-                >
-                  <option value="GREEN">Aprobado - Completado exitosamente</option>
-                  <option value="YELLOW">Suficiente - Con observaciones</option>
-                  <option value="RED">Reprobado - No completado</option>
-                </select>
+                />
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
@@ -1946,23 +1942,24 @@ export default function SubjectDetail() {
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="create-result-status"><strong>Estado del Resultado</strong></label>
-                <select
-                  id="create-result-status"
-                  value={createStatus}
-                  onChange={(e) => setCreateStatus(e.target.value)}
+                <label htmlFor="create-result-score"><strong>Nota del Resultado (1.0 - 5.0)</strong></label>
+                <input
+                  id="create-result-score"
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.01"
+                  value={createScore}
+                  onChange={(e) => setCreateScore(e.target.value)}
                   required
                   style={{ 
+                    width: '100%',
                     padding: '0.75rem',
                     fontSize: '1rem',
                     border: '2px solid var(--border-primary)',
                     borderRadius: 'var(--radius-md)'
                   }}
-                >
-                  <option value="GREEN">Aprobado - Completado exitosamente</option>
-                  <option value="YELLOW">Suficiente - Con observaciones</option>
-                  <option value="RED">Reprobado - No completado</option>
-                </select>
+                />
               </div>
 
               <div style={{ marginBottom: '1rem' }}>

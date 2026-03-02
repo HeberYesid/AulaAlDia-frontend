@@ -215,15 +215,13 @@ export default function StudentDashboard() {
                     <div style={{ fontWeight: 600, flex: 1, color: 'var(--text-primary)' }}>
                       {result.exercise_name}
                     </div>
-                    <span className={`badge ${result.status}`} style={{
+                    <span className={`badge ${result.status === 'SUBMITTED' ? 'SUBMITTED' : result.score != null ? 'SCORE' : 'PENDING'}`} style={{
                       padding: '0.25rem 0.75rem',
                       borderRadius: 'var(--radius-sm)',
                       fontSize: 'var(--font-size-xs)',
                       fontWeight: 600
                     }}>
-                      {result.status === 'GREEN' && 'Aprobado'}
-                      {result.status === 'YELLOW' && 'Suficiente'}
-                      {result.status === 'RED' && 'Reprobado'}
+                      {result.status === 'SUBMITTED' ? 'Entregado' : result.score != null ? `Nota ${Number(result.score).toFixed(2)}` : 'Pendiente'}
                     </span>
                   </div>
                   <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>

@@ -6,6 +6,20 @@ import { renderWithProviders } from '../../test/utils'
 import { api } from '../../api/axios'
 import * as router from 'react-router-dom'
 
+vi.mock('../../state/AuthContext', async () => {
+  const actual = await vi.importActual('../../state/AuthContext')
+  return {
+    ...actual,
+    useAuth: () => ({
+      user: {
+        id: 2,
+        email: 'teacher@test.com',
+        role: 'TEACHER'
+      }
+    })
+  }
+})
+
 // Mock axios
 vi.mock('../../api/axios', () => ({
   api: {
@@ -42,10 +56,25 @@ describe('SubjectDetail Component', () => {
   ]
   
   const mockDashboard = {
-    overview: {
-      total_students: 1,
-      average_grade: 4.5
-    }
+    total_exercises: 1,
+    aggregates: {
+      avg_grade: 4.5,
+      avg_score: 5.0,
+      total_graded_results: 1,
+      total_submitted_results: 0
+    },
+    enrollments: [
+      {
+        enrollment_id: 101,
+        student_email: 'student@test.com',
+        total_exercises: 1,
+        graded_count: 1,
+        submitted_count: 0,
+        average_score: 5.0,
+        grade: 4.5,
+        has_manual_grade: true
+      }
+    ]
   }
 
   const mockExercises = [
@@ -71,6 +100,7 @@ describe('SubjectDetail Component', () => {
     
     // Mock API responses
     api.get.mockImplementation((url) => {
+      if (url.includes('/academic-periods/')) return Promise.resolve({ data: [] })
       if (url.includes('/enrollments/')) return Promise.resolve({ data: mockEnrollments })
       if (url.includes('/dashboard/')) return Promise.resolve({ data: mockDashboard })
       if (url.includes('/exercises/')) return Promise.resolve({ data: mockExercises })
@@ -91,8 +121,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
     
     await waitFor(() => {
-      expect(screen.getByText('Mathematics')).toBeInTheDocument()
-      expect(screen.getByText('MATH101')).toBeInTheDocument()
+      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
     })
   })
 
@@ -115,7 +144,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
     
     await waitFor(() => {
-      expect(screen.getByText(/Mathematics/i)).toBeInTheDocument()
+      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
     })
 
     // Click on Results tab
@@ -142,7 +171,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
     
     await waitFor(() => {
-      expect(screen.getByText(/No se pudo cargar/i)).toBeInTheDocument()
+      expect(screen.getByText(/Materia no encontrada/i)).toBeInTheDocument()
     })
   })
 
@@ -151,7 +180,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
     
     await waitFor(() => {
-        expect(screen.getByText(/Mathematics/i)).toBeInTheDocument()
+      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
     })
     
     // Switch to exercises tab
@@ -162,7 +191,7 @@ describe('SubjectDetail Component', () => {
     await user.click(screen.getByRole('button', { name: /Crear Ejercicio/i }))
     
     // Fill form
-    const nameInput = screen.getByPlaceholderText(/nombre del ejercicio/i)
+    const nameInput = screen.getByPlaceholderText(/Ej: Ejercicio 1/i)
     await user.type(nameInput, 'New Calc Test')
     
     // Submit (Button inside form also says "Crear Ejercicio" likely, or use type="submit")

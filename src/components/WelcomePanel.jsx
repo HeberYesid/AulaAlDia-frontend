@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Bell, Clock, MapPin, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
@@ -48,16 +48,37 @@ export default function WelcomePanel() {
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
 
-  useEffect(() => {
-    api
-      .get('/api/v1/notifs/items/?limit=5')
-      .then(({ data }) => {
-        const items = Array.isArray(data) ? data : (data.results ?? [])
-        setNotifications(items.slice(0, 5))
-        setUnreadCount(items.filter((n) => !n.is_read).length)
-      })
-      .catch(() => {})
+  const loadNotifications = useCallback(async () => {
+    try {
+      const { data } = await api.get('/api/v1/notifs/items/?limit=5')
+      const items = Array.isArray(data) ? data : (data.results ?? [])
+      setNotifications(items.slice(0, 5))
+      setUnreadCount(items.filter((notification) => !notification.is_read).length)
+    } catch {
+      // keep silent to avoid noisy UX in dashboard
+    }
   }, [])
+
+  useEffect(() => {
+    loadNotifications()
+
+    const intervalId = setInterval(loadNotifications, 15000)
+    const handleFocus = () => loadNotifications()
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadNotifications()
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      clearInterval(intervalId)
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [loadNotifications])
 
   const firstName = user?.first_name || user?.email?.split('@')[0] || 'Usuario'
   const roleLabel = ROLE_LABEL[user?.role] || user?.role
