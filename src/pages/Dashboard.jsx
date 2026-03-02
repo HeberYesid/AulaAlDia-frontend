@@ -71,28 +71,28 @@ export default function Dashboard() {
         <Alert type="success" message={success} />
         <Alert type="error" message={error} />
 
-        <WelcomePanel />
-
-        <div className="dashboard-header">
-          <div>
-            <h1 className="dashboard-title">
-              {user.role === 'ADMIN' ? 'Panel de Administrador' : user.role === 'TEACHER' ? 'Panel de Profesor' : 'Panel de Padre/Tutor'}
-            </h1>
-            <p className="dashboard-subtitle">
-              {user.role === 'ADMIN' ? 'Acceso completo al sistema' : user.role === 'TEACHER' ? 'Gestiona tus materias y estudiantes' : 'Monitorea el progreso de estudiantes vinculados'}
-            </p>
-          </div>
-          <div className="stats-grid grid-stack-mobile" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
-            <div className="stat-card">
-              <div className="stat-value">{subjects.length}</div>
-              <div className="stat-label">Materias</div>
+        {user.role !== 'TEACHER' && (
+          <div className="dashboard-header">
+            <div>
+              <h1 className="dashboard-title">
+                {user.role === 'ADMIN' ? 'Panel de Administrador' : 'Panel de Padre/Tutor'}
+              </h1>
+              <p className="dashboard-subtitle">
+                {user.role === 'ADMIN' ? 'Acceso completo al sistema' : 'Monitorea el progreso de estudiantes vinculados'}
+              </p>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">{subjects.reduce((acc, s) => acc + (s.enrollments_count || 0), 0)}</div>
-              <div className="stat-label">Estudiantes</div>
+            <div className="stats-grid grid-stack-mobile" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)', margin: 0 }}>
+              <div className="stat-card">
+                <div className="stat-value">{subjects.length}</div>
+                <div className="stat-label">Materias</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{subjects.reduce((acc, s) => acc + (s.enrollments_count || 0), 0)}</div>
+                <div className="stat-label">Estudiantes</div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
@@ -159,6 +159,8 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        <WelcomePanel />
       </div>
     )
   }
