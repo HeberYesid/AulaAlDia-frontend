@@ -182,23 +182,7 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
             )}
           </span>
           {!collapsed && (
-            <span className="sidebar__nav-label">
-              Notificaciones
-              {unreadCount > 0 && (
-                <span style={{
-                  marginLeft: '0.5rem',
-                  background: 'var(--danger)',
-                  color: 'white',
-                  borderRadius: '999px',
-                  padding: '1px 6px',
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  verticalAlign: 'middle',
-                }}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </span>
+            <span className="sidebar__nav-label">Notificaciones</span>
           )}
         </button>
       ) : (
