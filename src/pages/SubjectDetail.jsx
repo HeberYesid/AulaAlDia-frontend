@@ -1804,22 +1804,6 @@ export default function SubjectDetail() {
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <label htmlFor="edit-result-comment" style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
-                  <button
-                    type="button"
-                    onClick={generateAIFeedback}
-                    disabled={generatingAI}
-                    className="btn secondary"
-                    style={{ 
-                      padding: '0.25rem 0.75rem', 
-                      fontSize: '0.8rem',
-                      background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-                      color: 'white',
-                      border: 'none'
-                    }}
-                    title="Generar sugerencia usando IA basada en el estado seleccionado"
-                  >
-                    {generatingAI ? '✨ Generando...' : '✨ Generar con IA'}
-                  </button>
                 </div>
                 <textarea
                   id="edit-result-comment"
@@ -1982,22 +1966,6 @@ export default function SubjectDetail() {
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <label htmlFor="create-result-comment" style={{ margin: 0 }}><strong>Comentarios / Retroalimentación (Opcional)</strong></label>
-                  <button
-                    type="button"
-                    onClick={generateAICreateFeedback}
-                    disabled={generatingAI}
-                    className="btn secondary"
-                    style={{ 
-                      padding: '0.25rem 0.75rem', 
-                      fontSize: '0.8rem',
-                      background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-                      color: 'white',
-                      border: 'none'
-                    }}
-                    title="Generar sugerencia usando IA basada en el estado seleccionado"
-                  >
-                    {generatingAI ? '✨ Generando...' : '✨ Generar con IA'}
-                  </button>
                 </div>
                 <textarea
                   id="create-result-comment"
