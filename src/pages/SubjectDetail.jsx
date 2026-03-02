@@ -438,7 +438,9 @@ export default function SubjectDetail() {
       submissionText: result.submission_text,
       submissionFile: result.submission_file
     })
-    setNewStatus(result.status)
+    // Default to GREEN when current status is SUBMITTED so the select always
+    // starts on a valid grade option (the dropdown has no SUBMITTED option).
+    setNewStatus(result.status === 'SUBMITTED' ? 'GREEN' : result.status)
     setNewComment(result.comment || '')
     setError('')
   }
