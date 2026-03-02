@@ -32,6 +32,8 @@ export default function MyResults() {
     let totalGreen = 0, totalYellow = 0, totalRed = 0, totalExercises = 0
     let sumGrades = 0
     let materiasConNotas = 0
+    let totalAbsences = 0
+    let unjustifiedAbsences = 0
     
     enrs.forEach(e => {
       if (e.stats?.grade != null) {
@@ -43,6 +45,8 @@ export default function MyResults() {
         totalYellow += e.stats.yellow_count || 0
         totalRed += e.stats.red_count || 0
         totalExercises += e.stats.total_exercises || 0
+        totalAbsences += e.stats.total_absences || 0
+        unjustifiedAbsences += e.stats.unjustified_absences || 0
       }
     })
     
@@ -56,7 +60,9 @@ export default function MyResults() {
       totalRed,
       totalExercises,
       avgGrade,
-      successRate
+      successRate,
+      totalAbsences,
+      unjustifiedAbsences
     }
   }, [enrs])
 
@@ -302,6 +308,10 @@ export default function MyResults() {
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--accent)' }}>{globalStats.successRate}%</div>
               <div className="stat-label">Tasa de Éxito</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value" style={{ color: 'var(--danger)' }}>{globalStats.totalAbsences}</div>
+              <div className="stat-label">Faltas</div>
             </div>
           </div>
         </div>

@@ -104,6 +104,18 @@ export default function StudentDashboard() {
                     <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>
                       {subject.subject_name}
                     </h3>
+                    {(subject.total_absences > 0) && (
+                      <div style={{ marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                        <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
+                          {subject.total_absences} {subject.total_absences === 1 ? 'falta' : 'faltas'}
+                        </span>
+                        {subject.unjustified_absences > 0 && (
+                          <span style={{ color: 'var(--text-muted)', marginLeft: '0.25rem' }}>
+                            ({subject.unjustified_absences} sin justificar)
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
