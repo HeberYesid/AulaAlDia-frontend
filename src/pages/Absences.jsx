@@ -185,7 +185,7 @@ export default function Absences() {
               aria-expanded={showForm}
               aria-controls="absence-form"
             >
-              {showForm ? 'Cancelar' : '+ Registrar Falta'}
+              {showForm ? 'Cancelar' : 'Registrar Falta'}
             </button>
           )}
         </div>
