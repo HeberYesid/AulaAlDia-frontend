@@ -68,6 +68,14 @@ export default function App() {
             }
           />
           <Route
+            path="/messages/:conversationId"
+            element={
+              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]}>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/"
             element={
               <ProtectedRoute>

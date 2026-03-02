@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../state/AuthContext';
 import {
     getConversations,
@@ -16,6 +17,7 @@ import './Messages.css';
 
 const Messages = () => {
     const { user } = useAuth();
+    const { conversationId } = useParams();
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -58,6 +60,22 @@ const Messages = () => {
         const interval = setInterval(() => fetchMessages(selectedConversation.id), 5000);
         return () => clearInterval(interval);
     }, [selectedConversation, fetchMessages]);
+
+    useEffect(() => {
+        if (!conversationId || conversations.length === 0) return;
+
+        const targetConversation = conversations.find(
+            (conversation) => String(conversation.id) === String(conversationId)
+        );
+
+        if (!targetConversation) return;
+
+        setSelectedConversation((current) => {
+            if (current?.id === targetConversation.id) return current;
+            return targetConversation;
+        });
+        setMobileShowChat(true);
+    }, [conversationId, conversations]);
 
     /* ── Handlers ──────────────────────────────────────── */
     const handleSendMessage = async (e) => {
