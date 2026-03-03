@@ -7,6 +7,8 @@ export const api = axios.create({
   timeout: 30000, // 30 segundos - suficiente para envío de email
 })
 
+let memoryTenantId = null
+
 function getTokens() {
   try {
     const raw = localStorage.getItem('auth')
@@ -24,11 +26,37 @@ function setTokens(tokens) {
   localStorage.setItem('auth', JSON.stringify(next))
 }
 
+function getActiveTenantId() {
+  const auth = getTokens()
+  if (auth?.active_tenant_id) return auth.active_tenant_id
+  if (auth?.user?.active_tenant_id) return auth.user.active_tenant_id
+  if (auth?.user?.active_tenant?.public_id) return auth.user.active_tenant.public_id
+  return memoryTenantId
+}
+
+export function setApiActiveTenantId(tenantId) {
+  memoryTenantId = tenantId || null
+
+  const raw = localStorage.getItem('auth')
+  if (!raw) return
+
+  const current = JSON.parse(raw)
+  const next = { ...current, active_tenant_id: memoryTenantId }
+  localStorage.setItem('auth', JSON.stringify(next))
+}
+
 api.interceptors.request.use((config) => {
   const auth = getTokens()
   if (auth?.access) {
     config.headers = config.headers || {}
     config.headers['Authorization'] = `Bearer ${auth.access}`
+
+    const activeTenantId = getActiveTenantId()
+    if (activeTenantId) {
+      config.headers['X-Tenant-ID'] = activeTenantId
+    } else {
+      delete config.headers['X-Tenant-ID']
+    }
   }
   return config
 })

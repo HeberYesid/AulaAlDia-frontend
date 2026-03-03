@@ -23,7 +23,7 @@ import {
 const SIDEBAR_COLLAPSED_KEY = 'devtrack-sidebar-collapsed'
 
 export default function Sidebar() {
-  const { user, logout } = useAuth()
+  const { user, logout, tenants, activeTenantId, switchTenant } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -71,6 +71,12 @@ export default function Sidebar() {
   function isActive(path) {
     if (path === '/') return location.pathname === '/'
     return location.pathname === path || location.pathname.startsWith(path + '/')
+  }
+
+  async function handleTenantChange(event) {
+    const tenantId = event.target.value
+    if (!tenantId) return
+    await switchTenant(tenantId)
   }
 
   // Don't render sidebar on public/auth pages
@@ -217,6 +223,26 @@ export default function Sidebar() {
 
         {/* Bottom: notifications + profile + logout */}
         <div className="sidebar__footer">
+          {!collapsed && tenants.length > 0 && (
+            <div className="sidebar__tenant-switcher">
+              <label htmlFor="tenant-select" className="sidebar__tenant-label">
+                Tenant activo
+              </label>
+              <select
+                id="tenant-select"
+                className="sidebar__tenant-select"
+                value={activeTenantId || ''}
+                onChange={handleTenantChange}
+              >
+                {tenants.map((tenant) => (
+                  <option key={tenant.tenant_id} value={tenant.tenant_id}>
+                    {tenant.tenant_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <NotificationBell sidebarMode={true} collapsed={collapsed} />
           <Link
             to="/profile"

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Dashboard from '../Dashboard'
 import * as AuthContext from '../../state/AuthContext'
@@ -35,7 +35,7 @@ describe('Dashboard Component', () => {
     
     renderDashboard()
     
-    expect(await screen.findByText(/panel de profesor/i)).toBeInTheDocument()
+    expect(await screen.findByText(/mis materias/i)).toBeInTheDocument()
   })
 
   it('shows user name in welcome message', async () => {
@@ -47,19 +47,32 @@ describe('Dashboard Component', () => {
     
     renderDashboard()
     
-    expect(await screen.findByText(/mis materias/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /bienvenido/i })).toBeInTheDocument()
+    expect(screen.getByText(/teacher/i)).toBeInTheDocument()
   })
 
   it('displays loading state', async () => {
-    api.get.mockResolvedValue({ data: [] })
+    let resolveRequest
+    api.get.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve
+        })
+    )
+
     vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
       user: mockTeacherUser,
-      loading: false,
-      isAuthenticated: true
+      loading: false
     })
     
     renderDashboard()
     
-    expect(await screen.findByText(/panel de profesor/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/cargando dashboard/i)).toBeInTheDocument()
+
+    resolveRequest({ data: [] })
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText(/cargando dashboard/i)).not.toBeInTheDocument()
+    })
   })
 })

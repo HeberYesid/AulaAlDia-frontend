@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { api } from '../api/axios'
+import { api, setApiActiveTenantId } from '../api/axios'
 
 const AuthContext = createContext(null)
 
@@ -10,6 +10,16 @@ export function AuthProvider({ children }) {
   const [lastActivity, setLastActivity] = useState(Date.now())
   const [lastLoginAt, setLastLoginAt] = useState(null)
   const [lastLoginIp, setLastLoginIp] = useState(null)
+  const [activeTenantId, setActiveTenantId] = useState(null)
+  const [tenants, setTenants] = useState([])
+
+  function resolveTenantId({ user, active_tenant_id }, fallbackTenantId = null) {
+    if (active_tenant_id) return active_tenant_id
+    if (user?.active_tenant_id) return user.active_tenant_id
+    if (user?.active_tenant?.public_id) return user.active_tenant.public_id
+    if (fallbackTenantId) return fallbackTenantId
+    return null
+  }
 
   useEffect(() => {
     const raw = localStorage.getItem('auth')
@@ -20,6 +30,9 @@ export function AuthProvider({ children }) {
       setRefresh(data.refresh || null)
       setLastLoginAt(data.last_login_at || null)
       setLastLoginIp(data.last_login_ip || null)
+      const tenantId = resolveTenantId(data)
+      setActiveTenantId(tenantId)
+      setApiActiveTenantId(tenantId)
     }
   }, [])
 
@@ -55,15 +68,58 @@ export function AuthProvider({ children }) {
     }
   }, [user, lastActivity])
 
-  function saveAuth({ user, access, refresh, last_login_at, last_login_ip }) {
-    const payload = { user, access, refresh, last_login_at, last_login_ip }
+  function saveAuth({ user, access, refresh, last_login_at, last_login_ip, active_tenant_id }) {
+    const tenantId = resolveTenantId(
+      { user, active_tenant_id },
+      activeTenantId
+    )
+    const payload = {
+      user,
+      access,
+      refresh,
+      last_login_at,
+      last_login_ip,
+      active_tenant_id: tenantId,
+    }
     localStorage.setItem('auth', JSON.stringify(payload))
     setUser(user)
     setAccess(access)
     setRefresh(refresh)
     setLastLoginAt(last_login_at || null)
     setLastLoginIp(last_login_ip || null)
+    setActiveTenantId(tenantId)
+    setApiActiveTenantId(tenantId)
     setLastActivity(Date.now()) // Resetear actividad al guardar auth
+  }
+
+  async function fetchMyTenants() {
+    if (!access) {
+      setTenants([])
+      return
+    }
+
+    try {
+      const { data } = await api.get('/api/v1/auth/my-tenants/')
+      const tenantItems = Array.isArray(data?.tenants) ? data.tenants : []
+      setTenants(tenantItems)
+
+      const backendActiveTenantId = data?.active_tenant_id || null
+      if (backendActiveTenantId && backendActiveTenantId !== activeTenantId) {
+        updateActiveTenant(backendActiveTenantId)
+      }
+    } catch (error) {
+      setTenants([])
+    }
+  }
+
+  async function refreshMe() {
+    try {
+      const { data } = await api.get('/api/v1/auth/me/')
+      updateUser(data)
+      return data
+    } catch (error) {
+      return null
+    }
   }
 
   async function login(email, password) {
@@ -86,15 +142,52 @@ export function AuthProvider({ children }) {
     setUser(null)
     setAccess(null)
     setRefresh(null)
+    setActiveTenantId(null)
+    setTenants([])
+    setApiActiveTenantId(null)
   }
 
   // Función para actualizar el usuario (después de cambiar configuración)
   function updateUser(updatedUser) {
     const currentAuth = JSON.parse(localStorage.getItem('auth') || '{}')
-    const newAuth = { ...currentAuth, user: updatedUser }
+    const tenantId = resolveTenantId(
+      { user: updatedUser, active_tenant_id: currentAuth.active_tenant_id },
+      activeTenantId
+    )
+    const newAuth = { ...currentAuth, user: updatedUser, active_tenant_id: tenantId }
     localStorage.setItem('auth', JSON.stringify(newAuth))
     setUser(updatedUser)
+    setActiveTenantId(tenantId)
+    setApiActiveTenantId(tenantId)
   }
+
+  function updateActiveTenant(tenantId) {
+    const normalizedTenantId = tenantId || null
+    const currentAuth = JSON.parse(localStorage.getItem('auth') || '{}')
+    const newAuth = { ...currentAuth, active_tenant_id: normalizedTenantId }
+    localStorage.setItem('auth', JSON.stringify(newAuth))
+    setActiveTenantId(normalizedTenantId)
+    setApiActiveTenantId(normalizedTenantId)
+  }
+
+  async function switchTenant(tenantId) {
+    if (!tenantId) return
+
+    await api.post('/api/v1/auth/select-tenant/', { tenant_id: tenantId })
+    updateActiveTenant(tenantId)
+    await refreshMe()
+    await fetchMyTenants()
+  }
+
+  useEffect(() => {
+    if (!user || !access) {
+      setTenants([])
+      return
+    }
+
+    fetchMyTenants()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, access])
 
   // Computed value para saber si está autenticado
   const isAuthenticated = !!user
@@ -106,11 +199,17 @@ export function AuthProvider({ children }) {
     isAuthenticated,
     lastLoginAt,
     lastLoginIp,
+    activeTenantId,
+    tenants,
     login, 
     googleLogin,
     register, 
     logout, 
     updateUser, 
+    updateActiveTenant,
+    switchTenant,
+    refreshMe,
+    fetchMyTenants,
     lastActivity 
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
