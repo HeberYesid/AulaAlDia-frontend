@@ -99,25 +99,13 @@ export default function Register() {
           <h1><span className="auth-icon"></span> Crear Cuenta</h1>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <div className="role-selector">
           {ROLES.map((r) => (
             <button
               key={r.value}
               type="button"
               onClick={() => { setRole(r.value); setError('') }}
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                borderRadius: 'var(--radius-md)',
-                border: '2px solid',
-                borderColor: role === r.value ? 'var(--primary)' : 'var(--border-color)',
-                background: role === r.value ? 'var(--primary)' : 'var(--bg-card)',
-                color: role === r.value ? '#fff' : 'var(--text-primary)',
-                fontWeight: role === r.value ? '600' : '400',
-                cursor: 'pointer',
-                fontSize: 'var(--font-size-sm)',
-                transition: 'all 0.15s',
-              }}
+              className={`role-selector-btn ${role === r.value ? 'active' : ''}`}
             >
               {r.label}
             </button>

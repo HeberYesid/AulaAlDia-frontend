@@ -1064,6 +1064,59 @@ form {
   filter: none;
 }
 
+.role-selector {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.role-selector-btn {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-primary);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.role-selector-btn.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+.role-selector-btn:hover {
+  border-color: var(--border-accent);
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    align-items: flex-start;
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+  }
+
+  .role-selector {
+    flex-wrap: wrap;
+  }
+
+  .role-selector-btn {
+    flex: 1 1 calc(50% - var(--space-sm));
+  }
+}
+
+@media (max-width: 420px) {
+  .role-selector-btn {
+    flex-basis: 100%;
+  }
+}
+
 .auth-header h1 span:not(.auth-icon) {
   color: var(--text-primary);
   font-weight: 700;
