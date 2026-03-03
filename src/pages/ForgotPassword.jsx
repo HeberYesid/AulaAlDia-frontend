@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
+import TurnstileCaptcha from '../components/TurnstileCaptcha'
 
 export default function ForgotPassword() {
+  const captchaRef = useRef(null)
   const [email, setEmail] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -11,14 +15,26 @@ export default function ForgotPassword() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    if (!turnstileToken) {
+      setError('Por favor completa la verificación de seguridad.')
+      return
+    }
+
     setLoading(true)
 
     try {
-      await api.post('/api/v1/auth/forgot-password/', { email })
+      await api.post('/api/v1/auth/forgot-password/', {
+        email,
+        turnstile_token: turnstileToken,
+      })
       setSuccess(true)
     } catch (err) {
       console.error('Error:', err)
-      setError(err.response?.data?.detail || 'Error al enviar el código')
+      const turnstileError = err.response?.data?.turnstile_token
+      setError(turnstileError || err.response?.data?.detail || 'Error al enviar el código')
+      setTurnstileToken('')
+      captchaRef.current?.reset?.()
     } finally {
       setLoading(false)
     }
@@ -89,13 +105,29 @@ export default function ForgotPassword() {
             />
           </div>
 
+          <div className="form-group">
+            <TurnstileCaptcha
+              ref={captchaRef}
+              onVerify={setTurnstileToken}
+              onError={() => {
+                setTurnstileToken('')
+                setIsCaptchaReady(false)
+              }}
+              onExpire={() => {
+                setTurnstileToken('')
+                setIsCaptchaReady(false)
+              }}
+              onReady={() => setIsCaptchaReady(true)}
+            />
+          </div>
+
           <button 
             type="submit" 
             className="btn primary"
-            disabled={loading}
+            disabled={loading || !isCaptchaReady || !turnstileToken}
             style={{ width: '100%', marginBottom: '1rem' }}
           >
-            {loading ? 'Enviando...' : 'Enviar Código'}
+            {loading ? 'Enviando...' : !isCaptchaReady ? 'Cargando captcha...' : !turnstileToken ? 'Completa el captcha' : 'Enviar Código'}
           </button>
 
           <div style={{ textAlign: 'center' }}>
