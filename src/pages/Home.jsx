@@ -120,11 +120,6 @@ export default function Home() {
             <p>Alertas de inscripciones, cambios de resultados y boletines. Centralizadas y configurables por usuario.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon" aria-hidden="true">🏢</div>
-            <h3>Para múltiples instituciones</h3>
-            <p>Cada colegio o universidad tiene su propio espacio seguro e independiente. Perfectamente aislado del resto.</p>
-          </div>
-          <div className="feature-card">
             <div className="feature-icon" aria-hidden="true">💬</div>
             <h3>Mensajería interna</h3>
             <p>Conversaciones directas entre estudiantes, profesores y administradores. Tutores con acceso de solo lectura.</p>
