@@ -61,12 +61,12 @@ export default function FAQ() {
         {
           question: '¿Cómo veo mis calificaciones?',
           answer:
-            'Puedes ver tus calificaciones en la sección "Mis Resultados" del menú principal. Allí encontrarás todas tus asignaturas y el estado de tus ejercicios (Verde: Aprobado, Amarillo: En proceso, Rojo: Necesita mejora).',
+            'Puedes ver tus calificaciones en la sección "Mis Resultados" del menú principal. Allí encontrarás todas tus asignaturas con la nota numérica de cada ejercicio (escala 1.0 – 5.0) y el promedio de la materia.',
         },
         {
-          question: '¿Qué significan los colores en mis resultados?',
+          question: '¿Qué significa la nota numérica en mis resultados?',
           answer:
-            'Verde indica que completaste exitosamente el ejercicio, Amarillo significa que tu desempeño es aceptable pero puede mejorar, y Rojo indica que necesitas trabajar más en ese ejercicio. La calificación final se calcula automáticamente basándose en estos estados.',
+            'Cada ejercicio se califica en una escala de 1.0 a 5.0. La nota promedio del conjunto de ejercicios calificados se muestra como tu desempeño en la materia. El profesor puede además asignar una nota final manual.',
         },
       ],
     },
@@ -86,7 +86,7 @@ export default function FAQ() {
         {
           question: '¿Cómo registro los resultados de los estudiantes?',
           answer:
-            'Desde el detalle de cada asignatura, puedes registrar resultados individualmente para cada estudiante y ejercicio, o usar la carga masiva mediante CSV para actualizar múltiples resultados a la vez. El sistema valida automáticamente que los estados sean Verde, Amarillo o Rojo.',
+            'Desde el detalle de cada asignatura, puedes registrar notas (1.0 – 5.0) individualmente para cada estudiante y ejercicio, o usar la carga masiva mediante CSV para actualizar múltiples resultados a la vez. El sistema valida automáticamente que los scores estén entre 1.0 y 5.0.',
         },
         {
           question: '¿Puedo exportar los datos de mis asignaturas?',

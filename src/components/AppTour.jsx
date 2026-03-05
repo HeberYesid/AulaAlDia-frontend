@@ -35,7 +35,7 @@ const STUDENT_STEPS = [
   },
   {
     target: '.stats-grid-responsive',
-    content: 'Estadísticas rápidas: total de resultados, verdes/amarillos/rojos, tasa de éxito y pendientes.',
+    content: 'Estadísticas rápidas: total de resultados, promedios numéricos (escala 1–5), tasa de entrega y pendientes.',
     disableBeacon: true,
   },
   {
