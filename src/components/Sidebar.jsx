@@ -40,6 +40,11 @@ export default function Sidebar() {
   })
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  // Sync has-sidebar body class — lets public pages opt out of sidebar margin
+  useEffect(() => {
+    document.body.classList.toggle('has-sidebar', !!user)
+  }, [user])
+
   // Sync body class and persist collapsed state
   useEffect(() => {
     document.body.classList.toggle('sidebar-collapsed', collapsed)

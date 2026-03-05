@@ -21,6 +21,7 @@ import UserProfile from './pages/UserProfile'
 import Home from './pages/Home'
 import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
+import PublicLayout from './components/PublicLayout'
 import CalendarPage from './pages/Calendar'
 import Messages from './pages/messaging/Messages'
 import Observer from './pages/Observer'
@@ -37,9 +38,9 @@ export default function App() {
       <div className="app-body">
         <main id="main-content" className="container">
         <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
+          <Route path="/faq" element={<PublicLayout><FAQ /></PublicLayout>} />
+          <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
           
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
