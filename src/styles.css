@@ -245,6 +245,12 @@ body.sidebar-collapsed .app-body {
   box-shadow: var(--shadow-md);
 }
 
+/* Commercial admin page */
+.commercial-admin {
+  display: grid;
+  gap: var(--space-md);
+}
+
 .sidebar.sidebar--collapsed {
   width: var(--sidebar-collapsed-width);
 }

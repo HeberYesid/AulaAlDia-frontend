@@ -12,6 +12,7 @@ import {
   ClipboardList,
   UserX,
   FileText,
+  ShieldCheck,
   User,
   LogOut,
   ChevronLeft,
@@ -136,6 +137,12 @@ export default function Sidebar() {
       label: 'Asistencia',
       icon: UserX,
       show: true,
+    },
+    {
+      to: '/admin/commercial',
+      label: 'Comercial Tenant',
+      icon: ShieldCheck,
+      show: user.role === 'ADMIN' && user.is_global_admin,
     },
   ].filter((item) => item.show)
 

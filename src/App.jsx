@@ -25,6 +25,7 @@ import CalendarPage from './pages/Calendar'
 import Messages from './pages/messaging/Messages'
 import Observer from './pages/Observer'
 import Absences from './pages/Absences'
+import TenantCommercialAdmin from './pages/TenantCommercialAdmin'
 
 export default function App() {
   return (
@@ -170,6 +171,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/commercial"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <TenantCommercialAdmin />
               </ProtectedRoute>
             }
           />
