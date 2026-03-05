@@ -79,7 +79,7 @@ export default function Login() {
       <div className="auth-card fade-in">
         <div className="auth-header">
           <h1><span className="auth-icon"></span> Iniciar Sesión</h1>
-          <p>Accede a tu cuenta de DevTrack</p>
+          <p>Accede a tu cuenta de AulaAlDía</p>
         </div>
 
         <form onSubmit={onSubmit} className="auth-form">

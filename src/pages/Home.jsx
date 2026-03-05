@@ -4,16 +4,16 @@ import { useAuth } from '../state/AuthContext'
 
 const PREVIEW_FAQS = [
   {
-    q: '¿Qué es DevTrack?',
-    a: 'DevTrack es un sistema integral de seguimiento académico que permite a profesores registrar evaluaciones y a estudiantes consultar su progreso en tiempo real. Las notas se registran en una escala numérica de 1.0 a 5.0 con cálculo automático del promedio.',
+    q: '¿Qué es AulaAlDía?',
+    a: 'AulaAlDía es un sistema integral de seguimiento académico que permite a profesores registrar evaluaciones y a estudiantes consultar su progreso en tiempo real. Las notas se registran en una escala numérica de 1.0 a 5.0 con cálculo automático del promedio.',
   },
   {
-    q: '¿Cuánto cuesta DevTrack?',
+    q: '¿Cuánto cuesta AulaAlDía?',
     a: 'Ofrecemos planes desde $29/mes para instituciones pequeñas hasta planes empresariales a medida. Todos los planes incluyen soporte técnico y actualizaciones continuas. Solicita una demo gratuita y te asesoramos sin compromiso.',
   },
   {
     q: '¿Cuántos estudiantes puede gestionar?',
-    a: 'DevTrack está diseñado para crecer con tu institución: desde 50 hasta más de 5 000 estudiantes. Sin límites artificiales ni sorpresas en la factura.',
+    a: 'AulaAlDía está diseñado para crecer con tu institución: desde 50 hasta más de 5 000 estudiantes. Sin límites artificiales ni sorpresas en la factura.',
   },
 ]
 
@@ -140,9 +140,9 @@ export default function Home() {
       {/* ============================================================
           4. CÓMO FUNCIONA
       ============================================================ */}
-      <section className="landing-how" id="how-it-works" aria-label="Cómo funciona DevTrack">
+      <section className="landing-how" id="how-it-works" aria-label="Cómo funciona AulaAlDía">
         <h2>Cómo funciona</h2>
-        <p className="landing-how__intro">Tres pasos para tener tu institución funcionando en DevTrack.</p>
+        <p className="landing-how__intro">Tres pasos para tener tu institución funcionando en AulaAlDía.</p>
         <div className="landing-how__steps">
           <div className="landing-how__step">
             <div className="landing-how__step-num" aria-hidden="true">1</div>
@@ -167,7 +167,7 @@ export default function Home() {
       {/* ============================================================
           5. PARA QUIÉN ES
       ============================================================ */}
-      <section className="landing-audience" id="audience" aria-label="Para quién es DevTrack">
+      <section className="landing-audience" id="audience" aria-label="Para quién es AulaAlDía">
         <h2>Diseñado para todos los actores educativos</h2>
         <div className="landing-audience__grid">
           <div className="landing-audience__card">
@@ -219,7 +219,7 @@ export default function Home() {
       <section className="landing-pros-cons" id="pros-cons" aria-label="Ventajas y limitaciones">
         <h2>Honestidad ante todo</h2>
         <p className="landing-pros-cons__intro">
-          Somos transparentes sobre lo que DevTrack hace bien y en qué aspectos aún está evolucionando.
+          Somos transparentes sobre lo que AulaAlDía hace bien y en qué aspectos aún está evolucionando.
         </p>
         <div className="landing-pros-cons__grid">
           <div className="landing-pros-cons__col landing-pros-cons__col--pro">
@@ -329,7 +329,7 @@ export default function Home() {
                 <span className="mock-dot mock-dot--red" aria-hidden="true" />
                 <span className="mock-dot mock-dot--yellow" aria-hidden="true" />
                 <span className="mock-dot mock-dot--green" aria-hidden="true" />
-                <span className="mock-title">Dashboard — DevTrack</span>
+                <span className="mock-title">Dashboard — AulaAlDía</span>
               </div>
               <div className="mock-body">
                 <div className="mock-stats-row">
@@ -424,7 +424,7 @@ export default function Home() {
         <div className="landing-testimonials__grid">
           <div className="landing-testimonials__card">
             <p className="landing-testimonials__quote">
-              "DevTrack redujo a la mitad el tiempo que dedicaba a registrar calificaciones.
+              "AulaAlDía redujo a la mitad el tiempo que dedicaba a registrar calificaciones.
               La escala numérica del 1 al 5 hace que los estudiantes entiendan su situación de un vistazo."
             </p>
             <div className="landing-testimonials__author">
@@ -467,12 +467,12 @@ export default function Home() {
       {/* ============================================================
           10. SOBRE EL PROYECTO
       ============================================================ */}
-      <section className="landing-about" id="about" aria-label="Sobre el proyecto DevTrack">
+      <section className="landing-about" id="about" aria-label="Sobre el proyecto AulaAlDía">
         <div className="landing-about__inner">
           <div className="landing-about__text">
-            <h2>Sobre DevTrack</h2>
+            <h2>Sobre AulaAlDía</h2>
             <p>
-              DevTrack nació de la necesidad de eliminar hojas de cálculo dispersas y registros
+              AulaAlDía nació de la necesidad de eliminar hojas de cálculo dispersas y registros
               físicos ineficientes en instituciones educativas. Nuestra misión es ofrecer una
               herramienta de gestión académica profesional que cualquier colegio o universidad
               pueda adoptar sin complicaciones.
@@ -526,7 +526,7 @@ export default function Home() {
       {/* ============================================================
           12. CTA FINAL
       ============================================================ */}
-      <section className="landing-cta-final" id="cta-final" aria-label="Comenzar con DevTrack">
+      <section className="landing-cta-final" id="cta-final" aria-label="Comenzar con AulaAlDía">
         <div className="landing-cta-final__inner">
           <h2>¿Listo para transformar el seguimiento académico de tu institución?</h2>
           <p>Comienza hoy. Planes flexibles para instituciones de cualquier tamaño. Demo gratuita sin compromiso.</p>

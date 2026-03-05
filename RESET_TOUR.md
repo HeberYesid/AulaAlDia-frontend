@@ -22,10 +22,10 @@ El tour debería aparecer automáticamente cuando:
 
 ```javascript
 // Para estudiante
-localStorage.removeItem('devtrack-tour-completed-STUDENT')
+localStorage.removeItem('aulaaldia-tour-completed-STUDENT')
 
 // Para profesor
-localStorage.removeItem('devtrack-tour-completed-TEACHER')
+localStorage.removeItem('aulaaldia-tour-completed-TEACHER')
 
 // O eliminar todos los tours
 localStorage.clear()
@@ -43,7 +43,7 @@ localStorage.clear()
 
 1. Abre DevTools (F12)
 2. Ve a **Application** > **Local Storage** > `http://localhost:5173`
-3. Busca las claves que empiecen con `devtrack-tour-completed-`
+3. Busca las claves que empiecen con `aulaaldia-tour-completed-`
 4. Elimina la que corresponda a tu rol
 5. Recarga la página
 
@@ -59,7 +59,7 @@ Deberías ver estos logs en la consola del navegador:
   userRole: "STUDENT" (o "TEACHER" o "ADMIN"),
   pathname: "/",
   hasCompletedTour: null,
-  tourKey: "devtrack-tour-completed-STUDENT"
+  tourKey: "aulaaldia-tour-completed-STUDENT"
 }
 
 [AppTour] Iniciando tour para rol: STUDENT
@@ -109,7 +109,7 @@ Puedes verificar en DevTools > Elements buscando estas clases.
 - **Solución**: Revisa que aparezca en consola:
   ```
   [AppTour] Tour completado/saltado
-  [AppTour] Guardado en localStorage: devtrack-tour-completed-STUDENT
+  [AppTour] Guardado en localStorage: aulaaldia-tour-completed-STUDENT
   ```
 
 ### El delay es muy largo

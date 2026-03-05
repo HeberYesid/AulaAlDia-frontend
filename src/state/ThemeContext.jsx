@@ -1,10 +1,10 @@
 /**
- * 🌓 SISTEMA DE TEMAS - DEVTRACK
+ * 🌓 SISTEMA DE TEMAS - AULAALDIA
  * 
  * Contexto de React para gestionar el tema de la aplicación (oscuro/claro)
  * Incluye persistencia en localStorage y aplicación automática al DOM
  * 
- * @author DevTrack Team
+ * @author AulaAlDía Team
  * @version 1.0.0
  */
 
@@ -43,7 +43,7 @@ export function ThemeProvider({ children }) {
   // 🎭 Estado del tema - inicializa desde localStorage o 'dark' por defecto
   const [theme, setTheme] = useState(() => {
     // Obtener tema guardado del localStorage o usar 'dark' por defecto
-    const savedTheme = localStorage.getItem('devtrack-theme')
+    const savedTheme = localStorage.getItem('aulaaldia-theme')
     return savedTheme || 'dark'
   })
 
@@ -55,7 +55,7 @@ export function ThemeProvider({ children }) {
    */
   useEffect(() => {
     // Guardar tema en localStorage
-    localStorage.setItem('devtrack-theme', theme)
+    localStorage.setItem('aulaaldia-theme', theme)
     
     // Aplicar atributo data-theme al documento (usado por CSS)
     document.documentElement.setAttribute('data-theme', theme)

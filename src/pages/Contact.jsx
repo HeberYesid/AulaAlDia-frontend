@@ -212,11 +212,11 @@ export default function Contact() {
               <h3>GitHub</h3>
               <p>
                 <a
-                  href="https://github.com/HeberYesid/DevTrack"
+                  href="https://github.com/HeberYesid/AulaAlDía"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  github.com/HeberYesid/DevTrack
+                  github.com/HeberYesid/AulaAlDía
                 </a>
               </p>
             </div>

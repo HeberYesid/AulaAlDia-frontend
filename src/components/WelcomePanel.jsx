@@ -109,7 +109,7 @@ export default function WelcomePanel() {
           {formattedLastLogin ? (
             <span>Último acceso: <strong>{formattedLastLogin}</strong></span>
           ) : (
-            <span>Esta es tu primera sesión en DevTrack. ¡Bienvenido!</span>
+            <span>Esta es tu primera sesión en AulaAlDía. ¡Bienvenido!</span>
           )}
         </div>
         {lastLoginIp && (

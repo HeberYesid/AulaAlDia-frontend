@@ -10,7 +10,7 @@ export default function TourDebugButton() {
 
   useEffect(() => {
     if (user) {
-      const tourKey = `devtrack-tour-completed-${user.role}`
+      const tourKey = `aulaaldia-tour-completed-${user.role}`
       const completed = localStorage.getItem(tourKey)
       setTourStatus(completed ? '✅' : '❌')
     }
@@ -18,7 +18,7 @@ export default function TourDebugButton() {
 
   const resetAndShowTour = () => {
     if (user) {
-      const tourKey = `devtrack-tour-completed-${user.role}`
+      const tourKey = `aulaaldia-tour-completed-${user.role}`
       localStorage.removeItem(tourKey)
       console.log('[TourDebug] Tour reset for role:', user.role)
       console.log('[TourDebug] Removed key:', tourKey)
@@ -37,7 +37,7 @@ export default function TourDebugButton() {
 
   const checkTourStatus = () => {
     if (user) {
-      const tourKey = `devtrack-tour-completed-${user.role}`
+      const tourKey = `aulaaldia-tour-completed-${user.role}`
       const completed = localStorage.getItem(tourKey)
       const allTourKeys = Object.keys(localStorage).filter(k => k.includes('tour'))
       

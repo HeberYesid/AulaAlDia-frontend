@@ -52,9 +52,9 @@ export default function PublicNavBar() {
     >
       <div className="public-navbar__inner">
         {/* Logo */}
-        <Link to="/home" className="public-navbar__logo" aria-label="DevTrack — Inicio">
+        <Link to="/home" className="public-navbar__logo" aria-label="AulaAlDía — Inicio">
           <span className="public-navbar__logo-icon" aria-hidden="true">DT</span>
-          <span className="public-navbar__logo-text">DevTrack</span>
+          <span className="public-navbar__logo-text">AulaAlDía</span>
         </Link>
 
         {/* Desktop nav links */}

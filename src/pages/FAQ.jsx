@@ -14,19 +14,19 @@ export default function FAQ() {
       category: 'General',
       questions: [
         {
-          question: '¿Qué es DevTrack?',
+          question: '¿Qué es AulaAlDía?',
           answer:
-            'DevTrack es un sistema de seguimiento académico diseñado para facilitar la gestión de asignaturas, estudiantes y resultados. Permite a profesores administrar cursos y evaluar el desempeño de los estudiantes, mientras que los estudiantes pueden consultar sus calificaciones y progreso en tiempo real.',
+            'AulaAlDía es un sistema de seguimiento académico diseñado para facilitar la gestión de asignaturas, estudiantes y resultados. Permite a profesores administrar cursos y evaluar el desempeño de los estudiantes, mientras que los estudiantes pueden consultar sus calificaciones y progreso en tiempo real.',
         },
         {
-          question: '¿Quién puede usar DevTrack?',
+          question: '¿Quién puede usar AulaAlDía?',
           answer:
-            'DevTrack está diseñado para tres tipos de usuarios: Estudiantes (pueden ver sus asignaturas y resultados), Profesores (pueden crear asignaturas, registrar estudiantes y calificar)',
+            'AulaAlDía está diseñado para tres tipos de usuarios: Estudiantes (pueden ver sus asignaturas y resultados), Profesores (pueden crear asignaturas, registrar estudiantes y calificar)',
         },
         {
-          question: '¿Es gratis usar DevTrack?',
+          question: '¿Es gratis usar AulaAlDía?',
           answer:
-            'Sí, DevTrack es un proyecto de código abierto y gratuito para uso académico. Puedes registrarte como estudiante o solicitar acceso como profesor sin costo alguno.',
+            'Sí, AulaAlDía es un proyecto de código abierto y gratuito para uso académico. Puedes registrarte como estudiante o solicitar acceso como profesor sin costo alguno.',
         },
       ],
     },
@@ -34,7 +34,7 @@ export default function FAQ() {
       category: 'Cuenta y Registro',
       questions: [
         {
-          question: '¿Cómo me registro en DevTrack?',
+          question: '¿Cómo me registro en AulaAlDía?',
           answer:
             'Para registrarte como estudiante, haz clic en "Registrarse" y completa el formulario. Si eres profesor, usa el enlace "Registro de Profesor". Después del registro, recibirás un código de verificación por correo electrónico (revisa spam) que debes ingresar para activar tu cuenta.',
         },
@@ -101,17 +101,17 @@ export default function FAQ() {
         {
           question: '¿Qué navegadores son compatibles?',
           answer:
-            'DevTrack funciona en todos los navegadores modernos: Chrome, Firefox, Safari, Edge (versiones recientes). Recomendamos mantener tu navegador actualizado para la mejor experiencia.',
+            'AulaAlDía funciona en todos los navegadores modernos: Chrome, Firefox, Safari, Edge (versiones recientes). Recomendamos mantener tu navegador actualizado para la mejor experiencia.',
         },
         {
           question: '¿Los datos están seguros?',
           answer:
-            'Sí, DevTrack implementa autenticación JWT, encriptación de contraseñas con bcrypt, y validación de correos electrónicos. Todas las comunicaciones entre el cliente y el servidor están protegidas.',
+            'Sí, AulaAlDía implementa autenticación JWT, encriptación de contraseñas con bcrypt, y validación de correos electrónicos. Todas las comunicaciones entre el cliente y el servidor están protegidas.',
         },
         {
-          question: '¿Puedo usar DevTrack en mi móvil?',
+          question: '¿Puedo usar AulaAlDía en mi móvil?',
           answer:
-            'Sí, DevTrack tiene un diseño responsive que se adapta a dispositivos móviles y tablets. Puedes acceder desde cualquier dispositivo con un navegador web.',
+            'Sí, AulaAlDía tiene un diseño responsive que se adapta a dispositivos móviles y tablets. Puedes acceder desde cualquier dispositivo con un navegador web.',
         },
       ],
     },
@@ -121,7 +121,7 @@ export default function FAQ() {
     <div className="faq-page">
       <div className="faq-header">
         <h1>Preguntas Frecuentes</h1>
-        <p>Encuentra respuestas a las preguntas más comunes sobre DevTrack</p>
+        <p>Encuentra respuestas a las preguntas más comunes sobre AulaAlDía</p>
       </div>
 
       <div className="faq-content">

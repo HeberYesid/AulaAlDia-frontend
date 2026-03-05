@@ -21,7 +21,7 @@ import {
   X,
 } from 'lucide-react'
 
-const SIDEBAR_COLLAPSED_KEY = 'devtrack-sidebar-collapsed'
+const SIDEBAR_COLLAPSED_KEY = 'aulaaldia-sidebar-collapsed'
 
 export default function Sidebar() {
   const { user, logout, tenants, activeTenantId, switchTenant } = useAuth()
@@ -190,9 +190,9 @@ export default function Sidebar() {
       <aside id="sidebar" className={sidebarClasses} aria-label="Navegación principal">
         {/* Brand + collapse toggle */}
         <div className="sidebar__brand">
-          <Link to="/" className="sidebar__logo" aria-label="DevTrack — Inicio">
+          <Link to="/" className="sidebar__logo" aria-label="AulaAlDía — Inicio">
             <span className="sidebar__logo-icon">DT</span>
-            {!collapsed && <span className="sidebar__logo-text">DevTrack</span>}
+            {!collapsed && <span className="sidebar__logo-text">AulaAlDía</span>}
           </Link>
 
           {/* Close button on mobile */}

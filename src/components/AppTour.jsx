@@ -3,7 +3,7 @@ import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride'
 import { useAuth } from '../state/AuthContext'
 import { useLocation } from 'react-router-dom'
 
-const TOUR_STORAGE_KEY = 'devtrack-tour-completed'
+const TOUR_STORAGE_KEY = 'aulaaldia-tour-completed'
 
 // Tours específicos por rol
 const STUDENT_STEPS = [
@@ -11,7 +11,7 @@ const STUDENT_STEPS = [
     target: 'body',
     content: (
       <div>
-        <h2>¡Bienvenido a DevTrack! 👋</h2>
+        <h2>¡Bienvenido a AulaAlDía! 👋</h2>
         <p>Te mostraremos las características principales de la plataforma para estudiantes.</p>
       </div>
     ),

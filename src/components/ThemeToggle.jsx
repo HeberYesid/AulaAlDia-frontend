@@ -10,7 +10,7 @@
  * - Accesibilidad completa con aria-labels
  * - Estilos adaptativos según el tema actual
  * 
- * @author DevTrack Team
+ * @author AulaAlDía Team
  * @version 1.0.0
  */
 
