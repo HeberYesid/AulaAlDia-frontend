@@ -1059,7 +1059,7 @@ form {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: var(--space-lg);
   overflow-y: auto;
@@ -1074,8 +1074,9 @@ form {
   max-width: 450px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   backdrop-filter: blur(10px);
+  margin: auto 0;
 }
 
 .auth-card::before {
@@ -1142,7 +1143,6 @@ form {
 
 @media (max-width: 768px) {
   .auth-container {
-    align-items: flex-start;
     padding-top: var(--space-xl);
     padding-bottom: var(--space-xl);
   }
