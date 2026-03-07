@@ -91,6 +91,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="tu@email.com"
+              autoComplete="email"
               required
             />
           </div>
@@ -113,6 +114,7 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 style={{ paddingRight: '2.5rem' }}
+                autoComplete="current-password"
                 required
               />
               <button
@@ -146,7 +148,7 @@ export default function Login() {
           >
             {isLoading ? (
               <>
-                <div className="spinner"></div>
+                <div className="spinner" aria-hidden="true"></div>
                 Iniciando sesión...
               </>
             ) : (
@@ -155,13 +157,13 @@ export default function Login() {
           </button>
 
           {message && (
-            <div className="alert success">
+            <div className="alert success" role="status" aria-live="polite">
               ✅ {message}
             </div>
           )}
 
           {error && (
-            <div className="alert error">
+            <div className="alert error" role="alert" aria-live="assertive">
               ❌ {error}
               {showVerifyLink && (
                 <div style={{ marginTop: 'var(--space-sm)' }}>

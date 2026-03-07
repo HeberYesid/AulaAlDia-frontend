@@ -99,13 +99,14 @@ export default function Register() {
           <h1><span className="auth-icon"></span> Crear Cuenta</h1>
         </div>
 
-        <div className="role-selector">
+        <div className="role-selector" role="group" aria-label="Tipo de cuenta">
           {ROLES.map((r) => (
             <button
               key={r.value}
               type="button"
               onClick={() => { setRole(r.value); setError('') }}
               className={`role-selector-btn ${role === r.value ? 'active' : ''}`}
+              aria-pressed={role === r.value}
             >
               {r.label}
             </button>
@@ -140,6 +141,7 @@ export default function Register() {
                 onChange={(e) => setFirstName(e.target.value)}
                 type="text"
                 placeholder="Tu nombre"
+                autoComplete="given-name"
                 required
               />
             </div>
@@ -151,6 +153,7 @@ export default function Register() {
                 onChange={(e) => setLastName(e.target.value)}
                 type="text"
                 placeholder="Tus apellidos"
+                autoComplete="family-name"
                 required
               />
             </div>
@@ -164,6 +167,7 @@ export default function Register() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="tu@email.com"
+              autoComplete="email"
               required
             />
           </div>
@@ -178,6 +182,7 @@ export default function Register() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Minimo 8 caracteres"
                 style={{ paddingRight: '2.5rem' }}
+                autoComplete="new-password"
                 minLength={8}
                 required
               />
@@ -243,14 +248,14 @@ export default function Register() {
             disabled={isLoading || !isCaptchaReady || !turnstileToken}
           >
             {isLoading ? (
-              <><div className="spinner"></div>Creando cuenta...</>
+              <><div className="spinner" aria-hidden="true"></div>Creando cuenta...</>
             ) : !isCaptchaReady ? <>Cargando...</>
             : !turnstileToken ? <>Completa el captcha</>
             : <>Crear Cuenta</>}
           </button>
 
           {error && (
-            <div className="alert error">
+            <div className="alert error" role="alert" aria-live="assertive">
               {error}
               {error.includes('ya esta registrado') && (
                 <div style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>

@@ -84,11 +84,11 @@ const ConversationList = ({
                 )}
             </div>
 
-            <div className="msg-conversation-list" role="listbox" aria-label="Conversaciones">
+            <ul className="msg-conversation-list" role="list" aria-label="Conversaciones" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {filteredConversations.length === 0 && (
-                    <div className="msg-conversation-empty">
+                    <li className="msg-conversation-empty">
                         {filterQuery ? 'Sin resultados' : 'No hay conversaciones'}
-                    </div>
+                    </li>
                 )}
                 {filteredConversations.map((conv) => {
                     const other = getOtherParticipant(conv);
@@ -100,14 +100,12 @@ const ConversationList = ({
                         : 'No hay mensajes';
 
                     return (
+                        <li key={conv.id}>
                         <button
-                            key={conv.id}
                             className={`msg-conversation-item ${isActive ? 'msg-conversation-active' : ''} ${hasUnread ? 'msg-conversation-unread' : ''}`}
                             onClick={() => onSelectConversation(conv)}
                             type="button"
-                            role="option"
-                            aria-selected={isActive}
-                            tabIndex={0}
+                            aria-current={isActive ? 'true' : undefined}
                         >
                             <div className="msg-avatar">
                                 <span className="msg-avatar-letter">
@@ -133,9 +131,10 @@ const ConversationList = ({
                                 </div>
                             </div>
                         </button>
+                        </li>
                     );
                 })}
-            </div>
+            </ul>
         </aside>
     );
 };

@@ -4,6 +4,7 @@ import { api } from '../api/axios'
 export default function MyResults() {
   const [enrs, setEnrs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [exportError, setExportError] = useState('')
 
   async function load() {
     setLoading(true)
@@ -94,7 +95,7 @@ export default function MyResults() {
       document.body.removeChild(link)
     } catch (err) {
       console.error('Error al exportar:', err)
-      alert('Error al exportar los datos')
+      setExportError('Error al exportar los datos. Inténtalo nuevamente.')
     }
   }
 
@@ -122,6 +123,11 @@ export default function MyResults() {
 
   return (
     <div className="fade-in">
+      {exportError && (
+        <div className="alert error" role="alert" aria-live="assertive" style={{ marginBottom: '1rem' }}>
+          {exportError}
+        </div>
+      )}
       {/* Header con estadísticas globales */}
       {globalStats && (
         <div className="card" style={{ marginTop: 'var(--space-lg)' }}>

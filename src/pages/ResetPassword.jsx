@@ -11,6 +11,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -36,8 +37,8 @@ export default function ResetPassword() {
       })
       
       // Mostrar éxito y redirigir a login
-      alert('✅ Contraseña restablecida exitosamente. Ya puedes iniciar sesión.')
-      navigate('/login')
+      setSuccess('Contraseña restablecida exitosamente. Ya puedes iniciar sesión.')
+      setTimeout(() => navigate('/login'), 2000)
     } catch (err) {
       console.error('Error:', err)
       setError(err.response?.data?.detail || 'Error al restablecer la contraseña')
@@ -57,8 +58,14 @@ export default function ResetPassword() {
           </p>
         </div>
 
+        {success && (
+          <div className="alert success" role="status" aria-live="polite" style={{ marginBottom: '1rem' }}>
+            ✅ {success}
+          </div>
+        )}
+
         {error && (
-          <div className="alert error" style={{ marginBottom: '1rem' }}>
+          <div className="alert error" role="alert" aria-live="assertive" style={{ marginBottom: '1rem' }}>
             {error}
           </div>
         )}

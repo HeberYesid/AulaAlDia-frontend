@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const CATEGORIES = [
   { value: 'MISBEHAVIOR', label: 'Mal comportamiento', color: '#ef4444' },
@@ -32,6 +33,7 @@ export default function Observer() {
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
+  const [confirmDialog, setConfirmDialog] = useState(null)
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('')
@@ -131,13 +133,19 @@ export default function Observer() {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta observación?')) return
-    try {
-      await api.delete(`/api/v1/courses/observations/${id}/`)
-      loadObservations()
-    } catch (err) {
-      console.error('Error deleting observation:', err)
-    }
+    setConfirmDialog({
+      title: 'Eliminar observación',
+      message: '¿Estás seguro de que quieres eliminar esta observación?',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        try {
+          await api.delete(`/api/v1/courses/observations/${id}/`)
+          loadObservations()
+        } catch (err) {
+          console.error('Error deleting observation:', err)
+        }
+      },
+    })
   }
 
   const handleToggleExpand = (id) => {
@@ -148,7 +156,7 @@ export default function Observer() {
     return (
       <div className="card">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div className="spinner"></div>
+          <div className="spinner" role="status" aria-label="Cargando observaciones..."></div>
           <p>Cargando observaciones...</p>
         </div>
       </div>
@@ -156,12 +164,13 @@ export default function Observer() {
   }
 
   return (
+    <>
     <div className="fade-in">
       {/* Header */}
       <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
           <div>
-            <h2 style={{ margin: 0 }}>📋 Observador</h2>
+            <h1 style={{ margin: 0 }}><span aria-hidden="true">📋 </span>Observador</h1>
             <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
               {isTeacherOrAdmin
                 ? 'Registra y consulta observaciones sobre el comportamiento de los estudiantes.'
@@ -345,15 +354,15 @@ export default function Observer() {
             <table className="table mobile-card-view" style={{ width: '100%' }}>
               <thead>
                 <tr>
-                  <th style={{ width: '130px' }}>Fecha</th>
+                  <th scope="col" style={{ width: '130px' }}>Fecha</th>
                   {(isTeacherOrAdmin || user?.role === 'TUTOR') && (
-                    <th style={{ width: '180px' }}>Estudiante</th>
+                    <th scope="col" style={{ width: '180px' }}>Estudiante</th>
                   )}
-                  <th style={{ width: '120px' }}>Categoría</th>
-                  <th style={{ width: '140px' }}>Materia</th>
-                  <th>Título</th>
-                  <th style={{ width: '150px' }}>Profesor</th>
-                  <th style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
+                  <th scope="col" style={{ width: '120px' }}>Categoría</th>
+                  <th scope="col" style={{ width: '140px' }}>Materia</th>
+                  <th scope="col">Título</th>
+                  <th scope="col" style={{ width: '150px' }}>Profesor</th>
+                  <th scope="col" style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -459,5 +468,14 @@ export default function Observer() {
         )}
       </div>
     </div>
+    {confirmDialog && (
+      <ConfirmDialog
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    )}
+    </>
   )
 }

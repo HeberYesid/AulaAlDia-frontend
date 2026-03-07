@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const INITIAL_FORM = {
   student_email: '',
@@ -22,6 +23,7 @@ export default function Absences() {
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
+  const [confirmDialog, setConfirmDialog] = useState(null)
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('')
@@ -126,18 +128,20 @@ export default function Absences() {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta falta?')) return
-    try {
-      await api.delete(`/api/v1/courses/absences/${id}/`)
-      loadAbsences()
-    } catch (err) {
-      console.error('Error deleting absence:', err)
-      const data = err.response?.data
-      if (data?.detail) {
-        alert(data.detail)
-      }
-    }
+  const handleDelete = (id) => {
+    setConfirmDialog({
+      title: 'Eliminar falta',
+      message: '¿Estás seguro de que quieres eliminar esta falta?',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        try {
+          await api.delete(`/api/v1/courses/absences/${id}/`)
+          loadAbsences()
+        } catch (err) {
+          console.error('Error deleting absence:', err)
+        }
+      },
+    })
   }
 
   const handleToggleExpand = (id) => {
@@ -148,7 +152,7 @@ export default function Absences() {
     return (
       <div className="card">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div className="spinner"></div>
+          <div className="spinner" role="status" aria-label="Cargando faltas de asistencia..."></div>
           <p>Cargando faltas de asistencia...</p>
         </div>
       </div>
@@ -156,6 +160,7 @@ export default function Absences() {
   }
 
   return (
+    <>
     <div className="fade-in">
       {/* Header */}
       <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
@@ -169,7 +174,7 @@ export default function Absences() {
           }}
         >
           <div>
-            <h2 style={{ margin: 0 }}>📋 Faltas de Asistencia</h2>
+            <h1 style={{ margin: 0 }}><span aria-hidden="true">📋 </span>Faltas de Asistencia</h1>
             <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
               {isTeacherOrAdmin
                 ? 'Registra y consulta las faltas de asistencia de los estudiantes.'
@@ -390,15 +395,15 @@ export default function Absences() {
             <table className="table mobile-card-view" style={{ width: '100%' }}>
               <thead>
                 <tr>
-                  <th style={{ width: '120px' }}>Fecha</th>
+                  <th scope="col" style={{ width: '120px' }}>Fecha</th>
                   {(isTeacherOrAdmin || user?.role === 'TUTOR') && (
-                    <th style={{ width: '180px' }}>Estudiante</th>
+                    <th scope="col" style={{ width: '180px' }}>Estudiante</th>
                   )}
-                  <th style={{ width: '140px' }}>Materia</th>
-                  <th style={{ width: '120px', textAlign: 'center' }}>Estado</th>
-                  <th>Motivo</th>
-                  <th style={{ width: '150px' }}>Registrado por</th>
-                  <th style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
+                  <th scope="col" style={{ width: '140px' }}>Materia</th>
+                  <th scope="col" style={{ width: '120px', textAlign: 'center' }}>Estado</th>
+                  <th scope="col">Motivo</th>
+                  <th scope="col" style={{ width: '150px' }}>Registrado por</th>
+                  <th scope="col" style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -417,8 +422,6 @@ export default function Absences() {
                         if (e.key === 'Enter' || e.key === ' ') handleToggleExpand(a.id)
                       }}
                       tabIndex={0}
-                      aria-expanded={isExpanded}
-                      aria-label={`Falta del ${a.date}`}
                     >
                       <td
                         data-label="Fecha"
@@ -503,7 +506,8 @@ export default function Absences() {
                               e.stopPropagation()
                               handleToggleExpand(a.id)
                             }}
-                            title={isExpanded ? 'Ocultar detalle' : 'Ver detalle'}
+                            aria-expanded={isExpanded}
+                            aria-label={isExpanded ? `Ocultar detalle de falta del ${a.date}` : `Ver detalle de falta del ${a.date}`}
                             style={{
                               padding: '0.3rem 0.6rem',
                               fontSize: '0.75rem',
@@ -540,5 +544,14 @@ export default function Absences() {
         )}
       </div>
     </div>
+    {confirmDialog && (
+      <ConfirmDialog
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    )}
+    </>
   )
 }

@@ -1,9 +1,11 @@
-﻿import { useEffect, useState, useMemo } from 'react'
+﻿import { useEffect, useState, useMemo, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
 import CSVUpload from '../components/CSVUpload'
 import StatusBadge from '../components/StatusBadge'
+import Alert from '../components/Alert'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function SubjectDetail() {
   const { id } = useParams()
@@ -63,8 +65,36 @@ export default function SubjectDetail() {
   // Estado para ver solución de texto
   const [viewingSubmission, setViewingSubmission] = useState(null)
 
+  // Estado para confirmación de borrado de ejercicio
+  const [confirmDeleteExercise, setConfirmDeleteExercise] = useState(null)
+
   // Estado para IA
   const [generatingAI, setGeneratingAI] = useState(false)
+
+  // Refs for modal focus management
+  const editExerciseDialogRef = useRef(null)
+  const editResultDialogRef = useRef(null)
+  const createResultDialogRef = useRef(null)
+  const uploadSolutionDialogRef = useRef(null)
+  const viewSubmissionDialogRef = useRef(null)
+  const lastFocusRef = useRef(null)
+
+  const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  function handleFocusTrap(e, ref) {
+    if (e.key !== 'Tab') return
+    const focusables = [...(ref.current?.querySelectorAll(FOCUSABLE) || [])]
+    if (focusables.length < 2) return
+    const first = focusables[0]
+    const last = focusables[focusables.length - 1]
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+  }
+
+  useEffect(() => { if (editingExercise) editExerciseDialogRef.current?.focus() }, [editingExercise])
+  useEffect(() => { if (editingResult) editResultDialogRef.current?.focus() }, [editingResult])
+  useEffect(() => { if (showCreateResultForm) createResultDialogRef.current?.focus() }, [showCreateResultForm])
+  useEffect(() => { if (uploadingExercise) uploadSolutionDialogRef.current?.focus() }, [uploadingExercise])
+  useEffect(() => { if (viewingSubmission) viewSubmissionDialogRef.current?.focus() }, [viewingSubmission])
 
   async function generateAIFeedback() {
     if (!newScore) {
@@ -357,9 +387,6 @@ export default function SubjectDetail() {
   }
 
   async function deleteExercise(exerciseId, exerciseName) {
-    if (!confirm(`¿Estás seguro de eliminar el ejercicio "${exerciseName}"? Esto eliminará todos los resultados asociados.`)) {
-      return
-    }
     try {
       await api.delete(`/api/v1/courses/exercises/${exerciseId}/`)
       setSuccess(`Ejercicio eliminado correctamente`)
@@ -370,7 +397,12 @@ export default function SubjectDetail() {
     }
   }
 
+  function handleDeleteExerciseClick(exerciseId, exerciseName) {
+    setConfirmDeleteExercise({ id: exerciseId, name: exerciseName })
+  }
+
   function openEditExerciseModal(exercise) {
+    lastFocusRef.current = document.activeElement
     setEditingExercise(exercise)
     setEditExerciseName(exercise.name)
     setEditExerciseDeadline(exercise.deadline || '')
@@ -386,6 +418,7 @@ export default function SubjectDetail() {
     setEditExerciseDescription('')
     setEditExerciseFile(null)
     setError('')
+    setTimeout(() => lastFocusRef.current?.focus(), 0)
   }
 
   async function updateExercise(e) {
@@ -432,6 +465,7 @@ export default function SubjectDetail() {
   }
 
   function openEditModal(result) {
+    lastFocusRef.current = document.activeElement
     setEditingResult({
       resultId: result.id,
       currentScore: result.score,
@@ -451,6 +485,7 @@ export default function SubjectDetail() {
     setNewScore('')
     setNewComment('')
     setError('')
+    setTimeout(() => lastFocusRef.current?.focus(), 0)
   }
 
   async function updateResultStatus(e) {
@@ -477,6 +512,7 @@ export default function SubjectDetail() {
   }
 
   function openCreateResultForm() {
+    lastFocusRef.current = document.activeElement
     setShowCreateResultForm(true)
     setSelectedEnrollmentId('')
     setSelectedExerciseId('')
@@ -493,6 +529,7 @@ export default function SubjectDetail() {
     setCreateScore('3.0')
     setCreateComment('')
     setError('')
+    setTimeout(() => lastFocusRef.current?.focus(), 0)
   }
 
   async function createResult(e) {
@@ -580,6 +617,14 @@ export default function SubjectDetail() {
 
   return (
     <div className="fade-in" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      {confirmDeleteExercise && (
+        <ConfirmDialog
+          title="¿Eliminar ejercicio?"
+          message={`¿Estás seguro de eliminar el ejercicio "${confirmDeleteExercise.name}"? Esto eliminará todos los resultados asociados. Esta acción no se puede deshacer.`}
+          onConfirm={() => { const ex = confirmDeleteExercise; setConfirmDeleteExercise(null); deleteExercise(ex.id, ex.name) }}
+          onCancel={() => setConfirmDeleteExercise(null)}
+        />
+      )}
       {/* Header */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -651,8 +696,12 @@ export default function SubjectDetail() {
       ) : (
         // Vista completa para profesores/admin con tabs
         <div className="card" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
-          <div className="tabs-scrollable" style={{ display: 'flex', borderBottom: '2px solid var(--border)' }}>
+          <div role="tablist" aria-label="Secciones de la materia" className="tabs-scrollable" style={{ display: 'flex', borderBottom: '2px solid var(--border)' }}>
             <button
+              role="tab"
+              id="tab-students"
+              aria-selected={activeTab === 'students'}
+              aria-controls="tab-panel-students"
               onClick={() => setActiveTab('students')}
               style={{
                 flex: 1,
@@ -670,6 +719,10 @@ export default function SubjectDetail() {
               Estudiantes ({enrollments.length})
             </button>
             <button
+              role="tab"
+              id="tab-exercises"
+              aria-selected={activeTab === 'exercises'}
+              aria-controls="tab-panel-exercises"
               onClick={() => setActiveTab('exercises')}
               style={{
                 flex: 1,
@@ -687,6 +740,10 @@ export default function SubjectDetail() {
               Ejercicios ({exercises.length})
             </button>
             <button
+              role="tab"
+              id="tab-results"
+              aria-selected={activeTab === 'results'}
+              aria-controls="tab-panel-results"
               onClick={() => setActiveTab('results')}
               style={{
                 flex: 1,
@@ -709,7 +766,7 @@ export default function SubjectDetail() {
 
       {/* Tab Content */}
       {activeTab === 'students' && (
-        <div className="card">
+        <div id="tab-panel-students" role="tabpanel" aria-labelledby="tab-students" className="card">
           <h2>Gestión de Estudiantes</h2>
           
           <div>
@@ -721,6 +778,7 @@ export default function SubjectDetail() {
               <div style={{ marginBottom: '1rem' }}>
                 <input
                   type="text"
+                  aria-label="Buscar estudiante por email, nombre o apellido"
                   placeholder="Buscar por email, nombre o apellido..."
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
@@ -887,7 +945,7 @@ export default function SubjectDetail() {
       )}
 
       {activeTab === 'exercises' && (
-        <div className="card">
+        <div id="tab-panel-exercises" role="tabpanel" aria-labelledby="tab-exercises" className="card">
           <h2>Gestión de Ejercicios</h2>
           
           {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
@@ -1037,6 +1095,7 @@ export default function SubjectDetail() {
               <div style={{ marginBottom: '1rem' }}>
                 <input
                   type="text"
+                  aria-label="Buscar ejercicio por nombre"
                   placeholder="Buscar ejercicio por nombre..."
                   value={exerciseSearch}
                   onChange={(e) => setExerciseSearch(e.target.value)}
@@ -1163,7 +1222,7 @@ export default function SubjectDetail() {
                                 <button 
                                   className="btn danger"
                                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', flex: 1 }}
-                                  onClick={() => deleteExercise(ex.id, ex.name)}
+                                  onClick={() => handleDeleteExerciseClick(ex.id, ex.name)}
                                 >
                                   Eliminar
                                 </button>
@@ -1184,7 +1243,7 @@ export default function SubjectDetail() {
       )}
 
       {(activeTab === 'results' || user?.role === 'STUDENT') && (
-        <div className="card">
+        <div id="tab-panel-results" role="tabpanel" aria-labelledby="tab-results" className="card">
           <h2>{user?.role === 'STUDENT' ? 'Mis Resultados' : 'Resultados y Dashboard'}</h2>
           
           <div>
@@ -1342,6 +1401,7 @@ export default function SubjectDetail() {
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
                   <input
                     type="text"
+                    aria-label={user?.role === 'STUDENT' ? 'Buscar resultado por ejercicio' : 'Buscar resultado por estudiante o ejercicio'}
                     placeholder={user?.role === 'STUDENT' ? '🔍 Buscar por ejercicio...' : '🔍 Buscar por estudiante o ejercicio...'}
                     value={resultSearch}
                     onChange={(e) => setResultSearch(e.target.value)}
@@ -1354,6 +1414,7 @@ export default function SubjectDetail() {
                     }}
                   />
                   <select
+                    aria-label="Filtrar resultados por estado"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     style={{
@@ -1548,6 +1609,7 @@ export default function SubjectDetail() {
             aria-modal="true"
             aria-labelledby="edit-exercise-modal-title"
             tabIndex={-1}
+            ref={editExerciseDialogRef}
             style={{ 
               maxWidth: '600px', 
               width: '100%',
@@ -1709,6 +1771,7 @@ export default function SubjectDetail() {
             aria-modal="true"
             aria-labelledby="edit-result-modal-title"
             tabIndex={-1}
+            ref={editResultDialogRef}
             style={{ 
               maxWidth: '500px', 
               width: '100%',
@@ -1880,6 +1943,7 @@ export default function SubjectDetail() {
             aria-modal="true"
             aria-labelledby="create-result-modal-title"
             tabIndex={-1}
+            ref={createResultDialogRef}
             style={{ 
               maxWidth: '600px', 
               width: '100%',
@@ -2038,7 +2102,12 @@ export default function SubjectDetail() {
           aria-label="Cerrar modal de subir solución"
         >
           <div 
-            className="card modal-responsive" 
+            className="card modal-responsive"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="upload-solution-modal-title"
+            tabIndex={-1}
+            ref={uploadSolutionDialogRef}
             style={{ 
               maxWidth: '500px', 
               width: '100%',
@@ -2047,7 +2116,7 @@ export default function SubjectDetail() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>Subir Solución</h2>
+            <h2 id="upload-solution-modal-title">Subir Solución</h2>
             <p><strong>Ejercicio:</strong> {uploadingExercise.name}</p>
             
             <form onSubmit={submitSolution}>
@@ -2136,7 +2205,12 @@ export default function SubjectDetail() {
           aria-label="Cerrar modal de ver solución"
         >
           <div 
-            className="card modal-responsive" 
+            className="card modal-responsive"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="view-submission-modal-title"
+            tabIndex={-1}
+            ref={viewSubmissionDialogRef}
             style={{ 
               maxWidth: '600px', 
               width: '100%',
@@ -2149,12 +2223,13 @@ export default function SubjectDetail() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 style={{ margin: 0 }}>Solución de Texto</h2>
+              <h2 id="view-submission-modal-title" style={{ margin: 0 }}>Solución de Texto</h2>
               <button 
                 onClick={() => setViewingSubmission(null)}
+                aria-label="Cerrar"
                 style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-secondary)' }}
               >
-                &times;
+                <span aria-hidden="true">&times;</span>
               </button>
             </div>
             

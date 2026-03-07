@@ -32,7 +32,7 @@ export default function CSVUpload({ label, uploadUrl, onComplete }) {
       <input id="csv-file-input" type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0])} />
       <div className="form-actions">
         <button className="btn" disabled={!file || loading}>{loading ? 'Cargando...' : 'Subir CSV'}</button>
-        {message && <span className="notice">{message}</span>}
+        {message && <span className="notice" role="status" aria-live="polite" aria-atomic="true">{message}</span>}
       </div>
     </form>
   )

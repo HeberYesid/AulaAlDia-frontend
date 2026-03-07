@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import Alert from '../components/Alert'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Subjects() {
   const [items, setItems] = useState([])
@@ -9,6 +10,7 @@ export default function Subjects() {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   async function load() {
     const { data } = await api.get('/api/v1/courses/subjects/')
@@ -36,13 +38,6 @@ export default function Subjects() {
   }
 
   async function deleteSubject(subject) {
-    // Confirmación
-    const confirmMessage = `¿Estás seguro de que deseas eliminar la materia "${subject.name}" (${subject.code})?\n\nEsta acción eliminará:\n- Todos los estudiantes inscritos\n- Todos los ejercicios\n- Todos los resultados\n\nEsta acción NO se puede deshacer.`
-    
-    if (!window.confirm(confirmMessage)) {
-      return
-    }
-
     setError('')
     setSuccess('')
     try {
@@ -56,8 +51,26 @@ export default function Subjects() {
     }
   }
 
+  function handleDeleteClick(subject) {
+    setConfirmDelete(subject)
+  }
+
+  function handleConfirmDelete() {
+    const subject = confirmDelete
+    setConfirmDelete(null)
+    deleteSubject(subject)
+  }
+
   return (
     <div>
+      {confirmDelete && (
+        <ConfirmDialog
+          title="¿Eliminar materia?"
+          message={`¿Estás seguro de que deseas eliminar la materia "${confirmDelete.name}" (${confirmDelete.code})? Esta acción eliminará todos los estudiantes inscritos, ejercicios y resultados. Esta acción NO se puede deshacer.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
       {/* Mensajes de éxito/error */}
       <Alert type="success" message={success} />
       <Alert type="error" message={error} />
@@ -89,9 +102,9 @@ export default function Subjects() {
               <table className="table mobile-card-view">
                 <thead>
                   <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Acciones</th>
+                    <th scope="col">Código</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -109,7 +122,7 @@ export default function Subjects() {
                             Ver
                           </Link>
                           <button
-                            onClick={() => deleteSubject(s)}
+                            onClick={() => handleDeleteClick(s)}
                             className="btn danger"
                             style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
                           >

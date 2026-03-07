@@ -223,6 +223,7 @@ export default function Sidebar() {
               to={to}
               className={`sidebar__nav-item ${isActive(to) ? 'sidebar__nav-item--active' : ''}`}
               aria-current={isActive(to) ? 'page' : undefined}
+              aria-label={collapsed ? label : undefined}
               title={collapsed ? label : undefined}
             >
               <span className="sidebar__nav-icon">

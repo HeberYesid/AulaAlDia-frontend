@@ -27,6 +27,7 @@ export default function CalendarPage() {
   const [subjects, setSubjects] = useState([])
   const [selectedSubject, setSelectedSubject] = useState('')
   const [loading, setLoading] = useState(true)
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
   useEffect(() => {
     fetchSubjects()
@@ -85,6 +86,7 @@ export default function CalendarPage() {
   }
 
   return (
+    <>
     <div className="calendar-page">
       <div className="header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Calendario Académico</h1>
@@ -93,6 +95,7 @@ export default function CalendarPage() {
           <select 
             value={selectedSubject} 
             onChange={(e) => setSelectedSubject(e.target.value)}
+            aria-label="Filtrar por materia"
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}
           >
             <option value="">Todas las materias</option>
@@ -127,9 +130,37 @@ export default function CalendarPage() {
             noEventsInRange: "No hay eventos en este rango."
           }}
           eventPropGetter={eventStyleGetter}
-          onSelectEvent={event => alert(`${event.title}\n${event.description || ''}`)}
+          onSelectEvent={event => setSelectedEvent(event)}
         />
       </div>
     </div>
+
+      {selectedEvent && (
+        <div
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}
+          role="presentation"
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-dialog-title"
+            className="card"
+            style={{ maxWidth: '450px', width: '100%', margin: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.key === 'Escape' && setSelectedEvent(null)}
+          >
+            <h2 id="event-dialog-title" style={{ marginTop: 0 }}>{selectedEvent.title}</h2>
+            {selectedEvent.description && <p style={{ color: 'var(--text-secondary)' }}>{selectedEvent.description}</p>}
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              {selectedEvent.start?.toLocaleDateString('es-CO', { dateStyle: 'full' })}
+            </p>
+            <div style={{ textAlign: 'right', marginTop: '1rem' }}>
+              <button className="btn secondary" autoFocus onClick={() => setSelectedEvent(null)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

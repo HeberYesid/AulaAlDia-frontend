@@ -484,7 +484,8 @@ body.sidebar-collapsed .app-body {
 .sidebar__tenant-select:focus {
   border-color: var(--border-accent);
   background: var(--bg-hover);
-  outline: none;
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .sidebar__logout {
@@ -755,9 +756,10 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  outline: none;
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
   border-color: var(--border-accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.45);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
   background: var(--bg-tertiary);
 }
 
@@ -4159,5 +4161,17 @@ a.welcome-panel__notif-link:hover {
     flex-wrap: wrap;
     justify-content: center;
     font-size: var(--font-size-xs);
+  }
+}
+
+/* Respect user's OS-level motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

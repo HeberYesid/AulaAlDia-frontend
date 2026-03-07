@@ -1,10 +1,12 @@
 ﻿import { useEffect, useState } from 'react'
 import { api } from '../api/axios'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function NotificationsPage() {
   const [items, setItems] = useState([])
   const [unread, setUnread] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [confirmDialog, setConfirmDialog] = useState(null)
 
   async function load() {
     setLoading(true)
@@ -46,34 +48,42 @@ export default function NotificationsPage() {
   }
 
   async function deleteNotification(id) {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta notificación?')) {
-      return
-    }
-    try {
-      await api.delete(`/api/v1/courses/notifications/${id}/`)
-      load()
-    } catch (err) {
-      console.error('Error deleting notification:', err)
-    }
+    setConfirmDialog({
+      title: 'Eliminar notificación',
+      message: '¿Estás seguro de que quieres eliminar esta notificación?',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        try {
+          await api.delete(`/api/v1/courses/notifications/${id}/`)
+          load()
+        } catch (err) {
+          console.error('Error deleting notification:', err)
+        }
+      },
+    })
   }
 
   async function deleteAll() {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar TODAS las notificaciones?')) {
-      return
-    }
-    try {
-      await api.post('/api/v1/courses/notifications/delete-all/')
-      load()
-    } catch (err) {
-      console.error('Error deleting all notifications:', err)
-    }
+    setConfirmDialog({
+      title: 'Eliminar todas las notificaciones',
+      message: '¿Estás seguro de que quieres eliminar TODAS las notificaciones?',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        try {
+          await api.post('/api/v1/courses/notifications/delete-all/')
+          load()
+        } catch (err) {
+          console.error('Error deleting all notifications:', err)
+        }
+      },
+    })
   }
 
   if (loading) {
     return (
       <div className="card">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div className="spinner"></div>
+          <div className="spinner" role="status" aria-label="Cargando notificaciones..."></div>
           <p>Cargando notificaciones...</p>
         </div>
       </div>
@@ -81,10 +91,11 @@ export default function NotificationsPage() {
   }
 
   return (
+    <>
     <div className="card">
       <div className="notification-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
         <div>
-          <h2 style={{ margin: 0 }}>Notificaciones</h2>
+          <h1 style={{ margin: 0 }}>Notificaciones</h1>
           <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
             {unread > 0 ? `Tienes ${unread} notificación${unread > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
           </p>
@@ -113,12 +124,12 @@ export default function NotificationsPage() {
           <table className="table mobile-card-view" style={{ marginTop: '1rem', width: '100%' }}>
             <thead>
               <tr>
-                <th style={{ width: '100px' }}>Tipo</th>
-                <th style={{ width: '200px' }}>Título</th>
-                <th>Mensaje</th>
-                <th style={{ width: '150px' }}>Fecha</th>
-                <th style={{ width: '100px', textAlign: 'center' }}>Estado</th>
-                <th style={{ width: '180px', textAlign: 'center' }}>Acciones</th>
+                <th scope="col" style={{ width: '100px' }}>Tipo</th>
+                <th scope="col" style={{ width: '200px' }}>Título</th>
+                <th scope="col">Mensaje</th>
+                <th scope="col" style={{ width: '150px' }}>Fecha</th>
+                <th scope="col" style={{ width: '100px', textAlign: 'center' }}>Estado</th>
+                <th scope="col" style={{ width: '180px', textAlign: 'center' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -197,6 +208,7 @@ export default function NotificationsPage() {
                       <button 
                         className="btn sm"
                         onClick={() => toggleRead(n)}
+                        aria-label={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
                         title={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
                         style={{
                           padding: '0.3rem 0.6rem',
@@ -210,7 +222,7 @@ export default function NotificationsPage() {
                       <button 
                         className="btn sm danger"
                         onClick={() => deleteNotification(n.id)}
-                        title="Eliminar notificación"
+                        aria-label={`Eliminar notificación: ${n.message?.substring(0, 60)}`}
                         style={{
                           padding: '0.3rem 0.6rem',
                           fontSize: '0.75rem',
@@ -228,5 +240,14 @@ export default function NotificationsPage() {
         </div>
       )}
     </div>
+    {confirmDialog && (
+      <ConfirmDialog
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    )}
+    </>
   )
 }

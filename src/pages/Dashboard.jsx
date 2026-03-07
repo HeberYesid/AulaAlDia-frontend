@@ -5,6 +5,7 @@ import { api } from '../api/axios'
 import StudentDashboard from './StudentDashboard'
 import Alert from '../components/Alert'
 import WelcomePanel from '../components/WelcomePanel'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [subjects, setSubjects] = useState([])
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
+  const [confirmDialog, setConfirmDialog] = useState(null)
 
   async function loadSubjects() {
     setLoading(true)
@@ -36,23 +38,24 @@ export default function Dashboard() {
   }
 
   async function deleteSubject(subject) {
-    const confirmMessage = `¿Estás seguro de que deseas eliminar la materia "${subject.name}" (${subject.code})?\n\nEsta acción eliminará:\n- Todos los estudiantes inscritos\n- Todos los ejercicios\n- Todos los resultados\n\nEsta acción NO se puede deshacer.`
-    
-    if (!window.confirm(confirmMessage)) {
-      return
-    }
-
-    setError('')
-    setSuccess('')
-    try {
-      await api.delete(`/api/v1/courses/subjects/${subject.id}/`)
-      setSuccess(`Materia "${subject.name}" eliminada exitosamente`)
-      loadSubjects()
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      console.error('Error deleting subject:', err)
-      setError(`No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
-    }
+    setConfirmDialog({
+      title: `Eliminar materia "${subject.name}"`,
+      message: `Esta acción eliminará todos los estudiantes inscritos, ejercicios y resultados de "${subject.name}" (${subject.code}). Esta acción NO se puede deshacer.`,
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        setError('')
+        setSuccess('')
+        try {
+          await api.delete(`/api/v1/courses/subjects/${subject.id}/`)
+          setSuccess(`Materia "${subject.name}" eliminada exitosamente`)
+          loadSubjects()
+          setTimeout(() => setSuccess(''), 3000)
+        } catch (err) {
+          console.error('Error deleting subject:', err)
+          setError(`No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
+        }
+      },
+    })
   }
 
   if (loading) {
@@ -66,6 +69,7 @@ export default function Dashboard() {
 
   if (user.role === 'TEACHER' || user.role === 'ADMIN' || user.role === 'TUTOR') {
     return (
+      <>
       <div className="fade-in">
         {/* Mensajes de éxito/error */}
         <Alert type="success" message={success} />
@@ -118,12 +122,13 @@ export default function Dashboard() {
           ) : (
             <div className="data-table">
               <table className="table mobile-card-view">
+                <caption className="sr-only">Lista de materias</caption>
                 <thead>
                   <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Estudiantes</th>
-                    <th>Acciones</th>
+                    <th scope="col">Código</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Estudiantes</th>
+                    <th scope="col">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,6 +167,15 @@ export default function Dashboard() {
 
         <WelcomePanel />
       </div>
+      {confirmDialog && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
+      </>
     )
   }
 }

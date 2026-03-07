@@ -313,7 +313,7 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
                       <strong style={{ fontSize: '0.95rem', flex: 1 }}>{notification.title}</strong>
                       {!notification.is_read && (
                         <span
-                          aria-label="No leída"
+                          aria-hidden="true"
                           style={{
                             width: '8px',
                             height: '8px',

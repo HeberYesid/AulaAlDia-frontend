@@ -36,7 +36,7 @@ export default function ThemeToggle() {
       aria-label={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}
     >
       {/* 🎭 Icono del tema - muestra el tema contrario al actual */}
-      <span className="theme-icon">
+      <span className="theme-icon" aria-hidden="true">
         {isDark ? '☀️' : '🌙'}
       </span>
       

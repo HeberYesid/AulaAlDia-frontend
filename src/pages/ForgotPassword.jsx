@@ -86,7 +86,7 @@ export default function ForgotPassword() {
         </div>
 
         {error && (
-          <div className="alert error" style={{ marginBottom: '1rem' }}>
+          <div className="alert error" role="alert" aria-live="assertive" style={{ marginBottom: '1rem' }}>
             {error}
           </div>
         )}

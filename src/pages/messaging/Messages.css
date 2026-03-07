@@ -140,7 +140,8 @@ body.sidebar-collapsed .msg-container {
 }
 
 .msg-sidebar-search-input:focus {
-    outline: none;
+    outline: 2px solid var(--msg-accent);
+    outline-offset: 2px;
     border-color: var(--msg-accent);
     box-shadow: 0 0 0 3px var(--msg-accent-glow);
 }
@@ -525,7 +526,11 @@ body.sidebar-collapsed .msg-container {
     color: var(--msg-text-primary);
     padding: 0.7rem 0 0.7rem 1.15rem;
     font-size: 0.9rem;
-    outline: none;
+}
+
+.msg-chat-input:focus {
+    outline: 2px solid var(--msg-accent);
+    outline-offset: -2px;
 }
 
 .msg-chat-input::placeholder {
@@ -718,7 +723,8 @@ body.sidebar-collapsed .msg-container {
 }
 
 .msg-modal-search-input:focus {
-    outline: none;
+    outline: 2px solid var(--msg-accent);
+    outline-offset: 2px;
     border-color: var(--msg-accent);
     box-shadow: 0 0 0 3px var(--msg-accent-glow);
 }
