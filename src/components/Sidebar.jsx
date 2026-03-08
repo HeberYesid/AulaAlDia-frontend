@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { useState, useEffect } from 'react'
 import NotificationBell from './NotificationBell'
+import { getBrandInitials } from '../utils/branding'
 import {
   LayoutDashboard,
   BookOpen,
@@ -24,9 +25,17 @@ import {
 const SIDEBAR_COLLAPSED_KEY = 'aulaaldia-sidebar-collapsed'
 
 export default function Sidebar() {
-  const { user, logout, tenants, activeTenantId, switchTenant } = useAuth()
+  const {
+    user,
+    logout,
+    tenants,
+    activeTenantId,
+    switchTenant,
+    activeTenantBranding,
+  } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [showLogoImage, setShowLogoImage] = useState(true)
 
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -68,6 +77,10 @@ export default function Sidebar() {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [mobileOpen])
+
+  useEffect(() => {
+    setShowLogoImage(true)
+  }, [activeTenantBranding.sidebarLogoUrl])
 
   function onLogout() {
     logout()
@@ -159,6 +172,11 @@ export default function Sidebar() {
     .filter(Boolean)
     .join(' ')
 
+  const brandName = activeTenantBranding.displayName
+  const logoInitials = getBrandInitials(brandName)
+  const logoUrl = activeTenantBranding.sidebarLogoUrl
+  const showImageLogo = Boolean(logoUrl) && showLogoImage
+
   return (
     <>
       {/* Mobile hamburger — fixed top-left, only visible on mobile */}
@@ -190,9 +208,18 @@ export default function Sidebar() {
       <aside id="sidebar" className={sidebarClasses} aria-label="Navegación principal">
         {/* Brand + collapse toggle */}
         <div className="sidebar__brand">
-          <Link to="/" className="sidebar__logo" aria-label="AulaAlDía — Inicio">
-            <span className="sidebar__logo-icon">DT</span>
-            {!collapsed && <span className="sidebar__logo-text">AulaAlDía</span>}
+          <Link to="/" className="sidebar__logo" aria-label={`${brandName} — Inicio`}>
+            {showImageLogo ? (
+              <img
+                src={logoUrl}
+                className="sidebar__logo-image"
+                alt={`Logo de ${brandName}`}
+                onError={() => setShowLogoImage(false)}
+              />
+            ) : (
+              <span className="sidebar__logo-icon">{logoInitials}</span>
+            )}
+            {!collapsed && <span className="sidebar__logo-text">{brandName}</span>}
           </Link>
 
           {/* Close button on mobile */}

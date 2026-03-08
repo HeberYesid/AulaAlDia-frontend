@@ -304,6 +304,16 @@ body.sidebar-collapsed .app-body {
   letter-spacing: -0.02em;
 }
 
+.sidebar__logo-image {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+}
+
 .sidebar__logo-text {
   font-size: var(--font-size-lg);
   font-weight: 700;
@@ -2956,6 +2966,16 @@ a.welcome-panel__notif-link:hover {
   font-size: var(--font-size-xs);
   font-weight: 800;
   letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.public-navbar__logo-image {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
   flex-shrink: 0;
 }
 

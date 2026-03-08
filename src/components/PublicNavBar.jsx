@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+import { getBrandInitials } from '../utils/branding'
 
 const NAV_LINKS = [
   { label: 'Características', scrollId: 'features' },
@@ -16,10 +17,15 @@ function scrollToSection(id) {
 }
 
 export default function PublicNavBar() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, activeTenantBranding } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [showLogoImage, setShowLogoImage] = useState(true)
   const location = useLocation()
+
+  const brandName = activeTenantBranding.displayName
+  const logoUrl = activeTenantBranding.sidebarLogoUrl
+  const logoInitials = getBrandInitials(brandName)
 
   // Track scroll to add background when user scrolls down
   useEffect(() => {
@@ -34,6 +40,10 @@ export default function PublicNavBar() {
   useEffect(() => {
     setMobileOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    setShowLogoImage(true)
+  }, [logoUrl])
 
   function handleNavClick(scrollId) {
     if (location.pathname === '/home') {
@@ -52,9 +62,18 @@ export default function PublicNavBar() {
     >
       <div className="public-navbar__inner">
         {/* Logo */}
-        <Link to="/home" className="public-navbar__logo" aria-label="AulaAlDía — Inicio">
-          <span className="public-navbar__logo-icon" aria-hidden="true">DT</span>
-          <span className="public-navbar__logo-text">AulaAlDía</span>
+        <Link to="/home" className="public-navbar__logo" aria-label={`${brandName} — Inicio`}>
+          {logoUrl && showLogoImage ? (
+            <img
+              src={logoUrl}
+              className="public-navbar__logo-image"
+              alt={`Logo de ${brandName}`}
+              onError={() => setShowLogoImage(false)}
+            />
+          ) : (
+            <span className="public-navbar__logo-icon" aria-hidden="true">{logoInitials}</span>
+          )}
+          <span className="public-navbar__logo-text">{brandName}</span>
         </Link>
 
         {/* Desktop nav links */}

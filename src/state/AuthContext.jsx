@@ -1,7 +1,44 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api, setApiActiveTenantId } from '../api/axios'
 
 const AuthContext = createContext(null)
+
+const DEFAULT_BRANDING = {
+  displayName: 'AulaAlDía',
+  sidebarLogoUrl: '',
+  faviconUrl: '/favicon.svg',
+  primaryColor: '#3b82f6',
+  accentColor: '#8b5cf6',
+}
+
+function normalizeTenantBranding(tenant) {
+  if (!tenant) return DEFAULT_BRANDING
+
+  return {
+    displayName: tenant.tenant_display_name || tenant.tenant_name || DEFAULT_BRANDING.displayName,
+    sidebarLogoUrl: tenant.tenant_sidebar_logo_url || '',
+    faviconUrl: tenant.tenant_favicon_url || DEFAULT_BRANDING.faviconUrl,
+    primaryColor: tenant.tenant_primary_color || DEFAULT_BRANDING.primaryColor,
+    accentColor: tenant.tenant_accent_color || DEFAULT_BRANDING.accentColor,
+  }
+}
+
+function setDocumentFavicon(href) {
+  const iconLinks = document.querySelectorAll('link[rel*="icon"]')
+  if (iconLinks.length === 0) return
+
+  iconLinks.forEach((linkEl) => {
+    linkEl.setAttribute('href', href)
+  })
+}
+
+function applyBrandingToDocument(branding) {
+  const root = document.documentElement
+  root.style.setProperty('--primary', branding.primaryColor)
+  root.style.setProperty('--accent', branding.accentColor)
+  document.title = branding.displayName
+  setDocumentFavicon(branding.faviconUrl)
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -189,6 +226,27 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, access])
 
+  const activeTenant = useMemo(() => {
+    return (
+      tenants.find((tenant) => tenant.tenant_id === activeTenantId) ||
+      tenants[0] ||
+      null
+    )
+  }, [tenants, activeTenantId])
+
+  const activeTenantBranding = useMemo(() => {
+    return normalizeTenantBranding(activeTenant)
+  }, [activeTenant])
+
+  useEffect(() => {
+    if (!user) {
+      applyBrandingToDocument(DEFAULT_BRANDING)
+      return
+    }
+
+    applyBrandingToDocument(activeTenantBranding)
+  }, [user, activeTenantBranding])
+
   // Computed value para saber si está autenticado
   const isAuthenticated = !!user
 
@@ -200,6 +258,8 @@ export function AuthProvider({ children }) {
     lastLoginAt,
     lastLoginIp,
     activeTenantId,
+    activeTenant,
+    activeTenantBranding,
     tenants,
     login, 
     googleLogin,
