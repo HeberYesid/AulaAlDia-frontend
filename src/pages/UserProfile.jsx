@@ -363,7 +363,7 @@ export default function UserProfile() {
                   fontWeight: 600,
                   margin: 0
                 }}>
-                  {user.role === 'TEACHER' ? 'Profesor' : user.role === 'ADMIN' ? 'Administrador' : user.role === 'TUTOR' ? 'Padre/Tutor' : 'Estudiante'}
+                  {user.role === 'TEACHER' ? 'Profesor' : user.role === 'ADMIN' ? 'Administrador' : user.role === 'TUTOR' ? 'Acudiente' : 'Estudiante'}
                 </p>
               </div>
             </div>

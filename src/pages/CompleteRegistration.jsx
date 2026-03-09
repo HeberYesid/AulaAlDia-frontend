@@ -6,7 +6,7 @@ import { api } from '../api/axios'
 /**
  * Optional post-Google-auth step.
  * New users who signed in with Google land here so they can enter an
- * invitation code if they are a Teacher or Tutor.
+ * invitation code if they are a Teacher or Caregiver.
  * Students can skip straight to the dashboard.
  */
 export default function CompleteRegistration() {
@@ -44,7 +44,7 @@ export default function CompleteRegistration() {
           <h1><span className="auth-icon"></span> Bienvenido/a{user?.first_name ? `, ${user.first_name}` : ''}!</h1>
           <p>Tu cuenta de Google fue registrada como <strong>Estudiante</strong>.</p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-            Si eres Profesor o Padre/Tutor, ingresa tu código de invitación para actualizar tu rol.
+            Si eres Profesor o Acudiente, ingresa tu código de invitación para actualizar tu rol.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export default function CompleteRegistration() {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {[
                 { value: 'TEACHER', label: 'Profesor' },
-                { value: 'TUTOR',   label: 'Padre / Tutor' },
+                { value: 'TUTOR',   label: 'Acudiente' },
               ].map((r) => (
                 <button
                   key={r.value}

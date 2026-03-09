@@ -7,7 +7,7 @@ import TurnstileCaptcha from '../components/TurnstileCaptcha'
 const ROLES = [
   { value: 'STUDENT', label: 'Estudiante' },
   { value: 'TEACHER', label: 'Profesor' },
-  { value: 'TUTOR',   label: 'Padre / Tutor' },
+  { value: 'TUTOR',   label: 'Acudiente' },
 ]
 
 const ENDPOINTS = {

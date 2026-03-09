@@ -83,7 +83,7 @@ export default function Dashboard() {
           <div className="dashboard-header">
             <div>
               <h1 className="dashboard-title">
-                {user.role === 'ADMIN' ? 'Panel de Administrador' : 'Panel de Padre/Tutor'}
+                {user.role === 'ADMIN' ? 'Panel de Administrador' : 'Panel de Acudiente'}
               </h1>
               <p className="dashboard-subtitle">
                 {user.role === 'ADMIN' ? 'Acceso completo al sistema' : 'Monitorea el progreso de estudiantes vinculados'}
@@ -116,7 +116,7 @@ export default function Dashboard() {
             <div className="empty-state">
               <div className="empty-state-icon">📚</div>
               <h3>{user.role === 'TUTOR' ? 'No hay materias vinculadas' : 'No tienes materias creadas'}</h3>
-              <p>{user.role === 'TUTOR' ? 'Solicita al administrador vincular estudiantes a tu cuenta de tutor.' : 'Comienza creando tu primera materia para gestionar estudiantes y ejercicios'}</p>
+              <p>{user.role === 'TUTOR' ? 'Solicita al administrador vincular estudiantes a tu cuenta de acudiente.' : 'Comienza creando tu primera materia para gestionar estudiantes y ejercicios'}</p>
               {(user.role === 'TEACHER' || user.role === 'ADMIN') && (
                 <Link to="/subjects" className="btn primary" style={{ marginTop: 'var(--space-md)' }}>
                   Crear mi primera materia

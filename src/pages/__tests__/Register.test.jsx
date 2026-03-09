@@ -64,7 +64,7 @@ describe('Register Component', () => {
     
     expect(screen.getByRole('button', { name: /estudiante/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /profesor/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /padre \/ tutor/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /acudiente/i })).toBeInTheDocument()
   })
 
   it('validates password minimum length', () => {

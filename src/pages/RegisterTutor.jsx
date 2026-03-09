@@ -59,7 +59,7 @@ export default function RegisterTutor() {
       navigate('/verify-code', {
         state: {
           email,
-          message: 'Registro de padre/tutor exitoso. Hemos enviado un código de verificación a tu correo.',
+          message: 'Registro de acudiente exitoso. Hemos enviado un código de verificación a tu correo.',
         },
       })
     } catch (err) {
@@ -90,7 +90,7 @@ export default function RegisterTutor() {
     <div className="auth-container">
       <div className="auth-card fade-in">
         <div className="auth-header">
-          <h1><span className="auth-icon">👨‍👩‍👧‍👦</span> Registro de Padre/Tutor</h1>
+          <h1><span className="auth-icon">👨‍👩‍👧‍👦</span> Registro de Acudiente</h1>
           <p>Regístrate con tu código de invitación</p>
         </div>
 
@@ -203,7 +203,7 @@ export default function RegisterTutor() {
           </div>
 
           <button className="btn auth-btn" type="submit" disabled={isLoading || !isCaptchaReady || !turnstileToken}>
-            {isLoading ? 'Creando cuenta...' : 'Registrarme como Padre/Tutor'}
+            {isLoading ? 'Creando cuenta...' : 'Registrarme como Acudiente'}
           </button>
 
           {message && <div className="alert success">{message}</div>}

@@ -200,7 +200,7 @@ const TUTOR_STEPS = [
     target: 'body',
     content: (
       <div>
-        <h2>¡Bienvenido Tutor! 👪</h2>
+        <h2>¡Bienvenido Acudiente! 👪</h2>
         <p>Este tour te guía por las herramientas para monitorear el progreso académico.</p>
       </div>
     ),

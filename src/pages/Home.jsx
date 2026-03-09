@@ -122,7 +122,7 @@ export default function Home() {
           <div className="feature-card">
             <div className="feature-icon" aria-hidden="true">💬</div>
             <h3>Mensajería interna</h3>
-            <p>Conversaciones directas entre estudiantes, profesores y administradores. Tutores con acceso de solo lectura.</p>
+            <p>Conversaciones directas entre estudiantes, profesores y administradores. Acudientes con acceso de solo lectura.</p>
           </div>
           <div className="feature-card">
             <div className="feature-icon" aria-hidden="true">📅</div>
@@ -202,7 +202,7 @@ export default function Home() {
           </div>
           <div className="landing-audience__card">
             <div className="landing-audience__role-icon" aria-hidden="true">👁️</div>
-            <h3>Tutores / Acudientes</h3>
+            <h3>Acudientes</h3>
             <ul className="landing-audience__list">
               <li>Acceso de solo lectura al progreso</li>
               <li>Visualiza resultados sin poder modificarlos</li>
@@ -229,7 +229,7 @@ export default function Home() {
               <li>Elimina errores humanos en el registro de notas</li>
               <li>Importación masiva de estudiantes y calificaciones</li>
               <li>Datos de cada institución seguros y completamente separados</li>
-              <li>Roles diferenciados: Administrador, Profesor, Tutor y Estudiante</li>
+              <li>Roles diferenciados: Administrador, Profesor, Acudiente y Estudiante</li>
               <li>Notificaciones automáticas ante cada cambio importante</li>
               <li>Funciona en computador, tableta y celular</li>
               <li>Actualizaciones automáticas incluidas en el plan</li>

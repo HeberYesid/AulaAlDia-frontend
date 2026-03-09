@@ -8,7 +8,7 @@ const ROLE_LABEL = {
   STUDENT: 'Estudiante',
   TEACHER: 'Profesor',
   ADMIN: 'Administrador',
-  TUTOR: 'Padre / Tutor',
+  TUTOR: 'Acudiente',
 }
 
 const NOTIF_TYPE_ICON = {
