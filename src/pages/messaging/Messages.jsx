@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { startTransition, useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../state/AuthContext';
 import {
@@ -26,6 +26,7 @@ const Messages = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [showNewChatModal, setShowNewChatModal] = useState(false);
     const [mobileShowChat, setMobileShowChat] = useState(false);
+    const searchRequestIdRef = useRef(0);
 
     /* ── Fetch helpers ─────────────────────────────────── */
     const fetchConversations = useCallback(async () => {
@@ -49,17 +50,73 @@ const Messages = () => {
 
     /* ── Polling ───────────────────────────────────────── */
     useEffect(() => {
-        fetchConversations();
-        const interval = setInterval(fetchConversations, 10000);
-        return () => clearInterval(interval);
+        const refreshConversations = () => {
+            if (document.visibilityState !== 'visible') return;
+            fetchConversations();
+        };
+
+        refreshConversations();
+        const interval = window.setInterval(refreshConversations, 10000);
+
+        document.addEventListener('visibilitychange', refreshConversations);
+        window.addEventListener('focus', refreshConversations);
+
+        return () => {
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', refreshConversations);
+            window.removeEventListener('focus', refreshConversations);
+        };
     }, [fetchConversations]);
 
     useEffect(() => {
         if (!selectedConversation) return;
-        fetchMessages(selectedConversation.id);
-        const interval = setInterval(() => fetchMessages(selectedConversation.id), 5000);
-        return () => clearInterval(interval);
+
+        const refreshMessages = () => {
+            if (document.visibilityState !== 'visible') return;
+            fetchMessages(selectedConversation.id);
+        };
+
+        refreshMessages();
+        const interval = window.setInterval(refreshMessages, 5000);
+
+        document.addEventListener('visibilitychange', refreshMessages);
+        window.addEventListener('focus', refreshMessages);
+
+        return () => {
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', refreshMessages);
+            window.removeEventListener('focus', refreshMessages);
+        };
     }, [selectedConversation, fetchMessages]);
+
+    useEffect(() => {
+        const query = searchQuery.trim();
+        const requestId = ++searchRequestIdRef.current;
+
+        if (query.length <= 2) {
+            setSearchResults([]);
+            return undefined;
+        }
+
+        const timeoutId = window.setTimeout(async () => {
+            try {
+                const results = await searchUsers(query);
+
+                if (requestId !== searchRequestIdRef.current) return;
+
+                startTransition(() => {
+                    setSearchResults(results);
+                });
+            } catch (error) {
+                if (requestId !== searchRequestIdRef.current) return;
+                console.error('Error searching users:', error);
+            }
+        }, 250);
+
+        return () => {
+            window.clearTimeout(timeoutId);
+        };
+    }, [searchQuery]);
 
     useEffect(() => {
         if (!conversationId || conversations.length === 0) return;
@@ -91,19 +148,8 @@ const Messages = () => {
         }
     };
 
-    const handleSearchUsers = async (e) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-        if (query.length > 2) {
-            try {
-                const results = await searchUsers(query);
-                setSearchResults(results);
-            } catch (error) {
-                console.error('Error searching users:', error);
-            }
-        } else {
-            setSearchResults([]);
-        }
+    const handleSearchUsers = (e) => {
+        setSearchQuery(e.target.value);
     };
 
     const handleStartConversation = async (recipientId) => {

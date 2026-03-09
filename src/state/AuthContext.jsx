@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { api, setApiActiveTenantId } from '../api/axios'
 
 const AuthContext = createContext(null)
@@ -44,11 +44,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [access, setAccess] = useState(null)
   const [refresh, setRefresh] = useState(null)
-  const [lastActivity, setLastActivity] = useState(Date.now())
   const [lastLoginAt, setLastLoginAt] = useState(null)
   const [lastLoginIp, setLastLoginIp] = useState(null)
   const [activeTenantId, setActiveTenantId] = useState(null)
   const [tenants, setTenants] = useState([])
+  const lastActivityRef = useRef(Date.now())
 
   function resolveTenantId({ user, active_tenant_id }, fallbackTenantId = null) {
     if (active_tenant_id) return active_tenant_id
@@ -70,40 +70,9 @@ export function AuthProvider({ children }) {
       const tenantId = resolveTenantId(data)
       setActiveTenantId(tenantId)
       setApiActiveTenantId(tenantId)
+      lastActivityRef.current = Date.now()
     }
   }, [])
-
-  // Auto-logout por inactividad
-  useEffect(() => {
-    if (!user) return
-
-    const timeout = (user.session_timeout || 30) * 60 * 1000 // Convertir minutos a ms
-    
-    const checkInactivity = setInterval(() => {
-      const now = Date.now()
-      const inactive = now - lastActivity
-      
-      if (inactive >= timeout) {
-        console.log('⏱️ Sesión cerrada por inactividad')
-        logout()
-      }
-    }, 60000) // Verificar cada minuto
-
-    // Detectar actividad del usuario
-    const updateActivity = () => setLastActivity(Date.now())
-    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click']
-    
-    events.forEach(event => {
-      window.addEventListener(event, updateActivity)
-    })
-
-    return () => {
-      clearInterval(checkInactivity)
-      events.forEach(event => {
-        window.removeEventListener(event, updateActivity)
-      })
-    }
-  }, [user, lastActivity])
 
   function saveAuth({ user, access, refresh, last_login_at, last_login_ip, active_tenant_id }) {
     const tenantId = resolveTenantId(
@@ -126,7 +95,7 @@ export function AuthProvider({ children }) {
     setLastLoginIp(last_login_ip || null)
     setActiveTenantId(tenantId)
     setApiActiveTenantId(tenantId)
-    setLastActivity(Date.now()) // Resetear actividad al guardar auth
+    lastActivityRef.current = Date.now()
   }
 
   async function fetchMyTenants() {
@@ -174,7 +143,7 @@ export function AuthProvider({ children }) {
     await api.post('/api/v1/auth/register/', payload)
   }
 
-  function logout() {
+  const logout = useCallback(() => {
     localStorage.removeItem('auth')
     setUser(null)
     setAccess(null)
@@ -182,7 +151,39 @@ export function AuthProvider({ children }) {
     setActiveTenantId(null)
     setTenants([])
     setApiActiveTenantId(null)
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
+
+    const timeout = (user.session_timeout || 30) * 60 * 1000
+    const updateActivity = () => {
+      lastActivityRef.current = Date.now()
+    }
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click']
+
+    updateActivity()
+
+    const checkInactivity = window.setInterval(() => {
+      const inactive = Date.now() - lastActivityRef.current
+
+      if (inactive >= timeout) {
+        console.log('⏱️ Sesión cerrada por inactividad')
+        logout()
+      }
+    }, 60000)
+
+    events.forEach((event) => {
+      window.addEventListener(event, updateActivity)
+    })
+
+    return () => {
+      window.clearInterval(checkInactivity)
+      events.forEach((event) => {
+        window.removeEventListener(event, updateActivity)
+      })
+    }
+  }, [user, logout])
 
   // Función para actualizar el usuario (después de cambiar configuración)
   function updateUser(updatedUser) {
@@ -270,7 +271,6 @@ export function AuthProvider({ children }) {
     switchTenant,
     refreshMe,
     fetchMyTenants,
-    lastActivity 
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
