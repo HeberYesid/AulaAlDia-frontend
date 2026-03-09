@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { api, setApiActiveTenantId } from '../api/axios'
+import { api, AUTH_INVALIDATED_EVENT, setApiActiveTenantId } from '../api/axios'
 
 const AuthContext = createContext(null)
 
@@ -98,6 +98,29 @@ export function AuthProvider({ children }) {
     lastActivityRef.current = Date.now()
   }
 
+  function mergeAuthState(partialAuth) {
+    const currentAuth = JSON.parse(localStorage.getItem('auth') || '{}')
+    const nextAuth = { ...currentAuth, ...partialAuth }
+
+    localStorage.setItem('auth', JSON.stringify(nextAuth))
+
+    if (Object.prototype.hasOwnProperty.call(partialAuth, 'access')) {
+      setAccess(nextAuth.access || null)
+    }
+
+    if (Object.prototype.hasOwnProperty.call(partialAuth, 'refresh')) {
+      setRefresh(nextAuth.refresh || null)
+    }
+
+    if (Object.prototype.hasOwnProperty.call(partialAuth, 'active_tenant_id')) {
+      const tenantId = nextAuth.active_tenant_id || null
+      setActiveTenantId(tenantId)
+      setApiActiveTenantId(tenantId)
+    }
+
+    return nextAuth
+  }
+
   async function fetchMyTenants() {
     if (!access) {
       setTenants([])
@@ -154,6 +177,34 @@ export function AuthProvider({ children }) {
   }, [])
 
   useEffect(() => {
+    const handleAuthInvalidated = () => {
+      logout()
+    }
+
+    window.addEventListener(AUTH_INVALIDATED_EVENT, handleAuthInvalidated)
+
+    return () => {
+      window.removeEventListener(AUTH_INVALIDATED_EVENT, handleAuthInvalidated)
+    }
+  }, [logout])
+
+  useEffect(() => {
+    const handleStorage = (event) => {
+      if (event.key !== 'auth') return
+
+      if (event.newValue) return
+
+      logout()
+    }
+
+    window.addEventListener('storage', handleStorage)
+
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+    }
+  }, [logout])
+
+  useEffect(() => {
     if (!user) return
 
     const timeout = (user.session_timeout || 30) * 60 * 1000
@@ -201,18 +252,20 @@ export function AuthProvider({ children }) {
 
   function updateActiveTenant(tenantId) {
     const normalizedTenantId = tenantId || null
-    const currentAuth = JSON.parse(localStorage.getItem('auth') || '{}')
-    const newAuth = { ...currentAuth, active_tenant_id: normalizedTenantId }
-    localStorage.setItem('auth', JSON.stringify(newAuth))
-    setActiveTenantId(normalizedTenantId)
-    setApiActiveTenantId(normalizedTenantId)
+    mergeAuthState({ active_tenant_id: normalizedTenantId })
   }
 
   async function switchTenant(tenantId) {
     if (!tenantId) return
 
-    await api.post('/api/v1/auth/select-tenant/', { tenant_id: tenantId })
-    updateActiveTenant(tenantId)
+    const { data } = await api.post('/api/v1/auth/select-tenant/', { tenant_id: tenantId })
+
+    mergeAuthState({
+      access: data?.access,
+      refresh: data?.refresh,
+      active_tenant_id: data?.active_tenant_id || tenantId,
+    })
+
     await refreshMe()
     await fetchMyTenants()
   }

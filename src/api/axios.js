@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
+export const AUTH_INVALIDATED_EVENT = 'aulaaldia:auth-invalidated'
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -24,6 +25,12 @@ function setTokens(tokens) {
   const current = raw ? JSON.parse(raw) : {}
   const next = { ...current, ...tokens }
   localStorage.setItem('auth', JSON.stringify(next))
+}
+
+function notifyAuthInvalidated() {
+  if (typeof window === 'undefined') return
+
+  window.dispatchEvent(new CustomEvent(AUTH_INVALIDATED_EVENT))
 }
 
 function getActiveTenantId() {
@@ -92,7 +99,10 @@ api.interceptors.response.use(
         const { data } = await axios.post(`${API_BASE}/api/v1/auth/token/refresh/`, {
           refresh: auth.refresh,
         })
-        setTokens({ access: data.access })
+        setTokens({
+          access: data.access,
+          active_tenant_id: data.active_tenant_id ?? getActiveTenantId(),
+        })
         isRefreshing = false
         onRefreshed(data.access)
         original.headers['Authorization'] = 'Bearer ' + data.access
@@ -100,6 +110,7 @@ api.interceptors.response.use(
       } catch (e) {
         isRefreshing = false
         localStorage.removeItem('auth')
+        notifyAuthInvalidated()
         return Promise.reject(e)
       }
     }

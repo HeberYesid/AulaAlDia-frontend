@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import StatusBadge from '../components/StatusBadge'
+import { useAuth } from '../state/AuthContext'
 
 export default function MyBulletins() {
   const [bulletins, setBulletins] = useState([])
@@ -10,6 +12,8 @@ export default function MyBulletins() {
   const [expandedBulletinId, setExpandedBulletinId] = useState(null)
   const [bulletinDetail, setBulletinDetail] = useState(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const navigate = useNavigate()
+  const { logout } = useAuth()
 
   useEffect(() => {
     loadBulletins()
@@ -23,7 +27,22 @@ export default function MyBulletins() {
       setBulletins(data.bulletins || [])
     } catch (err) {
       console.error('Error loading bulletins:', err)
-      setError('No se pudieron cargar los boletines.')
+
+      if (err.response?.status === 401) {
+        logout()
+        navigate('/login', {
+          replace: true,
+          state: { message: 'Tu sesión expiró. Inicia sesión nuevamente.' },
+        })
+        return
+      }
+
+      if (err.message === 'Network Error') {
+        setError('No se pudo conectar con el servidor para cargar los boletines.')
+        return
+      }
+
+      setError(err.response?.data?.detail || 'No se pudieron cargar los boletines.')
     } finally {
       setLoading(false)
     }
@@ -43,7 +62,21 @@ export default function MyBulletins() {
       setBulletinDetail(data)
     } catch (err) {
       console.error('Error loading bulletin detail:', err)
-      setError('No se pudo cargar el detalle del boletín.')
+
+      if (err.response?.status === 401) {
+        logout()
+        navigate('/login', {
+          replace: true,
+          state: { message: 'Tu sesión expiró. Inicia sesión nuevamente.' },
+        })
+        return
+      }
+
+      if (err.message === 'Network Error') {
+        setError('No se pudo conectar con el servidor para cargar el detalle del boletín.')
+      } else {
+        setError(err.response?.data?.detail || 'No se pudo cargar el detalle del boletín.')
+      }
       setExpandedBulletinId(null)
     } finally {
       setLoadingDetail(false)

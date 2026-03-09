@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import WelcomePanel from '../components/WelcomePanel'
+import { useAuth } from '../state/AuthContext'
 
 export default function StudentDashboard() {
   const [dashboard, setDashboard] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const { logout } = useAuth()
 
   useEffect(() => {
     loadDashboard()
@@ -19,7 +23,22 @@ export default function StudentDashboard() {
       setDashboard(response.data)
     } catch (err) {
       console.error('Error loading dashboard:', err)
-      setError('No se pudo cargar el dashboard')
+
+      if (err.response?.status === 401) {
+        logout()
+        navigate('/login', {
+          replace: true,
+          state: { message: 'Tu sesión expiró. Inicia sesión nuevamente.' },
+        })
+        return
+      }
+
+      if (err.message === 'Network Error') {
+        setError('No se pudo conectar con el servidor para cargar el dashboard.')
+        return
+      }
+
+      setError(err.response?.data?.detail || 'No se pudo cargar el dashboard')
     } finally {
       setLoading(false)
     }
