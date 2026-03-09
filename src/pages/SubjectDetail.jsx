@@ -7,6 +7,14 @@ import StatusBadge from '../components/StatusBadge'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 
+const DEFAULT_GRADE_SETTINGS = {
+  min_grade: '1.00',
+  max_grade: '5.00',
+  passing_grade: '3.00',
+  period_scheme: 'TRIMESTER',
+  active_grading_scale: null,
+}
+
 export default function SubjectDetail() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -181,7 +189,7 @@ export default function SubjectDetail() {
       ]
       // Teachers/admins also need academic periods for the exercise form
       if (user?.role === 'TEACHER' || user?.role === 'ADMIN') {
-        promises.push(api.get('/api/v1/courses/academic-periods/?is_closed=false'))
+        promises.push(api.get('/api/v1/courses/academic-periods/'))
       }
       const results = await Promise.all(promises)
       const [s, e, d, ex, res] = results
@@ -191,7 +199,7 @@ export default function SubjectDetail() {
       setExercises(ex.data)
       setDetailedResults(res.data)
       if (results[5]) {
-        setAcademicPeriods(results[5].data || [])
+        setAcademicPeriods(results[5].data?.results || results[5].data || [])
       }
     } catch (err) {
       setError('No se pudo cargar la información de la materia.')
@@ -259,6 +267,79 @@ export default function SubjectDetail() {
 
     return filtered
   }, [detailedResults, statusFilter, resultSearch, user])
+
+  const gradeSettings = useMemo(() => {
+    return dash?.academic_settings || DEFAULT_GRADE_SETTINGS
+  }, [dash])
+
+  const gradeRanges = useMemo(() => {
+    return gradeSettings?.active_grading_scale?.ranges || []
+  }, [gradeSettings])
+
+  const gradeBounds = useMemo(() => {
+    return {
+      min: Number(gradeSettings?.min_grade ?? 1),
+      max: Number(gradeSettings?.max_grade ?? 5),
+      passing: Number(gradeSettings?.passing_grade ?? 3),
+    }
+  }, [gradeSettings])
+
+  const academicPeriodsById = useMemo(() => {
+    return Object.fromEntries(academicPeriods.map((period) => [period.id, period]))
+  }, [academicPeriods])
+
+  const availablePeriodsForExercises = useMemo(() => {
+    return academicPeriods.filter((period) => !period.is_closed && !period.is_grade_locked)
+  }, [academicPeriods])
+
+  const lockedPeriods = useMemo(() => {
+    return academicPeriods.filter((period) => period.is_grade_locked)
+  }, [academicPeriods])
+
+  const editableExercises = useMemo(() => {
+    return exercises.filter((exercise) => {
+      const period = exercise.academic_period ? academicPeriodsById[exercise.academic_period] : null
+      return !period || !period.is_grade_locked
+    })
+  }, [exercises, academicPeriodsById])
+
+  const getScaleLabel = (score, explicitLabel = null) => {
+    if (explicitLabel) return explicitLabel
+    const numericScore = Number(score)
+    if (score === null || score === undefined || score === '' || Number.isNaN(numericScore)) {
+      return null
+    }
+
+    const match = gradeRanges.find((range) => {
+      const minValue = Number(range.min_value)
+      const maxValue = Number(range.max_value)
+      return numericScore >= minValue && numericScore <= maxValue
+    })
+    return match?.label || null
+  }
+
+  const getExercisePeriod = (exerciseId) => {
+    const exercise = exercises.find((item) => item.id === Number(exerciseId))
+    if (!exercise?.academic_period) return null
+    return academicPeriodsById[exercise.academic_period] || null
+  }
+
+  const isExerciseGradeLocked = (exerciseId) => {
+    const period = getExercisePeriod(exerciseId)
+    return Boolean(period?.is_grade_locked)
+  }
+
+  const isPeriodGradeLocked = (periodId) => {
+    if (!periodId) return false
+    return Boolean(academicPeriodsById[Number(periodId)]?.is_grade_locked)
+  }
+
+  const formatPeriodState = (period) => {
+    if (!period) return 'Sin periodo'
+    if (period.is_closed) return 'Cerrado'
+    if (period.is_grade_locked) return 'Bloqueado'
+    return 'Abierto'
+  }
 
   // Obtener estadísticas del estudiante actual
   const studentStats = useMemo(() => {
@@ -345,6 +426,12 @@ export default function SubjectDetail() {
     e.preventDefault()
     setError('')
     setSuccess('')
+
+    if (selectedPeriod && isPeriodGradeLocked(selectedPeriod)) {
+      setError('No puedes asociar el ejercicio a un periodo bloqueado para notas.')
+      return
+    }
+
     try {
       const formData = new FormData()
       formData.append('subject', id)
@@ -465,9 +552,14 @@ export default function SubjectDetail() {
   }
 
   function openEditModal(result) {
+    if (isExerciseGradeLocked(result.exercise)) {
+      setError('Este resultado pertenece a un periodo bloqueado y ya no puede editarse.')
+      return
+    }
     lastFocusRef.current = document.activeElement
     setEditingResult({
       resultId: result.id,
+      exerciseId: result.exercise,
       currentScore: result.score,
       currentComment: result.comment || '',
       studentEmail: result.student_email,
@@ -475,7 +567,7 @@ export default function SubjectDetail() {
       submissionText: result.submission_text,
       submissionFile: result.submission_file
     })
-    setNewScore(result.score != null ? String(result.score) : '3.0')
+    setNewScore(result.score != null ? String(result.score) : String(gradeBounds.passing.toFixed(2)))
     setNewComment(result.comment || '')
     setError('')
   }
@@ -491,6 +583,11 @@ export default function SubjectDetail() {
   async function updateResultStatus(e) {
     e.preventDefault()
     if (!editingResult) return
+
+    if (isExerciseGradeLocked(editingResult.exerciseId)) {
+      setError('Este periodo ya no permite editar notas.')
+      return
+    }
     
     try {
       await api.patch(`/api/v1/courses/results/${editingResult.resultId}/`, {
@@ -516,7 +613,7 @@ export default function SubjectDetail() {
     setShowCreateResultForm(true)
     setSelectedEnrollmentId('')
     setSelectedExerciseId('')
-    setCreateScore('3.0')
+    setCreateScore(String(gradeBounds.passing.toFixed(2)))
     setCreateComment('')
     setError('')
     setSuccess('')
@@ -526,7 +623,7 @@ export default function SubjectDetail() {
     setShowCreateResultForm(false)
     setSelectedEnrollmentId('')
     setSelectedExerciseId('')
-    setCreateScore('3.0')
+    setCreateScore(String(gradeBounds.passing.toFixed(2)))
     setCreateComment('')
     setError('')
     setTimeout(() => lastFocusRef.current?.focus(), 0)
@@ -539,6 +636,11 @@ export default function SubjectDetail() {
     
     if (!selectedEnrollmentId || !selectedExerciseId) {
       setError('Debes seleccionar un estudiante y un ejercicio')
+      return
+    }
+
+    if (isExerciseGradeLocked(selectedExerciseId)) {
+      setError('El ejercicio seleccionado pertenece a un periodo bloqueado para notas.')
       return
     }
     
@@ -657,6 +759,25 @@ export default function SubjectDetail() {
         </div>
       )}
 
+      {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+        <div className="card" style={{ marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <div>
+              <strong>Escala activa:</strong> {gradeBounds.min.toFixed(2)} a {gradeBounds.max.toFixed(2)}
+              {gradeSettings?.active_grading_scale?.name ? ` · ${gradeSettings.active_grading_scale.name}` : ''}
+            </div>
+            <div>
+              <strong>Nota aprobatoria:</strong> {gradeBounds.passing.toFixed(2)}
+            </div>
+          </div>
+          {lockedPeriods.length > 0 ? (
+            <p className="notice" style={{ marginTop: '0.75rem' }}>
+              Hay {lockedPeriods.length} periodo(s) bloqueado(s) para edición de notas. Los resultados asociados quedan solo en consulta.
+            </p>
+          ) : null}
+        </div>
+      )}
+
       {/* Tabs Navigation */}
       {user?.role === 'STUDENT' ? (
         // Vista simplificada para estudiantes - sin tabs
@@ -665,14 +786,26 @@ export default function SubjectDetail() {
             <h2 style={{ margin: 0 }}>Resultados en {subject.name}</h2>
           </div>
 
+          <div className="card" style={{ marginBottom: '1rem' }}>
+            <p style={{ margin: 0 }}>
+              Escala visible en esta materia: <strong>{gradeBounds.min.toFixed(2)} a {gradeBounds.max.toFixed(2)}</strong>
+              {gradeSettings?.active_grading_scale?.name ? ` · ${gradeSettings.active_grading_scale.name}` : ''}
+            </p>
+          </div>
+
           {studentStats && (
             <div className="card" style={{ marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}>Nota Final</h3>
-                  <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: studentStats.grade >= 3.0 ? 'var(--success)' : 'var(--danger)' }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: studentStats.grade >= gradeBounds.passing ? 'var(--success)' : 'var(--danger)' }}>
                     {studentStats.grade?.toFixed(2)}
                   </div>
+                  {getScaleLabel(studentStats.grade, studentStats.grade_label) ? (
+                    <p style={{ margin: '0.35rem 0 0 0', color: 'var(--text-secondary)' }}>
+                      {getScaleLabel(studentStats.grade, studentStats.grade_label)}
+                    </p>
+                  ) : null}
                 </div>
                 
                 <div style={{ display: 'flex', gap: '1.5rem' }}>
@@ -1031,7 +1164,7 @@ export default function SubjectDetail() {
                   </p>
                 </div>
 
-                {academicPeriods.length > 0 && (
+                {availablePeriodsForExercises.length > 0 && (
                   <div style={{ marginBottom: '1rem' }}>
                     <label htmlFor="create-exercise-period"><strong>Periodo Académico (Opcional)</strong></label>
                     <select
@@ -1048,9 +1181,9 @@ export default function SubjectDetail() {
                       }}
                     >
                       <option value="">Sin periodo asignado</option>
-                      {academicPeriods.map((p) => (
+                      {availablePeriodsForExercises.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.label}
+                          {p.label} · {formatPeriodState(p)}
                         </option>
                       ))}
                     </select>
@@ -1059,6 +1192,11 @@ export default function SubjectDetail() {
                     </p>
                   </div>
                 )}
+                {academicPeriods.some((period) => period.is_grade_locked) ? (
+                  <p className="notice" style={{ marginTop: '-0.25rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                    Los periodos bloqueados ya no se muestran como opción para nuevos ejercicios.
+                  </p>
+                ) : null}
 
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button className="btn" type="submit" style={{ flex: 1 }}>
@@ -1307,7 +1445,7 @@ export default function SubjectDetail() {
                               <td data-label="Calificados">{i.graded_count}</td>
                               <td data-label="Entregados">{i.submitted_count}</td>
                               <td data-label="Promedio"><strong>{i.average_score?.toFixed(2)}</strong></td>
-                              <td data-label="Nota final"><StatusBadge status={null} grade={i.grade} /></td>
+                              <td data-label="Nota final"><StatusBadge status={null} grade={i.grade} label={getScaleLabel(i.grade, i.grade_label)} /></td>
                             </tr>
                           ))}
                         </tbody>
@@ -1472,7 +1610,12 @@ export default function SubjectDetail() {
                               whiteSpace: 'nowrap'
                             }} title={result.exercise_name}>{result.exercise_name}</td>
                             <td data-label="Resultado">
-                              <StatusBadge status={result.status} grade={result.score} />
+                              <StatusBadge
+                                status={result.status}
+                                grade={result.score}
+                                label={getScaleLabel(result.score)}
+                                locked={isExerciseGradeLocked(result.exercise)}
+                              />
                             </td>
                             <td data-label="Solución">
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -1535,8 +1678,10 @@ export default function SubjectDetail() {
                                   className="btn secondary"
                                   style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}
                                   onClick={() => openEditModal(result)}
+                                  disabled={isExerciseGradeLocked(result.exercise)}
+                                  title={isExerciseGradeLocked(result.exercise) ? 'Periodo bloqueado para edición' : 'Editar resultado'}
                                 >
-                                  Editar
+                                  {isExerciseGradeLocked(result.exercise) ? 'Bloqueado' : 'Editar'}
                                 </button>
                               </td>
                             )}
@@ -1597,12 +1742,14 @@ export default function SubjectDetail() {
             zIndex: 1000,
             padding: '1rem'
           }}
-          onClick={closeEditExerciseModal}
-          onKeyDown={(e) => e.key === 'Escape' && closeEditExerciseModal()}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal de editar ejercicio"
+          role="presentation"
         >
+          <button
+            type="button"
+            className="modal-backdrop-button"
+            aria-label="Cerrar modal de editar ejercicio"
+            onClick={closeEditExerciseModal}
+          />
           <div 
             className="card modal-responsive"
             role="dialog"
@@ -1614,6 +1761,8 @@ export default function SubjectDetail() {
               maxWidth: '600px', 
               width: '100%',
               margin: '0',
+              position: 'relative',
+              zIndex: 1,
               animation: 'fadeIn 0.2s ease'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -1759,12 +1908,14 @@ export default function SubjectDetail() {
             zIndex: 1000,
             padding: '1rem'
           }}
-          onClick={closeEditModal}
-          onKeyDown={(e) => e.key === 'Escape' && closeEditModal()}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal de editar resultado"
+          role="presentation"
         >
+          <button
+            type="button"
+            className="modal-backdrop-button"
+            aria-label="Cerrar modal de editar resultado"
+            onClick={closeEditModal}
+          />
           <div 
             className="card modal-responsive"
             role="dialog"
@@ -1776,6 +1927,8 @@ export default function SubjectDetail() {
               maxWidth: '500px', 
               width: '100%',
               margin: '0',
+              position: 'relative',
+              zIndex: 1,
               animation: 'fadeIn 0.2s ease'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -1785,11 +1938,18 @@ export default function SubjectDetail() {
             <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
               <p style={{ margin: '0.5rem 0' }}><strong>Estudiante:</strong> {editingResult.studentEmail}</p>
               <p style={{ margin: '0.5rem 0' }}><strong>Ejercicio:</strong> {editingResult.exerciseName}</p>
+              {getExercisePeriod(editingResult.exerciseId) ? (
+                <p style={{ margin: '0.5rem 0' }}>
+                  <strong>Periodo:</strong> {getExercisePeriod(editingResult.exerciseId).label} · {formatPeriodState(getExercisePeriod(editingResult.exerciseId))}
+                </p>
+              ) : null}
               <p style={{ margin: '0.5rem 0' }}>
                 <strong>Resultado Actual:</strong>{' '}
                 <StatusBadge 
                   status={editingResult.currentScore == null ? 'SUBMITTED' : null} 
-                  grade={editingResult.currentScore} 
+                  grade={editingResult.currentScore}
+                  label={getScaleLabel(editingResult.currentScore)}
+                  locked={isExerciseGradeLocked(editingResult.exerciseId)}
                 />
               </p>
               {editingResult.currentComment && (
@@ -1842,12 +2002,12 @@ export default function SubjectDetail() {
 
             <form onSubmit={updateResultStatus}>
               <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="edit-result-score"><strong>Nueva Nota (1.0 - 5.0)</strong></label>
+                <label htmlFor="edit-result-score"><strong>Nueva Nota ({gradeBounds.min.toFixed(2)} - {gradeBounds.max.toFixed(2)})</strong></label>
                 <input
                   id="edit-result-score"
                   type="number"
-                  min="1"
-                  max="5"
+                  min={gradeBounds.min}
+                  max={gradeBounds.max}
                   step="0.01"
                   value={newScore}
                   onChange={(e) => setNewScore(e.target.value)}
@@ -1931,12 +2091,14 @@ export default function SubjectDetail() {
             zIndex: 1000,
             padding: '1rem'
           }}
-          onClick={closeCreateResultForm}
-          onKeyDown={(e) => e.key === 'Escape' && closeCreateResultForm()}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal de crear resultado"
+          role="presentation"
         >
+          <button
+            type="button"
+            className="modal-backdrop-button"
+            aria-label="Cerrar modal de crear resultado"
+            onClick={closeCreateResultForm}
+          />
           <div 
             className="card modal-responsive"
             role="dialog"
@@ -1948,6 +2110,8 @@ export default function SubjectDetail() {
               maxWidth: '600px', 
               width: '100%',
               margin: '0',
+              position: 'relative',
+              zIndex: 1,
               animation: 'fadeIn 0.2s ease'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -1997,21 +2161,26 @@ export default function SubjectDetail() {
                   }}
                 >
                   <option value="">-- Selecciona un ejercicio --</option>
-                  {exercises.map(exercise => (
+                  {editableExercises.map(exercise => (
                     <option key={exercise.id} value={exercise.id}>
                       {exercise.name} {exercise.deadline && `(Entrega: ${new Date(exercise.deadline).toLocaleDateString()})`}
                     </option>
                   ))}
                 </select>
+                {selectedExerciseId && getExercisePeriod(selectedExerciseId) ? (
+                  <p className="notice" style={{ marginTop: '0.5rem' }}>
+                    {getExercisePeriod(selectedExerciseId).label} · {formatPeriodState(getExercisePeriod(selectedExerciseId))}
+                  </p>
+                ) : null}
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="create-result-score"><strong>Nota del Resultado (1.0 - 5.0)</strong></label>
+                <label htmlFor="create-result-score"><strong>Nota del Resultado ({gradeBounds.min.toFixed(2)} - {gradeBounds.max.toFixed(2)})</strong></label>
                 <input
                   id="create-result-score"
                   type="number"
-                  min="1"
-                  max="5"
+                  min={gradeBounds.min}
+                  max={gradeBounds.max}
                   step="0.01"
                   value={createScore}
                   onChange={(e) => setCreateScore(e.target.value)}
@@ -2095,12 +2264,14 @@ export default function SubjectDetail() {
             zIndex: 1000,
             padding: '1rem'
           }}
-          onClick={() => setUploadingExercise(null)}
-          onKeyDown={(e) => e.key === 'Escape' && setUploadingExercise(null)}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal de subir solución"
+          role="presentation"
         >
+          <button
+            type="button"
+            className="modal-backdrop-button"
+            aria-label="Cerrar modal de subir solución"
+            onClick={() => setUploadingExercise(null)}
+          />
           <div 
             className="card modal-responsive"
             role="dialog"
@@ -2112,6 +2283,8 @@ export default function SubjectDetail() {
               maxWidth: '500px', 
               width: '100%',
               margin: '0',
+              position: 'relative',
+              zIndex: 1,
               animation: 'fadeIn 0.2s ease'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -2198,12 +2371,14 @@ export default function SubjectDetail() {
             zIndex: 1000,
             padding: '1rem'
           }}
-          onClick={() => setViewingSubmission(null)}
-          onKeyDown={(e) => e.key === 'Escape' && setViewingSubmission(null)}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal de ver solución"
+          role="presentation"
         >
+          <button
+            type="button"
+            className="modal-backdrop-button"
+            aria-label="Cerrar modal de ver solución"
+            onClick={() => setViewingSubmission(null)}
+          />
           <div 
             className="card modal-responsive"
             role="dialog"
@@ -2215,6 +2390,8 @@ export default function SubjectDetail() {
               maxWidth: '600px', 
               width: '100%',
               margin: '0',
+              position: 'relative',
+              zIndex: 1,
               animation: 'fadeIn 0.2s ease',
               maxHeight: '80vh',
               display: 'flex',

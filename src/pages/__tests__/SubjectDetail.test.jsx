@@ -72,13 +72,41 @@ describe('SubjectDetail Component', () => {
         submitted_count: 0,
         average_score: 5.0,
         grade: 4.5,
+        grade_label: 'Superior',
         has_manual_grade: true
       }
-    ]
+    ],
+    academic_settings: {
+      min_grade: '0.00',
+      max_grade: '5.00',
+      passing_grade: '3.00',
+      active_grading_scale: {
+        id: 7,
+        name: 'Escala Institucional',
+        ranges: [
+          { id: 1, label: 'Superior', min_value: '4.50', max_value: '5.00', order: 1 },
+        ],
+      },
+    },
   }
 
   const mockExercises = [
     { id: 1, name: 'Algebra Quiz', deadline: '2026-03-01T10:00:00Z', description: 'Solve equations' }
+  ]
+
+  const mockAcademicPeriods = [
+    {
+      id: 10,
+      label: 'Periodo abierto',
+      is_closed: false,
+      is_grade_locked: false,
+    },
+    {
+      id: 20,
+      label: 'Periodo bloqueado',
+      is_closed: false,
+      is_grade_locked: true,
+    },
   ]
   
   const mockResults = [
@@ -100,7 +128,7 @@ describe('SubjectDetail Component', () => {
     
     // Mock API responses
     api.get.mockImplementation((url) => {
-      if (url.includes('/academic-periods/')) return Promise.resolve({ data: [] })
+      if (url.includes('/academic-periods/')) return Promise.resolve({ data: mockAcademicPeriods })
       if (url.includes('/enrollments/')) return Promise.resolve({ data: mockEnrollments })
       if (url.includes('/dashboard/')) return Promise.resolve({ data: mockDashboard })
       if (url.includes('/exercises/')) return Promise.resolve({ data: mockExercises })
@@ -161,7 +189,60 @@ describe('SubjectDetail Component', () => {
     await waitFor(() => {
       const row = screen.getByText('Algebra Quiz').closest('tr')
       expect(within(row).getByText(/5\.0/)).toBeInTheDocument() 
+      expect(within(row).getByText(/Superior/i)).toBeInTheDocument()
     })
+  })
+
+  it('hides locked periods from the exercise creation selector', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText(/Ejercicios \(\d+\)/))
+    await user.click(screen.getByRole('button', { name: /^Crear Ejercicio$/i }))
+
+    expect(screen.getByRole('option', { name: /Periodo abierto/i })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Periodo bloqueado/i })).not.toBeInTheDocument()
+  })
+
+  it('disables result editing when the exercise period is locked', async () => {
+    const user = userEvent.setup()
+
+    api.get.mockImplementation((url) => {
+      if (url.includes('/academic-periods/')) return Promise.resolve({ data: mockAcademicPeriods })
+      if (url.includes('/enrollments/')) return Promise.resolve({ data: mockEnrollments })
+      if (url.includes('/dashboard/')) return Promise.resolve({ data: mockDashboard })
+      if (url.includes('/exercises/')) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 1,
+              name: 'Algebra Quiz',
+              deadline: '2026-03-01T10:00:00Z',
+              description: 'Solve equations',
+              academic_period: 20,
+            },
+          ],
+        })
+      }
+      if (url.includes('/results/')) return Promise.resolve({ data: mockResults })
+      if (url.includes('/subjects/1')) return Promise.resolve({ data: mockSubject })
+      return Promise.reject(new Error('Not found'))
+    })
+
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('Resultados'))
+
+    const blockedButton = await screen.findByRole('button', { name: /Bloqueado/i })
+    expect(blockedButton).toBeDisabled()
   })
   
   it('handles error when loading fails', async () => {

@@ -61,12 +61,12 @@ export default function FAQ() {
         {
           question: '¿Cómo veo mis calificaciones?',
           answer:
-            'Puedes ver tus calificaciones en la sección "Mis Resultados" del menú principal. Allí encontrarás todas tus asignaturas con la nota numérica de cada ejercicio (escala 1.0 – 5.0) y el promedio de la materia.',
+            'Puedes ver tus calificaciones en la sección "Mis Resultados" del menú principal. Allí encontrarás todas tus asignaturas con la nota final, el promedio de ejercicios y, si tu institución la configuró, la equivalencia cualitativa asociada a cada materia.',
         },
         {
           question: '¿Qué significa la nota numérica en mis resultados?',
           answer:
-            'Cada ejercicio se califica en una escala de 1.0 a 5.0. La nota promedio del conjunto de ejercicios calificados se muestra como tu desempeño en la materia. El profesor puede además asignar una nota final manual.',
+            'Cada institución puede definir su propia escala operativa, por ejemplo de 0.0 a 5.0 o de 1.0 a 5.0. El sistema calcula tu desempeño con base en esa configuración y también puede mostrar una equivalencia cualitativa, como Superior, Alto, Básico o Bajo.',
         },
       ],
     },
@@ -86,7 +86,7 @@ export default function FAQ() {
         {
           question: '¿Cómo registro los resultados de los estudiantes?',
           answer:
-            'Desde el detalle de cada asignatura, puedes registrar notas (1.0 – 5.0) individualmente para cada estudiante y ejercicio, o usar la carga masiva mediante CSV para actualizar múltiples resultados a la vez. El sistema valida automáticamente que los scores estén entre 1.0 y 5.0.',
+            'Desde el detalle de cada asignatura, puedes registrar notas individualmente para cada estudiante y ejercicio, o usar la carga masiva mediante CSV para actualizar múltiples resultados a la vez. El sistema valida automáticamente que cada nota esté dentro de la escala configurada por la institución y bloquea la edición cuando el periodo académico ya cerró o venció su fecha límite.',
         },
         {
           question: '¿Puedo exportar los datos de mis asignaturas?',

@@ -14,6 +14,7 @@ import {
   UserX,
   FileText,
   ShieldCheck,
+  SlidersHorizontal,
   User,
   LogOut,
   ChevronLeft,
@@ -168,6 +169,12 @@ export default function Sidebar() {
       icon: ShieldCheck,
       show: user.role === 'ADMIN' && user.is_global_admin,
     },
+    {
+      to: '/admin/academic-settings',
+      label: 'Config. Académica',
+      icon: SlidersHorizontal,
+      show: user.role === 'ADMIN',
+    },
   ].filter((item) => item.show)
 
   const sidebarClasses = [
@@ -198,15 +205,10 @@ export default function Sidebar() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div
+        <button
+          type="button"
           className="sidebar-overlay"
           onClick={() => setMobileOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')
-              setMobileOpen(false)
-          }}
-          role="button"
-          tabIndex={0}
           aria-label="Cerrar menú"
         />
       )}
@@ -220,6 +222,8 @@ export default function Sidebar() {
                 src={logoUrl}
                 className="sidebar__logo-image"
                 alt={`Logo de ${brandName}`}
+                width="32"
+                height="32"
                 onError={() => setShowLogoImage(false)}
               />
             ) : (

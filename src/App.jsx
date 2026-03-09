@@ -1,43 +1,52 @@
+import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
-import AppTour from './components/AppTour'
-import TourDebugButton from './components/TourDebugButton'
-
-import Login from './pages/Login'
-import Register from './pages/Register'
-import CompleteRegistration from './pages/CompleteRegistration'
-import VerifyCode from './pages/VerifyCode'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import Dashboard from './pages/Dashboard'
-import AdminDashboard from './pages/AdminDashboard'
-import Subjects from './pages/Subjects'
-import SubjectDetail from './pages/SubjectDetail'
-import NotificationsPage from './pages/Notifications'
-import MyResults from './pages/MyResults'
-import MySubjects from './pages/MySubjects'
-import MyBulletins from './pages/MyBulletins'
-import UserProfile from './pages/UserProfile'
-import Home from './pages/Home'
-import FAQ from './pages/FAQ'
-import Contact from './pages/Contact'
 import PublicLayout from './components/PublicLayout'
-import CalendarPage from './pages/Calendar'
-import Messages from './pages/messaging/Messages'
-import Observer from './pages/Observer'
-import Absences from './pages/Absences'
-import TenantCommercialAdmin from './pages/TenantCommercialAdmin'
+
+const AppTour = lazy(() => import('./components/AppTour'))
+const TourDebugButton = lazy(() => import('./components/TourDebugButton'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const CompleteRegistration = lazy(() => import('./pages/CompleteRegistration'))
+const VerifyCode = lazy(() => import('./pages/VerifyCode'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const Subjects = lazy(() => import('./pages/Subjects'))
+const SubjectDetail = lazy(() => import('./pages/SubjectDetail'))
+const NotificationsPage = lazy(() => import('./pages/Notifications'))
+const MyResults = lazy(() => import('./pages/MyResults'))
+const MySubjects = lazy(() => import('./pages/MySubjects'))
+const MyBulletins = lazy(() => import('./pages/MyBulletins'))
+const UserProfile = lazy(() => import('./pages/UserProfile'))
+const Home = lazy(() => import('./pages/Home'))
+const FAQ = lazy(() => import('./pages/FAQ'))
+const Contact = lazy(() => import('./pages/Contact'))
+const CalendarPage = lazy(() => import('./pages/Calendar'))
+const Messages = lazy(() => import('./pages/messaging/Messages'))
+const Observer = lazy(() => import('./pages/Observer'))
+const Absences = lazy(() => import('./pages/Absences'))
+const TenantCommercialAdmin = lazy(() => import('./pages/TenantCommercialAdmin'))
+const AcademicSettings = lazy(() => import('./pages/AcademicSettings'))
+
+function RouteFallback() {
+  return <div aria-live="polite">Cargando...</div>
+}
 
 export default function App() {
   return (
     <div className="app">
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <Sidebar />
-      <AppTour />
-      <TourDebugButton />
+      <Suspense fallback={null}>
+        <AppTour />
+        <TourDebugButton />
+      </Suspense>
       <div className="app-body">
         <main id="main-content" className="container">
+        <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/faq" element={<PublicLayout><FAQ /></PublicLayout>} />
@@ -195,8 +204,18 @@ export default function App() {
             }
           />
 
+          <Route
+            path="/admin/academic-settings"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AcademicSettings />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </main>
       </div>
     </div>

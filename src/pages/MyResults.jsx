@@ -1,5 +1,8 @@
 ﻿import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/axios'
+import StatusBadge from '../components/StatusBadge'
+
+const DEFAULT_PASSING_GRADE = 3
 
 export default function MyResults() {
   const [enrs, setEnrs] = useState([])
@@ -63,6 +66,10 @@ export default function MyResults() {
       totalAbsences,
       unjustifiedAbsences
     }
+  }, [enrs])
+
+  const gradedSubjects = useMemo(() => {
+    return enrs.filter((enrollment) => enrollment.stats?.grade != null)
   }, [enrs])
 
   // Exportar resultados a CSV
@@ -178,6 +185,86 @@ export default function MyResults() {
           </div>
         </div>
       )}
+
+      <div className="card" style={{ marginTop: 'var(--space-lg)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: 'var(--space-lg)' }}>
+          <div>
+            <h2 style={{ margin: 0 }}>Detalle por materia</h2>
+            <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
+              Consulta tu nota final, el equivalente cualitativo y el avance por asignatura.
+            </p>
+          </div>
+          <div className="notice">
+            La interpretación cualitativa depende de la escala activa de tu institución.
+          </div>
+        </div>
+
+        <div className="data-table">
+          <table className="table mobile-card-view">
+            <thead>
+              <tr>
+                <th scope="col">Materia</th>
+                <th scope="col">Nota final</th>
+                <th scope="col">Promedio ejercicios</th>
+                <th scope="col">Progreso</th>
+                <th scope="col">Faltas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {enrs.map((enrollment) => {
+                const stats = enrollment.stats || {}
+                const grade = stats.grade
+                const gradeLabel = stats.grade_label || null
+                const averageScore = stats.average_score
+                const gradedCount = stats.graded_count || 0
+                const totalExercises = stats.total_exercises || 0
+                const totalAbsences = stats.total_absences || 0
+                const unjustifiedAbsences = stats.unjustified_absences || 0
+
+                return (
+                  <tr key={enrollment.enrollment_id}>
+                    <td data-label="Materia">
+                      <strong>{enrollment.subject_code}</strong> {enrollment.subject_name}
+                    </td>
+                    <td data-label="Nota final">
+                      {grade != null ? (
+                        <StatusBadge
+                          status={null}
+                          grade={grade}
+                          label={gradeLabel}
+                          locked={false}
+                        />
+                      ) : (
+                        <span className="notice">Sin nota final</span>
+                      )}
+                    </td>
+                    <td data-label="Promedio ejercicios">
+                      {averageScore != null ? (
+                        <span style={{ color: Number(averageScore) >= DEFAULT_PASSING_GRADE ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
+                          {Number(averageScore).toFixed(2)}
+                        </span>
+                      ) : 'N/A'}
+                    </td>
+                    <td data-label="Progreso">
+                      {gradedCount}/{totalExercises} calificados
+                    </td>
+                    <td data-label="Faltas">
+                      {totalAbsences}
+                      {unjustifiedAbsences > 0 ? ` (${unjustifiedAbsences} sin justificar)` : ''}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {gradedSubjects.length === 0 ? (
+          <p className="notice" style={{ marginTop: 'var(--space-md)', marginBottom: 0 }}>
+            Tus materias aún no tienen notas finales publicadas.
+          </p>
+        ) : null}
+      </div>
     </div>
   )
 }

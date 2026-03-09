@@ -29,6 +29,12 @@ function formatDate(value) {
   })
 }
 
+function getPeriodSchemeLabel(value) {
+  if (value === 'SEMESTER') return 'Semestral'
+  if (value === 'CYCLES') return 'Por ciclos'
+  return 'Trimestral'
+}
+
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -39,6 +45,7 @@ export default function AdminDashboard() {
   const [notifications, setNotifications] = useState([])
   const [upcomingEvents, setUpcomingEvents] = useState([])
   const [academicPeriods, setAcademicPeriods] = useState([])
+  const [academicSettings, setAcademicSettings] = useState(null)
   const [blockErrors, setBlockErrors] = useState({})
 
   useEffect(() => {
@@ -60,6 +67,7 @@ export default function AdminDashboard() {
         notificationsResult,
         calendarResult,
         periodsResult,
+        settingsResult,
       ] = await Promise.allSettled([
         api.get('/api/v1/courses/subjects/'),
         api.get('/api/v1/courses/absences/'),
@@ -67,6 +75,7 @@ export default function AdminDashboard() {
         api.get('/api/v1/courses/notifications/'),
         api.get('/api/v1/courses/calendar/all_events/'),
         api.get('/api/v1/courses/academic-periods/'),
+        api.get('/api/v1/courses/academic-settings/'),
       ])
 
       if (subjectsResult.status === 'fulfilled') {
@@ -126,6 +135,13 @@ export default function AdminDashboard() {
       } else {
         nextBlockErrors.periods = 'No se pudieron cargar los periodos académicos.'
         setAcademicPeriods([])
+      }
+
+      if (settingsResult.status === 'fulfilled') {
+        setAcademicSettings(settingsResult.value.data || null)
+      } else {
+        nextBlockErrors.academicSettings = 'No se pudo cargar la configuración académica.'
+        setAcademicSettings(null)
       }
     } catch (err) {
       setError('No se pudo cargar el panel de administración. Intenta nuevamente.')
@@ -245,6 +261,21 @@ export default function AdminDashboard() {
     return academicPeriods.filter((period) => !period.is_closed).slice(0, 3)
   }, [academicPeriods])
 
+  const lockedPeriodsCount = useMemo(() => {
+    return academicPeriods.filter((period) => period.is_grade_locked).length
+  }, [academicPeriods])
+
+  const nextDeadline = useMemo(() => {
+    const periodsWithDeadline = academicPeriods
+      .filter((period) => !period.is_closed && period.grading_deadline)
+      .sort((first, second) => {
+        const firstTime = toDate(first.grading_deadline)?.getTime() || 0
+        const secondTime = toDate(second.grading_deadline)?.getTime() || 0
+        return firstTime - secondTime
+      })
+    return periodsWithDeadline[0] || null
+  }, [academicPeriods])
+
   const criticalNotifications = useMemo(() => {
     return notifications
       .filter((item) => !item.is_read)
@@ -297,6 +328,10 @@ export default function AdminDashboard() {
         <div className="stat-card">
           <div className="stat-value">{kpis.recentObservations}</div>
           <div className="stat-label">Observaciones (7 días)</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{lockedPeriodsCount}</div>
+          <div className="stat-label">Períodos bloqueados</div>
         </div>
       </div>
 
@@ -398,6 +433,25 @@ export default function AdminDashboard() {
           <h2 style={{ marginTop: 0 }}>Calendario y próximos hitos</h2>
           {blockErrors.calendar && <Alert type="error" message={blockErrors.calendar} />}
           {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
+          {blockErrors.academicSettings && <Alert type="error" message={blockErrors.academicSettings} />}
+          {academicSettings && (
+            <div style={{ marginBottom: 'var(--space-md)', padding: '0.75rem', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)' }}>
+              <p style={{ margin: 0 }}>
+                <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)} | <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
+                {academicSettings.active_grading_scale_detail?.name ? ` | ${academicSettings.active_grading_scale_detail.name}` : ''}
+              </p>
+              {nextDeadline ? (
+                <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
+                  Próximo cierre operativo: <strong>{nextDeadline.label}</strong> el {formatDate(nextDeadline.grading_deadline)}
+                </p>
+              ) : null}
+              <div style={{ marginTop: '0.75rem' }}>
+                <Link className="btn secondary" to="/admin/academic-settings" style={{ textDecoration: 'none' }}>
+                  Ajustar configuración académica
+                </Link>
+              </div>
+            </div>
+          )}
           <h3 style={{ marginBottom: '0.5rem' }}>Eventos próximos</h3>
           {upcomingEvents.length === 0 ? (
             <p style={{ color: 'var(--text-secondary)' }}>No hay eventos futuros registrados.</p>
@@ -421,7 +475,8 @@ export default function AdminDashboard() {
             <ul style={{ marginTop: 0, paddingLeft: '1rem' }}>
               {openPeriods.map((period) => (
                 <li key={period.id} style={{ marginBottom: '0.5rem' }}>
-                  Año {period.year} - Periodo {period.period_number}
+                  {period.label}
+                  {period.is_grade_locked ? ' · Bloqueado' : ''}
                 </li>
               ))}
             </ul>
