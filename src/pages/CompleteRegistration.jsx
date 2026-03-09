@@ -49,8 +49,8 @@ export default function CompleteRegistration() {
         </div>
 
         <form onSubmit={handleUpgrade} className="auth-form">
-          <div className="form-group">
-            <label>Soy...</label>
+          <fieldset className="form-group" style={{ border: 0, padding: 0, margin: 0 }}>
+            <legend>Soy…</legend>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {[
                 { value: 'TEACHER', label: 'Profesor' },
@@ -71,14 +71,14 @@ export default function CompleteRegistration() {
                     fontWeight: role === r.value ? '600' : '400',
                     cursor: 'pointer',
                     fontSize: 'var(--font-size-sm)',
-                    transition: 'all 0.15s',
+                    transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
                   }}
                 >
                   {r.label}
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           <div className="form-group">
             <label htmlFor="invitation-code">Código de Invitación</label>
@@ -106,7 +106,7 @@ export default function CompleteRegistration() {
             disabled={isLoading || !invitationCode}
           >
             {isLoading ? (
-              <><div className="spinner"></div>Actualizando rol...</>
+              <><div className="spinner"></div>Actualizando rol…</>
             ) : (
               <>Confirmar y continuar</>
             )}

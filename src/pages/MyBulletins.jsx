@@ -210,38 +210,29 @@ export default function MyBulletins() {
             {yearBulletins.map((bulletin) => (
               <div key={bulletin.id}>
                 {/* Period card */}
-                <div
-                  className="card"
-                  role="button"
-                  tabIndex={0}
+                <button
+                  type="button"
+                  className="card card-button"
                   aria-label={`Ver boletín ${bulletin.period_label}`}
                   aria-expanded={expandedBulletinId === bulletin.id}
                   onClick={() => loadBulletinDetail(bulletin.id)}
                   onKeyDown={(e) => handleKeyDownCard(e, bulletin.id)}
                   style={{
-                    cursor: 'pointer',
-                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                    margin: 0,
                     border:
                       expandedBulletinId === bulletin.id
                         ? '2px solid var(--primary)'
                         : '2px solid transparent',
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = 'none'
-                  }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
+                  <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span>
+                      <span style={{ display: 'block', margin: 0, color: 'var(--text-primary)', fontSize: 'var(--font-size-lg)', fontWeight: 700 }}>
                         Periodo {bulletin.period_number}
-                      </h3>
-                      <p
+                      </span>
+                      <span
                         style={{
+                          display: 'block',
                           margin: '0.25rem 0 0 0',
                           fontSize: 'var(--font-size-sm)',
                           color: 'var(--text-muted)',
@@ -252,33 +243,35 @@ export default function MyBulletins() {
                           month: 'long',
                           day: 'numeric',
                         })}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div
+                      </span>
+                    </span>
+                    <span style={{ textAlign: 'right' }}>
+                      <span
                         style={{
+                          display: 'block',
                           fontSize: 'var(--font-size-2xl)',
                           fontWeight: 700,
                           color: getGradeColor(bulletin.average_grade),
                         }}
                       >
                         {bulletin.average_grade?.toFixed(2) ?? '—'}
-                      </div>
-                      <div
+                      </span>
+                      <span
                         style={{
+                          display: 'block',
                           fontSize: 'var(--font-size-sm)',
                           color: 'var(--text-muted)',
                         }}
                       >
                         Promedio
-                      </div>
-                    </div>
-                  </div>
+                      </span>
+                    </span>
+                  </span>
 
-                  <div
+                  <span
                     style={{
-                      marginTop: 'var(--space-sm)',
                       display: 'flex',
+                      marginTop: 'var(--space-sm)',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}
@@ -295,8 +288,8 @@ export default function MyBulletins() {
                     <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                       {expandedBulletinId === bulletin.id ? '▲ Ocultar' : '▼ Ver detalle'}
                     </span>
-                  </div>
-                </div>
+                  </span>
+                </button>
 
                 {/* Expanded detail */}
                 {expandedBulletinId === bulletin.id && (

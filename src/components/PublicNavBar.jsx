@@ -16,6 +16,10 @@ function scrollToSection(id) {
   }
 }
 
+function getSectionHref(pathname, id) {
+  return pathname === '/home' ? `#${id}` : `/home#${id}`
+}
+
 export default function PublicNavBar() {
   const { isAuthenticated, activeTenantBranding } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -45,14 +49,13 @@ export default function PublicNavBar() {
     setShowLogoImage(true)
   }, [logoUrl])
 
-  function handleNavClick(scrollId) {
-    if (location.pathname === '/home') {
-      scrollToSection(scrollId)
-    } else {
-      // Navigate to /home then scroll after load
-      window.location.href = `/home#${scrollId}`
-    }
+  function handleNavClick(event, scrollId) {
     setMobileOpen(false)
+    if (location.pathname === '/home') {
+      event.preventDefault()
+      scrollToSection(scrollId)
+      window.history.replaceState(null, '', `#${scrollId}`)
+    }
   }
 
   return (
@@ -68,6 +71,8 @@ export default function PublicNavBar() {
               src={logoUrl}
               className="public-navbar__logo-image"
               alt={`Logo de ${brandName}`}
+              width="32"
+              height="32"
               onError={() => setShowLogoImage(false)}
             />
           ) : (
@@ -79,13 +84,14 @@ export default function PublicNavBar() {
         {/* Desktop nav links */}
         <nav className="public-navbar__links" aria-label="Secciones de la página">
           {NAV_LINKS.map(({ label, scrollId }) => (
-            <button
+            <a
               key={scrollId}
-              onClick={() => handleNavClick(scrollId)}
+              href={getSectionHref(location.pathname, scrollId)}
+              onClick={(event) => handleNavClick(event, scrollId)}
               className="public-navbar__link"
             >
               {label}
-            </button>
+            </a>
           ))}
           <Link to="/faq" className="public-navbar__link">FAQ</Link>
           <Link to="/contact" className="public-navbar__link">Contacto</Link>
@@ -129,13 +135,14 @@ export default function PublicNavBar() {
           aria-label="Menú móvil"
         >
           {NAV_LINKS.map(({ label, scrollId }) => (
-            <button
+            <a
               key={scrollId}
-              onClick={() => handleNavClick(scrollId)}
+              href={getSectionHref(location.pathname, scrollId)}
+              onClick={(event) => handleNavClick(event, scrollId)}
               className="public-navbar__mobile-link"
             >
               {label}
-            </button>
+            </a>
           ))}
           <Link
             to="/faq"

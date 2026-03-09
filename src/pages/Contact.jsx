@@ -256,6 +256,7 @@ export default function Contact() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                autoComplete="name"
                 placeholder="Ej: Juan Pérez"
                 disabled={isSubmitting}
                 maxLength={200}
@@ -273,6 +274,9 @@ export default function Contact() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
+                inputMode="email"
+                spellCheck={false}
                 placeholder="tu@email.com"
                 disabled={isSubmitting}
               />
@@ -305,7 +309,7 @@ export default function Contact() {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Describe tu consulta o problema..."
+                placeholder="Describe tu consulta o problema…"
                 rows="6"
                 disabled={isSubmitting}
                 maxLength={2000}
@@ -316,9 +320,11 @@ export default function Contact() {
             </div>
 
             <div className="form-group">
-              <label>Verificación de seguridad *</label>
+              <label id="contact-security-verification-label">Verificación de seguridad *</label>
               <TurnstileCaptcha
                 ref={turnstileRef}
+                id="contact-security-verification"
+                ariaLabelledBy="contact-security-verification-label"
                 onVerify={handleTurnstileVerify}
                 onError={handleTurnstileError}
                 onExpire={handleTurnstileExpire}
@@ -330,7 +336,7 @@ export default function Contact() {
               className="btn btn-primary btn-block"
               disabled={isSubmitting || !turnstileToken}
             >
-              {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
+              {isSubmitting ? 'Enviando…' : 'Enviar Mensaje'}
             </button>
           </form>
         </div>

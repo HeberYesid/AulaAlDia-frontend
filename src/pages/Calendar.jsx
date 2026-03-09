@@ -139,16 +139,20 @@ export default function CalendarPage() {
         <div
           style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}
           role="presentation"
-          onClick={() => setSelectedEvent(null)}
         >
+          <button
+            type="button"
+            aria-label="Cerrar evento"
+            className="modal-backdrop-button"
+            onClick={() => setSelectedEvent(null)}
+          />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="event-dialog-title"
             className="card"
-            style={{ maxWidth: '450px', width: '100%', margin: 0 }}
+            style={{ maxWidth: '450px', width: '100%', margin: 0, position: 'relative', zIndex: 1 }}
             onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.key === 'Escape' && setSelectedEvent(null)}
           >
             <h2 id="event-dialog-title" style={{ marginTop: 0 }}>{selectedEvent.title}</h2>
             {selectedEvent.description && <p style={{ color: 'var(--text-secondary)' }}>{selectedEvent.description}</p>}
@@ -156,7 +160,7 @@ export default function CalendarPage() {
               {selectedEvent.start?.toLocaleDateString('es-CO', { dateStyle: 'full' })}
             </p>
             <div style={{ textAlign: 'right', marginTop: '1rem' }}>
-              <button className="btn secondary" autoFocus onClick={() => setSelectedEvent(null)}>Cerrar</button>
+              <button className="btn secondary" onClick={() => setSelectedEvent(null)}>Cerrar</button>
             </div>
           </div>
         </div>

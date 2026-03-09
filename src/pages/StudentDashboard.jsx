@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import WelcomePanel from '../components/WelcomePanel'
 
@@ -7,7 +7,6 @@ export default function StudentDashboard() {
   const [dashboard, setDashboard] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const navigate = useNavigate()
 
   useEffect(() => {
     loadDashboard()
@@ -32,7 +31,7 @@ export default function StudentDashboard() {
         <div className="card">
           <div className="loading">
             <div className="spinner"></div>
-            <span>Cargando dashboard...</span>
+            <span>Cargando dashboard…</span>
           </div>
         </div>
       </div>
@@ -66,19 +65,18 @@ export default function StudentDashboard() {
         ) : (
           <div className="subjects-grid-responsive">
             {subjects_progress.map((subject) => (
-              <div
+              <Link
                 key={subject.subject_id}
+                to={`/subjects/${subject.subject_id}`}
                 className="card"
-                role="button"
-                tabIndex={0}
                 style={{
+                  display: 'block',
                   padding: 'var(--space-xl)',
-                  cursor: 'pointer',
-                  transition: 'all var(--transition-fast)',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  transition: 'transform var(--transition-fast), box-shadow var(--transition-fast)',
                   height: '100%'
                 }}
-                onClick={() => navigate(`/subjects/${subject.subject_id}`)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/subjects/${subject.subject_id}`) } }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)'
                   e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)'
@@ -107,7 +105,7 @@ export default function StudentDashboard() {
                     )}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -126,20 +124,19 @@ export default function StudentDashboard() {
           ) : (
             <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
               {pending_exercises.map((exercise) => (
-                <div
+                <Link
                   key={exercise.id}
-                  role="button"
-                  tabIndex={0}
+                  to={`/subjects/${exercise.subject_id}`}
                   style={{
+                    display: 'block',
                     padding: 'var(--space-md)',
                     background: 'var(--bg-secondary)',
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--border-primary)',
-                    cursor: 'pointer',
-                    transition: 'all var(--transition-fast)'
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    transition: 'transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast)'
                   }}
-                  onClick={() => navigate(`/subjects/${exercise.subject_id}`)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/subjects/${exercise.subject_id}`) } }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'var(--bg-hover)'
                     e.currentTarget.style.borderColor = 'var(--primary)'
@@ -173,7 +170,7 @@ export default function StudentDashboard() {
                       Sin fecha límite
                     </div>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           )}

@@ -65,8 +65,10 @@ const ConversationList = ({
                 <Search size={16} className="msg-sidebar-search-icon" />
                 <input
                     type="text"
+                    name="conversation-search"
+                    autoComplete="off"
                     className="msg-sidebar-search-input"
-                    placeholder="Buscar conversación..."
+                    placeholder="Buscar conversación…"
                     value={filterQuery}
                     onChange={(e) => setFilterQuery(e.target.value)}
                     aria-label="Filtrar conversaciones"

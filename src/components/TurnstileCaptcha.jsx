@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 
-const TurnstileCaptcha = forwardRef(({ onVerify, onError, onExpire, onReady, theme = 'light', size = 'normal' }, ref) => {
+const TurnstileCaptcha = forwardRef(({
+  id,
+  ariaLabelledBy,
+  onVerify,
+  onError,
+  onExpire,
+  onReady,
+  theme = 'light',
+  size = 'normal',
+}, ref) => {
   const turnstileRef = useRef(null)
   const [widgetId, setWidgetId] = useState(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -122,12 +131,12 @@ const TurnstileCaptcha = forwardRef(({ onVerify, onError, onExpire, onReady, the
         justifyContent: 'center',
         color: '#666'
       }}>
-        Cargando captcha...
+        Cargando captcha…
       </div>
     )
   }
 
-  return <div ref={turnstileRef}></div>
+  return <div id={id} ref={turnstileRef} role="group" aria-labelledby={ariaLabelledBy}></div>
 })
 
 TurnstileCaptcha.displayName = 'TurnstileCaptcha'

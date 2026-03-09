@@ -52,8 +52,10 @@ const NewChatModal = ({ searchQuery, searchResults, onSearchChange, onStartConve
                     <input
                         ref={inputRef}
                         type="text"
+                        name="user-search"
+                        autoComplete="off"
                         className="msg-modal-search-input"
-                        placeholder="Buscar por nombre o correo..."
+                        placeholder="Buscar por nombre o correo…"
                         value={searchQuery}
                         onChange={onSearchChange}
                         aria-label="Buscar usuario"
