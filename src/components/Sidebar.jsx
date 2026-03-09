@@ -106,7 +106,13 @@ export default function Sidebar() {
       to: '/',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      show: true,
+      show: user.role !== 'ADMIN',
+    },
+    {
+      to: '/admin/dashboard',
+      label: 'Dashboard Admin',
+      icon: LayoutDashboard,
+      show: user.role === 'ADMIN',
     },
     {
       to: '/subjects',

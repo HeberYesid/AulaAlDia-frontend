@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api } from '../api/axios'
 import StudentDashboard from './StudentDashboard'
@@ -35,6 +35,10 @@ export default function Dashboard() {
   // Si es estudiante, mostrar StudentDashboard
   if (user.role === 'STUDENT') {
     return <StudentDashboard />
+  }
+
+  if (user.role === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />
   }
 
   async function deleteSubject(subject) {

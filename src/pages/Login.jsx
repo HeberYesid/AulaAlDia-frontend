@@ -16,6 +16,17 @@ export default function Login() {
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
 
+  function getPostLoginPath() {
+    try {
+      const raw = localStorage.getItem('auth')
+      if (!raw) return from
+      const auth = JSON.parse(raw)
+      return auth?.user?.role === 'ADMIN' ? '/admin/dashboard' : from
+    } catch {
+      return from
+    }
+  }
+
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setIsLoading(true)
@@ -24,7 +35,7 @@ export default function Login() {
         // New users can optionally upgrade their role (Teacher/Tutor) on the next page
         navigate('/complete-registration')
       } else {
-        navigate(from)
+        navigate(getPostLoginPath())
       }
     } catch (err) {
       console.error('Google Login Error:', err)
@@ -61,7 +72,7 @@ export default function Login() {
 
     try {
       await login(email, password)
-      navigate(from)
+      navigate(getPostLoginPath())
     } catch (err) {
       const errorMessage = err.response?.data?.detail || 'Error al iniciar sesión'
       setError(errorMessage)

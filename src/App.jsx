@@ -11,6 +11,7 @@ import VerifyCode from './pages/VerifyCode'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
+import AdminDashboard from './pages/AdminDashboard'
 import Subjects from './pages/Subjects'
 import SubjectDetail from './pages/SubjectDetail'
 import NotificationsPage from './pages/Notifications'
@@ -82,6 +83,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />

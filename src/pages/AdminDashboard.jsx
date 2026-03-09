@@ -1,0 +1,483 @@
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { api } from '../api/axios'
+import Alert from '../components/Alert'
+
+const MS_IN_DAY = 24 * 60 * 60 * 1000
+
+function toDate(value) {
+  if (!value) return null
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return null
+  return parsed
+}
+
+function isWithinLastDays(value, days) {
+  const date = toDate(value)
+  if (!date) return false
+  const threshold = Date.now() - days * MS_IN_DAY
+  return date.getTime() >= threshold
+}
+
+function formatDate(value) {
+  const date = toDate(value)
+  if (!date) return '-'
+  return date.toLocaleDateString('es-CO', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+export default function AdminDashboard() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [subjects, setSubjects] = useState([])
+  const [subjectStats, setSubjectStats] = useState([])
+  const [absences, setAbsences] = useState([])
+  const [observations, setObservations] = useState([])
+  const [notifications, setNotifications] = useState([])
+  const [upcomingEvents, setUpcomingEvents] = useState([])
+  const [academicPeriods, setAcademicPeriods] = useState([])
+  const [blockErrors, setBlockErrors] = useState({})
+
+  useEffect(() => {
+    loadDashboard()
+  }, [])
+
+  async function loadDashboard() {
+    setLoading(true)
+    setError('')
+
+    const nextBlockErrors = {}
+    let nextSubjects = []
+
+    try {
+      const [
+        subjectsResult,
+        absencesResult,
+        observationsResult,
+        notificationsResult,
+        calendarResult,
+        periodsResult,
+      ] = await Promise.allSettled([
+        api.get('/api/v1/courses/subjects/'),
+        api.get('/api/v1/courses/absences/'),
+        api.get('/api/v1/courses/observations/'),
+        api.get('/api/v1/courses/notifications/'),
+        api.get('/api/v1/courses/calendar/all_events/'),
+        api.get('/api/v1/courses/academic-periods/'),
+      ])
+
+      if (subjectsResult.status === 'fulfilled') {
+        nextSubjects = subjectsResult.value.data?.results || subjectsResult.value.data || []
+        setSubjects(Array.isArray(nextSubjects) ? nextSubjects : [])
+      } else {
+        nextBlockErrors.subjects = 'No se pudieron cargar las materias.'
+        setSubjects([])
+      }
+
+      if (absencesResult.status === 'fulfilled') {
+        setAbsences(Array.isArray(absencesResult.value.data) ? absencesResult.value.data : [])
+      } else {
+        nextBlockErrors.absences = 'No se pudieron cargar las faltas.'
+        setAbsences([])
+      }
+
+      if (observationsResult.status === 'fulfilled') {
+        setObservations(Array.isArray(observationsResult.value.data) ? observationsResult.value.data : [])
+      } else {
+        nextBlockErrors.observations = 'No se pudieron cargar las observaciones.'
+        setObservations([])
+      }
+
+      if (notificationsResult.status === 'fulfilled') {
+        setNotifications(Array.isArray(notificationsResult.value.data) ? notificationsResult.value.data : [])
+      } else {
+        nextBlockErrors.notifications = 'No se pudieron cargar las notificaciones.'
+        setNotifications([])
+      }
+
+      if (calendarResult.status === 'fulfilled') {
+        const events = Array.isArray(calendarResult.value.data) ? calendarResult.value.data : []
+        const now = new Date()
+        const future = events
+          .filter((event) => {
+            const startValue = event.start || event.start_time || event.date
+            const startDate = toDate(startValue)
+            return startDate && startDate >= now
+          })
+          .sort((a, b) => {
+            const first = toDate(a.start || a.start_time || a.date)?.getTime() || 0
+            const second = toDate(b.start || b.start_time || b.date)?.getTime() || 0
+            return first - second
+          })
+          .slice(0, 5)
+
+        setUpcomingEvents(future)
+      } else {
+        nextBlockErrors.calendar = 'No se pudieron cargar los eventos del calendario.'
+        setUpcomingEvents([])
+      }
+
+      if (periodsResult.status === 'fulfilled') {
+        const periods = periodsResult.value.data?.results || periodsResult.value.data || []
+        setAcademicPeriods(Array.isArray(periods) ? periods : [])
+      } else {
+        nextBlockErrors.periods = 'No se pudieron cargar los periodos académicos.'
+        setAcademicPeriods([])
+      }
+    } catch (err) {
+      setError('No se pudo cargar el panel de administración. Intenta nuevamente.')
+    }
+
+    try {
+      if (nextSubjects.length > 0) {
+        const dashboards = await Promise.allSettled(
+          nextSubjects.map((subject) => api.get(`/api/v1/courses/subjects/${subject.id}/dashboard/`))
+        )
+
+        const nextSubjectStats = dashboards
+          .map((result, index) => {
+            if (result.status !== 'fulfilled') return null
+            const raw = result.value.data || {}
+            const aggregates = raw.aggregates || {}
+            const submitted = Number(aggregates.total_submitted_results || 0)
+            const graded = Number(aggregates.total_graded_results || 0)
+            const avgScore = Number(aggregates.avg_score || 0)
+            const avgGrade = Number(aggregates.avg_grade || 0)
+
+            return {
+              subjectId: nextSubjects[index].id,
+              subjectCode: nextSubjects[index].code,
+              subjectName: nextSubjects[index].name,
+              submitted,
+              graded,
+              avgScore,
+              avgGrade,
+            }
+          })
+          .filter(Boolean)
+
+        setSubjectStats(nextSubjectStats)
+
+        const hasFailures = dashboards.some((item) => item.status === 'rejected')
+        if (hasFailures) {
+          nextBlockErrors.performance = 'Algunas métricas por materia no estuvieron disponibles.'
+        }
+      } else {
+        setSubjectStats([])
+      }
+    } catch (err) {
+      nextBlockErrors.performance = 'No se pudieron cargar las métricas de rendimiento.'
+      setSubjectStats([])
+    }
+
+    setBlockErrors(nextBlockErrors)
+
+    if (Object.keys(nextBlockErrors).length > 0) {
+      setError('El dashboard cargó parcialmente. Revisa los bloques con alerta.')
+    }
+
+    setLoading(false)
+  }
+
+  const kpis = useMemo(() => {
+    const subjectsCount = subjects.length
+    const studentsCount = subjects.reduce((acc, subject) => acc + Number(subject.enrollments_count || 0), 0)
+    const totalAbsences = absences.length
+    const unjustifiedAbsences = absences.filter((absence) => !absence.justified).length
+    const recentObservations = observations.filter((item) => isWithinLastDays(item.created_at, 7)).length
+    const unreadNotifications = notifications.filter((item) => !item.is_read).length
+
+    return {
+      subjectsCount,
+      studentsCount,
+      totalAbsences,
+      unjustifiedAbsences,
+      recentObservations,
+      unreadNotifications,
+    }
+  }, [subjects, absences, observations, notifications])
+
+  const performanceList = useMemo(() => {
+    return [...subjectStats]
+      .sort((a, b) => b.avgScore - a.avgScore)
+      .slice(0, 5)
+  }, [subjectStats])
+
+  const riskStudents = useMemo(() => {
+    const byStudent = {}
+
+    for (const absence of absences) {
+      if (absence.justified) continue
+
+      const studentKey = absence.student_email_display || absence.student_name || String(absence.id)
+      if (!byStudent[studentKey]) {
+        byStudent[studentKey] = {
+          name: absence.student_name || absence.student_email_display || 'Estudiante',
+          email: absence.student_email_display || '',
+          count: 0,
+        }
+      }
+
+      byStudent[studentKey].count += 1
+    }
+
+    return Object.values(byStudent)
+      .filter((student) => student.count >= 3)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+  }, [absences])
+
+  const recentObservationList = useMemo(() => {
+    return observations
+      .filter((item) => isWithinLastDays(item.created_at, 7))
+      .sort((a, b) => {
+        const first = toDate(a.created_at)?.getTime() || 0
+        const second = toDate(b.created_at)?.getTime() || 0
+        return second - first
+      })
+      .slice(0, 6)
+  }, [observations])
+
+  const openPeriods = useMemo(() => {
+    return academicPeriods.filter((period) => !period.is_closed).slice(0, 3)
+  }, [academicPeriods])
+
+  const criticalNotifications = useMemo(() => {
+    return notifications
+      .filter((item) => !item.is_read)
+      .sort((a, b) => {
+        const first = toDate(a.created_at)?.getTime() || 0
+        const second = toDate(b.created_at)?.getTime() || 0
+        return second - first
+      })
+      .slice(0, 5)
+  }, [notifications])
+
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="spinner" role="status" aria-label="Cargando panel de administrador..."></div>
+        <span aria-hidden="true">Cargando panel de administrador...</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fade-in">
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Dashboard Administrativo</h1>
+          <p className="dashboard-subtitle">
+            Vista consolidada para seguimiento académico y gestión operativa.
+          </p>
+        </div>
+        <button className="btn secondary" onClick={loadDashboard}>
+          Actualizar datos
+        </button>
+      </div>
+
+      <Alert type="error" message={error} />
+
+      <div className="stats-grid" style={{ marginBottom: 'var(--space-lg)' }}>
+        <div className="stat-card">
+          <div className="stat-value">{kpis.subjectsCount}</div>
+          <div className="stat-label">Materias</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{kpis.studentsCount}</div>
+          <div className="stat-label">Estudiantes</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{kpis.unjustifiedAbsences}</div>
+          <div className="stat-label">Faltas sin justificar</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{kpis.recentObservations}</div>
+          <div className="stat-label">Observaciones (7 días)</div>
+        </div>
+      </div>
+
+      <div className="grid-2" style={{ display: 'grid', gap: 'var(--space-lg)', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Rendimiento por materia</h2>
+          {blockErrors.performance && <Alert type="error" message={blockErrors.performance} />}
+          {performanceList.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>No hay métricas disponibles aún.</p>
+          ) : (
+            <div className="data-table">
+              <table className="table mobile-card-view">
+                <thead>
+                  <tr>
+                    <th scope="col">Materia</th>
+                    <th scope="col">Prom. puntaje</th>
+                    <th scope="col">Entregados</th>
+                    <th scope="col">Calificados</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {performanceList.map((item) => (
+                    <tr key={item.subjectId}>
+                      <td data-label="Materia">
+                        <strong>{item.subjectCode}</strong> {item.subjectName}
+                      </td>
+                      <td data-label="Prom. puntaje">{item.avgScore.toFixed(2)}</td>
+                      <td data-label="Entregados">{item.submitted}</td>
+                      <td data-label="Calificados">{item.graded}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Ausencias y alertas</h2>
+          {blockErrors.absences && <Alert type="error" message={blockErrors.absences} />}
+          <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>
+            Total faltas: <strong>{kpis.totalAbsences}</strong> | Sin justificar: <strong>{kpis.unjustifiedAbsences}</strong>
+          </p>
+          {riskStudents.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>No hay estudiantes en riesgo por faltas en este momento.</p>
+          ) : (
+            <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+              {riskStudents.map((student) => (
+                <li key={student.email || student.name} style={{ marginBottom: '0.5rem' }}>
+                  <strong>{student.name}</strong> ({student.count} faltas sin justificar)
+                </li>
+              ))}
+            </ul>
+          )}
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            <Link className="btn secondary" to="/absences" style={{ textDecoration: 'none' }}>
+              Ver módulo de asistencia
+            </Link>
+          </div>
+        </section>
+
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Observaciones recientes</h2>
+          {blockErrors.observations && <Alert type="error" message={blockErrors.observations} />}
+          {recentObservationList.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>No hay observaciones en los últimos 7 días.</p>
+          ) : (
+            <div className="data-table">
+              <table className="table mobile-card-view">
+                <thead>
+                  <tr>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Estudiante</th>
+                    <th scope="col">Categoría</th>
+                    <th scope="col">Título</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentObservationList.map((item) => (
+                    <tr key={item.id}>
+                      <td data-label="Fecha">{formatDate(item.created_at)}</td>
+                      <td data-label="Estudiante">{item.student_name || item.student_email_display || '-'}</td>
+                      <td data-label="Categoría">{item.category || '-'}</td>
+                      <td data-label="Título">{item.title || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            <Link className="btn secondary" to="/observer" style={{ textDecoration: 'none' }}>
+              Ver observador
+            </Link>
+          </div>
+        </section>
+
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Calendario y próximos hitos</h2>
+          {blockErrors.calendar && <Alert type="error" message={blockErrors.calendar} />}
+          {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
+          <h3 style={{ marginBottom: '0.5rem' }}>Eventos próximos</h3>
+          {upcomingEvents.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>No hay eventos futuros registrados.</p>
+          ) : (
+            <ul style={{ marginTop: 0, paddingLeft: '1rem' }}>
+              {upcomingEvents.map((event, index) => {
+                const eventStart = event.start || event.start_time || event.date
+                return (
+                  <li key={`${event.id || event.title}-${index}`} style={{ marginBottom: '0.5rem' }}>
+                    <strong>{event.title || 'Evento'}</strong> - {formatDate(eventStart)}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          <h3 style={{ marginBottom: '0.5rem', marginTop: 'var(--space-md)' }}>Períodos abiertos</h3>
+          {openPeriods.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>No hay períodos académicos abiertos.</p>
+          ) : (
+            <ul style={{ marginTop: 0, paddingLeft: '1rem' }}>
+              {openPeriods.map((period) => (
+                <li key={period.id} style={{ marginBottom: '0.5rem' }}>
+                  Año {period.year} - Periodo {period.period_number}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            <Link className="btn secondary" to="/calendar" style={{ textDecoration: 'none' }}>
+              Ver calendario completo
+            </Link>
+          </div>
+        </section>
+
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Notificaciones críticas</h2>
+          {blockErrors.notifications && <Alert type="error" message={blockErrors.notifications} />}
+          <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>
+            Tienes <strong>{kpis.unreadNotifications}</strong> notificaciones sin leer.
+          </p>
+          {criticalNotifications.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>No hay alertas sin leer.</p>
+          ) : (
+            <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+              {criticalNotifications.map((item) => (
+                <li key={item.id} style={{ marginBottom: '0.5rem' }}>
+                  <strong>{item.title || 'Notificación'}</strong> - {formatDate(item.created_at)}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            <Link className="btn secondary" to="/notifications" style={{ textDecoration: 'none' }}>
+              Ver notificaciones
+            </Link>
+          </div>
+        </section>
+
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Accesos rápidos de gestión</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            Atajos para tareas operativas frecuentes del administrador.
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
+            <Link className="btn primary" to="/subjects" style={{ textDecoration: 'none' }}>
+              Gestionar materias
+            </Link>
+            <Link className="btn secondary" to="/absences" style={{ textDecoration: 'none' }}>
+              Registrar asistencia
+            </Link>
+            <Link className="btn secondary" to="/observer" style={{ textDecoration: 'none' }}>
+              Registrar observación
+            </Link>
+            <Link className="btn secondary" to="/messages" style={{ textDecoration: 'none' }}>
+              Revisar mensajes
+            </Link>
+          </div>
+        </section>
+      </div>
+    </div>
+  )
+}
