@@ -27,6 +27,8 @@ const AppTour = lazy(() => import('./components/AppTour'))
 const TourDebugButton = lazy(() => import('./components/TourDebugButton'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
+const RegisterTeacher = lazy(() => import('./pages/RegisterTeacher'))
+const RegisterTutor = lazy(() => import('./pages/RegisterTutor'))
 const CompleteRegistration = lazy(() => import('./pages/CompleteRegistration'))
 const VerifyCode = lazy(() => import('./pages/VerifyCode'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
@@ -74,9 +76,8 @@ export default function App() {
           
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          {/* Legacy registration paths — redirect to the unified register page */}
-          <Route path="/register-teacher" element={<Navigate to="/register" replace />} />
-          <Route path="/register-tutor" element={<Navigate to="/register" replace />} />
+          <Route path="/register-teacher" element={<RegisterTeacher />} />
+          <Route path="/register-tutor" element={<RegisterTutor />} />
           {/* Legacy token-based email verification — no longer used */}
           <Route path="/verify" element={<Navigate to="/verify-code" replace />} />
           <Route path="/verify-code" element={<VerifyCode />} />

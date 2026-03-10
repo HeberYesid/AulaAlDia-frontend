@@ -33,7 +33,23 @@ describe('UserProfile Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    api.get.mockResolvedValue({ data: mockUser })
+    api.get.mockImplementation((url) => {
+      if (url === '/api/v1/auth/profile/') {
+        return Promise.resolve({ data: mockUser })
+      }
+
+      if (url === '/api/v1/auth/student-tutor-invitation/') {
+        return Promise.resolve({
+          data: {
+            has_tutor: false,
+            tutor: null,
+            pending_invitation: null,
+          },
+        })
+      }
+
+      return Promise.reject(new Error(`Unhandled GET ${url}`))
+    })
   })
 
   it('renders user profile information', async () => {
@@ -100,5 +116,25 @@ describe('UserProfile Component', () => {
     
     expect(screen.getByText(/las contraseñas no coinciden/i)).toBeInTheDocument()
     expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('allows a student to invite a caregiver', async () => {
+    const user = userEvent.setup()
+    api.post.mockResolvedValueOnce({
+      data: { message: 'Invitacion enviada correctamente al acudiente.' },
+    })
+
+    renderWithProviders(<UserProfile />)
+
+    await waitFor(() => expect(screen.getByText('Invitar Acudiente')).toBeInTheDocument())
+
+    await user.type(screen.getByLabelText(/correo del acudiente/i), 'caregiver@example.com')
+    await user.click(screen.getByRole('button', { name: /enviar invitacion/i }))
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith('/api/v1/auth/student-tutor-invitation/', {
+        email: 'caregiver@example.com',
+      })
+    })
   })
 })

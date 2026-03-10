@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Register from '../Register'
 import { renderWithProviders } from '../../test/utils'
@@ -7,15 +7,36 @@ import * as axios from '../../api/axios'
 
 vi.mock('../../api/axios')
 
+const TENANT_ID = '11111111-1111-1111-1111-111111111111'
+
 describe('Register Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
+    window.history.pushState({}, '', '/register')
   })
 
-  it('renders registration form', () => {
+  it('shows only institution guidance without tenant_id', () => {
     renderWithProviders(<Register />)
-    
+
+    expect(screen.getByText(/debes ingresar desde el enlace de registro compartido por tu institución/i)).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText(/tu nombre/i)).not.toBeInTheDocument()
+    expect(document.querySelector('form')).not.toBeInTheDocument()
+  })
+
+  it('shows that public registration is only for students when tenant_id is present', () => {
+    window.history.pushState({}, '', `/register?tenant_id=${TENANT_ID}`)
+
+    renderWithProviders(<Register />)
+
+    expect(screen.getByText(/registro publico esta disponible solo para estudiantes/i)).toBeInTheDocument()
+  })
+
+  it('renders registration form when tenant_id is present', () => {
+    window.history.pushState({}, '', `/register?tenant_id=${TENANT_ID}`)
+
+    renderWithProviders(<Register />)
+
     expect(screen.getByPlaceholderText(/tu nombre/i)).toBeInTheDocument()
     expect(screen.getByPlaceholderText(/tus apellidos/i)).toBeInTheDocument()
     expect(screen.getByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument()
@@ -23,8 +44,25 @@ describe('Register Component', () => {
     expect(screen.getByRole('button', { name: /cargando|crear cuenta/i })).toBeInTheDocument()
   })
 
+  it('does not render teacher or caregiver role buttons', () => {
+    renderWithProviders(<Register />)
+
+    expect(screen.queryByRole('button', { name: /profesor/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /acudiente/i })).not.toBeInTheDocument()
+  })
+
+  it('captures tenant_id from query string', () => {
+    window.history.pushState({}, '', `/register?tenant_id=${TENANT_ID}`)
+
+    renderWithProviders(<Register />)
+
+    expect(axios.setApiActiveTenantId).toHaveBeenCalledWith(TENANT_ID)
+  })
+
   it('allows user to fill registration form', async () => {
     const user = userEvent.setup()
+    window.history.pushState({}, '', `/register?tenant_id=${TENANT_ID}`)
+
     renderWithProviders(<Register />)
     
     const firstNameInput = screen.getByPlaceholderText(/tu nombre/i)
@@ -43,10 +81,11 @@ describe('Register Component', () => {
     expect(passwordInput).toHaveValue('password123')
   })
 
-  it('shows role selection for student', () => {
+  it('shows form for student registration only when tenant_id is present', () => {
+    window.history.pushState({}, '', `/register?tenant_id=${TENANT_ID}`)
+
     renderWithProviders(<Register />)
-    
-    // Form is present, role is handled by backend
+
     const form = document.querySelector('form')
     expect(form).toBeInTheDocument()
   })
@@ -59,18 +98,29 @@ describe('Register Component', () => {
     expect(loginLink.closest('a')).toHaveAttribute('href', '/login')
   })
 
-  it('shows available role buttons', () => {
+  it('does not show public role selection buttons', () => {
     renderWithProviders(<Register />)
-    
-    expect(screen.getByRole('button', { name: /estudiante/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /profesor/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /acudiente/i })).toBeInTheDocument()
+
+    expect(screen.queryByRole('button', { name: /estudiante/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /profesor/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /acudiente/i })).not.toBeInTheDocument()
   })
 
   it('validates password minimum length', () => {
+    window.history.pushState({}, '', `/register?tenant_id=${TENANT_ID}`)
+
     renderWithProviders(<Register />)
     
     const passwordInput = screen.getByPlaceholderText(/minimo 8 caracteres/i)
     expect(passwordInput).toHaveAttribute('minLength', '8')
+  })
+
+  it('keeps the form hidden even if an active tenant exists without tenant_id in the URL', () => {
+    localStorage.setItem('activeTenantId', TENANT_ID)
+
+    renderWithProviders(<Register />)
+
+    expect(screen.getByText(/debes ingresar desde el enlace de registro compartido por tu institución/i)).toBeInTheDocument()
+    expect(document.querySelector('form')).not.toBeInTheDocument()
   })
 })

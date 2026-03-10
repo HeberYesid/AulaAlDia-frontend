@@ -1,33 +1,48 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
-import { api } from '../api/axios'
+import { api, setApiActiveTenantId } from '../api/axios'
 
 /**
  * Optional post-Google-auth step.
- * New users who signed in with Google land here so they can enter an
- * invitation code if they are a Teacher or Caregiver.
- * Students can skip straight to the dashboard.
+ * New users who signed in with Google land here so they can complete
+ * a restricted teacher or caregiver invitation using a valid code.
  */
 export default function CompleteRegistration() {
-  const { updateUser, user } = useAuth()
+  const { updateUser, user, activeTenantId } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
-  const [role, setRole] = useState('TEACHER')
-  const [invitationCode, setInvitationCode] = useState('')
+  const [invitationCode, setInvitationCode] = useState(new URLSearchParams(location.search).get('code')?.trim().toUpperCase() || '')
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const tenantIdFromQuery = new URLSearchParams(location.search).get('tenant_id')?.trim() || null
+  const effectiveTenantId = tenantIdFromQuery || activeTenantId || null
+
+  useEffect(() => {
+    if (!tenantIdFromQuery) return
+
+    setApiActiveTenantId(tenantIdFromQuery)
+  }, [tenantIdFromQuery])
 
   async function handleUpgrade(e) {
     e.preventDefault()
     setError('')
+
+    if (!invitationCode) {
+      setError('Ingresa un codigo de invitacion valido para acceder como profesor o acudiente.')
+      return
+    }
+
     setIsLoading(true)
     try {
       const { data } = await api.post('/api/v1/auth/complete-google-registration/', {
-        role,
         invitation_code: invitationCode,
       })
       updateUser(data.user)
+      setSuccess(data.message || 'Registro restringido completado correctamente.')
       navigate('/')
     } catch (err) {
       const d = err.response?.data
@@ -44,57 +59,36 @@ export default function CompleteRegistration() {
           <h1><span className="auth-icon"></span> Bienvenido/a{user?.first_name ? `, ${user.first_name}` : ''}!</h1>
           <p>Tu cuenta de Google fue registrada como <strong>Estudiante</strong>.</p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-            Si eres Profesor o Acudiente, ingresa tu código de invitación para actualizar tu rol.
+            Si recibiste una invitacion de Profesor o Acudiente, ingresa el codigo para completar ese acceso restringido.
           </p>
         </div>
 
         <form onSubmit={handleUpgrade} className="auth-form">
-          <fieldset className="form-group" style={{ border: 0, padding: 0, margin: 0 }}>
-            <legend>Soy…</legend>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {[
-                { value: 'TEACHER', label: 'Profesor' },
-                { value: 'TUTOR',   label: 'Acudiente' },
-              ].map((r) => (
-                <button
-                  key={r.value}
-                  type="button"
-                  onClick={() => { setRole(r.value); setError('') }}
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: '2px solid',
-                    borderColor: role === r.value ? 'var(--primary)' : 'var(--border-color)',
-                    background: role === r.value ? 'var(--primary)' : 'var(--bg-card)',
-                    color: role === r.value ? '#fff' : 'var(--text-primary)',
-                    fontWeight: role === r.value ? '600' : '400',
-                    cursor: 'pointer',
-                    fontSize: 'var(--font-size-sm)',
-                    transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-                  }}
-                >
-                  {r.label}
-                </button>
-              ))}
+          {effectiveTenantId && (
+            <div className="alert success" role="status" aria-live="polite">
+              Institucion activa detectada para este flujo.
             </div>
-          </fieldset>
+          )}
 
           <div className="form-group">
-            <label htmlFor="invitation-code">Código de Invitación</label>
+            <label htmlFor="complete-registration-code">Codigo de Invitacion</label>
             <input
-              id="invitation-code"
+              id="complete-registration-code"
               value={invitationCode}
-              onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
+              onChange={(event) => setInvitationCode(event.target.value.toUpperCase())}
               type="text"
-              placeholder="Código recibido por email"
-              required
+              placeholder="Codigo recibido por email"
               style={{ fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '2px' }}
+              required
             />
             <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
-              El código debe coincidir con tu dirección de email de Google
+              El backend validara el rol y la institucion desde la invitacion, no desde una seleccion libre.
             </small>
           </div>
+
+          {success && (
+            <div className="alert success">{success}</div>
+          )}
 
           {error && (
             <div className="alert error">❌ {error}</div>
@@ -106,9 +100,9 @@ export default function CompleteRegistration() {
             disabled={isLoading || !invitationCode}
           >
             {isLoading ? (
-              <><div className="spinner"></div>Actualizando rol…</>
+              <><div className="spinner"></div>Validando invitacion...</>
             ) : (
-              <>Confirmar y continuar</>
+              <>Completar acceso restringido</>
             )}
           </button>
         </form>

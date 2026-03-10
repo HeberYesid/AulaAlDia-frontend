@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
+import { setApiActiveTenantId } from '../api/axios'
 
 export default function Login() {
   const { login, googleLogin, user } = useAuth()
@@ -15,6 +16,14 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
+  const tenantIdFromQuery = new URLSearchParams(location.search).get('tenant_id')?.trim() || null
+  const authQuerySuffix = tenantIdFromQuery ? `?tenant_id=${encodeURIComponent(tenantIdFromQuery)}` : ''
+
+  useEffect(() => {
+    if (!tenantIdFromQuery) return
+
+    setApiActiveTenantId(tenantIdFromQuery)
+  }, [tenantIdFromQuery])
 
   function getPostLoginPath() {
     try {
@@ -33,7 +42,7 @@ export default function Login() {
       const data = await googleLogin(credentialResponse.credential)
       if (data?.is_new_user) {
         // New users can optionally upgrade their role (Teacher/Tutor) on the next page
-        navigate('/complete-registration')
+        navigate(`/complete-registration${authQuerySuffix}`)
       } else {
         navigate(getPostLoginPath())
       }
@@ -211,7 +220,7 @@ export default function Login() {
 
         <div className="auth-footer">
           <p>
-            ¿No tienes cuenta? <Link to="/register" className="link">Regístrate aquí</Link>
+            ¿No tienes cuenta? <Link to={`/register${authQuerySuffix}`} className="link">Regístrate aquí</Link>
           </p>
         </div>
       </div>

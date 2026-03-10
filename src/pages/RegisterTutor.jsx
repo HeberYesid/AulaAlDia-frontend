@@ -1,13 +1,19 @@
-import { useState, useRef, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
-import { api } from '../api/axios'
+import { api, setApiActiveTenantId } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
 
 export default function RegisterTutor() {
-  const { user } = useAuth()
+  const { user, activeTenantId } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const captchaRef = useRef(null)
+
+  const searchParams = new URLSearchParams(location.search)
+  const tenantIdFromQuery = searchParams.get('tenant_id')?.trim() || null
+  const codeFromQuery = searchParams.get('code')?.trim().toUpperCase() || ''
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -15,12 +21,18 @@ export default function RegisterTutor() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [invitationCode, setInvitationCode] = useState('')
+  const [invitationCode, setInvitationCode] = useState(codeFromQuery)
+  const [invitation, setInvitation] = useState(null)
+  const [invitationError, setInvitationError] = useState('')
+  const [isLoadingInvitation, setIsLoadingInvitation] = useState(Boolean(codeFromQuery))
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  const effectiveTenantId = tenantIdFromQuery || invitation?.tenant_id || activeTenantId || null
+  const authQuerySuffix = effectiveTenantId ? `?tenant_id=${encodeURIComponent(effectiveTenantId)}` : ''
 
   useEffect(() => {
     if (user) {
@@ -28,24 +40,75 @@ export default function RegisterTutor() {
     }
   }, [user, navigate])
 
+  useEffect(() => {
+    if (!tenantIdFromQuery) return
+
+    setApiActiveTenantId(tenantIdFromQuery)
+  }, [tenantIdFromQuery])
+
+  useEffect(() => {
+    if (!codeFromQuery) {
+      setInvitation(null)
+      setInvitationError('')
+      setIsLoadingInvitation(false)
+      return
+    }
+
+    let ignore = false
+
+    async function loadInvitation() {
+      setIsLoadingInvitation(true)
+      setInvitationError('')
+
+      try {
+        const { data } = await api.get(`/api/v1/auth/tutor-invitations/${encodeURIComponent(codeFromQuery)}/`)
+        if (ignore) return
+
+        setInvitation(data)
+        setEmail(data.email || '')
+        if (data.tenant_id) {
+          setApiActiveTenantId(data.tenant_id)
+        }
+      } catch (err) {
+        if (ignore) return
+
+        setInvitation(null)
+        setInvitationError(err.response?.data?.detail || 'No se pudo validar la invitacion.')
+      } finally {
+        if (!ignore) {
+          setIsLoadingInvitation(false)
+        }
+      }
+    }
+
+    loadInvitation()
+
+    return () => {
+      ignore = true
+    }
+  }, [codeFromQuery])
+
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
     setMessage('')
-    setIsLoading(true)
+
+    if (!invitationCode) {
+      setError('Necesitas una invitacion valida para completar este registro.')
+      return
+    }
 
     if (!turnstileToken) {
-      setError('Por favor completa la verificación de seguridad.')
-      setIsLoading(false)
+      setError('Por favor completa la verificacion de seguridad.')
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden. Por favor verifica.')
-      setIsLoading(false)
+      setError('Las contrasenas no coinciden. Por favor verifica.')
       return
     }
 
+    setIsLoading(true)
     try {
       await api.post('/api/v1/auth/register-tutor/', {
         email,
@@ -59,7 +122,7 @@ export default function RegisterTutor() {
       navigate('/verify-code', {
         state: {
           email,
-          message: 'Registro de acudiente exitoso. Hemos enviado un código de verificación a tu correo.',
+          message: 'Registro de acudiente exitoso. Hemos enviado un codigo de verificacion a tu correo.',
         },
       })
     } catch (err) {
@@ -78,9 +141,7 @@ export default function RegisterTutor() {
 
       setError(errorMessage)
       setTurnstileToken('')
-      if (captchaRef.current?.reset) {
-        captchaRef.current.reset()
-      }
+      captchaRef.current?.reset?.()
     } finally {
       setIsLoading(false)
     }
@@ -90,17 +151,44 @@ export default function RegisterTutor() {
     <div className="auth-container">
       <div className="auth-card fade-in">
         <div className="auth-header">
-          <h1><span className="auth-icon">👨‍👩‍👧‍👦</span> Registro de Acudiente</h1>
-          <p>Regístrate con tu código de invitación</p>
+          <h1><span className="auth-icon"></span> Acceso de Acudiente</h1>
+          <p>Este registro esta disponible solo por invitacion asociada a un estudiante.</p>
         </div>
 
         <form onSubmit={onSubmit} className="auth-form">
+          {!codeFromQuery && (
+            <div className="alert error" role="alert" aria-live="polite">
+              Esta pagina solo habilita altas por invitacion. Usa el enlace enviado por el estudiante o ingresa tu codigo manualmente.
+            </div>
+          )}
+
+          {isLoadingInvitation && (
+            <div className="alert success" role="status" aria-live="polite">
+              Validando invitacion...
+            </div>
+          )}
+
+          {invitationError && (
+            <div className="alert error" role="alert" aria-live="assertive">
+              {invitationError}
+            </div>
+          )}
+
+          {invitation && (
+            <div className="card" style={{ marginBottom: 'var(--space-md)', background: 'var(--bg-secondary)' }}>
+              <p style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600 }}>{invitation.tenant_name}</p>
+              <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                Invitacion para acompanar a {invitation.student_name || invitation.student_email}.
+              </p>
+            </div>
+          )}
+
           <div className="form-group">
             <label htmlFor="invitation-code">Código de Invitación</label>
             <input
               id="invitation-code"
               value={invitationCode}
-              onChange={(event) => setInvitationCode(event.target.value)}
+              onChange={(event) => setInvitationCode(event.target.value.toUpperCase())}
               type="text"
               placeholder="Código recibido por email"
               required
@@ -121,7 +209,10 @@ export default function RegisterTutor() {
 
           <div className="form-group">
             <label htmlFor="email">Correo Electrónico</label>
-            <input id="email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
+            <input id="email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" readOnly={Boolean(invitation?.email)} required />
+            <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
+              Debe coincidir con el correo al que se envio la invitacion.
+            </small>
           </div>
 
           <div className="form-group">
@@ -139,7 +230,7 @@ export default function RegisterTutor() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
                 style={{
                   position: 'absolute',
                   right: '0.5rem',
@@ -150,7 +241,7 @@ export default function RegisterTutor() {
                   cursor: 'pointer',
                 }}
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
           </div>
@@ -170,7 +261,7 @@ export default function RegisterTutor() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showConfirmPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
                 style={{
                   position: 'absolute',
                   right: '0.5rem',
@@ -181,7 +272,7 @@ export default function RegisterTutor() {
                   cursor: 'pointer',
                 }}
               >
-                {showConfirmPassword ? '🙈' : '👁️'}
+                {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
           </div>
@@ -202,8 +293,8 @@ export default function RegisterTutor() {
             />
           </div>
 
-          <button className="btn auth-btn" type="submit" disabled={isLoading || !isCaptchaReady || !turnstileToken}>
-            {isLoading ? 'Creando cuenta...' : 'Registrarme como Acudiente'}
+          <button className="btn auth-btn" type="submit" disabled={isLoading || isLoadingInvitation || Boolean(invitationError) || !isCaptchaReady || !turnstileToken || !invitationCode}>
+            {isLoading ? 'Creando cuenta...' : isLoadingInvitation ? 'Validando invitacion...' : invitationError ? 'Invitacion no disponible' : 'Completar acceso de acudiente'}
           </button>
 
           {message && <div className="alert success">{message}</div>}
@@ -211,8 +302,8 @@ export default function RegisterTutor() {
         </form>
 
         <div className="auth-footer">
-          <p>¿Ya tienes cuenta? <Link to="/login" className="link">Inicia sesión aquí</Link></p>
-          <p>¿Eres profesor? <Link to="/register-teacher" className="link">Regístrate aquí</Link></p>
+          <p>Ya tienes cuenta? <Link to={`/login${authQuerySuffix}`} className="link">Inicia sesion aqui</Link></p>
+          <p>Si necesitas ayuda con la invitacion, contacta al estudiante o a la institucion.</p>
         </div>
       </div>
     </div>

@@ -4,11 +4,21 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import Login from '../Login'
 import { useAuth } from '../../state/AuthContext'
+import * as axios from '../../api/axios'
+
+const mockNavigate = vi.fn()
 
 vi.mock('../../api/axios')
 vi.mock('../../state/AuthContext', () => ({
   useAuth: vi.fn(),
 }))
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
 vi.mock('@react-oauth/google', () => ({
   GoogleLogin: ({ onSuccess, onError }) => (
     <div>
@@ -32,6 +42,7 @@ describe('Login Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
+    mockNavigate.mockReset()
     useAuth.mockReturnValue({
       login: vi.fn(),
       googleLogin: vi.fn(),
@@ -105,5 +116,42 @@ describe('Login Component', () => {
     const registerLink = screen.getByText(/regístrate aquí/i)
     expect(registerLink).toBeInTheDocument()
     expect(registerLink.closest('a')).toHaveAttribute('href', '/register')
+  })
+
+  it('preserves tenant_id from the URL', () => {
+    render(
+      <MemoryRouter initialEntries={['/login?tenant_id=22222222-2222-2222-2222-222222222222']}>
+        <Login />
+      </MemoryRouter>
+    )
+
+    expect(axios.setApiActiveTenantId).toHaveBeenCalledWith('22222222-2222-2222-2222-222222222222')
+
+    const registerLink = screen.getByText(/regístrate aquí/i)
+    expect(registerLink.closest('a')).toHaveAttribute('href', '/register?tenant_id=22222222-2222-2222-2222-222222222222')
+  })
+
+  it('preserves tenant_id when redirecting new Google users to complete registration', async () => {
+    const user = userEvent.setup()
+    const mockGoogleLogin = vi.fn().mockResolvedValueOnce({ is_new_user: true })
+    useAuth.mockReturnValue({
+      login: vi.fn(),
+      googleLogin: mockGoogleLogin,
+      user: null,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/login?tenant_id=22222222-2222-2222-2222-222222222222']}>
+        <Login />
+      </MemoryRouter>
+    )
+
+    await user.click(screen.getByRole('button', { name: /google login mock/i }))
+
+    await waitFor(() => {
+      expect(mockGoogleLogin).toHaveBeenCalledWith('fake-credential')
+    })
+
+    expect(mockNavigate).toHaveBeenCalledWith('/complete-registration?tenant_id=22222222-2222-2222-2222-222222222222')
   })
 })

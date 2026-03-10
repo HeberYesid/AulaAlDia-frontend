@@ -21,11 +21,14 @@ function getSectionHref(pathname, id) {
 }
 
 export default function PublicNavBar() {
-  const { isAuthenticated, activeTenantBranding } = useAuth()
+  const { isAuthenticated, activeTenantBranding, activeTenantId } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [showLogoImage, setShowLogoImage] = useState(true)
   const location = useLocation()
+  const tenantIdFromQuery = new URLSearchParams(location.search).get('tenant_id')?.trim() || null
+  const effectiveTenantId = tenantIdFromQuery || activeTenantId || null
+  const authQuerySuffix = effectiveTenantId ? `?tenant_id=${encodeURIComponent(effectiveTenantId)}` : ''
 
   const brandName = activeTenantBranding.displayName
   const logoUrl = activeTenantBranding.sidebarLogoUrl
@@ -105,8 +108,8 @@ export default function PublicNavBar() {
             </Link>
           ) : (
             <>
-              <Link to="/login" className="public-navbar__login">Iniciar Sesión</Link>
-              <Link to="/register" className="btn btn-primary public-navbar__cta-btn">
+              <Link to={`/login${authQuerySuffix}`} className="public-navbar__login">Iniciar Sesión</Link>
+              <Link to={`/register${authQuerySuffix}`} className="btn btn-primary public-navbar__cta-btn">
                 Registrarse
               </Link>
             </>
@@ -170,14 +173,14 @@ export default function PublicNavBar() {
             ) : (
               <>
                 <Link
-                  to="/login"
+                  to={`/login${authQuerySuffix}`}
                   className="btn btn-outline"
                   onClick={() => setMobileOpen(false)}
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
-                  to="/register"
+                  to={`/register${authQuerySuffix}`}
                   className="btn btn-primary"
                   onClick={() => setMobileOpen(false)}
                 >

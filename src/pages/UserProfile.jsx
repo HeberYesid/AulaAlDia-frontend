@@ -31,6 +31,9 @@ export default function UserProfile() {
   // Session timeout states
   const [editingTimeout, setEditingTimeout] = useState(false)
   const [sessionTimeout, setSessionTimeout] = useState(30)
+  const [tutorInvitationStatus, setTutorInvitationStatus] = useState(null)
+  const [tutorInviteEmail, setTutorInviteEmail] = useState('')
+  const [isSubmittingTutorInvite, setIsSubmittingTutorInvite] = useState(false)
 
   useEffect(() => {
     loadUserProfile()
@@ -45,11 +48,29 @@ export default function UserProfile() {
       setLastName(response.data.last_name)
       setEmail(response.data.email)
       setSessionTimeout(response.data.session_timeout || 30)
+
+      if (response.data.role === 'STUDENT') {
+        await loadTutorInvitationStatus()
+      } else {
+        setTutorInvitationStatus(null)
+        setTutorInviteEmail('')
+      }
     } catch (err) {
       console.error('Error loading profile:', err)
       setError('No se pudo cargar el perfil')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function loadTutorInvitationStatus() {
+    try {
+      const response = await api.get('/api/v1/auth/student-tutor-invitation/')
+      setTutorInvitationStatus(response.data)
+      setTutorInviteEmail(response.data.pending_invitation?.email || '')
+    } catch {
+      setTutorInvitationStatus(null)
+      setTutorInviteEmail('')
     }
   }
 
@@ -134,6 +155,32 @@ export default function UserProfile() {
     } catch (err) {
       console.error('Error updating timeout:', err)
       setError(err.response?.data?.detail || err.response?.data?.session_timeout?.[0] || 'No se pudo actualizar el timeout')
+    }
+  }
+
+  async function handleInviteTutor(e) {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+
+    if (!tutorInviteEmail) {
+      setError('Debes ingresar el correo del acudiente.')
+      return
+    }
+
+    setIsSubmittingTutorInvite(true)
+    try {
+      const response = await api.post('/api/v1/auth/student-tutor-invitation/', {
+        email: tutorInviteEmail,
+      })
+      setSuccess(response.data.message || 'Invitacion enviada correctamente.')
+      await loadTutorInvitationStatus()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('Error inviting tutor:', err)
+      setError(err.response?.data?.detail || err.response?.data?.email?.[0] || 'No se pudo enviar la invitacion del acudiente')
+    } finally {
+      setIsSubmittingTutorInvite(false)
     }
   }
 
@@ -606,6 +653,68 @@ export default function UserProfile() {
           </span>
         </div>
       </div>
+
+      {user.role === 'STUDENT' && (
+        <div className="card">
+          <h2 style={{ marginBottom: 'var(--space-lg)' }}>Invitar Acudiente</h2>
+          {tutorInvitationStatus?.has_tutor ? (
+            <div style={{
+              padding: 'var(--space-lg)',
+              background: 'var(--bg-secondary)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-primary)'
+            }}>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
+                Ya tienes un acudiente vinculado.
+              </p>
+              <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)' }}>
+                {tutorInvitationStatus.tutor?.name || tutorInvitationStatus.tutor?.email}
+                {tutorInvitationStatus.tutor?.email ? ` (${tutorInvitationStatus.tutor.email})` : ''}
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleInviteTutor}>
+              <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
+                {tutorInvitationStatus?.pending_invitation && (
+                  <div style={{
+                    padding: 'var(--space-lg)',
+                    background: 'var(--bg-secondary)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-primary)'
+                  }}>
+                    <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
+                      Invitacion pendiente para {tutorInvitationStatus.pending_invitation.email}
+                    </p>
+                    <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                      Puedes reenviar la invitacion al mismo correo desde aqui.
+                    </p>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label htmlFor="tutor-invite-email"><strong>Correo del acudiente</strong></label>
+                  <input
+                    id="tutor-invite-email"
+                    type="email"
+                    value={tutorInviteEmail}
+                    onChange={(event) => setTutorInviteEmail(event.target.value)}
+                    placeholder="acudiente@correo.com"
+                    required
+                  />
+                </div>
+
+                <button type="submit" className="btn" disabled={isSubmittingTutorInvite}>
+                  {isSubmittingTutorInvite
+                    ? 'Enviando invitacion...'
+                    : tutorInvitationStatus?.pending_invitation
+                      ? 'Reenviar invitacion'
+                      : 'Enviar invitacion'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      )}
 
       {/* Appearance Card */}
       <div className="card">
