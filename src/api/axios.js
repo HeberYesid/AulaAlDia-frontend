@@ -54,16 +54,17 @@ export function setApiActiveTenantId(tenantId) {
 
 api.interceptors.request.use((config) => {
   const auth = getTokens()
-  if (auth?.access) {
-    config.headers = config.headers || {}
-    config.headers['Authorization'] = `Bearer ${auth.access}`
+  config.headers = config.headers || {}
 
-    const activeTenantId = getActiveTenantId()
-    if (activeTenantId) {
-      config.headers['X-Tenant-ID'] = activeTenantId
-    } else {
-      delete config.headers['X-Tenant-ID']
-    }
+  const activeTenantId = getActiveTenantId()
+  if (activeTenantId) {
+    config.headers['X-Tenant-ID'] = activeTenantId
+  } else {
+    delete config.headers['X-Tenant-ID']
+  }
+
+  if (auth?.access) {
+    config.headers['Authorization'] = `Bearer ${auth.access}`
   }
   return config
 })
