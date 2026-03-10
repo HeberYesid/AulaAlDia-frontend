@@ -3731,6 +3731,255 @@ a.welcome-panel__notif-link:hover {
   margin-top: auto;
 }
 
+/* =========================================================
+   Subject Detail Page — Clean section-based layout
+   ========================================================= */
+
+.subject-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Disable hover lift on cards used as static containers */
+.card--static {
+  cursor: default;
+}
+
+.card--static:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero header */
+.subject-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.subject-hero__info h1 {
+  font-size: var(--font-size-2xl);
+  margin: 0 0 var(--space-xs) 0;
+  background: none;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+.subject-hero__meta {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.subject-hero__stats {
+  display: flex;
+  gap: var(--space-md);
+}
+
+/* Pill-style tabs (segmented control) */
+.subject-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+}
+
+.subject-tab {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.subject-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.subject-tab--active {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.subject-tab--active:hover {
+  background: var(--primary-dark);
+  color: #fff;
+}
+
+/* Tab panel — vertical stack of section cards */
+.tab-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Section card — removes default card margin so gap controls spacing */
+.section-card {
+  margin: 0;
+}
+
+/* Reusable section header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  background: none;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+/* Horizontal info strip (grade scale, etc.) */
+.info-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* Empty state */
+.empty-state {
+  padding: var(--space-2xl) var(--space-lg);
+  text-align: center;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-secondary);
+}
+
+.empty-state__title {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.empty-state__text {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Student grade hero card */
+.grade-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+
+.grade-hero__value {
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.grade-hero__label {
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-sm);
+}
+
+.grade-hero__counters {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.grade-hero__counter {
+  text-align: center;
+}
+
+.grade-hero__counter-value {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.grade-hero__counter-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.grade-hero__divider {
+  border-left: 1px solid var(--border-primary);
+  padding-left: var(--space-lg);
+}
+
+/* Collapsible form container */
+.form-panel {
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+}
+
+/* Search bar wrapper */
+.search-bar {
+  max-width: 400px;
+}
+
+/* Inline status indicator inside inputs */
+.input-status {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .subject-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .subject-hero__stats {
+    width: 100%;
+  }
+  .subject-tabs {
+    flex-direction: column;
+  }
+  .grade-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .grade-hero__counters {
+    width: 100%;
+    justify-content: space-around;
+  }
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* ---- 8. SCREENSHOTS ---- */
 .landing-screenshots {
   padding: var(--space-2xl) 0;

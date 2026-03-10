@@ -1,8 +1,27 @@
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, Component } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/PublicLayout'
+
+class ErrorBoundary extends Component {
+  state = { error: null }
+  static getDerivedStateFromError(error) { return { error } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="card" style={{ maxWidth: 800, margin: '2rem auto', padding: '2rem' }}>
+          <h2 style={{ color: 'var(--danger)' }}>Algo salió mal</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>{this.state.error?.message}</p>
+          <button className="btn" onClick={() => { this.setState({ error: null }); window.location.reload() }}>
+            Recargar página
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 const AppTour = lazy(() => import('./components/AppTour'))
 const TourDebugButton = lazy(() => import('./components/TourDebugButton'))
@@ -46,6 +65,7 @@ export default function App() {
       </Suspense>
       <div className="app-body">
         <main id="main-content" className="container">
+        <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
@@ -216,6 +236,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
       </div>
     </div>
