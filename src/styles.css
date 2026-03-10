@@ -985,10 +985,16 @@ form {
 }
 
 .link {
+  appearance: none;
+  background: none;
+  border: none;
   color: var(--text-accent);
   cursor: pointer;
   text-decoration: none;
   font-weight: 500;
+  font: inherit;
+  line-height: inherit;
+  padding: 0;
   transition: color var(--transition-fast);
   position: relative;
 }
@@ -996,6 +1002,13 @@ form {
 .link:hover {
   color: var(--text-primary);
   text-decoration: underline;
+}
+
+.link:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.75;
+  text-decoration: none;
 }
 
 /* Loading States */
