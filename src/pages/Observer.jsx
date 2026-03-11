@@ -220,7 +220,7 @@ export default function Observer() {
                   value={form.subject}
                   onChange={handleFormChange}
                 >
-                  <option value="">— General —</option>
+                  <option value="">General</option>
                   {subjects.map(s => (
                     <option key={s.id} value={s.id}>{s.code} - {s.name}</option>
                   ))}
