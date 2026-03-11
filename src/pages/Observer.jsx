@@ -5,9 +5,6 @@ import ConfirmDialog from '../components/ConfirmDialog'
 
 const CATEGORIES = [
   { value: 'MISBEHAVIOR', label: 'Mal comportamiento', color: '#ef4444' },
-  { value: 'TARDINESS', label: 'Tardanza', color: '#f59e0b' },
-  { value: 'ABSENCE', label: 'Ausencia', color: '#6366f1' },
-  { value: 'POSITIVE', label: 'Positivo', color: '#10b981' },
   { value: 'OTHER', label: 'Otro', color: '#6b7280' },
 ]
 
@@ -30,6 +27,10 @@ export default function Observer() {
   const [subjects, setSubjects] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(INITIAL_FORM)
+  const [studentSearch, setStudentSearch] = useState('')
+  const [studentOptions, setStudentOptions] = useState([])
+  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [studentSearchLoading, setStudentSearchLoading] = useState(false)
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
@@ -66,6 +67,49 @@ export default function Observer() {
     loadSubjects()
   }, [])
 
+  useEffect(() => {
+    const trimmedSearch = studentSearch.trim()
+
+    if (!showForm || !isTeacherOrAdmin || trimmedSearch.length < 2) {
+      setStudentOptions([])
+      setStudentSearchLoading(false)
+      return undefined
+    }
+
+    if (selectedStudent && trimmedSearch === selectedStudent.full_name) {
+      setStudentOptions([])
+      setStudentSearchLoading(false)
+      return undefined
+    }
+
+    let cancelled = false
+    const timeoutId = setTimeout(async () => {
+      setStudentSearchLoading(true)
+      try {
+        const response = await api.get('/api/v1/courses/observations/student-options/', {
+          params: { search: trimmedSearch },
+        })
+        if (!cancelled) {
+          setStudentOptions(Array.isArray(response.data) ? response.data : [])
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Error searching students:', err)
+          setStudentOptions([])
+        }
+      } finally {
+        if (!cancelled) {
+          setStudentSearchLoading(false)
+        }
+      }
+    }, 250)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeoutId)
+    }
+  }, [isTeacherOrAdmin, selectedStudent, showForm, studentSearch])
+
   const filteredObservations = useMemo(() => {
     let list = observations
     if (searchTerm) {
@@ -101,9 +145,39 @@ export default function Observer() {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleStudentSearchChange = (e) => {
+    const { value } = e.target
+    setStudentSearch(value)
+    setSelectedStudent(null)
+    setForm(prev => ({ ...prev, student_email: '' }))
+    setFormError('')
+  }
+
+  const handleStudentSelect = (student) => {
+    setSelectedStudent(student)
+    setStudentSearch(student.full_name)
+    setStudentOptions([])
+    setForm(prev => ({ ...prev, student_email: student.email }))
+    setFormError('')
+  }
+
+  const resetObservationForm = () => {
+    setForm(INITIAL_FORM)
+    setStudentSearch('')
+    setStudentOptions([])
+    setSelectedStudent(null)
+    setFormError('')
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormError('')
+
+    if (!form.student_email) {
+      setFormError('Selecciona un estudiante de la lista antes de guardar la observación.')
+      return
+    }
+
     setSubmitting(true)
     try {
       const payload = {
@@ -116,7 +190,7 @@ export default function Observer() {
         payload.subject = Number(form.subject)
       }
       await api.post('/api/v1/courses/observations/', payload)
-      setForm(INITIAL_FORM)
+      resetObservationForm()
       setShowForm(false)
       loadObservations()
     } catch (err) {
@@ -200,17 +274,72 @@ export default function Observer() {
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-md)' }}>
               <div className="form-group">
-                <label htmlFor="obs-email">Email del estudiante *</label>
+                <label htmlFor="obs-student">Estudiante *</label>
                 <input
-                  id="obs-email"
-                  type="email"
-                  name="student_email"
-                  value={form.student_email}
-                  onChange={handleFormChange}
+                  id="obs-student"
+                  type="text"
+                  value={studentSearch}
+                  onChange={handleStudentSearchChange}
                   required
-                  placeholder="estudiante@email.com"
-                  autoComplete="email"
+                  placeholder="Escribe el nombre del estudiante"
+                  autoComplete="off"
                 />
+                <div style={{ minHeight: '1.25rem', marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  {selectedStudent
+                    ? `Seleccionado: ${selectedStudent.full_name} · ${selectedStudent.email}`
+                    : studentSearch.trim().length >= 2
+                      ? 'Selecciona un estudiante de las sugerencias.'
+                      : 'Escribe al menos 2 caracteres para buscar.'}
+                </div>
+                {studentSearchLoading && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    Buscando estudiantes...
+                  </div>
+                )}
+                {!selectedStudent && studentOptions.length > 0 && (
+                  <div
+                    role="listbox"
+                    aria-label="Sugerencias de estudiantes"
+                    style={{
+                      marginTop: '0.5rem',
+                      border: '1px solid var(--border-secondary)',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--bg-hover)',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {studentOptions.map(student => (
+                      <button
+                        key={student.id}
+                        type="button"
+                        className="btn secondary"
+                        onClick={() => handleStudentSelect(student)}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          borderBottom: '1px solid var(--border-secondary)',
+                          borderRadius: 0,
+                          justifyContent: 'flex-start',
+                          padding: '0.75rem 1rem',
+                          background: 'transparent',
+                          color: 'var(--text-primary)',
+                        }}
+                      >
+                        <span>
+                          <strong>{student.full_name}</strong>
+                          <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            {student.email}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!selectedStudent && !studentSearchLoading && studentSearch.trim().length >= 2 && studentOptions.length === 0 && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    No se encontraron estudiantes con ese criterio.
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="obs-subject">Materia (opcional)</label>
@@ -274,7 +403,7 @@ export default function Observer() {
               <button type="submit" className="btn primary" disabled={submitting}>
                 {submitting ? 'Guardando...' : 'Guardar Observación'}
               </button>
-              <button type="button" className="btn secondary" onClick={() => { setShowForm(false); setForm(INITIAL_FORM); setFormError('') }}>
+              <button type="button" className="btn secondary" onClick={() => { setShowForm(false); resetObservationForm() }}>
                 Cancelar
               </button>
             </div>
@@ -408,7 +537,7 @@ export default function Observer() {
                           color: 'white',
                           whiteSpace: 'nowrap',
                         }}>
-                          {cat.label}
+                          {o.category_display || cat.label}
                         </span>
                       </td>
                       <td data-label="Materia" style={{ fontSize: '0.85rem' }}>
