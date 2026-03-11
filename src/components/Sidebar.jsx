@@ -102,7 +102,7 @@ export default function Sidebar() {
     },
     {
       to: '/admin/dashboard',
-      label: 'Dashboard Admin',
+      label: 'Dashboard',
       icon: LayoutDashboard,
       show: user.role === 'ADMIN',
     },
