@@ -5,6 +5,10 @@ import { useLocation } from 'react-router-dom'
 
 const TOUR_STORAGE_KEY = 'aulaaldia-tour-completed'
 
+function getTourStartPath(role) {
+  return role === 'ADMIN' ? '/admin/dashboard' : '/'
+}
+
 function completionContent(title, features) {
   return (
     <div>
@@ -186,13 +190,88 @@ const TEACHER_STEPS = [
 ]
 
 const ADMIN_STEPS = [
-  ...TEACHER_STEPS.slice(0, -1),
   {
-    target: '.sidebar__nav a[href="/admin/commercial"]',
-    content: 'Comercial Tenant: vista administrativa global para gestión comercial multi-tenant.',
+    target: 'body',
+    content: (
+      <div>
+        <h2>¡Bienvenido Administrador! 🛡️</h2>
+        <p>Este recorrido te muestra los accesos clave para la operación académica y administrativa.</p>
+      </div>
+    ),
+    placement: 'center',
     disableBeacon: true,
   },
-  TEACHER_STEPS[TEACHER_STEPS.length - 1],
+  {
+    target: '.theme-toggle',
+    content: 'Cambia entre tema claro y oscuro según tu preferencia.',
+    disableBeacon: true,
+  },
+  {
+    target: '.notification-bell',
+    content: 'Aquí recibes alertas del sistema, actividad académica y avisos operativos.',
+    disableBeacon: true,
+  },
+  {
+    target: '.dashboard-header',
+    content: 'Este panel resume el estado operativo para seguimiento académico y decisiones rápidas.',
+    disableBeacon: true,
+  },
+  {
+    target: '.stats-grid',
+    content: 'Estas métricas te dan una lectura rápida de materias, estudiantes, faltas y periodos bloqueados.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__nav a[href="/subjects"]',
+    content: 'Materias: administra cursos, ejercicios, inscripciones y resultados.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__nav a[href="/messages"]',
+    content: 'Mensajes: coordina con docentes y estudiantes desde un solo lugar.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__nav a[href="/calendar"]',
+    content: 'Calendario: revisa eventos, cierres y fechas operativas importantes.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__nav a[href="/observer"]',
+    content: 'Observador: consulta y registra novedades de seguimiento estudiantil.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__nav a[href="/absences"]',
+    content: 'Asistencia: monitorea faltas, justificaciones y casos de riesgo.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__nav a[href="/admin/academic-settings"]',
+    content: 'Config. Académica: gestiona periodos, escalas de calificación y parámetros institucionales.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__nav a[href="/admin/commercial"]',
+    content: 'Comercial Tenant: disponible para administradores globales con gestión multi-tenant.',
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar__profile',
+    content: 'Perfil: actualiza tu cuenta y reinicia este tour cuando lo necesites.',
+    disableBeacon: true,
+  },
+  {
+    target: 'body',
+    content: completionContent('¡Tour completado!', [
+      '🧭 Dashboard administrativo y métricas clave',
+      '📚 Gestión de materias y seguimiento académico',
+      '⚙️ Configuración académica y operación institucional',
+      '💬 Comunicación y alertas del sistema',
+    ]),
+    placement: 'center',
+    disableBeacon: true,
+  },
 ]
 
 const TUTOR_STEPS = [
@@ -294,12 +373,13 @@ export default function AppTour() {
   const [run, setRun] = useState(false)
   const [steps, setSteps] = useState([])
   const [stepIndex, setStepIndex] = useState(0)
+  const tourStartPath = getTourStartPath(user?.role)
 
   useEffect(() => {
     let timerId = null
     let retryTimerId = null
 
-    if (location.pathname !== '/') {
+    if (location.pathname !== tourStartPath) {
       setRun(false)
       return () => {
         if (timerId) clearTimeout(timerId)
@@ -317,7 +397,7 @@ export default function AppTour() {
     const tourKey = `${TOUR_STORAGE_KEY}-${user.role}`
     const hasCompletedTour = localStorage.getItem(tourKey)
 
-    if (location.pathname === '/' && !hasCompletedTour) {
+    if (location.pathname === tourStartPath && !hasCompletedTour) {
       const tourSteps = getStepsByRole(user.role)
       if (tourSteps.length > 0) {
         let attempts = 0
@@ -351,7 +431,7 @@ export default function AppTour() {
       if (timerId) clearTimeout(timerId)
       if (retryTimerId) clearTimeout(retryTimerId)
     }
-  }, [user, location.pathname])
+  }, [user, location.pathname, tourStartPath])
 
   const handleJoyrideCallback = (data) => {
     const { action, index, status, type } = data
