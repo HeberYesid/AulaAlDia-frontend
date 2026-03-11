@@ -106,7 +106,7 @@ export default function Register() {
         ) : (
           <>
             <div className="alert success" role="status" aria-live="polite">
-              El registro publico esta disponible solo para estudiantes.
+              Estás creando tu cuenta como estudiante.
             </div>
 
             <form onSubmit={onSubmit} className="auth-form">

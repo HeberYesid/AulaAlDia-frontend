@@ -110,6 +110,61 @@ describe('Login Component', () => {
     }, { timeout: 3000 })
   })
 
+  it('submits the form when pressing Enter in the password field', async () => {
+    const user = userEvent.setup()
+    const mockLogin = vi.fn().mockResolvedValueOnce()
+    useAuth.mockReturnValue({
+      login: mockLogin,
+      googleLogin: vi.fn(),
+      user: null,
+    })
+
+    renderLogin()
+
+    await user.type(screen.getByPlaceholderText(/tu@email\.com/i), 'test@example.com')
+    await user.type(screen.getByPlaceholderText(/••••••••/i), 'password123{enter}')
+
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123')
+    })
+  })
+
+  it('hides the submit button during login lockout and restores it afterwards', async () => {
+    const user = userEvent.setup()
+    const mockLogin = vi.fn().mockRejectedValueOnce({
+      response: {
+        data: {
+          detail: 'Has superado el máximo de 3 intentos fallidos. Intenta de nuevo en 5 minuto(s).',
+          retry_after: 1,
+        },
+      },
+    })
+
+    useAuth.mockReturnValue({
+      login: mockLogin,
+      googleLogin: vi.fn(),
+      user: null,
+    })
+
+    renderLogin()
+
+    await user.type(screen.getByPlaceholderText(/tu@email\.com/i), 'test@example.com')
+    await user.type(screen.getByPlaceholderText(/••••••••/i), 'password123')
+    await user.click(screen.getByRole('button', { name: /entrar/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /entrar/i })).not.toBeInTheDocument()
+    })
+
+    await user.type(screen.getByPlaceholderText(/••••••••/i), '{enter}')
+    expect(mockLogin).toHaveBeenCalledTimes(1)
+    expect(screen.getByText(/podras intentar de nuevo en 1s\.|podrás intentar de nuevo en 1s\./i)).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument()
+    }, { timeout: 2000 })
+  })
+
   it('has link to register page', () => {
     renderLogin()
     

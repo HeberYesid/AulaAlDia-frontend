@@ -1220,7 +1220,7 @@ form {
   position: relative;
   overflow: visible;
   backdrop-filter: blur(10px);
-  margin: auto 0;
+  margin: 0 0 var(--space-xl);
 }
 
 .auth-card::before {
@@ -1320,12 +1320,18 @@ form {
   margin-bottom: var(--space-xl);
 }
 
+.auth-feedback {
+  min-height: 0;
+}
+
 .auth-btn {
   width: 100%;
   padding: var(--space-md) var(--space-lg);
   font-size: var(--font-size-base);
   font-weight: 600;
   margin-top: var(--space-sm);
+  min-height: 3.5rem;
+  justify-content: center;
 }
 
 .auth-footer {

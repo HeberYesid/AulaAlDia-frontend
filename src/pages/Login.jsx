@@ -4,6 +4,18 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { setApiActiveTenantId } from '../api/axios'
 
+function formatRetryAfter(seconds) {
+  const totalSeconds = Math.max(0, Number(seconds) || 0)
+  const minutes = Math.floor(totalSeconds / 60)
+  const remainingSeconds = totalSeconds % 60
+
+  if (minutes === 0) {
+    return `${remainingSeconds}s`
+  }
+
+  return `${minutes}m ${String(remainingSeconds).padStart(2, '0')}s`
+}
+
 export default function Login() {
   const { login, googleLogin, user } = useAuth()
   const [email, setEmail] = useState('')
@@ -13,11 +25,13 @@ export default function Login() {
   const [message, setMessage] = useState('')
   const [showVerifyLink, setShowVerifyLink] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [retryAfter, setRetryAfter] = useState(0)
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
   const tenantIdFromQuery = new URLSearchParams(location.search).get('tenant_id')?.trim() || null
   const authQuerySuffix = tenantIdFromQuery ? `?tenant_id=${encodeURIComponent(tenantIdFromQuery)}` : ''
+  const isLockedOut = retryAfter > 0
 
   useEffect(() => {
     if (!tenantIdFromQuery) return
@@ -74,17 +88,44 @@ export default function Login() {
     }
   }, [location.state])
 
+  useEffect(() => {
+    if (!retryAfter) return undefined
+
+    const intervalId = window.setInterval(() => {
+      setRetryAfter((current) => {
+        if (current <= 1) {
+          window.clearInterval(intervalId)
+          return 0
+        }
+
+        return current - 1
+      })
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [retryAfter])
+
   async function onSubmit(e) {
     e.preventDefault()
+    if (isLoading || isLockedOut) return
+
     setError('')
+    setShowVerifyLink(false)
     setIsLoading(true)
 
     try {
       await login(email, password)
       navigate(getPostLoginPath())
     } catch (err) {
+      const retryAfterSeconds = Number(err.response?.data?.retry_after || 0)
       const errorMessage = err.response?.data?.detail || 'Error al iniciar sesión'
       setError(errorMessage)
+
+      if (retryAfterSeconds > 0) {
+        setRetryAfter(retryAfterSeconds)
+      }
 
       if (errorMessage.includes('verificar tu correo')) {
         setShowVerifyLink(true)
@@ -161,43 +202,51 @@ export default function Login() {
             </div>
           </div>
 
-          <button
-            className="btn auth-btn"
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <div className="spinner" aria-hidden="true"></div>
-                Iniciando sesión...
-              </>
-            ) : (
-              <>Entrar</>
-            )}
-          </button>
-
-          {message && (
-            <div className="alert success" role="status" aria-live="polite">
-              ✅ {message}
-            </div>
-          )}
-
-          {error && (
-            <div className="alert error" role="alert" aria-live="assertive">
-              ❌ {error}
-              {showVerifyLink && (
-                <div style={{ marginTop: 'var(--space-sm)' }}>
-                  <Link
-                    to="/verify-code"
-                    state={{ email }}
-                    className="link"
-                  >
-                    📧 Verificar mi correo con código
-                  </Link>
-                </div>
+          {!isLockedOut ? (
+            <button
+              className="btn auth-btn"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="spinner" aria-hidden="true"></div>
+                  Iniciando sesión...
+                </>
+              ) : (
+                <>Entrar</>
               )}
+            </button>
+          ) : (
+            <div className="alert warning auth-lockout" role="status" aria-live="polite">
+              Podrás intentar de nuevo en {formatRetryAfter(retryAfter)}.
             </div>
           )}
+
+          <div className="auth-feedback">
+            {message && (
+              <div className="alert success" role="status" aria-live="polite">
+                ✅ {message}
+              </div>
+            )}
+
+            {error && (
+              <div className="alert error" role="alert" aria-live="assertive">
+                ❌ {error}
+                {showVerifyLink && (
+                  <div style={{ marginTop: 'var(--space-sm)' }}>
+                    <Link
+                      to="/verify-code"
+                      state={{ email }}
+                      className="link"
+                    >
+                      📧 Verificar mi correo con código
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </form>
 
         <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
