@@ -5,7 +5,18 @@ import Register from '../Register'
 import { renderWithProviders } from '../../test/utils'
 import * as axios from '../../api/axios'
 
-vi.mock('../../api/axios')
+vi.mock('../../api/axios', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+    setApiActiveTenantId: vi.fn(),
+    api: {
+      post: vi.fn(),
+      get: vi.fn()
+    }
+  }
+})
 
 const TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
@@ -29,7 +40,7 @@ describe('Register Component', () => {
 
     renderWithProviders(<Register />)
 
-    expect(screen.getByText(/registro publico esta disponible solo para estudiantes/i)).toBeInTheDocument()
+    expect(screen.getByText(/estás creando tu cuenta como estudiante/i)).toBeInTheDocument()
   })
 
   it('renders registration form when tenant_id is present', () => {

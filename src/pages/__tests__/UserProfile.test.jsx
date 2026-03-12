@@ -10,7 +10,9 @@ vi.mock('../../api/axios', () => ({
     get: vi.fn(),
     patch: vi.fn(),
     post: vi.fn(),
-  }
+  },
+  AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+  setApiActiveTenantId: vi.fn()
 }))
 
 vi.mock('../../components/AppTour', () => ({

@@ -9,7 +9,9 @@ import { api } from '../../api/axios'
 vi.mock('../../api/axios', () => ({
   api: {
     post: vi.fn()
-  }
+  },
+  AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+  setApiActiveTenantId: vi.fn()
 }))
 
 describe('CSVUpload Component', () => {
