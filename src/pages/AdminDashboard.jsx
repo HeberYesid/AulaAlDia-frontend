@@ -511,22 +511,22 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        <section className="card">
+        <section className="card admin-dashboard__quick-actions">
           <h2 style={{ marginTop: 0 }}>Accesos rápidos de gestión</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>
+          <p className="admin-dashboard__quick-actions-copy">
             Atajos para tareas operativas frecuentes del administrador.
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
-            <Link className="btn primary" to="/subjects" style={{ textDecoration: 'none' }}>
+          <div className="admin-dashboard__quick-actions-grid">
+            <Link className="btn primary admin-dashboard__quick-action" to="/subjects" style={{ textDecoration: 'none' }}>
               Gestionar materias
             </Link>
-            <Link className="btn secondary" to="/absences" style={{ textDecoration: 'none' }}>
+            <Link className="btn secondary admin-dashboard__quick-action" to="/absences" style={{ textDecoration: 'none' }}>
               Registrar asistencia
             </Link>
-            <Link className="btn secondary" to="/observer" style={{ textDecoration: 'none' }}>
+            <Link className="btn secondary admin-dashboard__quick-action" to="/observer" style={{ textDecoration: 'none' }}>
               Registrar observación
             </Link>
-            <Link className="btn secondary" to="/messages" style={{ textDecoration: 'none' }}>
+            <Link className="btn secondary admin-dashboard__quick-action" to="/messages" style={{ textDecoration: 'none' }}>
               Revisar mensajes
             </Link>
           </div>

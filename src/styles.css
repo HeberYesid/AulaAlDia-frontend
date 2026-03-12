@@ -1371,6 +1371,42 @@ form {
   margin-top: var(--space-xs);
 }
 
+.admin-dashboard__quick-actions {
+  display: grid;
+  gap: var(--space-md);
+  align-content: start;
+}
+
+.admin-dashboard__quick-actions-copy {
+  color: var(--text-secondary);
+  max-width: 44ch;
+  margin: 0;
+}
+
+.admin-dashboard__quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.admin-dashboard__quick-action {
+  width: 100%;
+  min-height: 3.25rem;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+}
+
+@media (min-width: 1100px) {
+  .admin-dashboard__quick-actions {
+    grid-column: 1 / -1;
+  }
+
+  .admin-dashboard__quick-actions-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
