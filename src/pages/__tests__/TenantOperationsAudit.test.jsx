@@ -53,48 +53,55 @@ describe('TenantOperationsAudit', () => {
               metadata: {},
               created_at: '2026-03-12T15:00:00Z',
             },
+            {
+              id: 2,
+              category: 'ACCESS',
+              action: 'TENANT_SWITCH',
+              summary: 'Cambió el tenant activo',
+              actor_email: 'coord@test.com',
+              method: 'POST',
+              path: '/api/v1/auth/select-tenant/',
+              target_type: 'tenant',
+              target_id: '55',
+              metadata: {},
+              created_at: '2026-03-11T10:00:00Z',
+            },
           ],
           offset: 0,
-          total_count: 1,
-        },
-      })
-      .mockResolvedValueOnce({
-        data: {
-          results: [],
-          offset: 0,
-          total_count: 0,
+          next_offset: null,
+          total_count: 2,
         },
       })
 
     render(<TenantOperationsAudit />)
 
-    expect(await screen.findByText(/operaciones recientes/i)).toBeInTheDocument()
+    expect(await screen.findByText(/tabla de logs del tenant/i)).toBeInTheDocument()
+    expect(await screen.findByText(/creó una materia/i)).toBeInTheDocument()
+    expect(await screen.findByText(/cambió el tenant activo/i)).toBeInTheDocument()
+
+    expect(api.get).toHaveBeenCalledTimes(1)
     expect(api.get).toHaveBeenNthCalledWith(
       1,
       '/api/v1/auth/tenant-operation-audits/',
       expect.objectContaining({
         params: expect.objectContaining({
-          limit: 20,
+          limit: 100,
+          offset: 0,
           order: 'desc',
         }),
       })
     )
 
-    await user.type(screen.getByLabelText(/actor/i), 'admin@')
+    await user.type(screen.getByLabelText(/actor \(email contiene\)/i), 'admin@')
     await user.selectOptions(screen.getByLabelText(/categoría/i), 'ACADEMIC')
     await user.click(screen.getByRole('button', { name: /aplicar filtros/i }))
 
     await waitFor(() => {
-      expect(api.get).toHaveBeenNthCalledWith(
-        2,
-        '/api/v1/auth/tenant-operation-audits/',
-        expect.objectContaining({
-          params: expect.objectContaining({
-            actor_email: 'admin@',
-            category: 'ACADEMIC',
-          }),
-        })
-      )
+      expect(screen.getByText(/mostrando 1 de 2 registros filtrados/i)).toBeInTheDocument()
     })
+
+    expect(screen.getByText(/creó una materia/i)).toBeInTheDocument()
+    expect(screen.queryByText(/cambió el tenant activo/i)).not.toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledTimes(1)
   })
 })

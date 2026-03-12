@@ -12,13 +12,31 @@ const CATEGORY_OPTIONS = [
   { value: 'OTHER', label: 'Otro' },
 ]
 
-const METHOD_OPTIONS = [
-  { value: '', label: 'Todos' },
-  { value: 'POST', label: 'POST' },
-  { value: 'PUT', label: 'PUT' },
-  { value: 'PATCH', label: 'PATCH' },
-  { value: 'DELETE', label: 'DELETE' },
-]
+const CATEGORY_LABELS = {
+  ACADEMIC: 'Académico',
+  USER_MANAGEMENT: 'Gestión de usuarios',
+  ACCESS: 'Accesos y sesiones',
+  CONFIGURATION: 'Configuración',
+  MESSAGING: 'Mensajería',
+  OTHER: 'Otro',
+}
+
+const TARGET_LABELS = {
+  subject: 'Materia',
+  exercise: 'Ejercicio',
+  result: 'Resultado',
+  notification: 'Notificación',
+  calendar_event: 'Evento de calendario',
+  observation: 'Observación',
+  absence: 'Inasistencia',
+  academic_period: 'Periodo académico',
+  grading_scale: 'Escala de calificación',
+  profile: 'Perfil',
+  tenant: 'Tenant',
+  support_session: 'Sesión de soporte',
+  student_tutor_invitation: 'Invitación de acudiente',
+  enrollment: 'Matrícula',
+}
 
 function normalizeApiErrors(error) {
   const payload = error?.response?.data
@@ -48,25 +66,91 @@ function normalizeApiErrors(error) {
 
 export default function TenantOperationsAudit() {
   const { user, activeTenantId } = useAuth()
+  const [allAudits, setAllAudits] = useState([])
   const [audits, setAudits] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [auditLimit, setAuditLimit] = useState(20)
   const [auditActorEmail, setAuditActorEmail] = useState('')
   const [auditCategory, setAuditCategory] = useState('')
-  const [auditMethod, setAuditMethod] = useState('')
-  const [auditAction, setAuditAction] = useState('')
   const [auditSearch, setAuditSearch] = useState('')
   const [auditOrder, setAuditOrder] = useState('desc')
   const [auditDateFrom, setAuditDateFrom] = useState('')
   const [auditDateTo, setAuditDateTo] = useState('')
-  const [auditOffset, setAuditOffset] = useState(0)
-  const [auditTotalCount, setAuditTotalCount] = useState(0)
+  const [filtersApplied, setFiltersApplied] = useState(false)
   const [expandedAuditId, setExpandedAuditId] = useState(null)
 
   const isTenantAdmin = user?.role === 'ADMIN'
 
-  async function loadAudits({ offset = auditOffset, clearError = true } = {}) {
+  function getCategoryLabel(category) {
+    return CATEGORY_LABELS[category] || 'Otro'
+  }
+
+  function getTargetLabel(audit) {
+    const targetLabel = TARGET_LABELS[audit.target_type] || 'Registro'
+    if (!audit.target_id) {
+      return targetLabel
+    }
+    return `${targetLabel} #${audit.target_id}`
+  }
+
+  function formatAuditDate(value) {
+    return new Date(value).toLocaleString()
+  }
+
+  function normalizeText(value) {
+    return String(value || '').toLowerCase().trim()
+  }
+
+  function applyLocalFilters(sourceAudits, options = {}) {
+    const nextFiltersApplied = options.markApplied ?? true
+    let filteredAudits = [...sourceAudits]
+
+    if (auditActorEmail.trim()) {
+      const actorFilter = normalizeText(auditActorEmail)
+      filteredAudits = filteredAudits.filter((audit) =>
+        normalizeText(audit.actor_email).includes(actorFilter)
+      )
+    }
+
+    if (auditCategory) {
+      filteredAudits = filteredAudits.filter((audit) => audit.category === auditCategory)
+    }
+
+    if (auditSearch.trim()) {
+      const searchFilter = normalizeText(auditSearch)
+      filteredAudits = filteredAudits.filter((audit) => {
+        const searchableValues = [
+          audit.summary,
+          audit.actor_email,
+          audit.path,
+          audit.view_name,
+          getCategoryLabel(audit.category),
+          getTargetLabel(audit),
+        ]
+        return searchableValues.some((value) => normalizeText(value).includes(searchFilter))
+      })
+    }
+
+    if (auditDateFrom) {
+      filteredAudits = filteredAudits.filter((audit) => audit.created_at.slice(0, 10) >= auditDateFrom)
+    }
+
+    if (auditDateTo) {
+      filteredAudits = filteredAudits.filter((audit) => audit.created_at.slice(0, 10) <= auditDateTo)
+    }
+
+    filteredAudits.sort((left, right) => {
+      const leftTime = new Date(left.created_at).getTime()
+      const rightTime = new Date(right.created_at).getTime()
+      return auditOrder === 'asc' ? leftTime - rightTime : rightTime - leftTime
+    })
+
+    setAudits(filteredAudits)
+    setFiltersApplied(nextFiltersApplied)
+    setExpandedAuditId(null)
+  }
+
+  async function loadAudits({ clearError = true } = {}) {
     if (!activeTenantId) {
       setError('No hay un tenant activo seleccionado.')
       return
@@ -78,28 +162,36 @@ export default function TenantOperationsAudit() {
     }
 
     try {
-      const { data } = await api.get('/api/v1/auth/tenant-operation-audits/', {
-        params: {
-          limit: auditLimit,
-          offset,
-          actor_email: auditActorEmail || undefined,
-          category: auditCategory || undefined,
-          method: auditMethod || undefined,
-          action: auditAction || undefined,
-          search: auditSearch || undefined,
-          order: auditOrder,
-          date_from: auditDateFrom || undefined,
-          date_to: auditDateTo || undefined,
-        },
-      })
-      setAudits(Array.isArray(data?.results) ? data.results : [])
-      setAuditOffset(data?.offset || 0)
-      setAuditTotalCount(data?.total_count || 0)
-      setExpandedAuditId(null)
+      const collectedAudits = []
+      let nextOffset = 0
+      let hasMore = true
+
+      while (hasMore) {
+        const { data } = await api.get('/api/v1/auth/tenant-operation-audits/', {
+          params: {
+            limit: 100,
+            offset: nextOffset,
+            order: 'desc',
+          },
+        })
+
+        const pageResults = Array.isArray(data?.results) ? data.results : []
+        collectedAudits.push(...pageResults)
+
+        if (data?.next_offset === null || data?.next_offset === undefined) {
+          hasMore = false
+        } else {
+          nextOffset = data.next_offset
+        }
+      }
+
+      setAllAudits(collectedAudits)
+      applyLocalFilters(collectedAudits, { markApplied: false })
     } catch (requestError) {
       setError(normalizeApiErrors(requestError))
+      setAllAudits([])
       setAudits([])
-      setAuditTotalCount(0)
+      setFiltersApplied(false)
     } finally {
       setLoading(false)
     }
@@ -109,21 +201,21 @@ export default function TenantOperationsAudit() {
     if (!isTenantAdmin || !activeTenantId) {
       return
     }
-    loadAudits({ offset: 0, clearError: false })
+    loadAudits({ clearError: false })
   }, [activeTenantId, isTenantAdmin])
 
   async function applyFilters() {
-    await loadAudits({ offset: 0 })
+    applyLocalFilters(allAudits)
   }
 
-  async function goToPreviousPage() {
-    const previousOffset = Math.max(0, auditOffset - auditLimit)
-    await loadAudits({ offset: previousOffset })
-  }
-
-  async function goToNextPage() {
-    const nextOffset = auditOffset + auditLimit
-    await loadAudits({ offset: nextOffset })
+  function clearFilters() {
+    setAuditActorEmail('')
+    setAuditCategory('')
+    setAuditSearch('')
+    setAuditOrder('desc')
+    setAuditDateFrom('')
+    setAuditDateTo('')
+    applyLocalFilters(allAudits, { markApplied: false })
   }
 
   function exportAuditsJson() {
@@ -136,11 +228,8 @@ export default function TenantOperationsAudit() {
       tenant_id: activeTenantId,
       exported_at: new Date().toISOString(),
       filters: {
-        limit: auditLimit,
         actor_email: auditActorEmail || null,
         category: auditCategory || null,
-        method: auditMethod || null,
-        action: auditAction || null,
         search: auditSearch || null,
         order: auditOrder,
         date_from: auditDateFrom || null,
@@ -176,7 +265,7 @@ export default function TenantOperationsAudit() {
       <div className="card">
         <h2>Auditoría Operativa del Tenant</h2>
         <p className="notice">
-          Visualiza operaciones mutantes exitosas ejecutadas dentro del tenant activo.
+          Aquí ves una bitácora completa de actividades realizadas en el tenant activo.
         </p>
         <p className="notice">
           Tenant activo: <strong>{activeTenantId || 'No definido'}</strong>
@@ -187,15 +276,20 @@ export default function TenantOperationsAudit() {
 
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
-          <h3 style={{ margin: 0 }}>Operaciones Recientes</h3>
+          <div>
+            <h3 style={{ margin: 0 }}>Tabla de Logs del Tenant</h3>
+            <p className="notice" style={{ marginTop: '0.35rem' }}>
+              Se cargan primero todos los registros y luego puedes filtrar si lo necesitas.
+            </p>
+          </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
             <button
               className="btn secondary"
               type="button"
-              onClick={() => loadAudits({ offset: auditOffset })}
+              onClick={() => loadAudits()}
               disabled={loading || !activeTenantId}
             >
-              {loading ? 'Recargando...' : 'Recargar'}
+              {loading ? 'Cargando logs...' : 'Recargar logs'}
             </button>
             <button
               className="btn secondary"
@@ -209,20 +303,6 @@ export default function TenantOperationsAudit() {
         </div>
 
         <div className="grid cols-2 grid-stack-mobile" style={{ marginTop: 'var(--space-md)' }}>
-          <div className="form-group">
-            <label htmlFor="operation-limit">Límite</label>
-            <select
-              id="operation-limit"
-              value={auditLimit}
-              onChange={(event) => setAuditLimit(Number(event.target.value))}
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
-
           <div className="form-group">
             <label htmlFor="operation-actor">Actor (email contiene)</label>
             <input
@@ -250,39 +330,13 @@ export default function TenantOperationsAudit() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="operation-method">Método</label>
-            <select
-              id="operation-method"
-              value={auditMethod}
-              onChange={(event) => setAuditMethod(event.target.value)}
-            >
-              {METHOD_OPTIONS.map((option) => (
-                <option key={option.value || 'all'} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="operation-action">Acción exacta</label>
-            <input
-              id="operation-action"
-              type="text"
-              value={auditAction}
-              onChange={(event) => setAuditAction(event.target.value.trim().toUpperCase())}
-              placeholder="ej: SUBJECT_CREATED"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="operation-search">Buscar en resumen o ruta</label>
+            <label htmlFor="operation-search">Buscar por descripción, actor o registro</label>
             <input
               id="operation-search"
               type="text"
               value={auditSearch}
               onChange={(event) => setAuditSearch(event.target.value)}
-              placeholder="ej: results-csv"
+              placeholder="ej: materia, acudiente, soporte"
             />
           </div>
 
@@ -324,34 +378,28 @@ export default function TenantOperationsAudit() {
             className="btn secondary"
             type="button"
             onClick={applyFilters}
-            disabled={loading || !activeTenantId}
+            disabled={loading || !activeTenantId || !allAudits.length}
           >
             Aplicar filtros
           </button>
           <button
             className="btn secondary"
             type="button"
-            onClick={goToPreviousPage}
-            disabled={loading || auditOffset <= 0}
+            onClick={clearFilters}
+            disabled={loading || !allAudits.length}
           >
-            Anterior
-          </button>
-          <button
-            className="btn secondary"
-            type="button"
-            onClick={goToNextPage}
-            disabled={loading || (auditOffset + audits.length) >= auditTotalCount}
-          >
-            Siguiente
+            Quitar filtros
           </button>
           <span className="notice" style={{ alignSelf: 'center' }}>
-            Mostrando {audits.length ? auditOffset + 1 : 0}-{auditOffset + audits.length} de {auditTotalCount}
+            {filtersApplied
+              ? `Mostrando ${audits.length} de ${allAudits.length} registros filtrados`
+              : `Mostrando ${audits.length} registros cargados`}
           </span>
         </div>
 
         {audits.length === 0 ? (
           <p className="notice" style={{ marginTop: 'var(--space-md)' }}>
-            No hay operaciones registradas para el tenant activo con los filtros actuales.
+            No hay registros para mostrar con los filtros actuales.
           </p>
         ) : (
           <div className="table-container" style={{ marginTop: 'var(--space-md)' }}>
@@ -359,10 +407,10 @@ export default function TenantOperationsAudit() {
               <thead>
                 <tr>
                   <th>Fecha</th>
-                  <th>Actor</th>
-                  <th>Categoría</th>
-                  <th>Resumen</th>
-                  <th>Acción</th>
+                  <th>Quién hizo el cambio</th>
+                  <th>Tipo de actividad</th>
+                  <th>Qué pasó</th>
+                  <th>Registro afectado</th>
                   <th>Detalle</th>
                 </tr>
               </thead>
@@ -370,13 +418,11 @@ export default function TenantOperationsAudit() {
                 {audits.map((audit) => (
                   <Fragment key={audit.id}>
                     <tr>
-                      <td data-label="Fecha">{new Date(audit.created_at).toLocaleString()}</td>
-                      <td data-label="Actor">{audit.actor_email || 'Sistema'}</td>
-                      <td data-label="Categoría">{audit.category}</td>
-                      <td data-label="Resumen">{audit.summary}</td>
-                      <td data-label="Acción">
-                        <code>{`${audit.method} ${audit.action}`}</code>
-                      </td>
+                      <td data-label="Fecha">{formatAuditDate(audit.created_at)}</td>
+                      <td data-label="Quién hizo el cambio">{audit.actor_email || 'Sistema'}</td>
+                      <td data-label="Tipo de actividad">{getCategoryLabel(audit.category)}</td>
+                      <td data-label="Qué pasó">{audit.summary}</td>
+                      <td data-label="Registro afectado">{getTargetLabel(audit)}</td>
                       <td data-label="Detalle">
                         <button
                           type="button"
@@ -394,11 +440,11 @@ export default function TenantOperationsAudit() {
                         <td colSpan={6}>
                           <div style={{ display: 'grid', gap: 'var(--space-sm)' }}>
                             <div>
-                              <strong>Ruta</strong>
-                              <pre>{audit.path}</pre>
+                              <strong>Descripción técnica</strong>
+                              <pre>{`${audit.action} | ${audit.method} | ${audit.path}`}</pre>
                             </div>
                             <div>
-                              <strong>Metadata</strong>
+                              <strong>Detalle completo</strong>
                               <pre>{JSON.stringify(audit.metadata, null, 2)}</pre>
                             </div>
                           </div>
