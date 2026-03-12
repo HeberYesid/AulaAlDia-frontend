@@ -64,8 +64,7 @@ export default function MySubjects() {
               <table className="table mobile-card-view">
                 <thead>
                   <tr>
-                    <th style={{ width: '15%' }}>Código</th>
-                    <th style={{ width: '40%' }}>Materia</th>
+                    <th style={{ width: '55%' }}>Materia</th>
                     <th style={{ width: '12%', textAlign: 'center' }}>Nota</th>
                     <th style={{ width: '18%', textAlign: 'center' }}>Promedio ejercicios</th>
                     <th style={{ width: '15%', textAlign: 'center' }}>Acción</th>
@@ -74,7 +73,6 @@ export default function MySubjects() {
                 <tbody>
                   {enrollments.map((enr) => (
                     <tr key={enr.enrollment_id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/subjects/${enr.subject_id}`)}>
-                      <td data-label="Código"><strong>{enr.subject_code}</strong></td>
                       <td data-label="Materia">{enr.subject_name}</td>
                       <td data-label="Nota" style={{ textAlign: 'center', fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
                         {enr.stats?.grade?.toFixed?.(2)}

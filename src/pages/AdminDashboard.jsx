@@ -165,7 +165,6 @@ export default function AdminDashboard() {
 
             return {
               subjectId: nextSubjects[index].id,
-              subjectCode: nextSubjects[index].code,
               subjectName: nextSubjects[index].name,
               submitted,
               graded,
@@ -356,7 +355,7 @@ export default function AdminDashboard() {
                   {performanceList.map((item) => (
                     <tr key={item.subjectId}>
                       <td data-label="Materia">
-                        <strong>{item.subjectCode}</strong> {item.subjectName}
+                        <strong>{item.subjectName}</strong>
                       </td>
                       <td data-label="Prom. puntaje">{item.avgScore.toFixed(2)}</td>
                       <td data-label="Entregados">{item.submitted}</td>

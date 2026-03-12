@@ -44,7 +44,7 @@ export default function Dashboard() {
   async function deleteSubject(subject) {
     setConfirmDialog({
       title: `Eliminar materia "${subject.name}"`,
-      message: `Esta acción eliminará todos los estudiantes inscritos, ejercicios y resultados de "${subject.name}" (${subject.code}). Esta acción NO se puede deshacer.`,
+      message: `Esta acción eliminará todos los estudiantes inscritos, ejercicios y resultados de "${subject.name}". Esta acción NO se puede deshacer.`,
       onConfirm: async () => {
         setConfirmDialog(null)
         setError('')
@@ -129,7 +129,6 @@ export default function Dashboard() {
                 <caption className="sr-only">Lista de materias</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Código</th>
                     <th scope="col">Nombre</th>
                     <th scope="col">Estudiantes</th>
                     <th scope="col">Acciones</th>
@@ -138,7 +137,6 @@ export default function Dashboard() {
                 <tbody>
                   {subjects.map((s) => (
                     <tr key={s.id}>
-                      <td data-label="Código"><strong>{s.code}</strong></td>
                       <td data-label="Nombre">{s.name}</td>
                       <td data-label="Estudiantes">{s.enrollments_count || 0}</td>
                       <td data-label="Acciones">

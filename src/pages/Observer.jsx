@@ -351,7 +351,7 @@ export default function Observer() {
                 >
                   <option value="">General</option>
                   {subjects.map(s => (
-                    <option key={s.id} value={s.id}>{s.code} - {s.name}</option>
+                    <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
               </div>
@@ -460,7 +460,7 @@ export default function Observer() {
             >
               <option value="">Todas</option>
               {subjects.map(s => (
-                <option key={s.id} value={String(s.id)}>{s.code} - {s.name}</option>
+                <option key={s.id} value={String(s.id)}>{s.name}</option>
               ))}
             </select>
           </div>

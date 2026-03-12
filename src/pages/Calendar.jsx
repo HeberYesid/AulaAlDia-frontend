@@ -101,7 +101,7 @@ export default function CalendarPage() {
             <option value="">Todas las materias</option>
             {subjects.map(subject => (
               <option key={subject.id} value={subject.id}>
-                {subject.code} - {subject.name}
+                {subject.name}
               </option>
             ))}
           </select>

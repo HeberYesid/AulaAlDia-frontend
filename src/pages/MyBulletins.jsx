@@ -353,7 +353,6 @@ export default function MyBulletins() {
                           <table className="table mobile-card-view">
                             <thead>
                               <tr>
-                                <th>Código</th>
                                 <th>Materia</th>
                                 <th style={{ textAlign: 'center' }}>Nota</th>
                                 <th style={{ textAlign: 'center' }}>Promedio ejercicios</th>
@@ -365,9 +364,6 @@ export default function MyBulletins() {
                             <tbody>
                               {bulletinDetail.entries.map((entry) => (
                                 <tr key={entry.id}>
-                                  <td data-label="Código">
-                                    <strong>{entry.subject_code}</strong>
-                                  </td>
                                   <td data-label="Materia">{entry.subject_name}</td>
                                   <td
                                     data-label="Nota"
@@ -434,7 +430,7 @@ export default function MyBulletins() {
                                   }}
                                 >
                                   <strong style={{ color: 'var(--text-primary)' }}>
-                                    {entry.subject_code} — {entry.subject_name}
+                                    {entry.subject_name}
                                   </strong>
                                   <pre
                                     style={{

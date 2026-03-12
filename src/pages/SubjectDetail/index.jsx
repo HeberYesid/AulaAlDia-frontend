@@ -160,7 +160,7 @@ export default function SubjectDetail() {
       <div className="card card--static" style={{ margin: 0 }}>
         <div className="subject-hero">
           <div className="subject-hero__info">
-            <h1>{subject.code} — {subject.name}</h1>
+            <h1>{subject.name}</h1>
             <p className="subject-hero__meta">Profesor: {subject.teacher?.email}</p>
           </div>
           <div className="subject-hero__stats">

@@ -22,6 +22,7 @@ vi.mock('../../state/AuthContext', async () => {
 
 // Mock axios
 vi.mock('../../api/axios', () => ({
+  AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
   api: {
     get: vi.fn(),
     post: vi.fn(),
@@ -149,7 +150,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
     
     await waitFor(() => {
-      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
     })
   })
 
@@ -172,7 +173,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
     
     await waitFor(() => {
-      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
     })
 
     // Click on Results tab
@@ -198,11 +199,11 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
 
     await waitFor(() => {
-      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
     })
 
     await user.click(screen.getByText(/Ejercicios \(\d+\)/))
-    await user.click(screen.getByRole('button', { name: /^Crear Ejercicio$/i }))
+    await user.click(screen.getByRole('button', { name: /^Nuevo Ejercicio$/i }))
 
     expect(screen.getByRole('option', { name: /Periodo abierto/i })).toBeInTheDocument()
     expect(screen.queryByRole('option', { name: /Periodo bloqueado/i })).not.toBeInTheDocument()
@@ -236,7 +237,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
 
     await waitFor(() => {
-      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
     })
 
     await user.click(screen.getByText('Resultados'))
@@ -261,7 +262,7 @@ describe('SubjectDetail Component', () => {
     renderWithProviders(<SubjectDetail />)
     
     await waitFor(() => {
-      expect(screen.getByText(/MATH101\s*-\s*Mathematics/i)).toBeInTheDocument()
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
     })
     
     // Switch to exercises tab
@@ -269,7 +270,7 @@ describe('SubjectDetail Component', () => {
     await user.click(screen.getByText(/Ejercicios \(\d+\)/))
     
     // Click "Crear Ejercicio" button (which opens the form)
-    await user.click(screen.getByRole('button', { name: /Crear Ejercicio/i }))
+    await user.click(screen.getByRole('button', { name: /Nuevo Ejercicio/i }))
     
     // Fill form
     const nameInput = screen.getByPlaceholderText(/Ej: Ejercicio 1/i)

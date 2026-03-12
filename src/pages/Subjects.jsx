@@ -7,7 +7,6 @@ import ConfirmDialog from '../components/ConfirmDialog'
 export default function Subjects() {
   const [items, setItems] = useState([])
   const [name, setName] = useState('')
-  const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(null)
@@ -26,14 +25,13 @@ export default function Subjects() {
     setError('')
     setSuccess('')
     try {
-      await api.post('/api/v1/courses/subjects/', { name, code })
+      await api.post('/api/v1/courses/subjects/', { name })
       setName('')
-      setCode('')
       setSuccess('Materia creada exitosamente')
       load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      setError('No se pudo crear la materia. Verifica que el código sea único.')
+      setError('No se pudo crear la materia.')
     }
   }
 
@@ -66,7 +64,7 @@ export default function Subjects() {
       {confirmDelete && (
         <ConfirmDialog
           title="¿Eliminar materia?"
-          message={`¿Estás seguro de que deseas eliminar la materia "${confirmDelete.name}" (${confirmDelete.code})? Esta acción eliminará todos los estudiantes inscritos, ejercicios y resultados. Esta acción NO se puede deshacer.`}
+          message={`¿Estás seguro de que deseas eliminar la materia "${confirmDelete.name}"? Esta acción eliminará todos los estudiantes inscritos, ejercicios y resultados. Esta acción NO se puede deshacer.`}
           onConfirm={handleConfirmDelete}
           onCancel={() => setConfirmDelete(null)}
         />
@@ -79,10 +77,6 @@ export default function Subjects() {
         <div className="card">
           <h2>Crear materia</h2>
           <form onSubmit={createSubject}>
-            <div>
-              <label htmlFor="subject-code">Código</label>
-              <input id="subject-code" value={code} onChange={(e) => setCode(e.target.value)} required placeholder="Ej: PW-2024" />
-            </div>
             <div>
               <label htmlFor="subject-name">Nombre</label>
               <input id="subject-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Matemáticas" />
@@ -102,7 +96,6 @@ export default function Subjects() {
               <table className="table mobile-card-view">
                 <thead>
                   <tr>
-                    <th scope="col">Código</th>
                     <th scope="col">Nombre</th>
                     <th scope="col">Acciones</th>
                   </tr>
@@ -110,7 +103,6 @@ export default function Subjects() {
                 <tbody>
                   {items.map((s) => (
                     <tr key={s.id}>
-                      <td data-label="Código"><strong>{s.code}</strong></td>
                       <td data-label="Nombre">{s.name}</td>
                       <td data-label="Acciones">
                         <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>

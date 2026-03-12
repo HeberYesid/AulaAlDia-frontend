@@ -271,7 +271,7 @@ export default function Absences() {
                   <option value="">— Seleccionar —</option>
                   {subjects.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.code} - {s.name}
+                      {s.name}
                     </option>
                   ))}
                 </select>
@@ -436,7 +436,7 @@ export default function Absences() {
               <option value="">Todas</option>
               {subjects.map((s) => (
                 <option key={s.id} value={String(s.id)}>
-                  {s.code} - {s.name}
+                  {s.name}
                 </option>
               ))}
             </select>
@@ -517,11 +517,7 @@ export default function Absences() {
                         </td>
                       )}
                       <td data-label="Materia" style={{ fontSize: '0.85rem' }}>
-                        <strong>{a.subject_code}</strong>
-                        <br />
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                          {a.subject_name}
-                        </span>
+                        <strong>{a.subject_name}</strong>
                       </td>
                       <td data-label="Estado" style={{ textAlign: 'center' }}>
                         <span

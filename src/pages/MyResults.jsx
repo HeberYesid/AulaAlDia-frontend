@@ -224,7 +224,7 @@ export default function MyResults() {
                 return (
                   <tr key={enrollment.enrollment_id}>
                     <td data-label="Materia">
-                      <strong>{enrollment.subject_code}</strong> {enrollment.subject_name}
+                      <strong>{enrollment.subject_name}</strong>
                     </td>
                     <td data-label="Nota final">
                       {grade != null ? (
