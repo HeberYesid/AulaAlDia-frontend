@@ -265,10 +265,7 @@ export default function TenantOperationsAudit() {
       <div className="card">
         <h2>Auditoría Operativa del Tenant</h2>
         <p className="notice">
-          Aquí ves una bitácora completa de actividades realizadas en el tenant activo.
-        </p>
-        <p className="notice">
-          Tenant activo: <strong>{activeTenantId || 'No definido'}</strong>
+          Aquí ves una bitácora completa de actividades realizadas en toda la institución.
         </p>
       </div>
 
@@ -277,7 +274,7 @@ export default function TenantOperationsAudit() {
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
           <div>
-            <h3 style={{ margin: 0 }}>Tabla de Logs del Tenant</h3>
+            <h3 style={{ margin: 0 }}>Tabla de Logs de la institución</h3>
             <p className="notice" style={{ marginTop: '0.35rem' }}>
               Se cargan primero todos los registros y luego puedes filtrar si lo necesitas.
             </p>
@@ -304,7 +301,7 @@ export default function TenantOperationsAudit() {
 
         <div className="grid cols-2 grid-stack-mobile" style={{ marginTop: 'var(--space-md)' }}>
           <div className="form-group">
-            <label htmlFor="operation-actor">Actor (email contiene)</label>
+            <label htmlFor="operation-actor">Email</label>
             <input
               id="operation-actor"
               type="text"
