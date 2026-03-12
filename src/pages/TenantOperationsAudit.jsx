@@ -343,7 +343,7 @@ export default function TenantOperationsAudit() {
               type="text"
               value={auditActorEmail}
               onChange={(event) => setAuditActorEmail(event.target.value)}
-              placeholder="ej: teacher@"
+              placeholder="ej: teacher@gmail.com"
             />
           </div>
 
