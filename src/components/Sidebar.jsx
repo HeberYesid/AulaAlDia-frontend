@@ -155,6 +155,12 @@ export default function Sidebar() {
       show: true,
     },
     {
+      to: '/admin/operations',
+      label: 'Auditoría',
+      icon: ClipboardList,
+      show: user.role === 'ADMIN',
+    },
+    {
       to: '/admin/commercial',
       label: 'Comercial Tenant',
       icon: ShieldCheck,

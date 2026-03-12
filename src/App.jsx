@@ -49,6 +49,7 @@ const CalendarPage = lazy(() => import('./pages/Calendar'))
 const Messages = lazy(() => import('./pages/messaging/Messages'))
 const Observer = lazy(() => import('./pages/Observer'))
 const Absences = lazy(() => import('./pages/Absences'))
+const TenantOperationsAudit = lazy(() => import('./pages/TenantOperationsAudit'))
 const TenantCommercialAdmin = lazy(() => import('./pages/TenantCommercialAdmin'))
 const AcademicSettings = lazy(() => import('./pages/AcademicSettings'))
 
@@ -212,6 +213,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/operations"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <TenantOperationsAudit />
               </ProtectedRoute>
             }
           />
