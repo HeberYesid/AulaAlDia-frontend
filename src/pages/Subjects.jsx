@@ -4,6 +4,17 @@ import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 
+function normalizeApiError(error, fallback) {
+  const detail = error?.response?.data?.detail
+  if (typeof detail === 'string' && detail.trim()) return detail
+
+  const firstEntry = Object.values(error?.response?.data || {})[0]
+  if (Array.isArray(firstEntry) && firstEntry[0]) return firstEntry[0]
+  if (typeof firstEntry === 'string' && firstEntry.trim()) return firstEntry
+
+  return fallback
+}
+
 export default function Subjects() {
   const [items, setItems] = useState([])
   const [name, setName] = useState('')
@@ -31,7 +42,7 @@ export default function Subjects() {
       load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      setError('No se pudo crear la materia.')
+      setError(normalizeApiError(err, 'No se pudo crear la materia.'))
     }
   }
 
