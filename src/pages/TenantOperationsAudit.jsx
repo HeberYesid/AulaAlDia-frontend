@@ -51,6 +51,36 @@ const IMPACT_OPTIONS = [
   { value: 'low', label: 'Informativo' },
 ]
 
+const FRIENDLY_METADATA_LABELS = {
+  action: 'Acción solicitada',
+  reason: 'Motivo registrado',
+  duration_minutes: 'Duración autorizada',
+  tenant_name: 'Institución',
+  tenant_slug: 'Código de la institución',
+  display_name: 'Nombre visible',
+  plan: 'Plan',
+  max_subjects: 'Límite de materias',
+  max_students: 'Límite de estudiantes',
+  max_teachers: 'Límite de docentes',
+  max_members: 'Límite de miembros',
+  email: 'Correo',
+  student_email: 'Correo del estudiante',
+  student_name: 'Estudiante',
+  code: 'Código',
+  role: 'Rol',
+  expires_at: 'Vencimiento',
+}
+
+const OMITTED_METADATA_KEYS = new Set([
+  'password',
+  'token',
+  'access',
+  'refresh',
+  'submission_text',
+  'query',
+  'route_kwargs',
+])
+
 function normalizeApiErrors(error) {
   const payload = error?.response?.data
   if (!payload || typeof payload !== 'object') {
@@ -129,6 +159,132 @@ export default function TenantOperationsAudit() {
 
   function normalizeText(value) {
     return String(value || '').toLowerCase().trim()
+  }
+
+  function getStatusLabel(audit) {
+    if (audit.status_code >= 200 && audit.status_code < 300) {
+      return 'Se completó correctamente.'
+    }
+
+    if (audit.status_code >= 300 && audit.status_code < 400) {
+      return 'Se registró con redirección o seguimiento adicional.'
+    }
+
+    return 'Se registró con observaciones y conviene revisarlo.'
+  }
+
+  function formatFriendlyValue(value) {
+    if (value === null || value === undefined || value === '') {
+      return ''
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Sí' : 'No'
+    }
+
+    if (typeof value === 'number') {
+      return String(value)
+    }
+
+    if (typeof value === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) {
+        return formatAuditDate(value)
+      }
+
+      const trimmedValue = value.trim()
+      if (!trimmedValue) {
+        return ''
+      }
+
+      if (trimmedValue.length > 120) {
+        return 'Se registró contenido adicional en esta operación.'
+      }
+
+      return trimmedValue
+    }
+
+    if (Array.isArray(value)) {
+      if (!value.length) {
+        return ''
+      }
+      return `Se registraron ${value.length} elementos asociados.`
+    }
+
+    if (typeof value === 'object') {
+      const objectKeys = Object.keys(value)
+      if (!objectKeys.length) {
+        return ''
+      }
+      return `Se registraron ${objectKeys.length} datos adicionales.`
+    }
+
+    return String(value)
+  }
+
+  function getFriendlyFieldLabel(key) {
+    return FRIENDLY_METADATA_LABELS[key] || key.replace(/_/g, ' ')
+  }
+
+  function getFriendlyMetadataItems(audit) {
+    const metadata = audit.metadata && typeof audit.metadata === 'object' ? audit.metadata : {}
+    const payload = metadata.payload && typeof metadata.payload === 'object' ? metadata.payload : {}
+    const query = metadata.query && typeof metadata.query === 'object' ? metadata.query : {}
+
+    const items = []
+
+    Object.entries(payload).forEach(([key, value]) => {
+      if (OMITTED_METADATA_KEYS.has(key)) {
+        if (key === 'submission_text') {
+          items.push({
+            label: 'Contenido enviado',
+            value: 'Incluyó texto escrito en el envío.',
+          })
+        }
+        return
+      }
+
+      const formattedValue = formatFriendlyValue(value)
+      if (!formattedValue) {
+        return
+      }
+
+      items.push({
+        label: getFriendlyFieldLabel(key),
+        value: formattedValue,
+      })
+    })
+
+    if (Object.keys(query).length) {
+      items.push({
+        label: 'Criterios adicionales',
+        value: 'La acción se realizó con filtros o parámetros complementarios.',
+      })
+    }
+
+    if (!items.length && audit.target_id) {
+      items.push({
+        label: 'Registro relacionado',
+        value: `Corresponde al identificador interno ${audit.target_id}.`,
+      })
+    }
+
+    return items.slice(0, 6)
+  }
+
+  function getFriendlyDetailTitle(audit) {
+    if (audit.category === 'ACCESS') {
+      return 'Resumen de acceso o sesión'
+    }
+
+    if (audit.category === 'CONFIGURATION') {
+      return 'Resumen de configuración'
+    }
+
+    if (audit.category === 'USER_MANAGEMENT') {
+      return 'Resumen de gestión de usuarios'
+    }
+
+    return 'Resumen del movimiento'
   }
 
   function applyLocalFilters(sourceAudits, options = {}) {
@@ -489,7 +645,7 @@ export default function TenantOperationsAudit() {
                             setExpandedAuditId(expandedAuditId === audit.id ? null : audit.id)
                           }
                         >
-                          {expandedAuditId === audit.id ? 'Ocultar' : 'Ver'}
+                          {expandedAuditId === audit.id ? 'Ocultar' : 'Ver resumen'}
                         </button>
                       </td>
                     </tr>
@@ -498,12 +654,42 @@ export default function TenantOperationsAudit() {
                         <td colSpan={7}>
                           <div style={{ display: 'grid', gap: 'var(--space-sm)' }}>
                             <div>
-                              <strong>Descripción técnica</strong>
-                              <pre>{`${audit.action} | ${audit.method} | ${audit.path}`}</pre>
+                              <strong>{getFriendlyDetailTitle(audit)}</strong>
+                              <p className="notice" style={{ margin: '0.35rem 0 0' }}>
+                                {audit.summary}. {getStatusLabel(audit)}
+                              </p>
                             </div>
-                            <div>
-                              <strong>Detalle completo</strong>
-                              <pre>{JSON.stringify(audit.metadata, null, 2)}</pre>
+                            <div className="grid cols-2 grid-stack-mobile">
+                              <div>
+                                <strong>Información clave</strong>
+                                <div style={{ display: 'grid', gap: '0.45rem', marginTop: '0.5rem' }}>
+                                  <p className="notice" style={{ margin: 0 }}>
+                                    <strong>Área:</strong> {getCategoryLabel(audit.category)}
+                                  </p>
+                                  <p className="notice" style={{ margin: 0 }}>
+                                    <strong>Registro afectado:</strong> {getTargetLabel(audit)}
+                                  </p>
+                                  <p className="notice" style={{ margin: 0 }}>
+                                    <strong>Fecha del movimiento:</strong> {formatAuditDate(audit.created_at)}
+                                  </p>
+                                </div>
+                              </div>
+                              <div>
+                                <strong>Datos registrados</strong>
+                                <div style={{ display: 'grid', gap: '0.45rem', marginTop: '0.5rem' }}>
+                                  {getFriendlyMetadataItems(audit).length ? (
+                                    getFriendlyMetadataItems(audit).map((item) => (
+                                      <p key={`${audit.id}-${item.label}`} className="notice" style={{ margin: 0 }}>
+                                        <strong>{item.label}:</strong> {item.value}
+                                      </p>
+                                    ))
+                                  ) : (
+                                    <p className="notice" style={{ margin: 0 }}>
+                                      No hay detalles adicionales relevantes para mostrar.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </td>

@@ -105,4 +105,56 @@ describe('TenantOperationsAudit', () => {
     expect(screen.queryByText(/cambió el tenant activo/i)).not.toBeInTheDocument()
     expect(api.get).toHaveBeenCalledTimes(1)
   })
+
+  it('shows administrator-friendly details instead of technical raw data', async () => {
+    const user = userEvent.setup()
+    useAuth.mockReturnValue({
+      user: { role: 'ADMIN' },
+      activeTenantId: '11111111-1111-1111-1111-111111111111',
+    })
+
+    api.get.mockResolvedValueOnce({
+      data: {
+        results: [
+          {
+            id: 15,
+            category: 'ACADEMIC',
+            action: 'EXERCISE_EXECUTED',
+            summary: 'Ejecutó ejercicio',
+            actor_email: 'admin@test.com',
+            method: 'POST',
+            path: '/api/v1/courses/exercises/15/submit/',
+            target_type: 'exercise',
+            target_id: '15',
+            metadata: {
+              payload: {
+                submission_text: 'asdasdasd',
+              },
+              query: {},
+              route_kwargs: {
+                pk: '15',
+              },
+            },
+            status_code: 201,
+            created_at: '2026-03-12T15:00:00Z',
+          },
+        ],
+        offset: 0,
+        next_offset: null,
+        total_count: 1,
+      },
+    })
+
+    render(<TenantOperationsAudit />)
+
+    await user.click(await screen.findByRole('button', { name: /ver resumen/i }))
+
+    expect(screen.getByText(/resumen del movimiento/i)).toBeInTheDocument()
+    expect(screen.getByText(/incluyó texto escrito en el envío/i)).toBeInTheDocument()
+    expect(screen.queryByText(/descripción técnica/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/detalle completo/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/exercise_executed/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/submission_text/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/route_kwargs/i)).not.toBeInTheDocument()
+  })
 })
