@@ -504,14 +504,6 @@ export default function TenantCommercialAdmin() {
             >
               {loadingAudits ? 'Recargando...' : 'Recargar auditoría'}
             </button>
-            <button
-              className="btn secondary"
-              type="button"
-              onClick={exportAuditsJson}
-              disabled={!audits.length}
-            >
-              Exportar JSON
-            </button>
           </div>
         </div>
 

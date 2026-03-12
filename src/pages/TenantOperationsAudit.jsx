@@ -480,14 +480,6 @@ export default function TenantOperationsAudit() {
             >
               {loading ? 'Cargando logs...' : 'Recargar logs'}
             </button>
-            <button
-              className="btn secondary"
-              type="button"
-              onClick={exportAuditsJson}
-              disabled={!audits.length}
-            >
-              Exportar JSON
-            </button>
           </div>
         </div>
 
