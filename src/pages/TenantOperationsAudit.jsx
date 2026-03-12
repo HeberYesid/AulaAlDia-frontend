@@ -44,6 +44,13 @@ const IMPACT_LABELS = {
   low: 'Informativo',
 }
 
+const IMPACT_OPTIONS = [
+  { value: '', label: 'Todos' },
+  { value: 'high', label: 'Alta prioridad' },
+  { value: 'medium', label: 'Seguimiento' },
+  { value: 'low', label: 'Informativo' },
+]
+
 function normalizeApiErrors(error) {
   const payload = error?.response?.data
   if (!payload || typeof payload !== 'object') {
@@ -78,6 +85,7 @@ export default function TenantOperationsAudit() {
   const [loading, setLoading] = useState(false)
   const [auditActorEmail, setAuditActorEmail] = useState('')
   const [auditCategory, setAuditCategory] = useState('')
+  const [auditImpactLevel, setAuditImpactLevel] = useState('')
   const [auditSearch, setAuditSearch] = useState('')
   const [auditOrder, setAuditOrder] = useState('desc')
   const [auditDateFrom, setAuditDateFrom] = useState('')
@@ -136,6 +144,10 @@ export default function TenantOperationsAudit() {
 
     if (auditCategory) {
       filteredAudits = filteredAudits.filter((audit) => audit.category === auditCategory)
+    }
+
+    if (auditImpactLevel) {
+      filteredAudits = filteredAudits.filter((audit) => getImpactLevel(audit) === auditImpactLevel)
     }
 
     if (auditSearch.trim()) {
@@ -233,6 +245,7 @@ export default function TenantOperationsAudit() {
   function clearFilters() {
     setAuditActorEmail('')
     setAuditCategory('')
+    setAuditImpactLevel('')
     setAuditSearch('')
     setAuditOrder('desc')
     setAuditDateFrom('')
@@ -252,6 +265,7 @@ export default function TenantOperationsAudit() {
       filters: {
         actor_email: auditActorEmail || null,
         category: auditCategory || null,
+        impact_level: auditImpactLevel || null,
         search: auditSearch || null,
         order: auditOrder,
         date_from: auditDateFrom || null,
@@ -342,6 +356,21 @@ export default function TenantOperationsAudit() {
             >
               {CATEGORY_OPTIONS.map((option) => (
                 <option key={option.value || 'all'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="operation-impact-level">Nivel</label>
+            <select
+              id="operation-impact-level"
+              value={auditImpactLevel}
+              onChange={(event) => setAuditImpactLevel(event.target.value)}
+            >
+              {IMPACT_OPTIONS.map((option) => (
+                <option key={option.value || 'all-impact'} value={option.value}>
                   {option.label}
                 </option>
               ))}

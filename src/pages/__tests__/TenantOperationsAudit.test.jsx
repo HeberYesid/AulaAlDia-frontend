@@ -94,6 +94,7 @@ describe('TenantOperationsAudit', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'admin@')
     await user.selectOptions(screen.getByLabelText(/categoría/i), 'ACADEMIC')
+    await user.selectOptions(screen.getByLabelText(/^nivel$/i), 'low')
     await user.click(screen.getByRole('button', { name: /aplicar filtros/i }))
 
     await waitFor(() => {
