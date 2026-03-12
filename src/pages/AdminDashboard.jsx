@@ -334,14 +334,14 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid-2" style={{ display: 'grid', gap: 'var(--space-lg)', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-        <section className="card">
-          <h2 style={{ marginTop: 0 }}>Rendimiento por materia</h2>
+      <div className="grid-2 admin-dashboard__grid">
+        <section className="card admin-dashboard__section">
+          <h2 className="admin-dashboard__section-title">Rendimiento por materia</h2>
           {blockErrors.performance && <Alert type="error" message={blockErrors.performance} />}
           {performanceList.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No hay métricas disponibles aún.</p>
+            <p className="admin-dashboard__muted">No hay métricas disponibles aún.</p>
           ) : (
-            <div className="data-table">
+            <div className="data-table admin-dashboard__table">
               <table className="table mobile-card-view">
                 <thead>
                   <tr>
@@ -368,37 +368,37 @@ export default function AdminDashboard() {
           )}
         </section>
 
-        <section className="card">
-          <h2 style={{ marginTop: 0 }}>Ausencias y alertas</h2>
+        <section className="card admin-dashboard__section">
+          <h2 className="admin-dashboard__section-title">Ausencias y alertas</h2>
           {blockErrors.absences && <Alert type="error" message={blockErrors.absences} />}
-          <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>
+          <p className="admin-dashboard__muted admin-dashboard__muted--tight">
             Total faltas: <strong>{kpis.totalAbsences}</strong> | Sin justificar: <strong>{kpis.unjustifiedAbsences}</strong>
           </p>
           {riskStudents.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No hay estudiantes en riesgo por faltas en este momento.</p>
+            <p className="admin-dashboard__muted">No hay estudiantes en riesgo por faltas en este momento.</p>
           ) : (
-            <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+            <ul className="admin-dashboard__list">
               {riskStudents.map((student) => (
-                <li key={student.email || student.name} style={{ marginBottom: '0.5rem' }}>
+                <li key={student.email || student.name} className="admin-dashboard__list-item">
                   <strong>{student.name}</strong> ({student.count} faltas sin justificar)
                 </li>
               ))}
             </ul>
           )}
-          <div style={{ marginTop: 'var(--space-md)' }}>
+          <div className="admin-dashboard__actions">
             <Link className="btn secondary" to="/absences" style={{ textDecoration: 'none' }}>
               Ver módulo de asistencia
             </Link>
           </div>
         </section>
 
-        <section className="card">
-          <h2 style={{ marginTop: 0 }}>Observaciones recientes</h2>
+        <section className="card admin-dashboard__section">
+          <h2 className="admin-dashboard__section-title">Observaciones recientes</h2>
           {blockErrors.observations && <Alert type="error" message={blockErrors.observations} />}
           {recentObservationList.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No hay observaciones en los últimos 7 días.</p>
+            <p className="admin-dashboard__muted">No hay observaciones en los últimos 7 días.</p>
           ) : (
-            <div className="data-table">
+            <div className="data-table admin-dashboard__table">
               <table className="table mobile-card-view">
                 <thead>
                   <tr>
@@ -421,45 +421,45 @@ export default function AdminDashboard() {
               </table>
             </div>
           )}
-          <div style={{ marginTop: 'var(--space-md)' }}>
+          <div className="admin-dashboard__actions">
             <Link className="btn secondary" to="/observer" style={{ textDecoration: 'none' }}>
               Ver observador
             </Link>
           </div>
         </section>
 
-        <section className="card">
-          <h2 style={{ marginTop: 0 }}>Calendario y próximos hitos</h2>
+        <section className="card admin-dashboard__section">
+          <h2 className="admin-dashboard__section-title">Calendario y próximos hitos</h2>
           {blockErrors.calendar && <Alert type="error" message={blockErrors.calendar} />}
           {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
           {blockErrors.academicSettings && <Alert type="error" message={blockErrors.academicSettings} />}
           {academicSettings && (
-            <div style={{ marginBottom: 'var(--space-md)', padding: '0.75rem', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)' }}>
-              <p style={{ margin: 0 }}>
+            <div className="admin-dashboard__info-card">
+              <p className="admin-dashboard__info-card-copy">
                 <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)} | <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
                 {academicSettings.active_grading_scale_detail?.name ? ` | ${academicSettings.active_grading_scale_detail.name}` : ''}
               </p>
               {nextDeadline ? (
-                <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
+                <p className="admin-dashboard__info-card-note">
                   Próximo cierre operativo: <strong>{nextDeadline.label}</strong> el {formatDate(nextDeadline.grading_deadline)}
                 </p>
               ) : null}
-              <div style={{ marginTop: '0.75rem' }}>
+              <div className="admin-dashboard__info-card-actions">
                 <Link className="btn secondary" to="/admin/academic-settings" style={{ textDecoration: 'none' }}>
                   Ajustar configuración académica
                 </Link>
               </div>
             </div>
           )}
-          <h3 style={{ marginBottom: '0.5rem' }}>Eventos próximos</h3>
+          <h3 className="admin-dashboard__subheading">Eventos próximos</h3>
           {upcomingEvents.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No hay eventos futuros registrados.</p>
+            <p className="admin-dashboard__muted">No hay eventos futuros registrados.</p>
           ) : (
-            <ul style={{ marginTop: 0, paddingLeft: '1rem' }}>
+            <ul className="admin-dashboard__list admin-dashboard__list--tight-top">
               {upcomingEvents.map((event, index) => {
                 const eventStart = event.start || event.start_time || event.date
                 return (
-                  <li key={`${event.id || event.title}-${index}`} style={{ marginBottom: '0.5rem' }}>
+                  <li key={`${event.id || event.title}-${index}`} className="admin-dashboard__list-item">
                     <strong>{event.title || 'Evento'}</strong> - {formatDate(eventStart)}
                   </li>
                 )
@@ -467,52 +467,52 @@ export default function AdminDashboard() {
             </ul>
           )}
 
-          <h3 style={{ marginBottom: '0.5rem', marginTop: 'var(--space-md)' }}>Períodos abiertos</h3>
+          <h3 className="admin-dashboard__subheading admin-dashboard__subheading--spaced">Períodos abiertos</h3>
           {openPeriods.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No hay períodos académicos abiertos.</p>
+            <p className="admin-dashboard__muted">No hay períodos académicos abiertos.</p>
           ) : (
-            <ul style={{ marginTop: 0, paddingLeft: '1rem' }}>
+            <ul className="admin-dashboard__list admin-dashboard__list--tight-top">
               {openPeriods.map((period) => (
-                <li key={period.id} style={{ marginBottom: '0.5rem' }}>
+                <li key={period.id} className="admin-dashboard__list-item">
                   {period.label}
                   {period.is_grade_locked ? ' · Bloqueado' : ''}
                 </li>
               ))}
             </ul>
           )}
-          <div style={{ marginTop: 'var(--space-md)' }}>
+          <div className="admin-dashboard__actions">
             <Link className="btn secondary" to="/calendar" style={{ textDecoration: 'none' }}>
               Ver calendario completo
             </Link>
           </div>
         </section>
 
-        <section className="card">
-          <h2 style={{ marginTop: 0 }}>Notificaciones críticas</h2>
+        <section className="card admin-dashboard__section">
+          <h2 className="admin-dashboard__section-title">Notificaciones críticas</h2>
           {blockErrors.notifications && <Alert type="error" message={blockErrors.notifications} />}
-          <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>
+          <p className="admin-dashboard__muted admin-dashboard__muted--tight">
             Tienes <strong>{kpis.unreadNotifications}</strong> notificaciones sin leer.
           </p>
           {criticalNotifications.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No hay alertas sin leer.</p>
+            <p className="admin-dashboard__muted">No hay alertas sin leer.</p>
           ) : (
-            <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+            <ul className="admin-dashboard__list">
               {criticalNotifications.map((item) => (
-                <li key={item.id} style={{ marginBottom: '0.5rem' }}>
+                <li key={item.id} className="admin-dashboard__list-item">
                   <strong>{item.title || 'Notificación'}</strong> - {formatDate(item.created_at)}
                 </li>
               ))}
             </ul>
           )}
-          <div style={{ marginTop: 'var(--space-md)' }}>
+          <div className="admin-dashboard__actions">
             <Link className="btn secondary" to="/notifications" style={{ textDecoration: 'none' }}>
               Ver notificaciones
             </Link>
           </div>
         </section>
 
-        <section className="card admin-dashboard__quick-actions">
-          <h2 style={{ marginTop: 0 }}>Accesos rápidos de gestión</h2>
+        <section className="card admin-dashboard__section admin-dashboard__quick-actions">
+          <h2 className="admin-dashboard__section-title">Accesos rápidos de gestión</h2>
           <p className="admin-dashboard__quick-actions-copy">
             Atajos para tareas operativas frecuentes del administrador.
           </p>
