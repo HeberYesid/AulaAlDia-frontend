@@ -85,7 +85,7 @@ export default function Subjects() {
             </div>
             <div>
               <label htmlFor="subject-name">Nombre</label>
-              <input id="subject-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Programación Web" />
+              <input id="subject-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Matemáticas" />
             </div>
             <button className="btn" type="submit">Crear Materia</button>
           </form>
