@@ -5,7 +5,16 @@ import Dashboard from '../Dashboard'
 import * as AuthContext from '../../state/AuthContext'
 import { api } from '../../api/axios'
 
-vi.mock('../../api/axios')
+vi.mock('../../api/axios', () => ({
+  api: {
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  },
+  AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+  setApiActiveTenantId: vi.fn(),
+}))
 
 const mockTeacherUser = {
   id: 2,

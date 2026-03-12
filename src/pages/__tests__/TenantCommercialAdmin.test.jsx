@@ -15,6 +15,8 @@ vi.mock('../../api/axios', () => ({
     post: vi.fn(),
     patch: vi.fn(),
   },
+  AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+  setApiActiveTenantId: vi.fn(),
 }))
 
 describe('TenantCommercialAdmin', () => {

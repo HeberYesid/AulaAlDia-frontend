@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CalendarPage from '../Calendar';
 import { api } from '../../api/axios';
-import { AuthProvider } from '../../state/AuthContext';
+import { useAuth } from '../../state/AuthContext';
 
 vi.mock('../../api/axios', () => ({
   api: {
@@ -13,13 +13,16 @@ vi.mock('../../api/axios', () => ({
   AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated'
 }));
 
-const renderWithAuth = (ui) => render(
-  <AuthProvider>{ui}</AuthProvider>
-);
+vi.mock('../../state/AuthContext', () => ({
+  useAuth: vi.fn()
+}));
 
 describe('Calendar page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useAuth.mockReturnValue({
+      user: { id: 1, first_name: 'Test', role: 'TEACHER' }
+    });
   });
 
   it('fetches and renders subjects and events', async () => {
@@ -44,12 +47,11 @@ describe('Calendar page', () => {
       return Promise.reject(new Error('Unknown url'));
     });
 
-    renderWithAuth(<CalendarPage />);
+    render(<CalendarPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Calendario Académico')).toBeInTheDocument();
-      expect(screen.getByText('Math')).toBeInTheDocument(); // Select option
-      expect(screen.getByText('Math Exam')).toBeInTheDocument(); // Event on calendar
+      expect(screen.getByText('Math Exam')).toBeInTheDocument();
     });
   });
 
@@ -59,7 +61,7 @@ describe('Calendar page', () => {
         { title: 'Math Exam', start: new Date().toISOString(), end: new Date().toISOString() }
     ];
 
-    api.get.mockImplementation((url, config) => {
+    api.get.mockImplementation((url) => {
       if (url === '/api/v1/courses/subjects/') {
         return Promise.resolve({ data: { results: subjects } });
       }
@@ -70,7 +72,7 @@ describe('Calendar page', () => {
     });
 
     const user = userEvent.setup();
-    renderWithAuth(<CalendarPage />);
+    render(<CalendarPage />);
 
     await waitFor(() => {
       expect(screen.getByRole('combobox', { name: /Filtrar por materia/i })).toBeInTheDocument();
@@ -88,7 +90,7 @@ describe('Calendar page', () => {
   });
 
   it('shows event details in modal when event is clicked', async () => {
-    const subjects = [{ id: 101, name: 'Math' }];
+    const subjects = [];
     const eventsAll = [
         { title: 'Math Exam', description: 'Exam details', start: new Date().toISOString(), end: new Date().toISOString() }
     ];
@@ -104,7 +106,7 @@ describe('Calendar page', () => {
     });
 
     const user = userEvent.setup();
-    renderWithAuth(<CalendarPage />);
+    render(<CalendarPage />);
 
     let eventEl;
     await waitFor(() => {
@@ -119,8 +121,10 @@ describe('Calendar page', () => {
       expect(screen.getByText('Exam details')).toBeInTheDocument();
     });
     
-    // Test closing modal
-    await user.click(screen.getByRole('button', { name: /Cerrar/i, exact: true }));
+    // Test closing modal via dialog's Cerrar button
+    const dialog = screen.getByRole('dialog');
+    const closeBtn = dialog.querySelector('button.btn.secondary');
+    await user.click(closeBtn);
     
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

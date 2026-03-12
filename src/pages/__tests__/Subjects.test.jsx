@@ -10,8 +10,11 @@ vi.mock('../../api/axios', () => ({
   api: {
     get: vi.fn(),
     post: vi.fn(),
+    patch: vi.fn(),
     delete: vi.fn(),
   },
+  AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+  setApiActiveTenantId: vi.fn()
 }))
 
 describe('Subjects', () => {

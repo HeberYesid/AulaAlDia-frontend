@@ -28,7 +28,8 @@ vi.mock('../../api/axios', () => ({
     post: vi.fn(),
     patch: vi.fn(),
     delete: vi.fn(),
-  }
+  },
+  setApiActiveTenantId: vi.fn()
 }))
 
 // Mock react-router-dom

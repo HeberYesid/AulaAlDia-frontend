@@ -8,7 +8,14 @@ import * as axios from '../../api/axios'
 
 const mockNavigate = vi.fn()
 
-vi.mock('../../api/axios')
+vi.mock('../../api/axios', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+    setApiActiveTenantId: vi.fn(),
+  }
+})
 vi.mock('../../state/AuthContext', () => ({
   useAuth: vi.fn(),
 }))

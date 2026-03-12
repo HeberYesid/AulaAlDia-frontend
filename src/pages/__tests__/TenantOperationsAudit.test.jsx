@@ -12,7 +12,10 @@ vi.mock('../../state/AuthContext', () => ({
 vi.mock('../../api/axios', () => ({
   api: {
     get: vi.fn(),
+    post: vi.fn(),
   },
+  AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
+  setApiActiveTenantId: vi.fn()
 }))
 
 describe('TenantOperationsAudit', () => {
