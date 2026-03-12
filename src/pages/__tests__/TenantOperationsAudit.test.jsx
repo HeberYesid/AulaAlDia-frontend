@@ -75,7 +75,7 @@ describe('TenantOperationsAudit', () => {
 
     render(<TenantOperationsAudit />)
 
-    expect(await screen.findByText(/tabla de logs del tenant/i)).toBeInTheDocument()
+    expect(await screen.findByText(/tabla de logs de la institución/i)).toBeInTheDocument()
     expect(await screen.findByText(/creó una materia/i)).toBeInTheDocument()
     expect(await screen.findByText(/cambió el tenant activo/i)).toBeInTheDocument()
 
@@ -92,7 +92,7 @@ describe('TenantOperationsAudit', () => {
       })
     )
 
-    await user.type(screen.getByLabelText(/actor \(email contiene\)/i), 'admin@')
+    await user.type(screen.getByLabelText(/^email$/i), 'admin@')
     await user.selectOptions(screen.getByLabelText(/categoría/i), 'ACADEMIC')
     await user.click(screen.getByRole('button', { name: /aplicar filtros/i }))
 

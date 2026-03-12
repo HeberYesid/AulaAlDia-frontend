@@ -38,6 +38,12 @@ const TARGET_LABELS = {
   enrollment: 'Matrícula',
 }
 
+const IMPACT_LABELS = {
+  high: 'Alta prioridad',
+  medium: 'Seguimiento',
+  low: 'Informativo',
+}
+
 function normalizeApiErrors(error) {
   const payload = error?.response?.data
   if (!payload || typeof payload !== 'object') {
@@ -83,6 +89,22 @@ export default function TenantOperationsAudit() {
 
   function getCategoryLabel(category) {
     return CATEGORY_LABELS[category] || 'Otro'
+  }
+
+  function getImpactLevel(audit) {
+    if (audit.category === 'ACCESS' || audit.category === 'CONFIGURATION') {
+      return 'high'
+    }
+
+    if (audit.category === 'USER_MANAGEMENT' || String(audit.action || '').includes('DELETE')) {
+      return 'medium'
+    }
+
+    return 'low'
+  }
+
+  function getImpactLabel(audit) {
+    return IMPACT_LABELS[getImpactLevel(audit)] || IMPACT_LABELS.low
   }
 
   function getTargetLabel(audit) {
@@ -406,6 +428,7 @@ export default function TenantOperationsAudit() {
                   <th>Fecha</th>
                   <th>Quién hizo el cambio</th>
                   <th>Tipo de actividad</th>
+                  <th>Nivel</th>
                   <th>Qué pasó</th>
                   <th>Registro afectado</th>
                   <th>Detalle</th>
@@ -417,7 +440,16 @@ export default function TenantOperationsAudit() {
                     <tr>
                       <td data-label="Fecha">{formatAuditDate(audit.created_at)}</td>
                       <td data-label="Quién hizo el cambio">{audit.actor_email || 'Sistema'}</td>
-                      <td data-label="Tipo de actividad">{getCategoryLabel(audit.category)}</td>
+                      <td data-label="Tipo de actividad">
+                        <span className={`audit-log-badge audit-log-badge--category audit-log-badge--${String(audit.category || 'OTHER').toLowerCase().replace(/_/g, '-')}`}>
+                          {getCategoryLabel(audit.category)}
+                        </span>
+                      </td>
+                      <td data-label="Nivel">
+                        <span className={`audit-log-badge audit-log-badge--impact audit-log-badge--${getImpactLevel(audit)}`}>
+                          {getImpactLabel(audit)}
+                        </span>
+                      </td>
                       <td data-label="Qué pasó">{audit.summary}</td>
                       <td data-label="Registro afectado">{getTargetLabel(audit)}</td>
                       <td data-label="Detalle">
@@ -434,7 +466,7 @@ export default function TenantOperationsAudit() {
                     </tr>
                     {expandedAuditId === audit.id ? (
                       <tr>
-                        <td colSpan={6}>
+                        <td colSpan={7}>
                           <div style={{ display: 'grid', gap: 'var(--space-sm)' }}>
                             <div>
                               <strong>Descripción técnica</strong>
