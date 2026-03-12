@@ -4,11 +4,16 @@ import { useAuth } from '../state/AuthContext'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 const INITIAL_FORM = {
-  student_email: '',
+  student_id: '',
   subject_id: '',
   date: '',
   justified: false,
   reason: '',
+}
+
+const buildStudentLabel = (student) => {
+  const fullName = [student.first_name, student.last_name].filter(Boolean).join(' ').trim()
+  return fullName ? `${fullName} (${student.email})` : student.email
 }
 
 export default function Absences() {
@@ -20,6 +25,8 @@ export default function Absences() {
   const [subjects, setSubjects] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(INITIAL_FORM)
+  const [subjectStudents, setSubjectStudents] = useState([])
+  const [loadingStudents, setLoadingStudents] = useState(false)
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
@@ -51,10 +58,42 @@ export default function Absences() {
     }
   }
 
+  const loadSubjectStudents = async (subjectId) => {
+    if (!subjectId) {
+      setSubjectStudents([])
+      return
+    }
+
+    setLoadingStudents(true)
+    try {
+      const res = await api.get(`/api/v1/courses/subjects/${subjectId}/enrollments/`)
+      const enrollments = Array.isArray(res.data) ? res.data : []
+      const students = enrollments
+        .map((enrollment) => enrollment.student)
+        .filter(Boolean)
+        .sort((left, right) => buildStudentLabel(left).localeCompare(buildStudentLabel(right), 'es'))
+      setSubjectStudents(students)
+    } catch (err) {
+      console.error('Error loading subject students:', err)
+      setSubjectStudents([])
+    } finally {
+      setLoadingStudents(false)
+    }
+  }
+
   useEffect(() => {
     loadAbsences()
     loadSubjects()
   }, [])
+
+  useEffect(() => {
+    if (!showForm || !form.subject_id) {
+      setSubjectStudents([])
+      return
+    }
+
+    loadSubjectStudents(form.subject_id)
+  }, [form.subject_id, showForm])
 
   const filteredAbsences = useMemo(() => {
     let list = absences
@@ -91,6 +130,17 @@ export default function Absences() {
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target
+
+    if (name === 'subject_id') {
+      setForm((prev) => ({
+        ...prev,
+        subject_id: value,
+        student_id: '',
+      }))
+      setFormError('')
+      return
+    }
+
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -103,7 +153,7 @@ export default function Absences() {
     setSubmitting(true)
     try {
       const payload = {
-        student_email: form.student_email,
+        student_id: Number(form.student_id),
         subject_id: Number(form.subject_id),
         date: form.date,
         justified: form.justified,
@@ -113,6 +163,7 @@ export default function Absences() {
       }
       await api.post('/api/v1/courses/absences/', payload)
       setForm(INITIAL_FORM)
+      setSubjectStudents([])
       setShowForm(false)
       loadAbsences()
     } catch (err) {
@@ -209,19 +260,6 @@ export default function Absences() {
               }}
             >
               <div className="form-group">
-                <label htmlFor="abs-email">Email del estudiante *</label>
-                <input
-                  id="abs-email"
-                  type="email"
-                  name="student_email"
-                  value={form.student_email}
-                  onChange={handleFormChange}
-                  required
-                  placeholder="estudiante@email.com"
-                  autoComplete="email"
-                />
-              </div>
-              <div className="form-group">
                 <label htmlFor="abs-subject">Materia *</label>
                 <select
                   id="abs-subject"
@@ -234,6 +272,32 @@ export default function Absences() {
                   {subjects.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.code} - {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="abs-student">Estudiante *</label>
+                <select
+                  id="abs-student"
+                  name="student_id"
+                  value={form.student_id}
+                  onChange={handleFormChange}
+                  required
+                  disabled={!form.subject_id || loadingStudents || subjectStudents.length === 0}
+                >
+                  <option value="">
+                    {loadingStudents
+                      ? 'Cargando estudiantes...'
+                      : subjectStudents.length > 0
+                        ? '— Seleccionar estudiante —'
+                        : form.subject_id
+                          ? 'No hay estudiantes disponibles'
+                          : 'Selecciona una materia'}
+                  </option>
+                  {subjectStudents.map((student) => (
+                    <option key={student.id} value={student.id}>
+                      {buildStudentLabel(student)}
                     </option>
                   ))}
                 </select>
@@ -300,6 +364,7 @@ export default function Absences() {
                 onClick={() => {
                   setShowForm(false)
                   setForm(INITIAL_FORM)
+                  setSubjectStudents([])
                   setFormError('')
                 }}
               >
