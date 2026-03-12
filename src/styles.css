@@ -1476,10 +1476,6 @@ form {
   justify-content: center;
   text-align: center;
   white-space: normal;
-  line-height: 1.35;
-  padding: 0.875rem 1.25rem;
-  overflow: visible;
-  word-break: break-word;
 }
 
 @media (max-width: 767px) {
@@ -1496,7 +1492,7 @@ form {
   }
 
   .admin-dashboard__quick-actions-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
