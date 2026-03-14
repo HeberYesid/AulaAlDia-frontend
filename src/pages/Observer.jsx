@@ -1,144 +1,45 @@
-import { useEffect, useState, useMemo } from 'react'
-import { api } from '../api/axios'
+import { useState } from 'react'
 import { useAuth } from '../state/AuthContext'
 import ConfirmDialog from '../components/ConfirmDialog'
-
-const CATEGORIES = [
-  { value: 'MISBEHAVIOR', label: 'Mal comportamiento', color: '#ef4444' },
-  { value: 'OTHER', label: 'Otro', color: '#6b7280' },
-]
-
-const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map(c => [c.value, c]))
-
-const INITIAL_FORM = {
-  student_email: '',
-  subject: '',
-  category: 'OTHER',
-  title: '',
-  description: '',
-}
+import { useStudentSearch } from '../hooks/useStudentSearch'
+import { useObservations, CATEGORIES, CATEGORY_MAP, INITIAL_FORM } from '../hooks/useObservations'
 
 export default function Observer() {
   const { user } = useAuth()
-  const isTeacherOrAdmin = user?.role === 'TEACHER' || user?.role === 'ADMIN'
+  
+  const {
+    isTeacherOrAdmin,
+    observations,
+    loading,
+    subjects,
+    searchTerm,
+    setSearchTerm,
+    categoryFilter,
+    setCategoryFilter,
+    subjectFilter,
+    setSubjectFilter,
+    filteredObservations,
+    stats,
+    submitObservation,
+    deleteObservation
+  } = useObservations(user)
 
-  const [observations, setObservations] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [subjects, setSubjects] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(INITIAL_FORM)
-  const [studentSearch, setStudentSearch] = useState('')
-  const [studentOptions, setStudentOptions] = useState([])
-  const [selectedStudent, setSelectedStudent] = useState(null)
-  const [studentSearchLoading, setStudentSearchLoading] = useState(false)
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
   const [confirmDialog, setConfirmDialog] = useState(null)
 
-  // Filters
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
-  const [subjectFilter, setSubjectFilter] = useState('')
-
-  async function loadObservations() {
-    setLoading(true)
-    try {
-      const res = await api.get('/api/v1/courses/observations/')
-      setObservations(res.data)
-    } catch (err) {
-      console.error('Error loading observations:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function loadSubjects() {
-    try {
-      const res = await api.get('/api/v1/courses/subjects/')
-      setSubjects(res.data)
-    } catch (err) {
-      console.error('Error loading subjects:', err)
-    }
-  }
-
-  useEffect(() => {
-    loadObservations()
-    loadSubjects()
-  }, [])
-
-  useEffect(() => {
-    const trimmedSearch = studentSearch.trim()
-
-    if (!showForm || !isTeacherOrAdmin || trimmedSearch.length < 2) {
-      setStudentOptions([])
-      setStudentSearchLoading(false)
-      return undefined
-    }
-
-    if (selectedStudent && trimmedSearch === selectedStudent.full_name) {
-      setStudentOptions([])
-      setStudentSearchLoading(false)
-      return undefined
-    }
-
-    let cancelled = false
-    const timeoutId = setTimeout(async () => {
-      setStudentSearchLoading(true)
-      try {
-        const response = await api.get('/api/v1/courses/observations/student-options/', {
-          params: { search: trimmedSearch },
-        })
-        if (!cancelled) {
-          setStudentOptions(Array.isArray(response.data) ? response.data : [])
-        }
-      } catch (err) {
-        if (!cancelled) {
-          console.error('Error searching students:', err)
-          setStudentOptions([])
-        }
-      } finally {
-        if (!cancelled) {
-          setStudentSearchLoading(false)
-        }
-      }
-    }, 250)
-
-    return () => {
-      cancelled = true
-      clearTimeout(timeoutId)
-    }
-  }, [isTeacherOrAdmin, selectedStudent, showForm, studentSearch])
-
-  const filteredObservations = useMemo(() => {
-    let list = observations
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase()
-      list = list.filter(o =>
-        (o.student_name && o.student_name.toLowerCase().includes(term)) ||
-        (o.student_email_display && o.student_email_display.toLowerCase().includes(term)) ||
-        (o.title && o.title.toLowerCase().includes(term)) ||
-        (o.teacher_name && o.teacher_name.toLowerCase().includes(term))
-      )
-    }
-    if (categoryFilter) {
-      list = list.filter(o => o.category === categoryFilter)
-    }
-    if (subjectFilter) {
-      list = list.filter(o => String(o.subject) === subjectFilter)
-    }
-    return list
-  }, [observations, searchTerm, categoryFilter, subjectFilter])
-
-  // Stats
-  const stats = useMemo(() => {
-    const total = observations.length
-    const byCategory = {}
-    for (const c of CATEGORIES) {
-      byCategory[c.value] = observations.filter(o => o.category === c.value).length
-    }
-    return { total, byCategory }
-  }, [observations])
+  const {
+    searchTerm: studentSearch,
+    setSearchTerm: setStudentSearch,
+    options: studentOptions,
+    loading: studentSearchLoading,
+    selectedStudent,
+    setSelectedStudent,
+    clearSearch: clearStudentSearch
+  } = useStudentSearch('', showForm && isTeacherOrAdmin)
 
   const handleFormChange = (e) => {
     const { name, value } = e.target
@@ -156,16 +57,13 @@ export default function Observer() {
   const handleStudentSelect = (student) => {
     setSelectedStudent(student)
     setStudentSearch(student.full_name)
-    setStudentOptions([])
     setForm(prev => ({ ...prev, student_email: student.email }))
     setFormError('')
   }
 
   const resetObservationForm = () => {
     setForm(INITIAL_FORM)
-    setStudentSearch('')
-    setStudentOptions([])
-    setSelectedStudent(null)
+    clearStudentSearch()
     setFormError('')
   }
 
@@ -189,12 +87,11 @@ export default function Observer() {
       if (form.subject) {
         payload.subject = Number(form.subject)
       }
-      await api.post('/api/v1/courses/observations/', payload)
+      await submitObservation(payload)
       resetObservationForm()
       setShowForm(false)
-      loadObservations()
     } catch (err) {
-      const data = err.response?.data
+      const data = err?.response?.data
       if (data) {
         const messages = Object.values(data).flat().join(' ')
         setFormError(messages || 'Error al crear la observación.')
@@ -213,8 +110,7 @@ export default function Observer() {
       onConfirm: async () => {
         setConfirmDialog(null)
         try {
-          await api.delete(`/api/v1/courses/observations/${id}/`)
-          loadObservations()
+          await deleteObservation(id)
         } catch (err) {
           console.error('Error deleting observation:', err)
         }

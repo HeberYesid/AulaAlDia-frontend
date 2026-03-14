@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api, setApiActiveTenantId } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import { APP_CONFIG, VALIDATION_MESSAGES } from '../utils/constants'
 
 export default function RegisterTeacher() {
   const { user, activeTenantId } = useAuth()
@@ -251,9 +252,9 @@ export default function RegisterTeacher() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Minimo 8 caracteres"
+                placeholder={`Minimo ${APP_CONFIG.MIN_PASSWORD_LENGTH} caracteres`}
                 style={{ paddingRight: '2.5rem' }}
-                minLength={8}
+                minLength={APP_CONFIG.MIN_PASSWORD_LENGTH}
                 required
               />
               <button
@@ -266,7 +267,7 @@ export default function RegisterTeacher() {
               </button>
             </div>
             <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
-              La contrasena debe tener al menos 8 caracteres.
+              {VALIDATION_MESSAGES.PASSWORD_TOO_SHORT}
             </small>
           </div>
 
@@ -280,7 +281,7 @@ export default function RegisterTeacher() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Ingresa la contrasena nuevamente"
                 style={{ paddingRight: '2.5rem' }}
-                minLength={8}
+                minLength={APP_CONFIG.MIN_PASSWORD_LENGTH}
                 required
               />
               <button
@@ -294,7 +295,7 @@ export default function RegisterTeacher() {
             </div>
             {confirmPassword && password !== confirmPassword && (
               <small style={{ color: 'var(--danger)', fontSize: 'var(--font-size-xs)' }}>
-                Las contrasenas no coinciden.
+                {VALIDATION_MESSAGES.PASSWORDS_MUST_MATCH}
               </small>
             )}
             {confirmPassword && password === confirmPassword && (
