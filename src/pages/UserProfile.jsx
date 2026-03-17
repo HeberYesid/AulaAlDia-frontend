@@ -35,19 +35,25 @@ export default function UserProfile() {
   const [tutorInvitationStatus, setTutorInvitationStatus] = useState(null)
   const [tutorInviteEmail, setTutorInviteEmail] = useState('')
   const [isSubmittingTutorInvite, setIsSubmittingTutorInvite] = useState(false)
+  const [highlightTutorSection, setHighlightTutorSection] = useState(false)
 
   useEffect(() => {
     loadUserProfile()
   }, [])
 
-  // Mover suavemente hacia la sección si hay un hash en la URL
+  // Mover suavemente hacia la sección si hay un hash en la URL y resaltarla
   useEffect(() => {
     if (!loading && user && location.hash) {
       setTimeout(() => {
         const id = location.hash.replace('#', '')
         const element = document.getElementById(id)
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          
+          if (id === 'tutor-invite-section') {
+            setHighlightTutorSection(true)
+            setTimeout(() => setHighlightTutorSection(false), 3000)
+          }
         }
       }, 100)
     }
@@ -669,7 +675,16 @@ export default function UserProfile() {
       </div>
 
       {user.role === 'STUDENT' && (
-        <div className="card" id="tutor-invite-section">
+        <div 
+          className="card" 
+          id="tutor-invite-section"
+          style={{
+            transition: 'all 0.5s ease',
+            boxShadow: highlightTutorSection ? '0 0 0 4px var(--primary)' : '0 1px 3px rgba(0,0,0,0.1)',
+            borderColor: highlightTutorSection ? 'var(--primary)' : 'var(--border-primary)',
+            transform: highlightTutorSection ? 'scale(1.02)' : 'scale(1)'
+          }}
+        >
           <h2 style={{ marginBottom: 'var(--space-lg)' }}>Invitar Acudiente</h2>
           {tutorInvitationStatus?.has_tutor ? (
             <div style={{
