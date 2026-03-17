@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { api } from '../api/axios'
 import { showPasswordChangeToast } from '../utils/toast'
 import { useAuth } from '../state/AuthContext'
@@ -17,6 +17,7 @@ export default function UserProfile() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const navigate = useNavigate()
+  const location = useLocation()
 
   // Form states
   const [firstName, setFirstName] = useState('')
@@ -38,6 +39,19 @@ export default function UserProfile() {
   useEffect(() => {
     loadUserProfile()
   }, [])
+
+  // Mover suavemente hacia la sección si hay un hash en la URL
+  useEffect(() => {
+    if (!loading && user && location.hash) {
+      setTimeout(() => {
+        const id = location.hash.replace('#', '')
+        const element = document.getElementById(id)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
+    }
+  }, [loading, user, location.hash])
 
   async function loadUserProfile() {
     setLoading(true)
@@ -655,7 +669,7 @@ export default function UserProfile() {
       </div>
 
       {user.role === 'STUDENT' && (
-        <div className="card">
+        <div className="card" id="tutor-invite-section">
           <h2 style={{ marginBottom: 'var(--space-lg)' }}>Invitar Acudiente</h2>
           {tutorInvitationStatus?.has_tutor ? (
             <div style={{
