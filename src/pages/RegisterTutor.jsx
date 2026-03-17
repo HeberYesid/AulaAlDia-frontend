@@ -207,6 +207,19 @@ export default function RegisterTutor() {
             />
           </div>
 
+          {invitation && (
+            <div className="form-group">
+              <label>Estudiante Asociado (Hijo/a)</label>
+              <input 
+                type="text" 
+                value={invitation.student_name || invitation.student_email || 'No especificado'} 
+                readOnly 
+                disabled 
+                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', cursor: 'not-allowed', fontStyle: 'italic', opacity: 0.8 }}
+              />
+            </div>
+          )}
+
           <div className="grid cols-2" style={{ gap: '1rem' }}>
             <div className="form-group">
               <label htmlFor="first-name">Nombres</label>
