@@ -10,11 +10,25 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { user, lastLoginAt, logout } = useAuth()
+  const [showTutorNotice, setShowTutorNotice] = useState(false)
 
   useEffect(() => {
     loadDashboard()
-  }, [])
+    
+    // Si no tiene acudiente y es el primer ingreso (lastLoginAt === null)
+    if (user?.role === 'STUDENT' && !user.tutor_email && lastLoginAt === null) {
+      const alreadyDismissed = sessionStorage.getItem('tutorNoticeDismissed')
+      if (!alreadyDismissed) {
+        setShowTutorNotice(true)
+      }
+    }
+  }, [user, lastLoginAt])
+
+  const dismissTutorNotice = () => {
+    setShowTutorNotice(false)
+    sessionStorage.setItem('tutorNoticeDismissed', 'true')
+  }
 
   async function loadDashboard() {
     setLoading(true)
@@ -71,6 +85,49 @@ export default function StudentDashboard() {
 
   return (
     <div className="fade-in">
+      {/* Notificación de Primer Ingreso (Añadir Acudiente) */}
+      {showTutorNotice && (
+        <div style={{
+          backgroundColor: 'var(--primary-light, #e0f2fe)',
+          border: '1px solid var(--primary, #3b82f6)',
+          borderRadius: 'var(--radius-md)',
+          padding: 'var(--space-md) var(--space-lg)',
+          marginBottom: 'var(--space-xl)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+        }}>
+          <div>
+            <h3 style={{ margin: '0 0 0.25rem 0', color: 'var(--primary-dark, #1e40af)', fontSize: '1.2rem' }}>
+              ¡Bienvenido a AulaAlDía!
+            </h3>
+            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+              Es tu primer ingreso. Te recomendamos{' '}
+              <Link to="/profile" style={{ fontWeight: '600', color: 'var(--primary)', textDecoration: 'underline' }}>
+                añadir a tu acudiente
+              </Link>{' '}
+              en tu perfil para que pueda acompañarte en tu proceso.
+            </p>
+          </div>
+          <button
+            onClick={dismissTutorNotice}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.5rem',
+              color: 'var(--text-muted)',
+              padding: '0 0.5rem',
+              lineHeight: 1
+            }}
+            aria-label="Cerrar notificación"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Mis Materias */}
       <div style={{ marginBottom: 'var(--space-xl)' }}>
         <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: '1.5rem', fontWeight: 'bold' }}>
