@@ -60,8 +60,14 @@ export function ThemeProvider({ children }) {
     // Aplicar atributo data-theme al documento (usado por CSS)
     document.documentElement.setAttribute('data-theme', theme)
     
-    // También agregar clase al body para compatibilidad adicional
-    document.body.className = theme === 'dark' ? 'dark-theme' : 'light-theme'
+    // También agregar clase al body para compatibilidad adicional, sin borrar otras clases existenes
+    if (theme === 'dark') {
+      document.body.classList.add('dark-theme')
+      document.body.classList.remove('light-theme')
+    } else {
+      document.body.classList.add('light-theme')
+      document.body.classList.remove('dark-theme')
+    }
   }, [theme])
 
   /**
