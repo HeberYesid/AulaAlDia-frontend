@@ -148,23 +148,23 @@ export default function RegisterTutor() {
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card fade-in">
+    <div className="auth-container" style={{ minHeight: '100vh', padding: '2rem 1rem', alignItems: 'flex-start' }}>
+      <div className="auth-card fade-in" style={{ margin: 'auto' }}>
         <div className="auth-header">
           <h1><span className="auth-icon"></span> Acceso de Acudiente</h1>
-          <p>Este registro esta disponible solo por invitacion asociada a un estudiante.</p>
+          <p>Este registro está disponible solo por invitación asociada a un estudiante.</p>
         </div>
 
         <form onSubmit={onSubmit} className="auth-form">
           {!codeFromQuery && (
             <div className="alert error" role="alert" aria-live="polite">
-              Esta pagina solo habilita altas por invitacion. Usa el enlace enviado por el estudiante o ingresa tu codigo manualmente.
+              Esta página solo habilita altas por invitación. Usa el enlace enviado por el estudiante o ingresa tu código manualmente.
             </div>
           )}
 
           {isLoadingInvitation && (
             <div className="alert success" role="status" aria-live="polite">
-              Validando invitacion...
+              Validando invitación...
             </div>
           )}
 
@@ -175,10 +175,21 @@ export default function RegisterTutor() {
           )}
 
           {invitation && (
-            <div className="card" style={{ marginBottom: 'var(--space-md)', background: 'var(--bg-secondary)' }}>
-              <p style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600 }}>{invitation.tenant_name}</p>
-              <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-                Invitacion para acompanar a {invitation.student_name || invitation.student_email}.
+            <div 
+              style={{ 
+                marginBottom: 'var(--space-md)', 
+                padding: '1rem',
+                background: 'var(--bg-secondary)', 
+                borderLeft: '4px solid var(--primary-color)',
+                borderRadius: '8px',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: 600 }}>
+                {invitation.tenant_name}
+              </h3>
+              <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                Invitación para acompañar a <strong>{invitation.student_name || invitation.student_email}</strong>.
               </p>
             </div>
           )}
@@ -196,7 +207,7 @@ export default function RegisterTutor() {
             />
           </div>
 
-          <div className="grid cols-2">
+          <div className="grid cols-2" style={{ gap: '1rem' }}>
             <div className="form-group">
               <label htmlFor="first-name">Nombres</label>
               <input id="first-name" value={firstName} onChange={(event) => setFirstName(event.target.value)} type="text" required />
@@ -210,8 +221,8 @@ export default function RegisterTutor() {
           <div className="form-group">
             <label htmlFor="email">Correo Electrónico</label>
             <input id="email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" readOnly={Boolean(invitation?.email)} required />
-            <small style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
-              Debe coincidir con el correo al que se envio la invitacion.
+            <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+              Debe coincidir con el correo al que se envió la invitación.
             </small>
           </div>
 
@@ -225,20 +236,24 @@ export default function RegisterTutor() {
                 type={showPassword ? 'text' : 'password'}
                 minLength={8}
                 required
-                style={{ paddingRight: '2.5rem' }}
+                style={{ paddingRight: '4.5rem' }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 style={{
                   position: 'absolute',
-                  right: '0.5rem',
+                  right: '0.75rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.85rem',
+                  fontWeight: '600',
+                  padding: '0.2rem'
                 }}
               >
                 {showPassword ? 'Ocultar' : 'Mostrar'}
@@ -256,20 +271,24 @@ export default function RegisterTutor() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 minLength={8}
                 required
-                style={{ paddingRight: '2.5rem' }}
+                style={{ paddingRight: '4.5rem' }}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={showConfirmPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+                aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 style={{
                   position: 'absolute',
-                  right: '0.5rem',
+                  right: '0.75rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.85rem',
+                  fontWeight: '600',
+                  padding: '0.2rem'
                 }}
               >
                 {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
@@ -294,7 +313,7 @@ export default function RegisterTutor() {
           </div>
 
           <button className="btn auth-btn" type="submit" disabled={isLoading || isLoadingInvitation || Boolean(invitationError) || !isCaptchaReady || !turnstileToken || !invitationCode}>
-            {isLoading ? 'Creando cuenta...' : isLoadingInvitation ? 'Validando invitacion...' : invitationError ? 'Invitacion no disponible' : 'Completar acceso de acudiente'}
+            {isLoading ? 'Creando cuenta...' : isLoadingInvitation ? 'Validando invitación...' : invitationError ? 'Invitación no disponible' : 'Completar acceso'}
           </button>
 
           {message && <div className="alert success">{message}</div>}
@@ -302,8 +321,8 @@ export default function RegisterTutor() {
         </form>
 
         <div className="auth-footer">
-          <p>Ya tienes cuenta? <Link to={`/login${authQuerySuffix}`} className="link">Inicia sesion aqui</Link></p>
-          <p>Si necesitas ayuda con la invitacion, contacta al estudiante o a la institucion.</p>
+          <p>¿Ya tienes cuenta? <Link to={`/login${authQuerySuffix}`} className="link">Inicia sesión aquí</Link></p>
+          <p>Si necesitas ayuda con la invitación, contacta al estudiante o a la institución.</p>
         </div>
       </div>
     </div>
