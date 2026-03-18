@@ -166,15 +166,23 @@ export function AuthProvider({ children }) {
     await api.post('/api/v1/auth/register/', payload)
   }
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('auth')
-    setUser(null)
-    setAccess(null)
-    setRefresh(null)
-    setActiveTenantId(null)
-    setTenants([])
-    setApiActiveTenantId(null)
-  }, [])
+  const logout = useCallback(async () => {
+    try {
+      if (access) {
+        await api.post('/api/v1/auth/logout/')
+      }
+    } catch (error) {
+      console.error('Error during logout:', error)
+    } finally {
+      localStorage.removeItem('auth')
+      setUser(null)
+      setAccess(null)
+      setRefresh(null)
+      setActiveTenantId(null)
+      setTenants([])
+      setApiActiveTenantId(null)
+    }
+  }, [access])
 
   useEffect(() => {
     const handleAuthInvalidated = () => {
