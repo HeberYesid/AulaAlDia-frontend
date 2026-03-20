@@ -125,10 +125,10 @@ Si quieres que el tour aparezca más rápido para pruebas:
 ```bash
 # Iniciar frontend
 cd frontend
-npm run dev
+pnpm dev
 
 # Limpiar caché de Vite (si hay problemas)
-npm run build -- --force
+pnpm build -- --force
 
 # Ver en tiempo real
 # Abre: http://localhost:5173
