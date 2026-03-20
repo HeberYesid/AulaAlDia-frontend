@@ -1,11 +1,10 @@
-import { expect, afterEach, vi } from 'vitest'
+import { expect, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-// Cleanup after each test
-afterEach(() => {
-  cleanup()
-})
+// No need for afterEach(() => cleanup()) and mock clearing anymore, 
+// enabled clearMocks and restoreMocks in vitest.config.js
+
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
