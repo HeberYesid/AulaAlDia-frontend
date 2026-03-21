@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import Alert from '../components/Alert'
+import SchoolHeader from '../components/SchoolHeader'
 
 const MS_IN_DAY = 24 * 60 * 60 * 1000
 
@@ -297,6 +298,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="fade-in">
+      <SchoolHeader />
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Dashboard Administrativo</h1>

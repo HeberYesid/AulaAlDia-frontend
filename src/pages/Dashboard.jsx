@@ -6,6 +6,7 @@ import StudentDashboard from './StudentDashboard'
 import Alert from '../components/Alert'
 import WelcomePanel from '../components/WelcomePanel'
 import ConfirmDialog from '../components/ConfirmDialog'
+import SchoolHeader from '../components/SchoolHeader'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -75,6 +76,8 @@ export default function Dashboard() {
     return (
       <>
       <div className="fade-in">
+        <SchoolHeader />
+        
         {/* Mensajes de éxito/error */}
         <Alert type="success" message={success} />
         <Alert type="error" message={error} />

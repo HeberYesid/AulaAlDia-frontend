@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import WelcomePanel from '../components/WelcomePanel'
+import SchoolHeader from '../components/SchoolHeader'
 import { useAuth } from '../state/AuthContext'
 
 export default function StudentDashboard() {
@@ -77,6 +78,8 @@ export default function StudentDashboard() {
 
   return (
     <div className="fade-in">
+      <SchoolHeader />
+
       {/* Notificación para Añadir Acudiente */}
       {showTutorNotice && (
         <div style={{
