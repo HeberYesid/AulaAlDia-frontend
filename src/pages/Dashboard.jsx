@@ -76,11 +76,10 @@ export default function Dashboard() {
   if (user.role === 'TEACHER' || user.role === 'ADMIN' || user.role === 'TUTOR') {
     return (
       <>
-      <div className="dashboard-layout fade-in">
-        <div className="dashboard-main-content">
-          <SchoolHeader />
-          
-          {/* Mensajes de éxito/error */}
+      <div className="fade-in">
+        <SchoolHeader />
+        
+        {/* Mensajes de éxito/error */}
         <Alert type="success" message={success} />
         <Alert type="error" message={error} />
 
@@ -173,7 +172,6 @@ export default function Dashboard() {
         </div>
 
         <WelcomePanel />
-        </div>
         <SidebarBanner />
       </div>
       {confirmDialog && (

@@ -78,11 +78,10 @@ export default function StudentDashboard() {
   const { summary, subjects_progress, pending_exercises, recent_results } = dashboard
 
   return (
-    <div className="dashboard-layout fade-in">
-      <div className="dashboard-main-content">
-        <SchoolHeader />
+    <div className="fade-in">
+      <SchoolHeader />
 
-        {/* Notificación para Añadir Acudiente */}
+      {/* Notificación para Añadir Acudiente */}
       {showTutorNotice && (
         <div style={{
           backgroundColor: 'var(--bg-secondary)',
@@ -302,7 +301,6 @@ export default function StudentDashboard() {
       </div>
 
       <WelcomePanel />
-      </div>
       <SidebarBanner />
     </div>
   )

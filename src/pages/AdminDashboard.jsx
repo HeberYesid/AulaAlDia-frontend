@@ -298,10 +298,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="dashboard-layout fade-in">
-      <div className="dashboard-main-content">
-        <SchoolHeader />
-        <div className="dashboard-header">
+    <div className="fade-in">
+      <SchoolHeader />
+      <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Dashboard Administrativo</h1>
           <p className="dashboard-subtitle">
@@ -535,7 +534,6 @@ export default function AdminDashboard() {
             </Link>
           </div>
         </section>
-      </div>
       </div>
       <SidebarBanner />
     </div>
