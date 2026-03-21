@@ -7,6 +7,7 @@ import Alert from '../components/Alert'
 import WelcomePanel from '../components/WelcomePanel'
 import ConfirmDialog from '../components/ConfirmDialog'
 import SchoolHeader from '../components/SchoolHeader'
+import SidebarBanner from '../components/SidebarBanner'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -75,10 +76,11 @@ export default function Dashboard() {
   if (user.role === 'TEACHER' || user.role === 'ADMIN' || user.role === 'TUTOR') {
     return (
       <>
-      <div className="fade-in">
-        <SchoolHeader />
-        
-        {/* Mensajes de éxito/error */}
+      <div className="dashboard-layout fade-in">
+        <div className="dashboard-main-content">
+          <SchoolHeader />
+          
+          {/* Mensajes de éxito/error */}
         <Alert type="success" message={success} />
         <Alert type="error" message={error} />
 
@@ -171,6 +173,8 @@ export default function Dashboard() {
         </div>
 
         <WelcomePanel />
+        </div>
+        <SidebarBanner />
       </div>
       {confirmDialog && (
         <ConfirmDialog

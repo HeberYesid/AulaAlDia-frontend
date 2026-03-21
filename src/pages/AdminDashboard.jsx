@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import SchoolHeader from '../components/SchoolHeader'
+import SidebarBanner from '../components/SidebarBanner'
 
 const MS_IN_DAY = 24 * 60 * 60 * 1000
 
@@ -297,9 +298,10 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="fade-in">
-      <SchoolHeader />
-      <div className="dashboard-header">
+    <div className="dashboard-layout fade-in">
+      <div className="dashboard-main-content">
+        <SchoolHeader />
+        <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Dashboard Administrativo</h1>
           <p className="dashboard-subtitle">
@@ -534,6 +536,8 @@ export default function AdminDashboard() {
           </div>
         </section>
       </div>
+      </div>
+      <SidebarBanner />
     </div>
   )
 }

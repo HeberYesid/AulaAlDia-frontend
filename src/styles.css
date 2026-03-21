@@ -4818,3 +4818,109 @@ a.welcome-panel__notif-link:hover {
     font-size: 2rem;
   }
 }
+
+/* Dashboard Layout with Sidebar Banner */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.dashboard-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.sidebar-banner {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: var(--space-lg);
+}
+
+.sidebar-banner__section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 2px solid var(--primary-color, #3b82f6);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar-banner__event {
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-secondary);
+  margin-bottom: var(--space-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-banner__event:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-banner__event-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.sidebar-banner__event-date {
+  font-size: 0.8rem;
+  color: var(--primary-color, #3b82f6);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sidebar-banner__announcement {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--accent-color, #8b5cf6);
+}
+
+.sidebar-banner__announcement p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sidebar-banner__announcement strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-banner__empty {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-md) 0;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-banner {
+    position: static;
+  }
+}
