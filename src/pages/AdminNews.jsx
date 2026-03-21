@@ -150,31 +150,34 @@ export default function AdminNews() {
         />
       )}
 
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-        <div>
-          <h1 style={{ margin: 0 }}>Gestión de Novedades e Institucional</h1>
-          <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-xs) 0 0 0' }}>Administra los anuncios generales y eventos institucionales del portal.</p>
-        </div>
-        <button className="btn primary" onClick={() => openModal()}>
-          Crear {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}
-        </button>
+      <div className="page-header" style={{ marginBottom: 'var(--space-lg)' }}>
+        <h1 style={{ margin: 0 }}>Gestión de Novedades e Institucional</h1>
+        <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-xs) 0 0 0' }}>Administra los anuncios generales y eventos institucionales del portal.</p>
       </div>
 
       <Alert type="error" message={error} />
       <Alert type="success" message={success} />
 
-      <div className="subject-tabs" style={{ marginBottom: 'var(--space-md)' }}>
-        <button
-          className={`subject-tab ${activeTab === 'announcements' ? 'subject-tab--active' : ''}`}
-          onClick={() => setActiveTab('announcements')}
-        >
-          Anuncios Generales
-        </button>
-        <button
-          className={`subject-tab ${activeTab === 'events' ? 'subject-tab--active' : ''}`}
-          onClick={() => setActiveTab('events')}
-        >
-          Eventos Institucionales
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
+        <div className="subject-tabs" style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', flex: '1 1 auto', margin: 0 }}>
+          <button
+            className={`subject-tab ${activeTab === 'announcements' ? 'subject-tab--active' : ''}`}
+            onClick={() => setActiveTab('announcements')}
+            style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap', margin: 0 }}
+          >
+            Anuncios Generales
+          </button>
+          <button
+            className={`subject-tab ${activeTab === 'events' ? 'subject-tab--active' : ''}`}
+            onClick={() => setActiveTab('events')}
+            style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap', margin: 0 }}
+          >
+            Eventos Institucionales
+          </button>
+        </div>
+        
+        <button className="btn primary" onClick={() => openModal()} style={{ whiteSpace: 'nowrap', flex: '0 1 auto' }}>
+          Crear {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}
         </button>
       </div>
 
@@ -225,11 +228,11 @@ export default function AdminNews() {
                         </td>
                       )}
                       <td data-label="Acciones">
-                        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
-                          <button onClick={() => openModal(item)} className="btn secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          <button onClick={() => openModal(item)} className="btn secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }} aria-label={`Editar ${item.title}`}>
                             Editar
                           </button>
-                          <button onClick={() => handleDeleteClick(item)} className="btn danger" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                          <button onClick={() => handleDeleteClick(item)} className="btn danger" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }} aria-label={`Eliminar ${item.title}`}>
                             Eliminar
                           </button>
                         </div>
@@ -248,9 +251,18 @@ export default function AdminNews() {
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.5)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-md)'
-        }}>
-          <div className="card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2 style={{ marginTop: 0 }}>{editingItem ? 'Editar' : 'Crear'} {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}</h2>
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) closeModal();
+        }}
+        role="dialog"
+        aria-modal="true"
+        >
+          <div className="card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+              <h2 style={{ margin: 0 }}>{editingItem ? 'Editar' : 'Crear'} {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}</h2>
+              <button onClick={closeModal} className="btn-close" aria-label="Cerrar modal" style={{ background: 'transparent', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '0 0.5rem' }}>&times;</button>
+            </div>
             
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
               <div>
@@ -341,9 +353,9 @@ export default function AdminNews() {
                 </>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
-                <button type="button" onClick={closeModal} className="btn secondary">Cancelar</button>
-                <button type="submit" className="btn primary">Guardar</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-sm)', marginTop: 'var(--space-md)', flexWrap: 'wrap' }}>
+                <button type="button" onClick={closeModal} className="btn secondary" style={{ flex: '1', minWidth: '100px' }}>Cancelar</button>
+                <button type="submit" className="btn primary" style={{ flex: '1', minWidth: '100px' }}>Guardar</button>
               </div>
             </form>
           </div>
