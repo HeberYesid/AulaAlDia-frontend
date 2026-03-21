@@ -138,6 +138,24 @@ export default function App() {
             />
 
           <Route
+            path="/subjects"
+            element={
+              <ProtectedRoute roles={["TEACHER", "ADMIN"]}>
+                <Subjects />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subjects/:id"
+            element={
+              <ProtectedRoute roles={["TEACHER", "ADMIN", "STUDENT", "TUTOR"]}>
+                <SubjectDetail />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/notifications"
             element={
               <ProtectedRoute>
