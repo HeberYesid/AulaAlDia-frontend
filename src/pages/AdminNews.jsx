@@ -15,7 +15,7 @@ export default function AdminNews() {
   // Form states
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [isActive, setIsActive] = useState(true)
+
 
   const [dateStart, setDateStart] = useState('')
   const [dateEnd, setDateEnd] = useState('')
@@ -55,7 +55,7 @@ export default function AdminNews() {
       setTitle(item.title || '')
       if (activeTab === 'announcements') {
         setContent(item.content || '')
-        setIsActive(item.is_active !== false)
+
       } else {
         setContent(item.description || '')
         setEventType(item.event_type || 'OTHER')
@@ -65,8 +65,8 @@ export default function AdminNews() {
     } else {
       setTitle('')
       setContent('')
-      setIsActive(true)
       setDateStart('')
+
       setDateEnd('')
       setEventType('OTHER')
     }
@@ -87,7 +87,8 @@ export default function AdminNews() {
       let url = activeTab === 'announcements' ? '/api/v1/courses/announcements/' : '/api/v1/courses/calendar/'
       
       if (activeTab === 'announcements') {
-        payload = { title, content, is_active: isActive }
+        payload = { title, content, is_active: true }
+
       } else {
         payload = {
           title,
@@ -288,15 +289,7 @@ export default function AdminNews() {
                       required 
                     />
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
-                    <input 
-                      type="checkbox" 
-                      id="isActive"
-                      checked={isActive} 
-                      onChange={e => setIsActive(e.target.checked)} 
-                    />
-                    <label htmlFor="isActive" style={{ margin: 0 }}>Anuncio activo (visible en sidebar)</label>
-                  </div>
+
                 </>
               ) : (
                 <>
@@ -309,24 +302,26 @@ export default function AdminNews() {
                       onChange={e => setContent(e.target.value)} 
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)' }}>
-                    <div>
-                      <label>Inicio</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-sm)', alignItems: 'end' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                      <label htmlFor="event-start">Inicio</label>
                       <input 
+                        id="event-start"
                         type="datetime-local" 
                         className="input-field" 
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', minHeight: '42px', boxSizing: 'border-box' }}
                         value={dateStart} 
                         onChange={e => setDateStart(e.target.value)} 
                         required 
                       />
                     </div>
-                    <div>
-                      <label>Fin</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                      <label htmlFor="event-end">Fin</label>
                       <input 
+                        id="event-end"
                         type="datetime-local" 
                         className="input-field" 
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', minHeight: '42px', boxSizing: 'border-box' }}
                         value={dateEnd} 
                         onChange={e => setDateEnd(e.target.value)} 
                         required 
