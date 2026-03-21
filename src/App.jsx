@@ -35,6 +35,7 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const AdminNews = lazy(() => import('./pages/AdminNews'))
 const Subjects = lazy(() => import('./pages/Subjects'))
 const SubjectDetail = lazy(() => import('./pages/SubjectDetail'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
@@ -127,23 +128,14 @@ export default function App() {
             }
           />
 
-          <Route
-            path="/subjects"
-            element={
-              <ProtectedRoute roles={["TEACHER", "ADMIN"]}>
-                <Subjects />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/subjects/:id"
-            element={
-              <ProtectedRoute>
-                <SubjectDetail />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin/news"
+              element={
+                <ProtectedRoute roles={["ADMIN"]}>
+                  <AdminNews />
+                </ProtectedRoute>
+              }
+            />
 
           <Route
             path="/notifications"

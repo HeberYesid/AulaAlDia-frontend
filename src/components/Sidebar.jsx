@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Megaphone,
 } from 'lucide-react'
 
 const SIDEBAR_COLLAPSED_KEY = 'aulaaldia-sidebar-collapsed'
@@ -104,6 +105,12 @@ export default function Sidebar() {
       to: '/admin/dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
+      show: user.role === 'ADMIN',
+    },
+    {
+      to: '/admin/news',
+      label: 'Gestión de Novedades',
+      icon: Megaphone,
       show: user.role === 'ADMIN',
     },
     {

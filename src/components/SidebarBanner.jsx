@@ -10,14 +10,20 @@ function toDate(value) {
 
 export default function SidebarBanner() {
   const [events, setEvents] = useState([])
+  const [announcements, setAnnouncements] = useState([])
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    async function loadEvents() {
+    async function loadData() {
       try {
-        const { data } = await api.get('/api/v1/courses/calendar/all_events/')
-        const allEvents = Array.isArray(data) ? data : []
+        const [eventsRes, annRes] = await Promise.all([
+          api.get('/api/v1/courses/calendar/all_events/'),
+          api.get('/api/v1/courses/announcements/')
+        ])
+        
+        const allEvents = Array.isArray(eventsRes.data) ? eventsRes.data : []
+        const allAnnouncements = Array.isArray(annRes.data) ? annRes.data : []
         
         const now = new Date()
         
@@ -36,14 +42,15 @@ export default function SidebarBanner() {
           .slice(0, 4)
 
         setEvents(upcomingEvents)
+        setAnnouncements(allAnnouncements.filter(a => a.is_active).slice(0, 5))
       } catch (err) {
-        console.error('Error loading calendar events for sidebar:', err)
+        console.error('Error loading sidebar data:', err)
       } finally {
         setLoading(false)
       }
     }
 
-    loadEvents()
+    loadData()
   }, [])
 
   // Prevenir scroll en el body cuando el panel está abierto
@@ -96,10 +103,21 @@ export default function SidebarBanner() {
           <h3 className="sidebar-banner__section-title">
             <span>📣</span> Anuncios Generales
           </h3>
-          <div className="sidebar-banner__announcement">
-            <strong>¡Bienvenidos a nuestro portal!</strong>
-            <p>Mantente al día con las últimas novedades de la institución. Revisa regularmente este espacio para comunicados importantes.</p>
-          </div>
+          {loading ? (
+            <div className="sidebar-banner__empty">Cargando anuncios...</div>
+          ) : announcements.length === 0 ? (
+            <div className="sidebar-banner__empty">No hay anuncios generales en este momento.</div>
+          ) : (
+            announcements.map((ann, idx) => (
+              <div key={ann.id || idx} className="sidebar-banner__announcement" style={{marginBottom: "1rem"}}>
+                <strong>{ann.title}</strong>
+                <p style={{whiteSpace: "pre-wrap"}}>{ann.content}</p>
+                <small style={{display: "block", marginTop: "0.5rem", color: "#666"}}>
+                  {new Date(ann.created_at).toLocaleDateString('es-CO')}
+                </small>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="sidebar-banner__section">
