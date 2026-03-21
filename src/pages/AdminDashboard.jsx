@@ -307,9 +307,6 @@ export default function AdminDashboard() {
             Vista consolidada para seguimiento académico y gestión operativa.
           </p>
         </div>
-        <button className="btn secondary" onClick={loadDashboard}>
-          Actualizar datos
-        </button>
       </div>
 
       <Alert type="error" message={error} />
