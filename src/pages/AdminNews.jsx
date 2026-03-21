@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { api } from '../api/axios'
-import { Plus, Edit2, Trash2, Calendar, Megaphone, X } from 'lucide-react'
+import Alert from '../components/Alert'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function AdminNews() {
   const [activeTab, setActiveTab] = useState('announcements') // 'announcements' | 'events'
@@ -8,15 +9,19 @@ export default function AdminNews() {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   
   // Form states
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState('') // announcement body
+  const [content, setContent] = useState('')
   const [isActive, setIsActive] = useState(true)
 
   const [dateStart, setDateStart] = useState('')
   const [dateEnd, setDateEnd] = useState('')
   const [eventType, setEventType] = useState('OTHER')
+  
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   useEffect(() => {
     loadData()
@@ -24,26 +29,27 @@ export default function AdminNews() {
 
   async function loadData() {
     setLoading(true)
+    setError('')
     try {
       if (activeTab === 'announcements') {
         const res = await api.get('/api/v1/courses/announcements/')
         setData(res.data)
       } else {
         const res = await api.get('/api/v1/courses/calendar/')
-        // Filter out event subjects if we only want institutional context, 
-        // but for now let's just show those created without a subject (Institutional)
-        // or all. Let's just show events that have no subject.
         const institutionalEvents = res.data.filter(e => !e.subject)
         setData(institutionalEvents)
       }
     } catch (err) {
       console.error(err)
+      setError('Error al cargar la información.')
     } finally {
       setLoading(false)
     }
   }
 
   function openModal(item = null) {
+    setError('')
+    setSuccess('')
     setEditingItem(item)
     if (item) {
       setTitle(item.title || '')
@@ -74,6 +80,8 @@ export default function AdminNews() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    setError('')
+    setSuccess('')
     try {
       let payload = {}
       let url = activeTab === 'announcements' ? '/api/v1/courses/announcements/' : '/api/v1/courses/calendar/'
@@ -87,242 +95,255 @@ export default function AdminNews() {
           start_time: new Date(dateStart).toISOString(),
           end_time: new Date(dateEnd).toISOString(),
           event_type: eventType,
-          subject: null // Institutional event
+          subject: null
         }
       }
 
-      if (editingItem) {
-        await api.put(`${url}${editingItem.id}/`, payload)
-      } else {
-        await api.post(url, payload)
-      }
+      const method = editingItem ? api.put : api.post
+      const fullUrl = editingItem ? `${url}${editingItem.id}/` : url
+      
+      await method(fullUrl, payload)
+      setSuccess('Registro guardado exitosamente.')
       closeModal()
       loadData()
+      setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error(err)
-      alert("Ocurrió un error al guardar.")
+      const detail = err.response?.data?.detail || err.message
+      setError(`Ocurrió un error al guardar: ${detail}`)
     }
   }
 
   async function handleDelete(id) {
-    if (!window.confirm("¿Estás seguro de eliminar este registro?")) return
+    setError('')
+    setSuccess('')
     try {
       const url = activeTab === 'announcements' ? '/api/v1/courses/announcements/' : '/api/v1/courses/calendar/'
       await api.delete(`${url}${id}/`)
+      setSuccess('Registro eliminado exitosamente.')
       loadData()
+      setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error(err)
-      alert("Error al eliminar.")
+      setError("Error al eliminar el registro.")
     }
   }
 
-  if (loading && data.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <div className="spinner"></div>
-      </div>
-    )
+  function handleDeleteClick(item) {
+    setConfirmDelete(item)
+  }
+
+  function handleConfirmDelete() {
+    const item = confirmDelete
+    setConfirmDelete(null)
+    handleDelete(item.id)
   }
 
   return (
-    <div className="page-container p-6 w-full max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <div className="page-container">
+      {confirmDelete && (
+        <ConfirmDialog
+          title="¿Eliminar registro?"
+          message={`¿Estás seguro de que deseas eliminar "${confirmDelete.title}"? Esta acción no se puede deshacer.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Megaphone className="w-6 h-6 text-primary-500" />
-            Gestión de Novedades e Institucional
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Administra los anuncios generales y eventos institucionales del portal.
-          </p>
+          <h1 style={{ margin: 0 }}>Gestión de Novedades e Institucional</h1>
+          <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-xs) 0 0 0' }}>Administra los anuncios generales y eventos institucionales del portal.</p>
         </div>
-        <button 
-          onClick={() => openModal()}
-          className="mt-4 md:mt-0 btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
+        <button className="btn primary" onClick={() => openModal()}>
           Crear {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}
         </button>
       </div>
 
-      <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-        <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
-          <li className="mr-2">
-            <button
-              className={`inline-block p-4 border-b-2 rounded-t-lg flex items-center gap-2 ${
-                activeTab === 'announcements' 
-                  ? 'text-primary-600 border-primary-600 dark:text-primary-500 dark:border-primary-500' 
-                  : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'
-              }`}
-              onClick={() => setActiveTab('announcements')}
-            >
-              <Megaphone className="w-4 h-4" /> Anuncios Generales
-            </button>
-          </li>
-          <li className="mr-2">
-            <button
-              className={`inline-block p-4 border-b-2 rounded-t-lg flex items-center gap-2 ${
-                activeTab === 'events' 
-                  ? 'text-primary-600 border-primary-600 dark:text-primary-500 dark:border-primary-500' 
-                  : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'
-              }`}
-              onClick={() => setActiveTab('events')}
-            >
-              <Calendar className="w-4 h-4" /> Eventos Institucionales
-            </button>
-          </li>
-        </ul>
+      <Alert type="error" message={error} />
+      <Alert type="success" message={success} />
+
+      <div className="subject-tabs" style={{ marginBottom: 'var(--space-md)' }}>
+        <button
+          className={`subject-tab ${activeTab === 'announcements' ? 'subject-tab--active' : ''}`}
+          onClick={() => setActiveTab('announcements')}
+        >
+          Anuncios Generales
+        </button>
+        <button
+          className={`subject-tab ${activeTab === 'events' ? 'subject-tab--active' : ''}`}
+          onClick={() => setActiveTab('events')}
+        >
+          Eventos Institucionales
+        </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {data.length === 0 && !loading && (
-          <div className="col-span-full p-8 text-center text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300">
-            No hay registros para mostrar.
-          </div>
-        )}
-        
-        {data.map(item => (
-          <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative group">
-            <div className="p-5">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-2">
-                  {item.title}
-                </h3>
-              </div>
-              {activeTab === 'announcements' ? (
-                <>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                    {item.content}
-                  </p>
-                  <div className="flex justify-between items-center mt-4 text-xs font-medium">
-                    <span className={`px-2 py-1 rounded-full ${item.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {item.is_active ? 'Activo' : 'Inactivo'}
-                    </span>
-                    <span className="text-gray-500">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                    {item.description || 'Sin descripción'}
-                  </p>
-                  <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
-                    <p><strong>Inicio:</strong> {new Date(item.start_time).toLocaleString()}</p>
-                    <p><strong>Fin:</strong> {new Date(item.end_time).toLocaleString()}</p>
-                    <p><strong>Tipo:</strong> {item.event_type}</p>
-                  </div>
-                </>
-              )}
+      {loading && data.length === 0 ? (
+        <div style={{ padding: 'var(--space-2xl)', textAlign: 'center' }}>
+          <div className="spinner"></div>
+        </div>
+      ) : (
+        <div className="card">
+          {data.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
+              No hay {activeTab === 'announcements' ? 'anuncios' : 'eventos'} para mostrar.
             </div>
-            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-gray-800 rounded shadow px-1 py-1">
-              <button onClick={() => openModal(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Editar">
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Eliminar">
-                <Trash2 className="w-4 h-4" />
-              </button>
+          ) : (
+            <div className="table-container">
+              <table className="table mobile-card-view">
+                <thead>
+                  <tr>
+                    <th scope="col">Título</th>
+                    {activeTab === 'announcements' ? (
+                      <th scope="col">Estado</th>
+                    ) : (
+                      <th scope="col">Fechas</th>
+                    )}
+                    <th scope="col" style={{ textAlign: 'right' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map(item => (
+                    <tr key={item.id}>
+                      <td data-label="Título">
+                        <strong style={{ display: 'block' }}>{item.title}</strong>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          {activeTab === 'announcements' ? 
+                           (item.content?.length > 50 ? item.content.substring(0, 50) + '...' : item.content) : 
+                           (item.description ? (item.description.length > 50 ? item.description.substring(0, 50) + '...' : item.description) : '')}
+                        </span>
+                      </td>
+                      {activeTab === 'announcements' ? (
+                        <td data-label="Estado">
+                          {item.is_active ? 
+                           <span style={{ color: 'var(--success-color, green)', fontWeight: 'bold' }}>Activo</span> : 
+                           <span style={{ color: 'var(--text-muted)' }}>Inactivo</span>}
+                        </td>
+                      ) : (
+                        <td data-label="Fechas">
+                          {new Date(item.start_time).toLocaleDateString()}
+                        </td>
+                      )}
+                      <td data-label="Acciones">
+                        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
+                          <button onClick={() => openModal(item)} className="btn secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                            Editar
+                          </button>
+                          <button onClick={() => handleDeleteClick(item)} className="btn danger" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </div>
+      )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg overflow-hidden">
-            <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                {editingItem ? 'Editar' : 'Crear'} {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}
-              </h2>
-              <button onClick={closeModal} className="text-gray-500 hover:bg-gray-100 p-1 rounded-full">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-md)'
+        }}>
+          <div className="card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h2 style={{ marginTop: 0 }}>{editingItem ? 'Editar' : 'Crear'} {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}</h2>
+            
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
               <div>
-                <label className="block text-sm font-medium mb-1">Título</label>
+                <label>Título</label>
                 <input 
-                  required
-                  type="text"
-                  className="input-field w-full"
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
+                  className="input-field" 
+                  style={{ width: '100%' }}
+                  value={title} 
+                  onChange={e => setTitle(e.target.value)} 
+                  required 
                 />
               </div>
 
               {activeTab === 'announcements' ? (
                 <>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Contenido</label>
+                    <label>Contenido</label>
                     <textarea 
-                      required
-                      className="input-field w-full min-h-[100px]"
-                      value={content}
-                      onChange={e => setContent(e.target.value)}
+                      className="input-field" 
+                      style={{ width: '100%', minHeight: '100px', resize: 'vertical' }}
+                      value={content} 
+                      onChange={e => setContent(e.target.value)} 
+                      required 
                     />
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
                     <input 
-                      type="checkbox"
+                      type="checkbox" 
                       id="isActive"
-                      checked={isActive}
-                      onChange={e => setIsActive(e.target.checked)}
-                      className="rounded text-primary-600 focus:ring-primary-500 border-gray-300"
+                      checked={isActive} 
+                      onChange={e => setIsActive(e.target.checked)} 
                     />
-                    <label htmlFor="isActive" className="text-sm font-medium">Anuncio activo (visible en sidebar)</label>
+                    <label htmlFor="isActive" style={{ margin: 0 }}>Anuncio activo (visible en sidebar)</label>
                   </div>
                 </>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Descripción</label>
+                    <label>Descripción</label>
                     <textarea 
-                      className="input-field w-full"
-                      value={content}
-                      onChange={e => setContent(e.target.value)}
+                      className="input-field" 
+                      style={{ width: '100%', minHeight: '80px', resize: 'vertical' }}
+                      value={content} 
+                      onChange={e => setContent(e.target.value)} 
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)' }}>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Inicio</label>
+                      <label>Inicio</label>
                       <input 
-                        required
-                        type="datetime-local"
-                        className="input-field w-full"
-                        value={dateStart}
-                        onChange={e => setDateStart(e.target.value)}
+                        type="datetime-local" 
+                        className="input-field" 
+                        style={{ width: '100%' }}
+                        value={dateStart} 
+                        onChange={e => setDateStart(e.target.value)} 
+                        required 
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Fin</label>
+                      <label>Fin</label>
                       <input 
-                        required
-                        type="datetime-local"
-                        className="input-field w-full"
-                        value={dateEnd}
-                        onChange={e => setDateEnd(e.target.value)}
+                        type="datetime-local" 
+                        className="input-field" 
+                        style={{ width: '100%' }}
+                        value={dateEnd} 
+                        onChange={e => setDateEnd(e.target.value)} 
+                        required 
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Tipo de Evento</label>
+                    <label>Tipo de Evento</label>
                     <select 
-                      className="input-field w-full"
-                      value={eventType}
+                      className="input-field" 
+                      style={{ width: '100%' }}
+                      value={eventType} 
                       onChange={e => setEventType(e.target.value)}
                     >
-                      <option value="OTHER">Otro</option>
                       <option value="CLASS">Clase</option>
-                      <option value="EXAM">Exámen</option>
+                      <option value="EXAM">Examen</option>
+                      <option value="ASSIGNMENT">Entrega de Tarea</option>
+                      <option value="EVENT">Evento</option>
+                      <option value="MEETING">Reunión</option>
+                      <option value="HOLIDAY">Día Feriado</option>
+                      <option value="OTHER">Otro</option>
                     </select>
                   </div>
                 </>
               )}
-              
-              <div className="flex justify-end gap-2 pt-4 border-t dark:border-gray-700">
-                <button type="button" onClick={closeModal} className="btn-secondary">Cancelar</button>
-                <button type="submit" className="btn-primary">Guardar</button>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
+                <button type="button" onClick={closeModal} className="btn secondary">Cancelar</button>
+                <button type="submit" className="btn primary">Guardar</button>
               </div>
             </form>
           </div>
