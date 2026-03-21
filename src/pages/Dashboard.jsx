@@ -83,19 +83,6 @@ export default function Dashboard() {
         <Alert type="success" message={success} />
         <Alert type="error" message={error} />
 
-        {user.role !== 'TEACHER' && (
-          <div className="dashboard-header">
-            <div>
-              <h1 className="dashboard-title">
-                {user.role === 'ADMIN' ? 'Panel de Administrador' : 'Panel de Acudiente'}
-              </h1>
-              <p className="dashboard-subtitle">
-                {user.role === 'ADMIN' ? 'Acceso completo al sistema' : 'Monitorea el progreso de estudiantes vinculados'}
-              </p>
-            </div>
-          </div>
-        )}
-
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
             <h2>{user.role === 'TUTOR' ? 'Materias Vinculadas' : 'Mis Materias'}</h2>

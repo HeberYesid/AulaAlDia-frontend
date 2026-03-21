@@ -50,7 +50,6 @@ describe('AdminDashboard page', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Dashboard Administrativo')).toBeInTheDocument();
       expect(screen.getByText('Math')).toBeInTheDocument();
     });
   });
@@ -70,7 +69,6 @@ describe('AdminDashboard page', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Dashboard Administrativo')).toBeInTheDocument();
       expect(screen.getByText(/dashboard carg/i)).toBeInTheDocument();
     });
   });

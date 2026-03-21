@@ -300,15 +300,6 @@ export default function AdminDashboard() {
   return (
     <div className="fade-in">
       <SchoolHeader />
-      <div className="dashboard-header">
-        <div>
-          <h1 className="dashboard-title">Dashboard Administrativo</h1>
-          <p className="dashboard-subtitle">
-            Vista consolidada para seguimiento académico y gestión operativa.
-          </p>
-        </div>
-      </div>
-
       <Alert type="error" message={error} />
 
       <div className="stats-grid" style={{ marginBottom: 'var(--space-lg)' }}>
