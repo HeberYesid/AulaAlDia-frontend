@@ -3,7 +3,6 @@ import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
 
 const PLAN_OPTIONS = [
-  { value: 'FREE', label: 'Free' },
   { value: 'SCHOOL', label: 'School' },
   { value: 'ENTERPRISE', label: 'Enterprise' },
 ]
@@ -38,7 +37,7 @@ export default function TenantCommercialAdmin() {
   const [supportDuration, setSupportDuration] = useState(30)
   const [commercial, setCommercial] = useState(null)
   const [audits, setAudits] = useState([])
-  const [plan, setPlan] = useState('FREE')
+  const [plan, setPlan] = useState('SCHOOL')
   const [maxSubjects, setMaxSubjects] = useState('')
   const [maxStudents, setMaxStudents] = useState('')
   const [maxTeachers, setMaxTeachers] = useState('')
@@ -80,7 +79,7 @@ export default function TenantCommercialAdmin() {
 
   function applyCommercialState(payload) {
     setCommercial(payload)
-    setPlan(payload.plan || 'FREE')
+    setPlan(payload.plan || 'SCHOOL')
     setMaxSubjects(payload.max_subjects ?? '')
     setMaxStudents(payload.max_students ?? '')
     setMaxTeachers(payload.max_teachers ?? '')
