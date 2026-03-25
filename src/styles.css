@@ -4790,6 +4790,36 @@ a.welcome-panel__notif-link:hover {
   background: linear-gradient(135deg, rgba(201, 123, 47, 0.14) 0%, rgba(45, 106, 104, 0.1) 100%);
 }
 
+/* Dark mode cohesion — reduce visible section boxes on landing */
+[data-theme="dark"] .landing-page .landing-hero,
+[data-theme="dark"] .landing-page .landing-stats,
+[data-theme="dark"] .landing-page .landing-cta-final,
+[data-theme="dark"] .landing-about {
+  background: transparent;
+  border-top-color: transparent;
+  border-bottom-color: color-mix(in srgb, var(--border-primary) 30%, transparent);
+}
+
+[data-theme="dark"] .landing-page .landing-stats {
+  border-top: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-primary) 35%, transparent);
+}
+
+[data-theme="dark"] .landing-stats__item {
+  border-right-color: color-mix(in srgb, var(--border-primary) 40%, transparent);
+}
+
+[data-theme="dark"] .landing-hero__badge,
+[data-theme="dark"] .landing-pricing__card,
+[data-theme="dark"] .landing-testimonials__card,
+[data-theme="dark"] .landing-screenshots__mock,
+[data-theme="dark"] .landing-faq-preview__item,
+[data-theme="dark"] .landing-about__tech {
+  background: color-mix(in srgb, var(--bg-card) 76%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
 .landing-cta-final__inner {
   max-width: 640px;
   margin: 0 auto;

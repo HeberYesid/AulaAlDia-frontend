@@ -7,8 +7,47 @@ const DEFAULT_BRANDING = {
   displayName: 'AulaAlDía',
   sidebarLogoUrl: '',
   faviconUrl: '/favicon.svg',
-  primaryColor: '#3b82f6',
-  accentColor: '#8b5cf6',
+  primaryColor: '#c97b2f',
+  accentColor: '#f2c572',
+}
+
+function normalizeHexColor(color) {
+  if (typeof color !== 'string') return null
+  const trimmed = color.trim()
+
+  if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) return trimmed
+
+  if (/^#[0-9a-fA-F]{3}$/.test(trimmed)) {
+    const r = trimmed[1]
+    const g = trimmed[2]
+    const b = trimmed[3]
+    return `#${r}${r}${g}${g}${b}${b}`
+  }
+
+  return null
+}
+
+function shiftHexColor(hexColor, amount) {
+  const normalized = normalizeHexColor(hexColor)
+  if (!normalized) return hexColor
+
+  const r = parseInt(normalized.slice(1, 3), 16)
+  const g = parseInt(normalized.slice(3, 5), 16)
+  const b = parseInt(normalized.slice(5, 7), 16)
+
+  const applyShift = (channel) => {
+    if (amount >= 0) {
+      return Math.round(channel + (255 - channel) * amount)
+    }
+    return Math.round(channel * (1 + amount))
+  }
+
+  const toHex = (channel) => {
+    const clamped = Math.max(0, Math.min(255, channel))
+    return clamped.toString(16).padStart(2, '0')
+  }
+
+  return `#${toHex(applyShift(r))}${toHex(applyShift(g))}${toHex(applyShift(b))}`
 }
 
 function normalizeTenantBranding(tenant) {
@@ -34,8 +73,13 @@ function setDocumentFavicon(href) {
 
 function applyBrandingToDocument(branding) {
   const root = document.documentElement
-  root.style.setProperty('--primary', branding.primaryColor)
-  root.style.setProperty('--accent', branding.accentColor)
+  const primaryColor = branding?.primaryColor || DEFAULT_BRANDING.primaryColor
+  const accentColor = branding?.accentColor || DEFAULT_BRANDING.accentColor
+
+  root.style.setProperty('--primary', primaryColor)
+  root.style.setProperty('--primary-light', shiftHexColor(primaryColor, 0.18))
+  root.style.setProperty('--primary-dark', shiftHexColor(primaryColor, -0.18))
+  root.style.setProperty('--accent', accentColor)
   document.title = branding.displayName
   setDocumentFavicon(branding.faviconUrl)
 }
