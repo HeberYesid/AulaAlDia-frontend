@@ -100,7 +100,7 @@ export default function Home() {
             <p>Crea y administra materias, agrega descripción, duración y ejercicios. Profesores gestionan solo sus propias materias.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon" aria-hidden="true">�</div>
+            <div className="feature-icon" aria-hidden="true">🧮</div>
             <h3>Calificación Numérica 1–5</h3>
             <p>Notas en escala del 1.0 al 5.0 por ejercicio. Promedio de la materia calculado automáticamente en tiempo real.</p>
           </div>

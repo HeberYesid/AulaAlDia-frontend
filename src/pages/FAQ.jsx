@@ -138,12 +138,20 @@ export default function FAQ() {
                     <button
                       className={`faq-question ${isOpen ? 'active' : ''}`}
                       onClick={() => toggleQuestion(globalIndex)}
+                      aria-expanded={isOpen}
+                      aria-controls={`faq-answer-${globalIndex}`}
+                      id={`faq-question-${globalIndex}`}
                     >
                       <span>{faq.question}</span>
                       <span className="faq-icon">{isOpen ? '−' : '+'}</span>
                     </button>
                     {isOpen && (
-                      <div className="faq-answer">
+                      <div
+                        className="faq-answer"
+                        id={`faq-answer-${globalIndex}`}
+                        role="region"
+                        aria-labelledby={`faq-question-${globalIndex}`}
+                      >
                         <p>{faq.answer}</p>
                       </div>
                     )}
