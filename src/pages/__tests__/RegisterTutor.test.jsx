@@ -47,7 +47,7 @@ describe('RegisterTutor page', () => {
         await user.type(screen.getByLabelText(/Confirmar Contraseña/i), 'Password123!');
         
         await user.click(screen.getByRole('button', { name: /Verify Captcha/i }));
-        await user.click(screen.getByRole('button', { name: /Completar acceso de acudiente/i }));
+        await user.click(screen.getByRole('button', { name: /Completar acceso/i }));
         
         expect(api.post).toHaveBeenCalledWith('/api/v1/auth/register-tutor/', expect.objectContaining({
             email: 't@t.com',

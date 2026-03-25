@@ -54,6 +54,11 @@ const TenantOperationsAudit = lazy(() => import('./pages/TenantOperationsAudit')
 const TenantCommercialAdmin = lazy(() => import('./pages/TenantCommercialAdmin'))
 const AcademicSettings = lazy(() => import('./pages/AcademicSettings'))
 
+const Curriculums = lazy(() => import('./pages/curriculums/Curriculums'))
+const GradeLevels = lazy(() => import('./pages/curriculums/GradeLevels'))
+const Sections = lazy(() => import('./pages/curriculums/Sections'))
+const Courses = lazy(() => import('./pages/curriculums/Courses'))
+
 function RouteFallback() {
   return <div aria-live="polite">Cargando...</div>
 }
@@ -248,8 +253,73 @@ export default function App() {
           <Route
             path="/admin/academic-settings"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <AcademicSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/grade-levels"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <GradeLevels />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/sections"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <Sections />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/courses"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <Courses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/curriculums"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <Curriculums />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/grade-levels"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <GradeLevels />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/sections"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <Sections />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/courses"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <Courses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/curriculums"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <Curriculums />
               </ProtectedRoute>
             }
           />

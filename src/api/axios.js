@@ -38,7 +38,7 @@ function getActiveTenantId() {
   if (auth?.active_tenant_id) return auth.active_tenant_id
   if (auth?.user?.active_tenant_id) return auth.user.active_tenant_id
   if (auth?.user?.active_tenant?.public_id) return auth.user.active_tenant.public_id
-  return memoryTenantId
+  return memoryTenantId || null
 }
 
 export function setApiActiveTenantId(tenantId) {

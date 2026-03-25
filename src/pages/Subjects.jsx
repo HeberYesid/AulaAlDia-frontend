@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
+import HierarchicalSelector from '../components/HierarchicalSelector'
 
 function normalizeApiError(error, fallback) {
   const detail = error?.response?.data?.detail
@@ -83,6 +84,17 @@ export default function Subjects() {
       {/* Mensajes de éxito/error */}
       <Alert type="success" message={success} />
       <Alert type="error" message={error} />
+
+      {/* Fase 4: Selector Jerárquico para navegación académica */}
+      <HierarchicalSelector 
+        onSelectSubject={(subject) => {
+          if (subject) {
+            // Optional: Podríamos navegar a la materia o filtrarla aquí. 
+            // Por ahora, dejamos que sea un selector de demostración que 
+            // podría reemplazar la vista en un futuro.
+          }
+        }} 
+      />
 
       <div className="grid cols-2 grid-stack-mobile">
         <div className="card">

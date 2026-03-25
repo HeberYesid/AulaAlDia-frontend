@@ -179,6 +179,30 @@ export default function Sidebar() {
       icon: SlidersHorizontal,
       show: user.role === 'ADMIN',
     },
+    {
+      to: '/admin/curriculums',
+      label: 'Mallas Curriculares',
+      icon: BookOpen,
+      show: user.role === 'ADMIN',
+    },
+    {
+      to: '/admin/grade-levels',
+      label: 'Grados',
+      icon: LayoutDashboard,
+      show: user.role === 'ADMIN',
+    },
+    {
+      to: '/admin/sections',
+      label: 'Secciones',
+      icon: LayoutDashboard,
+      show: user.role === 'ADMIN',
+    },
+    {
+      to: '/admin/courses',
+      label: 'Cursos',
+      icon: BookOpen,
+      show: user.role === 'ADMIN',
+    },
   ].filter((item) => item.show)
 
   const sidebarClasses = [
