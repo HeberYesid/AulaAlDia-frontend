@@ -3467,6 +3467,12 @@ a.welcome-panel__notif-link:hover {
   flex-shrink: 0;
 }
 
+.public-navbar__cta .theme-toggle {
+  padding: 0.44rem 0.68rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-secondary) 82%, transparent);
+}
+
 .public-navbar__login {
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
@@ -3552,6 +3558,11 @@ a.welcome-panel__notif-link:hover {
 }
 
 .public-navbar__mobile-cta .btn {
+  justify-content: center;
+}
+
+.public-navbar__mobile-cta .theme-toggle {
+  width: 100%;
   justify-content: center;
 }
 
