@@ -5,19 +5,19 @@
 
 /* ── Scoped design tokens (dark theme overrides) ────────── */
 .msg-container {
-    --msg-bg-base: #111318;
-    --msg-bg-surface: #1a1d24;
-    --msg-bg-elevated: #222630;
-    --msg-bg-card: #1e2028;
-    --msg-bg-input: #15171e;
-    --msg-border: #2a2e3a;
-    --msg-border-subtle: #333848;
-    --msg-text-primary: #e4e6eb;
-    --msg-text-secondary: #8b8fa3;
-    --msg-text-muted: #5c6070;
+    --msg-bg-base: #0e131c;
+    --msg-bg-surface: #141d2b;
+    --msg-bg-elevated: #1b2638;
+    --msg-bg-card: #182233;
+    --msg-bg-input: #121a28;
+    --msg-border: #2a3a55;
+    --msg-border-subtle: #354767;
+    --msg-text-primary: #f3ece1;
+    --msg-text-secondary: #c7b8a4;
+    --msg-text-muted: #9b8f7c;
     --msg-accent: var(--primary, #3b82f6);
     --msg-accent-hover: var(--primary-dark, #2563eb);
-    --msg-accent-glow: rgba(59, 130, 246, 0.15);
+    --msg-accent-glow: rgba(201, 123, 47, 0.2);
     --msg-radius-sm: 0.5rem;
     --msg-radius-md: 0.75rem;
     --msg-radius-lg: 1rem;
@@ -27,17 +27,17 @@
 
 /* Light theme overrides */
 [data-theme="light"] .msg-container {
-    --msg-bg-base: #f0f2f5;
-    --msg-bg-surface: #ffffff;
-    --msg-bg-elevated: #f5f6f8;
-    --msg-bg-card: #ffffff;
-    --msg-bg-input: #f0f2f5;
-    --msg-border: #e2e5ea;
-    --msg-border-subtle: #d1d5db;
-    --msg-text-primary: #1a1d26;
-    --msg-text-secondary: #5f6577;
-    --msg-text-muted: #9098a8;
-    --msg-accent-glow: rgba(59, 130, 246, 0.1);
+    --msg-bg-base: #f6efe1;
+    --msg-bg-surface: #fffaf0;
+    --msg-bg-elevated: #f2e8d8;
+    --msg-bg-card: #fffdf8;
+    --msg-bg-input: #f4eadb;
+    --msg-border: #d8c8ad;
+    --msg-border-subtle: #cdb997;
+    --msg-text-primary: #2f2619;
+    --msg-text-secondary: #655341;
+    --msg-text-muted: #8b7964;
+    --msg-accent-glow: rgba(201, 123, 47, 0.14);
 }
 
 /* ── Root container — fixed position to fill viewport ───── */
@@ -53,6 +53,9 @@
     color: var(--msg-text-primary);
     overflow: hidden;
     font-family: inherit;
+    background-image:
+        radial-gradient(circle at 8% 10%, rgba(242, 197, 114, 0.08), transparent 36%),
+        radial-gradient(circle at 92% 86%, rgba(45, 106, 104, 0.11), transparent 38%);
     z-index: 10;
 }
 
@@ -85,7 +88,8 @@ body.sidebar-collapsed .msg-container {
     font-weight: 700;
     margin: 0;
     color: var(--msg-text-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: 0.02em;
+    font-family: var(--font-display, serif);
 }
 
 .msg-new-chat-btn {
@@ -95,7 +99,7 @@ body.sidebar-collapsed .msg-container {
     width: 34px;
     height: 34px;
     border-radius: var(--msg-radius-sm);
-    border: none;
+    border: 1px solid rgba(242, 197, 114, 0.35);
     background: var(--msg-accent);
     color: #fff;
     cursor: pointer;
@@ -204,7 +208,7 @@ body.sidebar-collapsed .msg-container {
 
 .msg-conversation-active {
     background: var(--msg-bg-elevated);
-    box-shadow: inset 3px 0 0 var(--msg-accent);
+    box-shadow: inset 3px 0 0 var(--msg-accent), 0 0 0 1px rgba(242, 197, 114, 0.14);
 }
 
 .msg-conversation-active:hover {

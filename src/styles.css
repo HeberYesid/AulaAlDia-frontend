@@ -7,6 +7,8 @@ Implementado: 2024 - AulaAlDía Application
 ===============================================
 */
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
 /* Sidebar overlay — hidden by default on desktop */
 .sidebar-overlay {
   display: none;
@@ -18,19 +20,19 @@ Variables que se mantienen constantes en ambos temas
 */
 :root {
   /* 🎨 Colores Principales del Sistema */
-  --primary: #3b82f6;        /* Azul principal - Botones primarios */
-  --primary-dark: #2563eb;   /* Azul oscuro - Estados hover */
-  --primary-light: #60a5fa;  /* Azul claro - Estados activos */
-  --secondary: #6366f1;      /* Índigo - Elementos secundarios */
-  --accent: #8b5cf6;         /* Púrpura - Acentos y gradientes */
+  --primary: #c97b2f;        /* Bronce principal - Botones primarios */
+  --primary-dark: #a75b16;   /* Bronce oscuro - Estados hover */
+  --primary-light: #e8a057;  /* Bronce claro - Estados activos */
+  --secondary: #2d6a68;      /* Verde petróleo - Elementos secundarios */
+  --accent: #f2c572;         /* Oro suave - Acentos y gradientes */
   
   /* 🚦 Colores de Estado (Semánticos) */
-  --success: #10b981;        /* Verde - Éxito, confirmaciones */
-  --success-bg: rgba(16, 185, 129, 0.1);  /* Fondo de éxito */
-  --warning: #f59e0b;        /* Amarillo - Advertencias */
-  --warning-bg: rgba(245, 158, 11, 0.1);  /* Fondo de advertencia */
-  --danger: #ef4444;         /* Rojo - Errores, acciones destructivas */
-  --danger-bg: rgba(239, 68, 68, 0.1);    /* Fondo de error */
+  --success: #2d8a6e;        /* Verde refinado - Éxito, confirmaciones */
+  --success-bg: rgba(45, 138, 110, 0.15);  /* Fondo de éxito */
+  --warning: #cc8b2c;        /* Ámbar - Advertencias */
+  --warning-bg: rgba(204, 139, 44, 0.16);  /* Fondo de advertencia */
+  --danger: #d45757;         /* Rojo arcilla - Errores, acciones destructivas */
+  --danger-bg: rgba(212, 87, 87, 0.14);    /* Fondo de error */
   
   /* 📐 Border Radius - Esquinas redondeadas */
   --radius-sm: 0.375rem;    /* 6px - Elementos pequeños */
@@ -61,6 +63,11 @@ Variables que se mantienen constantes en ambos temas
   --transition-normal: 250ms ease-in-out;  /* Cambios de estado */
   --transition-slow: 350ms ease-in-out;    /* Animaciones complejas */
 
+  /* 🔤 Tipografías globales */
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
   /* 📐 Sidebar dimensions */
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 64px;
@@ -72,32 +79,32 @@ Paleta minimalista en negro/gris - Diseño sofisticado
 */
 [data-theme="dark"] {
   /* 🎨 Colores de Fondo - Escala de grises pura */
-  --bg-primary: #000000;      /* Negro absoluto - Fondo principal */
-  --bg-secondary: #0a0a0a;    /* Negro suave - Contenedores */
-  --bg-tertiary: #141414;     /* Gris muy oscuro - Elementos elevados */
-  --bg-card: #0f0f0f;         /* Gris oscuro - Tarjetas */
-  --bg-hover: #1a1a1a;        /* Gris medio oscuro - Estados hover */
+  --bg-primary: #0a0e15;      /* Obsidiana azulada - Fondo principal */
+  --bg-secondary: #111724;    /* Contenedores principales */
+  --bg-tertiary: #1a2232;     /* Elementos elevados */
+  --bg-card: #141d2b;         /* Tarjetas */
+  --bg-hover: #1e2a3f;        /* Estados hover */
   
   /* ✍️ Colores de Texto - Alto contraste elegante */
-  --text-primary: #ffffff;    /* Blanco puro - Texto principal */
-  --text-secondary: #a1a1a1;  /* Gris claro - Texto secundario */
-  --text-muted: #9ca3af;      /* Gris medio - Texto atenuado */
-  --text-accent: #ffffff;     /* Blanco - Enlaces y acentos */
+  --text-primary: #f6f0e6;    /* Marfil claro - Texto principal */
+  --text-secondary: #c5b8a8;  /* Arena media - Texto secundario */
+  --text-muted: #9e937f;      /* Arena oscura - Texto atenuado */
+  --text-accent: #f2c572;     /* Oro suave - Enlaces y acentos */
   
   /* 🖼️ Bordes - Sutiles en gris */
-  --border-primary: #1f1f1f;   /* Gris muy oscuro - Bordes principales */
-  --border-secondary: #2a2a2a; /* Gris oscuro - Bordes secundarios */
-  --border-accent: #3f3f3f;    /* Gris medio - Bordes de acento */
+  --border-primary: #243046;   /* Bordes principales */
+  --border-secondary: #31415d; /* Bordes secundarios */
+  --border-accent: #c97b2f;    /* Bordes de acento */
   
   /* 🌫️ Sombras - Sutiles y elegantes */
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 2px 4px 0 rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 20px 0 rgba(0, 0, 0, 0.7), 0 4px 8px 0 rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 30px 0 rgba(0, 0, 0, 0.8), 0 10px 15px 0 rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 2px 6px rgba(2, 8, 20, 0.45);
+  --shadow-md: 0 10px 20px rgba(2, 8, 20, 0.42), 0 2px 6px rgba(2, 8, 20, 0.3);
+  --shadow-lg: 0 18px 32px rgba(2, 8, 20, 0.5), 0 4px 10px rgba(2, 8, 20, 0.32);
+  --shadow-xl: 0 28px 56px rgba(2, 8, 20, 0.58), 0 8px 18px rgba(2, 8, 20, 0.35);
   
   /* 🎨 Overlay sutil para profundidad */
-  --overlay-bg: rgba(255, 255, 255, 0.03);
-  --overlay-hover: rgba(255, 255, 255, 0.06);
+  --overlay-bg: rgba(242, 197, 114, 0.06);
+  --overlay-hover: rgba(242, 197, 114, 0.1);
 }
 
 /* 
@@ -106,32 +113,32 @@ Paleta optimizada para uso diurno y alta legibilidad
 */
 [data-theme="light"] {
   /* 🎨 Colores de Fondo - Tonos claros y limpios */
-  --bg-primary: #ffffff;      /* Blanco puro - Fondo principal */
-  --bg-secondary: #f8fafc;    /* Slate 50 - Contenedores */
-  --bg-tertiary: #e2e8f0;     /* Slate 200 - Elementos elevados */
-  --bg-card: #ffffff;         /* Blanco puro - Tarjetas */
-  --bg-hover: #f1f5f9;        /* Slate 100 - Estados hover */
+  --bg-primary: #f6f1e6;      /* Marfil - Fondo principal */
+  --bg-secondary: #f0e7d8;    /* Pergamino - Contenedores */
+  --bg-tertiary: #e8ddcb;     /* Elementos elevados */
+  --bg-card: #fffbf3;         /* Tarjetas */
+  --bg-hover: #efe4d2;        /* Estados hover */
   
   /* ✍️ Colores de Texto - Contraste óptimo sobre fondos claros */
-  --text-primary: #1e293b;    /* Slate 800 - Texto principal */
-  --text-secondary: #475569;  /* Slate 600 - Texto secundario */
-  --text-muted: #64748b;      /* Slate 500 - Texto atenuado */
-  --text-accent: #3b82f6;     /* Blue 500 - Enlaces y acentos */
+  --text-primary: #2d2418;    /* Tierra oscura - Texto principal */
+  --text-secondary: #5d4d3b;  /* Marrón medio - Texto secundario */
+  --text-muted: #7e6c57;      /* Marrón suave - Texto atenuado */
+  --text-accent: #a75b16;     /* Bronce oscuro - Enlaces y acentos */
   
   /* 🖼️ Bordes - Sutiles y elegantes */
-  --border-primary: #e2e8f0;   /* Slate 200 - Bordes principales */
-  --border-secondary: #cbd5e1; /* Slate 300 - Bordes secundarios */
-  --border-accent: #3b82f6;    /* Blue 500 - Bordes de acento */
+  --border-primary: #d9cdb9;   /* Bordes principales */
+  --border-secondary: #c9b99f; /* Bordes secundarios */
+  --border-accent: #c97b2f;    /* Bordes de acento */
   
   /* 🌫️ Sombras - Sutiles para elegancia */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 2px rgba(45, 36, 24, 0.08);
+  --shadow-md: 0 6px 14px rgba(45, 36, 24, 0.13), 0 2px 4px rgba(45, 36, 24, 0.08);
+  --shadow-lg: 0 12px 24px rgba(45, 36, 24, 0.16), 0 4px 10px rgba(45, 36, 24, 0.1);
+  --shadow-xl: 0 24px 40px rgba(45, 36, 24, 0.2), 0 10px 16px rgba(45, 36, 24, 0.12);
   
   /* 🎨 Overlay sutil para profundidad */
-  --overlay-bg: rgba(59, 130, 246, 0.05);
-  --overlay-hover: rgba(59, 130, 246, 0.08);
+  --overlay-bg: rgba(201, 123, 47, 0.05);
+  --overlay-hover: rgba(201, 123, 47, 0.1);
 }
 
 /* 
@@ -152,7 +159,7 @@ Paleta optimizada para uso diurno y alta legibilidad
 Incluye transiciones suaves para cambio de tema
 */
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -164,17 +171,27 @@ body {
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
+h1,
+h2,
+h3,
+.dashboard-title,
+.auth-header h1 {
+  font-family: var(--font-display);
+  letter-spacing: 0.012em;
+}
+
 /* 🌙 Fondo elegante para tema oscuro */
 [data-theme="dark"] body {
-  background: #000000;
+  background: #0a0e15;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(30, 30, 30, 0.3) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(20, 20, 20, 0.3) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(242, 197, 114, 0.08) 0px, transparent 45%),
+    radial-gradient(at 100% 100%, rgba(45, 106, 104, 0.1) 0px, transparent 48%),
+    linear-gradient(145deg, #0a0e15 0%, #121b29 55%, #0f1622 100%);
 }
 
 /* ☀️ Gradiente específico para tema claro */
 [data-theme="light"] body {
-  background: linear-gradient(135deg, var(--bg-primary) 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #faf5eb 0%, var(--bg-primary) 40%, #efe3cd 100%);
 }
 
 /* Layout */
@@ -661,28 +678,30 @@ Componente interactivo para alternar entre modo oscuro/claro
 
 /* Buttons - Diseño moderno y elegante */
 .btn {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  border: none;
-  color: white;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+  border: 1px solid rgba(242, 197, 114, 0.3);
+  color: #fffdf8;
   text-decoration: none;
-  padding: 0.625rem 1.5rem;
+  padding: 0.68rem 1.55rem;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: var(--font-size-sm);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 18px rgba(42, 22, 8, 0.32);
   position: relative;
   overflow: hidden;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 24px rgba(201, 123, 47, 0.32);
+  filter: saturate(1.08);
   text-decoration: none;
 }
 
@@ -691,27 +710,29 @@ Componente interactivo para alternar entre modo oscuro/claro
 }
 
 .btn.secondary {
-  background: var(--bg-tertiary);
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-hover));
   color: var(--text-primary);
   border: 1px solid var(--border-secondary);
+  text-transform: none;
+  letter-spacing: 0.01em;
 }
 
 .btn.secondary:hover {
   background: var(--bg-hover);
   border-color: var(--border-accent);
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-md);
 }
 
 .btn.success {
-  background: linear-gradient(135deg, var(--success), #059669);
+  background: linear-gradient(135deg, var(--success), #256f59);
 }
 
 .btn.warning {
-  background: linear-gradient(135deg, var(--warning), #d97706);
+  background: linear-gradient(135deg, var(--warning), #9a6118);
 }
 
 .btn.danger {
-  background: linear-gradient(135deg, var(--danger), #dc2626);
+  background: linear-gradient(135deg, var(--danger), #9e3d3d);
 }
 
 .btn:disabled {
@@ -761,10 +782,10 @@ Componente interactivo para alternar entre modo oscuro/claro
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
+  border-radius: calc(var(--radius-lg) + 2px);
   padding: var(--space-xl);
   margin: var(--space-md) 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   transition: transform var(--transition-normal), 
               background-color var(--transition-normal), 
               border-color var(--transition-normal),
@@ -804,20 +825,20 @@ Componente interactivo para alternar entre modo oscuro/claro
   top: 0;
   left: 0;
   right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
-  opacity: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--secondary), transparent);
+  opacity: 0.45;
   transition: opacity var(--transition-normal);
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
   border-color: var(--border-secondary);
 }
 
 .card:hover::before {
-  opacity: 0.5;
+  opacity: 0.95;
 }
 
 .card h1, .card h2, .card h3 {
@@ -828,7 +849,7 @@ Componente interactivo para alternar entre modo oscuro/claro
 
 .card h2 {
   font-size: var(--font-size-2xl);
-  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+  background: linear-gradient(135deg, var(--text-primary), var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -905,7 +926,8 @@ form {
   overflow-x: auto;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-primary);
-  background: var(--bg-card);
+  background: linear-gradient(180deg, var(--bg-card), var(--overlay-bg));
+  box-shadow: var(--shadow-sm);
 }
 
 .table {
@@ -914,7 +936,7 @@ form {
 }
 
 .table th {
-  background: var(--bg-secondary);
+  background: linear-gradient(90deg, var(--bg-secondary), var(--bg-tertiary));
   color: var(--text-primary);
   font-weight: 600;
   padding: 1rem 1.25rem;
@@ -934,7 +956,7 @@ form {
 }
 
 .table tr:hover td {
-  background: var(--overlay-hover);
+  background: linear-gradient(90deg, var(--overlay-hover), transparent);
   color: var(--text-primary);
 }
 
@@ -947,24 +969,24 @@ form {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-lg);
+  padding: 0.24rem 0.58rem;
+  border-radius: 999px;
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .badge.SCORE {
   background: var(--success-bg);
   color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(45, 138, 110, 0.3);
 }
 
 .badge.SUBMITTED {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(201, 123, 47, 0.14);
   color: var(--primary);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(201, 123, 47, 0.3);
 }
 
 .badge.PENDING {
@@ -1278,19 +1300,22 @@ form {
   justify-content: center;
   padding: var(--space-lg);
   overflow-y: auto;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(242, 197, 114, 0.09) 0%, transparent 34%),
+    radial-gradient(circle at 88% 86%, rgba(45, 106, 104, 0.12) 0%, transparent 38%);
 }
 
 .auth-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: 1rem;
+  background: linear-gradient(170deg, var(--bg-card), var(--bg-secondary));
+  border: 1px solid var(--border-secondary);
+  border-radius: 1.1rem;
   padding: 2.5rem;
   width: 100%;
   max-width: 450px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-xl);
   position: relative;
   overflow: visible;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   margin: 0;
 }
 
@@ -1318,6 +1343,7 @@ form {
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
+  line-height: 1.18;
 }
 
 .auth-header h1 .auth-icon {
@@ -1423,17 +1449,17 @@ form {
   align-items: center;
   margin-bottom: var(--space-xl);
   padding: var(--space-xl);
-  background: var(--bg-card);
+  background: linear-gradient(140deg, var(--bg-card), var(--bg-secondary));
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-secondary);
+  box-shadow: var(--shadow-md);
 }
 
 .dashboard-title {
   font-size: var(--font-size-3xl);
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
 }
 
 .dashboard-subtitle {
