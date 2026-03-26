@@ -19,7 +19,13 @@ export default defineConfig({
         'src/test/',
         '**/*.config.js',
         '**/main.jsx'
-      ]
+      ],
+      thresholds: {
+        lines: 40,
+        functions: 40,
+        statements: 40,
+        branches: 30,
+      },
     }
   },
   resolve: {
