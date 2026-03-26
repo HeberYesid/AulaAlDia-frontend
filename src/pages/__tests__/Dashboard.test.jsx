@@ -84,4 +84,34 @@ describe('Dashboard Component', () => {
       expect(screen.queryByLabelText(/cargando dashboard/i)).not.toBeInTheDocument()
     })
   })
+
+  it('shows tenant selection prompt and skips subjects request when active tenant is missing', async () => {
+    vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
+      user: mockTeacherUser,
+      activeTenantId: null,
+      tenantsLoaded: true,
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      switchTenant: vi.fn(),
+    })
+
+    renderDashboard()
+
+    expect(await screen.findByText(/select institution/i)).toBeInTheDocument()
+    expect(api.get).not.toHaveBeenCalled()
+  })
+
+  it('shows access denied state when active tenant is not authorized', async () => {
+    vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
+      user: mockTeacherUser,
+      activeTenantId: 'tenant-b',
+      tenantsLoaded: true,
+      tenants: [{ tenant_id: 'tenant-a', tenant_name: 'Colegio A' }],
+      switchTenant: vi.fn(),
+    })
+
+    renderDashboard()
+
+    expect(await screen.findByText(/access denied/i)).toBeInTheDocument()
+    expect(api.get).not.toHaveBeenCalled()
+  })
 })

@@ -92,6 +92,7 @@ export function AuthProvider({ children }) {
   const [lastLoginIp, setLastLoginIp] = useState(null)
   const [activeTenantId, setActiveTenantId] = useState(null)
   const [tenants, setTenants] = useState([])
+  const [tenantsLoaded, setTenantsLoaded] = useState(false)
   const lastActivityRef = useRef(Date.now())
 
   function resolveTenantId({ user, active_tenant_id }, fallbackTenantId = null) {
@@ -168,9 +169,11 @@ export function AuthProvider({ children }) {
   async function fetchMyTenants() {
     if (!access) {
       setTenants([])
+      setTenantsLoaded(true)
       return
     }
 
+    setTenantsLoaded(false)
     try {
       const { data } = await api.get('/api/v1/auth/my-tenants/')
       const tenantItems = Array.isArray(data?.tenants) ? data.tenants : []
@@ -182,6 +185,8 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       setTenants([])
+    } finally {
+      setTenantsLoaded(true)
     }
   }
 
@@ -224,6 +229,7 @@ export function AuthProvider({ children }) {
       setRefresh(null)
       setActiveTenantId(null)
       setTenants([])
+      setTenantsLoaded(false)
       setApiActiveTenantId(null)
     }
   }, [access])
@@ -325,6 +331,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!user || !access) {
       setTenants([])
+      setTenantsLoaded(false)
       return
     }
 
@@ -367,6 +374,7 @@ export function AuthProvider({ children }) {
     activeTenant,
     activeTenantBranding,
     tenants,
+    tenantsLoaded,
     login, 
     googleLogin,
     register, 

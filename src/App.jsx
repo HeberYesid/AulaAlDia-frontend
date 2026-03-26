@@ -103,7 +103,7 @@ export default function App() {
           <Route
             path="/messages"
             element={
-              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]}>
+              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]} requireTenant>
                 <Messages />
               </ProtectedRoute>
             }
@@ -111,7 +111,7 @@ export default function App() {
           <Route
             path="/messages/:conversationId"
             element={
-              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]}>
+              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]} requireTenant>
                 <Messages />
               </ProtectedRoute>
             }
@@ -126,9 +126,18 @@ export default function App() {
           />
 
           <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/admin/dashboard"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -137,7 +146,7 @@ export default function App() {
             <Route
               path="/admin/news"
               element={
-                <ProtectedRoute roles={["ADMIN"]}>
+                <ProtectedRoute roles={["ADMIN"]} requireTenant>
                   <AdminNews />
                 </ProtectedRoute>
               }
@@ -146,7 +155,7 @@ export default function App() {
           <Route
             path="/subjects"
             element={
-              <ProtectedRoute roles={["TEACHER", "ADMIN"]}>
+              <ProtectedRoute roles={["TEACHER", "ADMIN"]} requireTenant>
                 <Subjects />
               </ProtectedRoute>
             }
@@ -155,7 +164,7 @@ export default function App() {
           <Route
             path="/subjects/:id"
             element={
-              <ProtectedRoute roles={["TEACHER", "ADMIN", "STUDENT", "TUTOR"]}>
+              <ProtectedRoute roles={["TEACHER", "ADMIN", "STUDENT", "TUTOR"]} requireTenant>
                 <SubjectDetail />
               </ProtectedRoute>
             }
@@ -164,7 +173,7 @@ export default function App() {
           <Route
             path="/notifications"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireTenant>
                 <NotificationsPage />
               </ProtectedRoute>
             }
@@ -173,7 +182,7 @@ export default function App() {
           <Route
             path="/calendar"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireTenant>
                 <CalendarPage />
               </ProtectedRoute>
             }
@@ -182,7 +191,7 @@ export default function App() {
           <Route
             path="/observer"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireTenant>
                 <Observer />
               </ProtectedRoute>
             }
@@ -191,7 +200,7 @@ export default function App() {
           <Route
             path="/absences"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireTenant>
                 <Absences />
               </ProtectedRoute>
             }
@@ -200,7 +209,7 @@ export default function App() {
           <Route
             path="/my"
             element={
-              <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant>
                 <MyResults />
               </ProtectedRoute>
             }
@@ -209,7 +218,7 @@ export default function App() {
           <Route
             path="/my-subjects"
             element={
-              <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant>
                 <MySubjects />
               </ProtectedRoute>
             }
@@ -218,7 +227,7 @@ export default function App() {
           <Route
             path="/my-bulletins"
             element={
-              <ProtectedRoute roles={["STUDENT", "TUTOR"]}>
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant>
                 <MyBulletins />
               </ProtectedRoute>
             }
@@ -236,7 +245,7 @@ export default function App() {
           <Route
             path="/admin/operations"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <TenantOperationsAudit />
               </ProtectedRoute>
             }
@@ -245,7 +254,7 @@ export default function App() {
           <Route
             path="/admin/users"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <AdminUsers />
               </ProtectedRoute>
             }
@@ -263,7 +272,7 @@ export default function App() {
           <Route
             path="/admin/academic-settings"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <AcademicSettings />
               </ProtectedRoute>
             }
@@ -271,7 +280,7 @@ export default function App() {
           <Route
             path="/admin/grade-levels"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <GradeLevels />
               </ProtectedRoute>
             }
@@ -279,7 +288,7 @@ export default function App() {
           <Route
             path="/admin/sections"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <Sections />
               </ProtectedRoute>
             }
@@ -287,7 +296,7 @@ export default function App() {
           <Route
             path="/admin/courses"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <Courses />
               </ProtectedRoute>
             }
@@ -295,7 +304,7 @@ export default function App() {
           <Route
             path="/admin/curriculums"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant>
                 <Curriculums />
               </ProtectedRoute>
             }

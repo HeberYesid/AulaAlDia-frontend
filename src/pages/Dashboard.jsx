@@ -10,36 +10,144 @@ import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const {
+    user,
+    activeTenantId = null,
+    tenants = [],
+    tenantsLoaded = true,
+    switchTenant,
+  } = useAuth()
   const [loading, setLoading] = useState(true)
   const [subjects, setSubjects] = useState([])
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [confirmDialog, setConfirmDialog] = useState(null)
+  const [tenantAccessDenied, setTenantAccessDenied] = useState(false)
+  const [selectedTenantId, setSelectedTenantId] = useState('')
+
+  const hasTenantCatalog = Array.isArray(tenants) && tenants.length > 0
+  const hasActiveTenant = Boolean(activeTenantId)
+  const hasAuthorizedActiveTenant = hasTenantCatalog
+    ? tenants.some((tenant) => tenant.tenant_id === activeTenantId)
+    : false
+
+  const shouldPromptTenantSelection =
+    user.role !== 'STUDENT' && tenantsLoaded && hasTenantCatalog && !hasActiveTenant
+  const shouldDenyTenantAccess =
+    user.role !== 'STUDENT' &&
+    tenantsLoaded &&
+    ((hasTenantCatalog && hasActiveTenant && !hasAuthorizedActiveTenant) || tenantAccessDenied)
 
   async function loadSubjects() {
     setLoading(true)
+    setError('')
     try {
       const { data } = await api.get('/api/v1/courses/subjects/')
       setSubjects(data)
+      setTenantAccessDenied(false)
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setTenantAccessDenied(true)
+        setSubjects([])
+        return
+      }
+      setError(`No se pudieron cargar las materias: ${err.response?.data?.detail || err.message}`)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    if (user.role === 'STUDENT') {
+  async function handleSelectTenant() {
+    if (!selectedTenantId) {
+      setError('Selecciona una institución para continuar.')
       return
     }
+
+    setError('')
+    setLoading(true)
+    try {
+      await switchTenant(selectedTenantId)
+      setTenantAccessDenied(false)
+    } catch (err) {
+      setError(`No se pudo activar la institución seleccionada: ${err.response?.data?.detail || err.message}`)
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!shouldPromptTenantSelection || selectedTenantId) {
+      return
+    }
+
+    const defaultTenantId = tenants[0]?.tenant_id || ''
+    setSelectedTenantId(defaultTenantId)
+  }, [shouldPromptTenantSelection, selectedTenantId, tenants])
+
+  useEffect(() => {
+    if (user.role === 'STUDENT' || user.role === 'ADMIN') {
+      return
+    }
+
+    if (!tenantsLoaded) {
+      setLoading(true)
+      return
+    }
+
+    if (shouldPromptTenantSelection || shouldDenyTenantAccess) {
+      setLoading(false)
+      return
+    }
+
     loadSubjects()
-  }, [user])
+  }, [user, tenantsLoaded, shouldPromptTenantSelection, shouldDenyTenantAccess, activeTenantId])
 
   // Si es estudiante, mostrar StudentDashboard
   if (user.role === 'STUDENT') {
     return <StudentDashboard />
   }
 
-  if (user.role === 'ADMIN') {
+  if (shouldPromptTenantSelection) {
+    return (
+      <div className="card" style={{ maxWidth: 560, margin: '2rem auto' }}>
+        <h2>Select institution</h2>
+        <p>Selecciona una institución activa para cargar tu dashboard.</p>
+        <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+          <label htmlFor="tenant-selector">Institución</label>
+          <select
+            id="tenant-selector"
+            value={selectedTenantId}
+            onChange={(event) => setSelectedTenantId(event.target.value)}
+          >
+            <option value="">Selecciona una institución</option>
+            {tenants.map((tenant) => (
+              <option key={tenant.tenant_id} value={tenant.tenant_id}>
+                {tenant.tenant_display_name || tenant.tenant_name || tenant.tenant_id}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div style={{ marginTop: 'var(--space-md)', display: 'flex', gap: 'var(--space-sm)' }}>
+          <button className="btn primary" onClick={handleSelectTenant}>
+            Continuar
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (shouldDenyTenantAccess) {
+    return (
+      <div className="card" style={{ maxWidth: 560, margin: '2rem auto' }}>
+        <h2>Access denied</h2>
+        <p>You do not have access to this institution.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>
+          Verifica que la institución activa sea válida para tu cuenta o solicita soporte a un administrador.
+        </p>
+      </div>
+    )
+  }
+
+  if (user.role === 'ADMIN' && !loading) {
     return <Navigate to="/admin/dashboard" replace />
   }
 
