@@ -55,6 +55,8 @@ describe('AcademicSettings', () => {
     },
   ]
 
+  const schoolYearsResponse = []
+
   beforeEach(() => {
     vi.clearAllMocks()
 
@@ -67,6 +69,9 @@ describe('AcademicSettings', () => {
       }
       if (url === '/api/v1/courses/grading-scales/') {
         return Promise.resolve({ data: scalesResponse })
+      }
+      if (url === '/api/v1/courses/school-years/') {
+        return Promise.resolve({ data: schoolYearsResponse })
       }
       return Promise.reject(new Error(`Unexpected GET ${url}`))
     })

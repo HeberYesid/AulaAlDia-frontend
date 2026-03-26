@@ -9,6 +9,10 @@ vi.mock('../../state/AuthContext', () => ({
     useAuth: vi.fn()
 }));
 
+vi.mock('../ThemeToggle', () => ({
+    default: () => <button type="button" className="theme-toggle">Tema</button>
+}));
+
 const renderWithRouter = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
 describe('PublicNavBar component', () => {

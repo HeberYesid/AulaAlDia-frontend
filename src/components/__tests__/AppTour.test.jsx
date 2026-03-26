@@ -27,13 +27,13 @@ describe('AppTour', () => {
       <div class="dashboard-header">Dashboard</div>
       <div class="stats-grid">Stats</div>
       <nav class="sidebar__nav">
-        <a href="/subjects">Materias</a>
-        <a href="/messages">Mensajes</a>
-        <a href="/calendar">Calendario</a>
-        <a href="/observer">Observador</a>
-        <a href="/absences">Asistencia</a>
-        <a href="/admin/academic-settings">Configuración académica</a>
-        <a href="/admin/commercial">Comercial</a>
+        <a href="/subjects" data-tour-id="nav-subjects">Materias</a>
+        <a href="/messages" data-tour-id="nav-messages">Mensajes</a>
+        <a href="/calendar" data-tour-id="nav-calendar">Calendario</a>
+        <a href="/observer" data-tour-id="nav-observer">Observador</a>
+        <a href="/absences" data-tour-id="nav-absences">Asistencia</a>
+        <a href="/admin/academic-settings" data-tour-id="nav-admin-academic-settings">Configuración académica</a>
+        <a href="/admin/commercial" data-tour-id="nav-admin-commercial">Comercial</a>
       </nav>
       <a class="sidebar__profile" href="/profile">Perfil</a>
     `
@@ -58,7 +58,7 @@ describe('AppTour', () => {
       const lastCall = joyrideMock.mock.calls.at(-1)?.[0]
       expect(lastCall.run).toBe(true)
       expect(lastCall.steps.length).toBeGreaterThan(3)
-      expect(lastCall.steps.some((step) => step.target === '.sidebar__nav a[href="/admin/academic-settings"]')).toBe(true)
+      expect(lastCall.steps.some((step) => step.target === '[data-tour-id="nav-admin-academic-settings"]')).toBe(true)
     })
   })
 
