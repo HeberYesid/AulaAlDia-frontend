@@ -45,6 +45,34 @@ describe('App admin routes', () => {
     vi.clearAllMocks()
   })
 
+  it('renders dashboard at root path / for authenticated users', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'TEACHER' },
+      loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+    })
+
+    renderAppAt('/')
+
+    expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
+  })
+
+  it('renders dashboard at /dashboard for authenticated users', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'TEACHER' },
+      loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+    })
+
+    renderAppAt('/dashboard')
+
+    expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
+  })
+
   it('redirects STUDENT away from /admin/grade-levels', async () => {
     AuthContext.useAuth.mockReturnValue({
       user: { id: 1, role: 'STUDENT' },

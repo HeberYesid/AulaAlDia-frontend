@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 
-export default function ProtectedRoute({ children, roles, requireTenant = false }) {
+export default function ProtectedRoute({ children, roles, allowedRoles, requireTenant = false }) {
   const {
     user,
     activeTenantId = null,
@@ -9,11 +9,16 @@ export default function ProtectedRoute({ children, roles, requireTenant = false 
     tenantsLoaded = true,
   } = useAuth()
   const location = useLocation()
+  const requiredRoles = Array.isArray(roles)
+    ? roles
+    : Array.isArray(allowedRoles)
+      ? allowedRoles
+      : null
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
-  if (roles && !roles.includes(user.role)) {
+  if (requiredRoles && !requiredRoles.includes(user.role)) {
     return <Navigate to="/" replace />
   }
 
