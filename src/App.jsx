@@ -263,44 +263,11 @@ export default function App() {
           <Route
             path="/admin/academic-settings"
             element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN"]}>
                 <AcademicSettings />
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin/grade-levels"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <GradeLevels />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/sections"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <Sections />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/courses"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <Courses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/curriculums"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <Curriculums />
-              </ProtectedRoute>
-            }
-          />
-          
           <Route
             path="/admin/grade-levels"
             element={
