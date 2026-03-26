@@ -15,6 +15,7 @@ import {
   FileText,
   ShieldCheck,
   SlidersHorizontal,
+  Users,
   User,
   LogOut,
   ChevronLeft,
@@ -165,6 +166,12 @@ export default function Sidebar() {
       to: '/admin/operations',
       label: 'Auditoría',
       icon: ClipboardList,
+      show: user.role === 'ADMIN',
+    },
+    {
+      to: '/admin/users',
+      label: 'Usuarios',
+      icon: Users,
       show: user.role === 'ADMIN',
     },
     {
