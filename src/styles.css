@@ -5112,37 +5112,91 @@ a.welcome-panel__notif-link:hover {
 
 /* School Header Banner */
 .school-header-banner {
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  width: calc(100% + (var(--space-md) * 2));
+  margin: 0 calc(var(--space-md) * -1) var(--space-xl);
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
   align-items: center;
-  justify-content: center;
-  margin-bottom: var(--space-xl);
-  text-align: center;
-  padding: var(--space-md) 0;
+  gap: clamp(var(--space-md), 2.4vw, var(--space-2xl));
+  padding: clamp(var(--space-md), 2.4vw, var(--space-xl)) clamp(var(--space-md), 2.8vw, var(--space-2xl));
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(120deg, var(--bg-secondary) 0%, var(--bg-card) 55%, var(--overlay-bg) 100%);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.school-header-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 18%, var(--overlay-hover) 0%, transparent 42%),
+    radial-gradient(circle at 88% 80%, var(--overlay-bg) 0%, transparent 36%);
+  z-index: -1;
+}
+
+.school-header-banner::after {
+  content: '';
+  position: absolute;
+  top: -4.5rem;
+  right: -5rem;
+  width: 14rem;
+  height: 14rem;
+  background: radial-gradient(circle, var(--overlay-hover) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.school-header-banner--no-logo {
+  grid-template-columns: 1fr;
+}
+
+.school-header-copy {
+  min-width: 0;
 }
 
 .school-header-logo {
-  max-width: 150px;
-  max-height: 150px;
+  width: min(100%, 170px);
+  max-height: 170px;
   object-fit: contain;
-  margin-bottom: var(--space-md);
+  justify-self: center;
+  filter: drop-shadow(0 10px 20px rgba(8, 12, 30, 0.35));
 }
 
 .school-header-title {
-  font-size: 2.5rem;
+  font-size: clamp(2.1rem, 4.3vw, 3.4rem);
   color: var(--text-primary);
   margin: 0;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.08;
+  text-shadow: 0 2px 14px rgba(8, 12, 30, 0.3);
+  text-wrap: balance;
+}
+
+.school-header-banner--no-logo .school-header-title {
+  text-align: center;
 }
 
 @media (max-width: 768px) {
-  .school-header-logo {
-    max-width: 120px;
-    max-height: 120px;
+  .school-header-banner {
+    width: 100%;
+    margin: 0 0 var(--space-xl);
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: var(--space-md);
+    border-radius: var(--radius-lg);
   }
+
+  .school-header-logo {
+    width: min(100%, 130px);
+    max-height: 130px;
+  }
+
   .school-header-title {
-    font-size: 2rem;
+    font-size: clamp(1.8rem, 8.5vw, 2.4rem);
   }
 }
 
