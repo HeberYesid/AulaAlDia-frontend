@@ -40,23 +40,23 @@ Variables que se mantienen constantes en ambos temas
   --radius-lg: 0.75rem;     /* 12px - Tarjetas */
   --radius-xl: 1rem;        /* 16px - Contenedores grandes */
   
-  /* 📏 Spacing - Sistema de espaciado consistente */
-  --space-xs: 0.25rem;      /* 4px - Espacios mínimos */
-  --space-sm: 0.5rem;       /* 8px - Espacios pequeños */
-  --space-md: 1rem;         /* 16px - Espacios medianos */
-  --space-lg: 1.5rem;       /* 24px - Espacios grandes */
-  --space-xl: 2rem;         /* 32px - Espacios extra grandes */
-  --space-2xl: 3rem;        /* 48px - Espacios máximos */
+  /* 📏 Spacing - Sistema fluido para mejor adaptación responsive */
+  --space-xs: clamp(0.25rem, 0.22rem + 0.15vw, 0.375rem);
+  --space-sm: clamp(0.5rem, 0.42rem + 0.35vw, 0.75rem);
+  --space-md: clamp(0.875rem, 0.74rem + 0.6vw, 1.25rem);
+  --space-lg: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+  --space-xl: clamp(1.75rem, 1.45rem + 1.3vw, 2.5rem);
+  --space-2xl: clamp(2.25rem, 1.8rem + 2vw, 3.25rem);
   
-  /* 📝 Typography - Escala tipográfica */
-  --font-size-xs: 0.75rem;    /* 12px - Texto muy pequeño */
-  --font-size-sm: 0.875rem;   /* 14px - Texto pequeño */
-  --font-size-base: 1rem;     /* 16px - Texto base */
-  --font-size-lg: 1.125rem;   /* 18px - Texto grande */
-  --font-size-xl: 1.25rem;    /* 20px - Títulos pequeños */
-  --font-size-2xl: 1.5rem;    /* 24px - Títulos medianos */
-  --font-size-3xl: 1.875rem;  /* 30px - Títulos grandes */
-  --font-size-4xl: 2.25rem;   /* 36px - Títulos principales */
+  /* 📝 Typography - Escala tipográfica fluida */
+  --font-size-xs: clamp(0.72rem, 0.7rem + 0.08vw, 0.78rem);
+  --font-size-sm: clamp(0.84rem, 0.82rem + 0.12vw, 0.92rem);
+  --font-size-base: clamp(0.98rem, 0.94rem + 0.2vw, 1.08rem);
+  --font-size-lg: clamp(1.06rem, 1rem + 0.28vw, 1.2rem);
+  --font-size-xl: clamp(1.18rem, 1.08rem + 0.5vw, 1.45rem);
+  --font-size-2xl: clamp(1.35rem, 1.16rem + 0.9vw, 1.9rem);
+  --font-size-3xl: clamp(1.65rem, 1.35rem + 1.35vw, 2.45rem);
+  --font-size-4xl: clamp(2rem, 1.55rem + 2vw, 3.1rem);
   
   /* ⚡ Transitions - Animaciones y transiciones */
   --transition-fast: 150ms ease-in-out;    /* Hover, clicks */
@@ -172,6 +172,18 @@ body {
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
 h1,
 h2,
 h3,
@@ -219,9 +231,10 @@ body.sidebar-collapsed .app-body {
 }
 
 .container {
-  max-width: 1200px;
+  width: min(100%, 1200px);
   margin: 0 auto;
-  padding: var(--space-md);
+  padding-block: var(--space-md);
+  padding-inline: clamp(0.75rem, 2.2vw, 1.5rem);
   flex: 1;
 }
 
@@ -732,6 +745,7 @@ Componente interactivo para alternar entre modo oscuro/claro
   overflow: hidden;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  min-height: 44px;
 }
 
 .btn:hover {
@@ -960,6 +974,7 @@ form {
 /* Tables - Diseño limpio y profesional */
 .table-container {
   overflow-x: auto;
+  max-width: 100%;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-primary);
   background: linear-gradient(180deg, var(--bg-card), var(--overlay-bg));
@@ -975,7 +990,7 @@ form {
   background: linear-gradient(90deg, var(--bg-secondary), var(--bg-tertiary));
   color: var(--text-primary);
   font-weight: 600;
-  padding: 1rem 1.25rem;
+  padding: clamp(0.75rem, 0.6rem + 0.6vw, 1rem) clamp(0.9rem, 0.7rem + 0.8vw, 1.25rem);
   text-align: left;
   border-bottom: 1px solid var(--border-secondary);
   font-size: 0.75rem;
@@ -984,7 +999,7 @@ form {
 }
 
 .table td {
-  padding: 1rem 1.25rem;
+  padding: clamp(0.75rem, 0.62rem + 0.55vw, 1rem) clamp(0.9rem, 0.7rem + 0.8vw, 1.25rem);
   border-bottom: 1px solid var(--border-primary);
   color: var(--text-secondary);
   transition: background-color var(--transition-fast), color var(--transition-fast);
@@ -1221,6 +1236,10 @@ form {
   
   .table-container {
     font-size: var(--font-size-sm);
+  }
+
+  .table-container .table:not(.mobile-card-view) {
+    min-width: 34rem;
   }
 
   /* Stack flex containers on mobile */

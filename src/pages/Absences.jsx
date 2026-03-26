@@ -460,15 +460,15 @@ export default function Absences() {
             <table className="table mobile-card-view" style={{ width: '100%' }}>
               <thead>
                 <tr>
-                  <th scope="col" style={{ width: '120px' }}>Fecha</th>
+                  <th scope="col">Fecha</th>
                   {(isTeacherOrAdmin || user?.role === 'TUTOR') && (
-                    <th scope="col" style={{ width: '180px' }}>Estudiante</th>
+                    <th scope="col">Estudiante</th>
                   )}
-                  <th scope="col" style={{ width: '140px' }}>Materia</th>
-                  <th scope="col" style={{ width: '120px', textAlign: 'center' }}>Estado</th>
+                  <th scope="col">Materia</th>
+                  <th scope="col" style={{ textAlign: 'center' }}>Estado</th>
                   <th scope="col">Motivo</th>
-                  <th scope="col" style={{ width: '150px' }}>Registrado por</th>
-                  <th scope="col" style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
+                  <th scope="col">Registrado por</th>
+                  <th scope="col" style={{ textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>

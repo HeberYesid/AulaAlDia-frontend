@@ -123,55 +123,57 @@ export default function Curriculums() {
       {curriculums.length === 0 ? (
         <p>No hay mallas registradas.</p>
       ) : (
-        <table className="table" style={{ width: '100%', textAlign: 'left' }}>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Alcance</th>
-              <th>Por defecto</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {curriculums.map(c => (
-              <tr key={c.id}>
-                <td>{c.name}</td>
-                <td>{c.scope_type}</td>
-                <td>{c.is_default ? 'Sí' : 'No'}</td>
-                <td>
-                  <span className={`badge ${c.is_active ? 'badge-success' : 'badge-danger'}`} style={{
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '4px',
-                    backgroundColor: c.is_active ? 'var(--success)' : 'var(--danger)',
-                    color: 'white',
-                    fontSize: '0.8rem'
-                  }}>
-                    {c.is_active ? 'Activa' : 'Inactiva'}
-                  </span>
-                </td>
-                <td>
-                  {c.scope_type === 'TENANT_DEFAULT' && (
-                    <button 
-                      className="btn btn-sm btn-secondary"
-                      onClick={() => handleClone(c.id)}
-                    >
-                      Clonar para Grado
-                    </button>
-                  )}
-                  {c.scope_type === 'GRADE' && (
-                    <button 
-                      className="btn btn-sm btn-danger ml-2"
-                      onClick={() => handleUnlink(c.id)}
-                    >
-                      Desvincular (Volver a Default)
-                    </button>
-                  )}
-                </td>
+        <div className="table-container">
+          <table className="table mobile-card-view" style={{ width: '100%', textAlign: 'left' }}>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Alcance</th>
+                <th>Por defecto</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {curriculums.map(c => (
+                <tr key={c.id}>
+                  <td data-label="Nombre">{c.name}</td>
+                  <td data-label="Alcance">{c.scope_type}</td>
+                  <td data-label="Por defecto">{c.is_default ? 'Sí' : 'No'}</td>
+                  <td data-label="Estado">
+                    <span className={`badge ${c.is_active ? 'badge-success' : 'badge-danger'}`} style={{
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '4px',
+                      backgroundColor: c.is_active ? 'var(--success)' : 'var(--danger)',
+                      color: 'white',
+                      fontSize: '0.8rem'
+                    }}>
+                      {c.is_active ? 'Activa' : 'Inactiva'}
+                    </span>
+                  </td>
+                  <td data-label="Acciones">
+                    {c.scope_type === 'TENANT_DEFAULT' && (
+                      <button 
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => handleClone(c.id)}
+                      >
+                        Clonar para Grado
+                      </button>
+                    )}
+                    {c.scope_type === 'GRADE' && (
+                      <button 
+                        className="btn btn-sm btn-danger ml-2"
+                        onClick={() => handleUnlink(c.id)}
+                      >
+                        Desvincular (Volver a Default)
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

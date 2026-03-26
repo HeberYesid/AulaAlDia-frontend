@@ -96,8 +96,8 @@ body.sidebar-collapsed .msg-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--msg-radius-sm);
     border: 1px solid rgba(242, 197, 114, 0.35);
     background: var(--msg-accent);
@@ -653,9 +653,9 @@ body.sidebar-collapsed .msg-container {
     background: var(--msg-bg-surface);
     border: 1px solid var(--msg-border);
     border-radius: var(--msg-radius-lg);
-    width: 440px;
+    width: clamp(18rem, 86vw, 27.5rem);
     max-width: 92vw;
-    max-height: 80vh;
+    max-height: min(80vh, 42rem);
     display: flex;
     flex-direction: column;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
@@ -680,8 +680,8 @@ body.sidebar-collapsed .msg-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--msg-radius-sm);
     border: none;
     background: transparent;
@@ -865,6 +865,11 @@ body.sidebar-collapsed .msg-container {
         left: 0;
     }
 
+    .msg-modal {
+        width: min(95vw, 30rem);
+        max-height: 85dvh;
+    }
+
     .msg-sidebar {
         display: flex;
     }
@@ -892,6 +897,12 @@ body.sidebar-collapsed .msg-container {
 }
 
 @media (max-width: 480px) {
+    .msg-modal {
+        width: 96vw;
+        max-height: 88dvh;
+        border-radius: var(--msg-radius-md);
+    }
+
     .msg-chat-messages {
         padding: 0.75rem;
     }
