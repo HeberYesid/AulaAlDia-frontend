@@ -379,15 +379,15 @@ export default function Observer() {
             <table className="table mobile-card-view" style={{ width: '100%' }}>
               <thead>
                 <tr>
-                  <th scope="col" style={{ width: '130px' }}>Fecha</th>
+                  <th scope="col">Fecha</th>
                   {(isTeacherOrAdmin || user?.role === 'TUTOR') && (
-                    <th scope="col" style={{ width: '180px' }}>Estudiante</th>
+                    <th scope="col">Estudiante</th>
                   )}
-                  <th scope="col" style={{ width: '120px' }}>Categoría</th>
-                  <th scope="col" style={{ width: '140px' }}>Materia</th>
+                  <th scope="col">Categoría</th>
+                  <th scope="col">Materia</th>
                   <th scope="col">Título</th>
-                  <th scope="col" style={{ width: '150px' }}>Profesor</th>
-                  <th scope="col" style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
+                  <th scope="col">Profesor</th>
+                  <th scope="col" style={{ textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>

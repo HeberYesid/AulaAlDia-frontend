@@ -64,10 +64,10 @@ export default function MySubjects() {
               <table className="table mobile-card-view">
                 <thead>
                   <tr>
-                    <th style={{ width: '55%' }}>Materia</th>
-                    <th style={{ width: '12%', textAlign: 'center' }}>Nota</th>
-                    <th style={{ width: '18%', textAlign: 'center' }}>Promedio ejercicios</th>
-                    <th style={{ width: '15%', textAlign: 'center' }}>Acción</th>
+                    <th>Materia</th>
+                    <th style={{ textAlign: 'center' }}>Nota</th>
+                    <th style={{ textAlign: 'center' }}>Promedio ejercicios</th>
+                    <th style={{ textAlign: 'center' }}>Acción</th>
                   </tr>
                 </thead>
                 <tbody>

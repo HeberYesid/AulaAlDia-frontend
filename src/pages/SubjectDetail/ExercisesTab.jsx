@@ -287,12 +287,12 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
             <table className="table mobile-card-view">
               <thead>
                 <tr>
-                  <th style={{ width: 60 }}>#</th>
+                  <th>#</th>
                   <th>Nombre</th>
                   <th>Descripción</th>
                   <th>Archivo</th>
-                  <th style={{ width: 180 }}>Fecha Límite</th>
-                  {isTeacherOrAdmin && <th style={{ width: 150 }}>Acciones</th>}
+                  <th>Fecha Límite</th>
+                  {isTeacherOrAdmin && <th>Acciones</th>}
                 </tr>
               </thead>
               <tbody>

@@ -120,16 +120,16 @@ export default function NotificationsPage() {
           <p style={{ fontSize: '1.2rem', margin: '1rem 0 0 0' }}>No tienes notificaciones</p>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table className="table mobile-card-view" style={{ marginTop: '1rem', width: '100%' }}>
+        <div className="table-container" style={{ marginTop: '1rem' }}>
+          <table className="table mobile-card-view" style={{ width: '100%' }}>
             <thead>
               <tr>
-                <th scope="col" style={{ width: '100px' }}>Tipo</th>
-                <th scope="col" style={{ width: '200px' }}>Título</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Título</th>
                 <th scope="col">Mensaje</th>
-                <th scope="col" style={{ width: '150px' }}>Fecha</th>
-                <th scope="col" style={{ width: '100px', textAlign: 'center' }}>Estado</th>
-                <th scope="col" style={{ width: '180px', textAlign: 'center' }}>Acciones</th>
+                <th scope="col">Fecha</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Estado</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>

@@ -127,7 +127,7 @@ export default function AdminUsers() {
       <section className="card">
         <h2>Listado de usuarios</h2>
         <div className="table-container">
-          <table className="table">
+          <table className="table mobile-card-view">
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -140,17 +140,17 @@ export default function AdminUsers() {
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan="5">No hay usuarios registrados en esta institución.</td>
+                  <td data-label="Estado" colSpan="5">No hay usuarios registrados en esta institución.</td>
                 </tr>
               ) : users.map((user) => {
                 const isMutating = mutatingUserId === user.id
                 return (
                   <tr key={user.id}>
-                    <td>{user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || '-'}</td>
-                    <td>{user.email}</td>
-                    <td>{ROLE_LABELS[user.role] || user.role}</td>
-                    <td>{user.is_active ? 'Habilitado' : 'Inhabilitado'}</td>
-                    <td>
+                    <td data-label="Nombre">{user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || '-'}</td>
+                    <td data-label="Correo">{user.email}</td>
+                    <td data-label="Rol">{ROLE_LABELS[user.role] || user.role}</td>
+                    <td data-label="Estado">{user.is_active ? 'Habilitado' : 'Inhabilitado'}</td>
+                    <td data-label="Acciones">
                       <div className="admin-users__actions">
                         <button
                           className={`btn ${user.is_active ? 'warning' : 'success'}`}

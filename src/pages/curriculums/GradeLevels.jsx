@@ -91,34 +91,36 @@ export default function GradeLevels() {
       {grades.length === 0 ? (
         <p>No hay grados registrados. Crea el primero.</p>
       ) : (
-        <table className="table" style={{ width: '100%', textAlign: 'left' }}>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Orden</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {grades.map(g => (
-              <tr key={g.id}>
-                <td>{g.name}</td>
-                <td>{g.order}</td>
-                <td>
-                  <span className={`badge ${g.is_active ? 'badge-success' : 'badge-danger'}`} style={{
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '4px',
-                    backgroundColor: g.is_active ? 'var(--success)' : 'var(--danger)',
-                    color: 'white',
-                    fontSize: '0.8rem'
-                  }}>
-                    {g.is_active ? 'Activo' : 'Inactivo'}
-                  </span>
-                </td>
+        <div className="table-container">
+          <table className="table mobile-card-view" style={{ width: '100%', textAlign: 'left' }}>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Orden</th>
+                <th>Estado</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {grades.map(g => (
+                <tr key={g.id}>
+                  <td data-label="Nombre">{g.name}</td>
+                  <td data-label="Orden">{g.order}</td>
+                  <td data-label="Estado">
+                    <span className={`badge ${g.is_active ? 'badge-success' : 'badge-danger'}`} style={{
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '4px',
+                      backgroundColor: g.is_active ? 'var(--success)' : 'var(--danger)',
+                      color: 'white',
+                      fontSize: '0.8rem'
+                    }}>
+                      {g.is_active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

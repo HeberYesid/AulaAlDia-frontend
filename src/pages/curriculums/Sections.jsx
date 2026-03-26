@@ -80,8 +80,8 @@ export default function Sections() {
 
       {error && <div className="alert alert-danger">{error}</div>}
 
-      <div className="table-responsive">
-        <table className="table">
+      <div className="table-container">
+        <table className="table mobile-card-view">
           <thead>
             <tr>
               <th>ID</th>
@@ -93,20 +93,20 @@ export default function Sections() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="4" className="text-center">Cargando...</td>
+                <td data-label="Estado" colSpan="4" className="text-center">Cargando...</td>
               </tr>
             ) : sections.length === 0 ? (
               <tr>
-                <td colSpan="4" className="text-center">
+                <td data-label="Estado" colSpan="4" className="text-center">
                   No hay secciones registradas.
                 </td>
               </tr>
             ) : (
               sections.map((sec) => (
                 <tr key={sec.id}>
-                  <td>{sec.id}</td>
-                  <td>{sec.name}</td>
-                  <td>
+                  <td data-label="ID">{sec.id}</td>
+                  <td data-label="Nombre">{sec.name}</td>
+                  <td data-label="Estado">
                     <span
                       className={`badge ${
                         sec.is_active ? "badge-success" : "badge-secondary"
@@ -115,7 +115,7 @@ export default function Sections() {
                       {sec.is_active ? "Activo" : "Inactivo"}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Acciones">
                     <button
                       className="btn btn-sm btn-outline-primary"
                       onClick={() => openEditModal(sec)}

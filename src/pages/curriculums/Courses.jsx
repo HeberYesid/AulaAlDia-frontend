@@ -122,8 +122,8 @@ export default function Courses() {
 
       {error && <div className="alert alert-danger">{error}</div>}
 
-      <div className="table-responsive">
-        <table className="table">
+      <div className="table-container">
+        <table className="table mobile-card-view">
           <thead>
             <tr>
               <th>ID</th>
@@ -137,24 +137,24 @@ export default function Courses() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="6" className="text-center">
+                <td data-label="Estado" colSpan="6" className="text-center">
                   Cargando...
                 </td>
               </tr>
             ) : courses.length === 0 ? (
               <tr>
-                <td colSpan="6" className="text-center">
+                <td data-label="Estado" colSpan="6" className="text-center">
                   No hay cursos registrados.
                 </td>
               </tr>
             ) : (
               courses.map((course) => (
                 <tr key={course.id}>
-                  <td>{course.id}</td>
-                  <td>{course.display_name}</td>
-                  <td>{getGradeName(course.grade_level)}</td>
-                  <td>{course.section ? getSectionName(course.section) : "-"}</td>
-                  <td>
+                  <td data-label="ID">{course.id}</td>
+                  <td data-label="Nombre Mostrar">{course.display_name}</td>
+                  <td data-label="Grado">{getGradeName(course.grade_level)}</td>
+                  <td data-label="Sección">{course.section ? getSectionName(course.section) : "-"}</td>
+                  <td data-label="Estado">
                     <span
                       className={`badge ${
                         course.is_active ? "badge-success" : "badge-secondary"
@@ -163,7 +163,7 @@ export default function Courses() {
                       {course.is_active ? "Activo" : "Inactivo"}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Acciones">
                     <button
                       className="btn btn-sm btn-outline-primary"
                       onClick={() => openEditModal(course)}

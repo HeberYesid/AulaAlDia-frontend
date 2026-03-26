@@ -389,16 +389,16 @@ export default function ResultsTab({
             <p className="notice">No se encontraron resultados con los filtros aplicados.</p>
           ) : (
             <div className="data-table" style={{ maxHeight: 500, overflowY: 'auto', overflowX: 'auto' }}>
-              <table className="table mobile-card-view" style={{ tableLayout: 'fixed', width: '100%' }}>
+              <table className="table mobile-card-view" style={{ tableLayout: 'auto', width: '100%' }}>
                 <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 1 }}>
                   <tr>
                     {isTeacherOrAdmin && <th>Estudiante</th>}
                     <th>Ejercicio</th>
-                    <th style={{ width: 120 }}>Resultado</th>
-                    <th style={{ width: 200 }}>Solución</th>
-                    <th style={{ width: 250, maxWidth: 250 }}>Comentarios</th>
-                    <th style={{ width: 150 }}>Actualizado</th>
-                    {isTeacherOrAdmin && <th style={{ width: 100 }}>Acción</th>}
+                    <th>Resultado</th>
+                    <th>Solución</th>
+                    <th>Comentarios</th>
+                    <th>Actualizado</th>
+                    {isTeacherOrAdmin && <th>Acción</th>}
                   </tr>
                 </thead>
                 <tbody>
