@@ -3,6 +3,7 @@ import { useAuth } from '../state/AuthContext'
 import { useState } from 'react'
 import ThemeToggle from './ThemeToggle'
 import NotificationBell from './NotificationBell'
+import { getNavigationItems } from '../utils/navigation'
 
 export default function NavBar() {
   const { user, logout } = useAuth()
@@ -17,12 +18,15 @@ export default function NavBar() {
   }
 
   function isActive(path) {
-    return location.pathname === path
+    if (path === '/') return location.pathname === '/'
+    return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
   function closeMenu() {
     setMenuOpen(false)
   }
+
+  const navItems = user ? getNavigationItems(user, { surface: 'navbar' }) : []
 
   return (
     <header className="navbar">
@@ -58,63 +62,19 @@ export default function NavBar() {
               >
                 ✕
               </button>
-              
-              <Link 
-                to="/" 
-                className={isActive('/') ? 'active' : ''}
-                aria-current={isActive('/') ? 'page' : undefined}
-                onClick={closeMenu}
-              >
-                Dashboard
-              </Link>
-              {(user.role === 'TEACHER' || user.role === 'ADMIN') && (
-                <Link 
-                  to="/subjects" 
-                  className={isActive('/subjects') ? 'active' : ''}
-                  aria-current={isActive('/subjects') ? 'page' : undefined}
+
+              {navItems.map(({ key, to, label, tourId }) => (
+                <Link
+                  key={key}
+                  to={to}
+                  className={isActive(to) ? 'active' : ''}
+                  aria-current={isActive(to) ? 'page' : undefined}
                   onClick={closeMenu}
+                  data-tour-id={tourId || undefined}
                 >
-                  Materias
+                  {label}
                 </Link>
-              )}
-              {(user.role === 'STUDENT' || user.role === 'TUTOR') && (
-                <Link 
-                  to="/my" 
-                  className={isActive('/my') ? 'active' : ''}
-                  aria-current={isActive('/my') ? 'page' : undefined}
-                  onClick={closeMenu}
-                >
-                  {user.role === 'TUTOR' ? 'Progreso' : 'Resultados'}
-                </Link>
-              )}
-              {(user.role === 'STUDENT' || user.role === 'TUTOR') && (
-                <Link 
-                  to="/my-bulletins" 
-                  className={isActive('/my-bulletins') ? 'active' : ''}
-                  aria-current={isActive('/my-bulletins') ? 'page' : undefined}
-                  onClick={closeMenu}
-                >
-                  Boletines
-                </Link>
-              )}
-              {user.role !== 'TUTOR' && (
-                <Link 
-                  to="/messages" 
-                  className={isActive('/messages') ? 'active' : ''}
-                  aria-current={isActive('/messages') ? 'page' : undefined}
-                  onClick={closeMenu}
-                >
-                  Mensajes
-                </Link>
-              )}
-              <Link 
-                to="/calendar" 
-                className={isActive('/calendar') ? 'active' : ''}
-                aria-current={isActive('/calendar') ? 'page' : undefined}
-                onClick={closeMenu}
-              >
-                Calendario
-              </Link>
+              ))}
               <div className="nav-icons">
                 <NotificationBell />
                 <ThemeToggle />

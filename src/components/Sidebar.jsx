@@ -3,26 +3,14 @@ import { useAuth } from '../state/AuthContext'
 import { useState, useEffect } from 'react'
 import NotificationBell from './NotificationBell'
 import { getBrandInitials } from '../utils/branding'
+import { getNavigationSections } from '../utils/navigation'
 import {
-  LayoutDashboard,
-  BookOpen,
-  BookMarked,
-  BarChart2,
-  MessageSquare,
-  Calendar,
-  ClipboardList,
-  UserX,
-  FileText,
-  ShieldCheck,
-  SlidersHorizontal,
-  Users,
   User,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Menu,
   X,
-  Megaphone,
 } from 'lucide-react'
 
 const SIDEBAR_COLLAPSED_KEY = 'aulaaldia-sidebar-collapsed'
@@ -95,122 +83,7 @@ export default function Sidebar() {
   // Don't render sidebar on public/auth pages
   if (!user) return null
 
-  const navItems = [
-    {
-      to: '/',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      show: user.role !== 'ADMIN',
-    },
-    {
-      to: '/admin/dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/admin/news',
-      label: 'Gestión de Novedades',
-      icon: Megaphone,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/subjects',
-      label: 'Materias',
-      icon: BookOpen,
-      show: user.role === 'TEACHER' || user.role === 'ADMIN',
-    },
-    {
-      to: '/my',
-      label: user.role === 'TUTOR' ? 'Progreso' : 'Resultados',
-      icon: BarChart2,
-      show: user.role === 'STUDENT' || user.role === 'TUTOR',
-    },
-    {
-      to: '/my-subjects',
-      label: 'Mis Materias',
-      icon: BookMarked,
-      show: user.role === 'STUDENT' || user.role === 'TUTOR',
-    },
-    {
-      to: '/my-bulletins',
-      label: 'Boletines',
-      icon: FileText,
-      show: user.role === 'STUDENT' || user.role === 'TUTOR',
-    },
-    {
-      to: '/messages',
-      label: 'Mensajes',
-      icon: MessageSquare,
-      show: user.role !== 'TUTOR',
-    },
-    {
-      to: '/calendar',
-      label: 'Calendario',
-      icon: Calendar,
-      show: true,
-    },
-    {
-      to: '/observer',
-      label: 'Observador',
-      icon: ClipboardList,
-      show: true,
-    },
-    {
-      to: '/absences',
-      label: 'Asistencia',
-      icon: UserX,
-      show: true,
-    },
-    {
-      to: '/admin/operations',
-      label: 'Auditoría',
-      icon: ClipboardList,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/admin/users',
-      label: 'Usuarios',
-      icon: Users,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/admin/commercial',
-      label: 'Comercial Tenant',
-      icon: ShieldCheck,
-      show: user.role === 'ADMIN' && user.is_global_admin,
-    },
-    {
-      to: '/admin/academic-settings',
-      label: 'Config. Académica',
-      icon: SlidersHorizontal,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/admin/curriculums',
-      label: 'Mallas Curriculares',
-      icon: BookOpen,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/admin/grade-levels',
-      label: 'Grados',
-      icon: LayoutDashboard,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/admin/sections',
-      label: 'Secciones',
-      icon: LayoutDashboard,
-      show: user.role === 'ADMIN',
-    },
-    {
-      to: '/admin/courses',
-      label: 'Cursos',
-      icon: BookOpen,
-      show: user.role === 'ADMIN',
-    },
-  ].filter((item) => item.show)
+  const navSections = getNavigationSections(user, { surface: 'sidebar' })
 
   const sidebarClasses = [
     'sidebar',
@@ -289,20 +162,26 @@ export default function Sidebar() {
 
         {/* Main navigation */}
         <nav id="sidebar-nav" className="sidebar__nav" aria-label="Navegación">
-          {navItems.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`sidebar__nav-item ${isActive(to) ? 'sidebar__nav-item--active' : ''}`}
-              aria-current={isActive(to) ? 'page' : undefined}
-              aria-label={collapsed ? label : undefined}
-              title={collapsed ? label : undefined}
-            >
-              <span className="sidebar__nav-icon">
-                <Icon size={20} strokeWidth={1.75} />
-              </span>
-              {!collapsed && <span className="sidebar__nav-label">{label}</span>}
-            </Link>
+          {navSections.map(({ id, label, items }) => (
+            <div key={id} className="sidebar__section" role="group" aria-label={label}>
+              <p className="sidebar__section-title">{label}</p>
+              {items.map(({ key, to, label: itemLabel, icon: Icon, tourId }) => (
+                <Link
+                  key={key}
+                  to={to}
+                  className={`sidebar__nav-item ${isActive(to) ? 'sidebar__nav-item--active' : ''}`}
+                  aria-current={isActive(to) ? 'page' : undefined}
+                  aria-label={collapsed ? itemLabel : undefined}
+                  title={collapsed ? itemLabel : undefined}
+                  data-tour-id={tourId || undefined}
+                >
+                  <span className="sidebar__nav-icon">
+                    <Icon size={20} strokeWidth={1.75} />
+                  </span>
+                  {!collapsed && <span className="sidebar__nav-label">{itemLabel}</span>}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
 

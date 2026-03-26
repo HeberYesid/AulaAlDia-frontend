@@ -24,6 +24,10 @@ function completionContent(title, features) {
   )
 }
 
+function navTarget(tourId) {
+  return `[data-tour-id="${tourId}"]`
+}
+
 const STUDENT_STEPS = [
   {
     target: 'body',
@@ -62,37 +66,37 @@ const STUDENT_STEPS = [
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/my"]',
+    target: navTarget('nav-my'),
     content: 'Resultados: consulta tu historial completo de calificaciones y comentarios.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/my-subjects"]',
+    target: navTarget('nav-my-subjects'),
     content: 'Mis Materias: revisa el progreso detallado y el rendimiento por asignatura.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/my-bulletins"]',
+    target: navTarget('nav-my-bulletins'),
     content: 'Boletines: genera y descarga reportes de desempeño académico.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/messages"]',
+    target: navTarget('nav-messages'),
     content: 'Mensajes: comunícate con docentes y mantén seguimiento de conversaciones.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/calendar"]',
+    target: navTarget('nav-calendar'),
     content: 'Calendario: organiza entregas, evaluaciones y eventos académicos.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/observer"]',
+    target: navTarget('nav-observer'),
     content: 'Observador: revisa anotaciones y seguimiento académico.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/absences"]',
+    target: navTarget('nav-absences'),
     content: 'Asistencia: verifica faltas justificadas y pendientes de justificación.',
     disableBeacon: true,
   },
@@ -147,27 +151,27 @@ const TEACHER_STEPS = [
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/subjects"]',
+    target: navTarget('nav-subjects'),
     content: 'Gestión de Materias: crea cursos, ejercicios, inscripciones y carga de resultados CSV.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/messages"]',
+    target: navTarget('nav-messages'),
     content: 'Mensajes: comunicación directa con estudiantes y coordinación académica.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/calendar"]',
+    target: navTarget('nav-calendar'),
     content: 'Calendario: planifica fechas límite, clases y actividades.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/observer"]',
+    target: navTarget('nav-observer'),
     content: 'Observador: registra y revisa observaciones de seguimiento por estudiante.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/absences"]',
+    target: navTarget('nav-absences'),
     content: 'Asistencia: controla faltas y su estado de justificación.',
     disableBeacon: true,
   },
@@ -222,37 +226,37 @@ const ADMIN_STEPS = [
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/subjects"]',
+    target: navTarget('nav-subjects'),
     content: 'Materias: administra cursos, ejercicios, inscripciones y resultados.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/messages"]',
+    target: navTarget('nav-messages'),
     content: 'Mensajes: coordina con docentes y estudiantes desde un solo lugar.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/calendar"]',
+    target: navTarget('nav-calendar'),
     content: 'Calendario: revisa eventos, cierres y fechas operativas importantes.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/observer"]',
+    target: navTarget('nav-observer'),
     content: 'Observador: consulta y registra novedades de seguimiento estudiantil.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/absences"]',
+    target: navTarget('nav-absences'),
     content: 'Asistencia: monitorea faltas, justificaciones y casos de riesgo.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/admin/academic-settings"]',
+    target: navTarget('nav-admin-academic-settings'),
     content: 'Config. Académica: gestiona periodos, escalas de calificación y parámetros institucionales.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/admin/commercial"]',
+    target: navTarget('nav-admin-commercial'),
     content: 'Comercial Tenant: disponible para administradores globales con gestión multi-tenant.',
     disableBeacon: true,
   },
@@ -307,32 +311,32 @@ const TUTOR_STEPS = [
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/my"]',
+    target: navTarget('nav-my'),
     content: 'Progreso: vista consolidada de desempeño académico.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/my-subjects"]',
+    target: navTarget('nav-my-subjects'),
     content: 'Mis Materias: detalle por materia para el seguimiento familiar.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/my-bulletins"]',
+    target: navTarget('nav-my-bulletins'),
     content: 'Boletines: consulta reportes de rendimiento.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/calendar"]',
+    target: navTarget('nav-calendar'),
     content: 'Calendario: mantén al día fechas relevantes de actividades y entregas.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/observer"]',
+    target: navTarget('nav-observer'),
     content: 'Observador: revisa observaciones registradas por docentes.',
     disableBeacon: true,
   },
   {
-    target: '.sidebar__nav a[href="/absences"]',
+    target: navTarget('nav-absences'),
     content: 'Asistencia: consulta faltas y estado de justificación.',
     disableBeacon: true,
   },
