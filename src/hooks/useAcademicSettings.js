@@ -32,6 +32,15 @@ export const DEFAULT_SCALE = {
   ],
 }
 
+export const DEFAULT_SCHOOL_YEAR = {
+  start_date: '',
+  end_date: '',
+  enrollment_open_date: '',
+  enrollment_close_date: '',
+  evaluation_type: 'TRIMESTER',
+  is_active: false,
+}
+
 export function toLocalDateTimeInput(value) {
   if (!value) return ''
   const date = new Date(value)
@@ -78,6 +87,17 @@ export function createDefaultScale() {
   }
 }
 
+export function createDefaultSchoolYear() {
+  return {
+    start_date: '',
+    end_date: '',
+    enrollment_open_date: '',
+    enrollment_close_date: '',
+    evaluation_type: 'TRIMESTER',
+    is_active: false,
+  }
+}
+
 export function buildPeriodForm(period) {
   return {
     year: period.year,
@@ -112,28 +132,34 @@ export function useAcademicSettings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [periods, setPeriods] = useState([])
   const [scales, setScales] = useState([])
+  const [schoolYears, setSchoolYears] = useState([])
   const [settingsForm, setSettingsForm] = useState(DEFAULT_SETTINGS)
   const [periodForm, setPeriodForm] = useState(DEFAULT_PERIOD)
   const [scaleForm, setScaleForm] = useState(DEFAULT_SCALE)
+  const [schoolYearForm, setSchoolYearForm] = useState(DEFAULT_SCHOOL_YEAR)
   const [editingPeriodId, setEditingPeriodId] = useState(null)
   const [editingScaleId, setEditingScaleId] = useState(null)
   const [savingSettings, setSavingSettings] = useState(false)
   const [savingPeriod, setSavingPeriod] = useState(false)
   const [savingScale, setSavingScale] = useState(false)
+  const [savingSchoolYear, setSavingSchoolYear] = useState(false)
+  const [mutatingSchoolYearId, setMutatingSchoolYearId] = useState(null)
 
   const loadAcademicAdmin = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
-      const [settingsResult, periodsResult, scalesResult] = await Promise.all([
+      const [settingsResult, periodsResult, scalesResult, schoolYearsResult] = await Promise.all([
         api.get('/api/v1/courses/academic-settings/'),
         api.get('/api/v1/courses/academic-periods/'),
         api.get('/api/v1/courses/grading-scales/'),
+        api.get('/api/v1/courses/school-years/'),
       ])
 
       const nextSettings = settingsResult.data || DEFAULT_SETTINGS
       const nextPeriods = periodsResult.data?.results || periodsResult.data || []
       const nextScales = scalesResult.data?.results || scalesResult.data || []
+      const nextSchoolYears = schoolYearsResult.data?.results || schoolYearsResult.data || []
 
       setSettings(nextSettings)
       setSettingsForm({
@@ -146,6 +172,7 @@ export function useAcademicSettings() {
       })
       setPeriods(Array.isArray(nextPeriods) ? nextPeriods : [])
       setScales(Array.isArray(nextScales) ? nextScales : [])
+      setSchoolYears(Array.isArray(nextSchoolYears) ? nextSchoolYears : [])
     } catch (err) {
       setError(normalizeApiError(err, 'No se pudo cargar la configuración académica.'))
     } finally {
@@ -319,22 +346,70 @@ export function useAcademicSettings() {
     setError('')
   }
 
+  async function handleCreateSchoolYear(event) {
+    event.preventDefault()
+    setSavingSchoolYear(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const payload = {
+        start_date: schoolYearForm.start_date,
+        end_date: schoolYearForm.end_date,
+        enrollment_open_date: schoolYearForm.enrollment_open_date,
+        enrollment_close_date: schoolYearForm.enrollment_close_date,
+        evaluation_type: schoolYearForm.evaluation_type,
+        is_active: Boolean(schoolYearForm.is_active),
+      }
+      await api.post('/api/v1/courses/school-years/', payload)
+      setSchoolYearForm(createDefaultSchoolYear())
+      setSuccess('Año escolar creado correctamente.')
+      loadAcademicAdmin()
+    } catch (err) {
+      setError(normalizeApiError(err, 'No se pudo crear el año escolar.'))
+    } finally {
+      setSavingSchoolYear(false)
+    }
+  }
+
+  async function handleToggleSchoolYearStatus(schoolYear) {
+    setMutatingSchoolYearId(schoolYear.id)
+    setError('')
+    setSuccess('')
+
+    try {
+      const action = schoolYear.is_active ? 'deactivate' : 'activate'
+      await api.post(`/api/v1/courses/school-years/${schoolYear.id}/${action}/`)
+      setSuccess(schoolYear.is_active ? 'Año escolar desactivado.' : 'Año escolar activado.')
+      loadAcademicAdmin()
+    } catch (err) {
+      setError(normalizeApiError(err, 'No se pudo actualizar el estado del año escolar.'))
+    } finally {
+      setMutatingSchoolYearId(null)
+    }
+  }
+
   return {
     loading,
     error,
     success,
     settings,
+    schoolYears,
     periods,
     scales,
     settingsForm,
+    schoolYearForm,
     periodForm,
     scaleForm,
     editingPeriodId,
     editingScaleId,
     savingSettings,
+    savingSchoolYear,
     savingPeriod,
     savingScale,
+    mutatingSchoolYearId,
     setSettingsForm,
+    setSchoolYearForm,
     setPeriodForm,
     setScaleForm,
     loadAcademicAdmin,
@@ -342,6 +417,8 @@ export function useAcademicSettings() {
     addScaleRange,
     removeScaleRange,
     handleSaveSettings,
+    handleCreateSchoolYear,
+    handleToggleSchoolYearStatus,
     handleCreatePeriod,
     handleEditPeriod,
     handleCancelPeriodEdit,
