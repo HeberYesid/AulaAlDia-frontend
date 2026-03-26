@@ -25,7 +25,6 @@ class ErrorBoundary extends Component {
 }
 
 const AppTour = lazy(() => import('./components/AppTour'))
-const TourDebugButton = lazy(() => import('./components/TourDebugButton'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const RegisterTeacher = lazy(() => import('./pages/RegisterTeacher'))
@@ -72,7 +71,6 @@ export default function App() {
       <Sidebar />
       <Suspense fallback={null}>
         <AppTour />
-        <TourDebugButton />
       </Suspense>
       <div className="app-body">
         <main id="main-content" className="container">
