@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/PublicLayout'
+import ContextualTipBanner from './components/ContextualTipBanner'
 
 class ErrorBoundary extends Component {
   state = { error: null }
@@ -75,6 +76,7 @@ export default function App() {
       </Suspense>
       <div className="app-body">
         <main id="main-content" className="container">
+        <ContextualTipBanner />
         <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
         <Routes>

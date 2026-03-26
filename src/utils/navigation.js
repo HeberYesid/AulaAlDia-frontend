@@ -27,6 +27,7 @@ const NAVIGATION_ITEMS = [
     key: 'dashboard',
     to: '/',
     label: 'Dashboard',
+    contextualTip: 'Revisa aqui el resumen rapido de tu actividad y entra a los modulos clave desde el menu lateral.',
     icon: LayoutDashboard,
     section: 'general',
     roles: [USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
@@ -36,6 +37,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-dashboard',
     to: '/admin/dashboard',
     label: 'Dashboard',
+    contextualTip: 'Monitorea los indicadores principales y usa este panel para priorizar acciones academicas y operativas.',
     icon: LayoutDashboard,
     section: 'general',
     roles: [USER_ROLES.ADMIN],
@@ -45,6 +47,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-news',
     to: '/admin/news',
     label: 'Gestion de Novedades',
+    contextualTip: 'Publica novedades claras y breves para mantener informada a toda la comunidad en tiempo real.',
     icon: Megaphone,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
@@ -54,6 +57,7 @@ const NAVIGATION_ITEMS = [
     key: 'subjects',
     to: '/subjects',
     label: 'Materias',
+    contextualTip: 'Para crear una materia, usa el boton de crear en esta vista y completa nombre, grado y seccion.',
     icon: BookOpen,
     section: 'academic',
     roles: [USER_ROLES.TEACHER, USER_ROLES.ADMIN],
@@ -63,6 +67,7 @@ const NAVIGATION_ITEMS = [
     key: 'my-results',
     to: '/my',
     label: (user) => (user.role === USER_ROLES.TUTOR ? 'Progreso' : 'Resultados'),
+    contextualTip: 'Consulta aqui el rendimiento por actividad para identificar avances y puntos de mejora.',
     icon: BarChart2,
     section: 'academic',
     roles: [USER_ROLES.STUDENT, USER_ROLES.TUTOR],
@@ -72,6 +77,7 @@ const NAVIGATION_ITEMS = [
     key: 'my-subjects',
     to: '/my-subjects',
     label: 'Mis Materias',
+    contextualTip: 'Entra a cada materia para revisar contenidos, ejercicios y seguimiento academico detallado.',
     icon: BookMarked,
     section: 'academic',
     roles: [USER_ROLES.STUDENT, USER_ROLES.TUTOR],
@@ -82,6 +88,7 @@ const NAVIGATION_ITEMS = [
     key: 'my-bulletins',
     to: '/my-bulletins',
     label: 'Boletines',
+    contextualTip: 'Genera y revisa tus boletines para tener una vista consolidada del periodo academico.',
     icon: FileText,
     section: 'academic',
     roles: [USER_ROLES.STUDENT, USER_ROLES.TUTOR],
@@ -91,6 +98,7 @@ const NAVIGATION_ITEMS = [
     key: 'messages',
     to: '/messages',
     label: 'Mensajes',
+    contextualTip: 'Usa este modulo para comunicarte de forma directa y mantener contexto por conversacion.',
     icon: MessageSquare,
     section: 'communication',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT],
@@ -100,6 +108,7 @@ const NAVIGATION_ITEMS = [
     key: 'calendar',
     to: '/calendar',
     label: 'Calendario',
+    contextualTip: 'Planifica entregas y eventos clave; revisa fechas proximas para evitar retrasos.',
     icon: Calendar,
     section: 'academic',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
@@ -109,6 +118,7 @@ const NAVIGATION_ITEMS = [
     key: 'observer',
     to: '/observer',
     label: 'Observador',
+    contextualTip: 'Registra observaciones relevantes y consulta historial para seguimiento academico oportuno.',
     icon: ClipboardList,
     section: 'academic',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
@@ -119,6 +129,7 @@ const NAVIGATION_ITEMS = [
     key: 'absences',
     to: '/absences',
     label: 'Asistencia',
+    contextualTip: 'Controla faltas y justificaciones desde aqui para mantener el estado de asistencia actualizado.',
     icon: UserX,
     section: 'academic',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
@@ -129,6 +140,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-operations',
     to: '/admin/operations',
     label: 'Auditoria',
+    contextualTip: 'Revisa eventos operativos para auditar cambios y validar trazabilidad institucional.',
     icon: ClipboardList,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
@@ -138,6 +150,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-users',
     to: '/admin/users',
     label: 'Usuarios',
+    contextualTip: 'Administra usuarios, roles y accesos para mantener orden y seguridad en la plataforma.',
     icon: Users,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
@@ -147,6 +160,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-commercial',
     to: '/admin/commercial',
     label: 'Comercial Tenant',
+    contextualTip: 'Gestiona informacion comercial multi-tenant para el seguimiento de planes y facturacion.',
     icon: ShieldCheck,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
@@ -158,6 +172,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-academic-settings',
     to: '/admin/academic-settings',
     label: 'Config. Academica',
+    contextualTip: 'Ajusta periodos y parametros academicos base para que toda la operacion use la misma regla.',
     icon: SlidersHorizontal,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
@@ -168,6 +183,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-curriculums',
     to: '/admin/curriculums',
     label: 'Mallas Curriculares',
+    contextualTip: 'Define y organiza las mallas curriculares para estructurar contenidos por nivel y grado.',
     icon: BookOpen,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
@@ -177,6 +193,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-grade-levels',
     to: '/admin/grade-levels',
     label: 'Grados',
+    contextualTip: 'Configura los grados academicos para mantener coherencia en la estructura institucional.',
     icon: LayoutDashboard,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
@@ -186,6 +203,7 @@ const NAVIGATION_ITEMS = [
     key: 'admin-sections',
     to: '/admin/sections',
     label: 'Secciones',
+    contextualTip: 'Crea secciones por grado para organizar grupos y facilitar la asignacion de materias.',
     icon: LayoutDashboard,
     section: 'administration',
     showInNavbar: false,
@@ -195,12 +213,18 @@ const NAVIGATION_ITEMS = [
     key: 'admin-courses',
     to: '/admin/courses',
     label: 'Cursos',
+    contextualTip: 'Administra cursos y su relacion con grados y secciones para mantener una oferta ordenada.',
     icon: BookOpen,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
   },
 ]
+
+function normalizePath(pathname) {
+  if (!pathname || pathname === '/') return '/'
+  return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
+}
 
 function canShowItem(item, user) {
   if (!user) return false
@@ -234,4 +258,14 @@ export function getNavigationSections(user, options = {}) {
       items: items.filter((item) => item.section === section.id),
     }))
     .filter((section) => section.items.length > 0)
+}
+
+export function getContextualTipByPath(user, pathname, options = {}) {
+  if (!user) return null
+
+  const normalizedPath = normalizePath(pathname)
+  const items = getNavigationItems(user, { surface: 'sidebar', ...options })
+  const matchedItem = items.find((item) => normalizePath(item.to) === normalizedPath)
+
+  return matchedItem?.contextualTip || null
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getNavigationItems, getNavigationSections } from '../navigation'
+import { getNavigationItems, getNavigationSections, getContextualTipByPath } from '../navigation'
 import { USER_ROLES } from '../constants'
 
 function buildUser(role, overrides = {}) {
@@ -77,5 +77,21 @@ describe('navigation config', () => {
     expect(navbarKeys).toContain('calendar')
     expect(navbarKeys).not.toContain('observer')
     expect(navbarKeys).not.toContain('absences')
+  })
+
+  it('resolves contextual tip for exact sidebar route', () => {
+    const teacher = buildUser(USER_ROLES.TEACHER)
+
+    const tip = getContextualTipByPath(teacher, '/subjects')
+
+    expect(tip).toMatch(/crear una materia/i)
+  })
+
+  it('does not resolve contextual tip for subroute detail path', () => {
+    const teacher = buildUser(USER_ROLES.TEACHER)
+
+    const tip = getContextualTipByPath(teacher, '/subjects/123')
+
+    expect(tip).toBeNull()
   })
 })
