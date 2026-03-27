@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import ContextualTipBanner from '../ContextualTipBanner'
 import * as AuthContext from '../../state/AuthContext'
@@ -11,6 +11,7 @@ vi.mock('../../state/AuthContext', () => ({
 describe('ContextualTipBanner component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    window.localStorage.clear()
   })
 
   it('renders an info tip for a supported sidebar route', () => {
@@ -51,6 +52,35 @@ describe('ContextualTipBanner component', () => {
 
   it('does not render for anonymous users', () => {
     AuthContext.useAuth.mockReturnValue({ user: null })
+
+    render(
+      <MemoryRouter initialEntries={['/subjects']}>
+        <ContextualTipBanner />
+      </MemoryRouter>
+    )
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('allows dismissing the tip and keeps it hidden for the same route', () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: {
+        id: 2,
+        first_name: 'Teacher',
+        role: 'TEACHER',
+      },
+    })
+
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/subjects']}>
+        <ContextualTipBanner />
+      </MemoryRouter>
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /cerrar tip/i }))
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+
+    unmount()
 
     render(
       <MemoryRouter initialEntries={['/subjects']}>
