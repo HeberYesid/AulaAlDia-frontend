@@ -420,11 +420,9 @@ export default function AdminDashboard() {
         </section>
 
         <section className="card admin-dashboard__section">
-          <h2 className="admin-dashboard__section-title">Calendario y próximos hitos</h2>
-          {blockErrors.calendar && <Alert type="error" message={blockErrors.calendar} />}
-          {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
+          <h2 className="admin-dashboard__section-title">Configuración académica</h2>
           {blockErrors.academicSettings && <Alert type="error" message={blockErrors.academicSettings} />}
-          {academicSettings && (
+          {academicSettings ? (
             <div className="admin-dashboard__info-card">
               <p className="admin-dashboard__info-card-copy">
                 <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)} | <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
@@ -440,7 +438,22 @@ export default function AdminDashboard() {
                 </Link>
               </div>
             </div>
+          ) : (
+            <>
+              <p className="admin-dashboard__muted">No hay configuración académica cargada para este tenant.</p>
+              <div className="admin-dashboard__actions">
+                <Link className="btn secondary" to="/admin/academic-settings" style={{ textDecoration: 'none' }}>
+                  Configurar esquema y escala
+                </Link>
+              </div>
+            </>
           )}
+        </section>
+
+        <section className="card admin-dashboard__section">
+          <h2 className="admin-dashboard__section-title">Calendario y próximos hitos</h2>
+          {blockErrors.calendar && <Alert type="error" message={blockErrors.calendar} />}
+          {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
           <h3 className="admin-dashboard__subheading">Eventos próximos</h3>
           {upcomingEvents.length === 0 ? (
             <p className="admin-dashboard__muted">No hay eventos futuros registrados.</p>
