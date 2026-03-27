@@ -144,7 +144,7 @@ export default function TenantCommercialAdmin() {
 
   async function loadCommercialConfig() {
     if (!tenantId) {
-      setError('Debes indicar un tenant_id (UUID).')
+      setError('Debes indicar un ID de institución (UUID).')
       return
     }
 
@@ -225,7 +225,7 @@ export default function TenantCommercialAdmin() {
     }
 
     const exportData = {
-      tenant_id: tenantId,
+      institution_id: tenantId,
       exported_at: new Date().toISOString(),
       filters: {
         limit: auditLimit,
@@ -244,7 +244,7 @@ export default function TenantCommercialAdmin() {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `tenant-commercial-audits-${tenantId}.json`
+    link.download = `institution-commercial-audits-${tenantId}.json`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -254,7 +254,7 @@ export default function TenantCommercialAdmin() {
   async function saveCommercialConfig(event) {
     event.preventDefault()
     if (!tenantId) {
-      setError('Debes indicar un tenant_id (UUID).')
+      setError('Debes indicar un ID de institución (UUID).')
       return
     }
 
@@ -298,9 +298,9 @@ export default function TenantCommercialAdmin() {
   return (
     <div className="commercial-admin">
       <div className="card">
-        <h2>Operación Comercial por Tenant</h2>
+        <h2>Operación Comercial por Institución</h2>
         <p className="notice">
-          Gestiona plan y cuotas por tenant. El endpoint requiere sesión de soporte global activa.
+          Gestiona plan y cuotas por institución. El endpoint requiere sesión de soporte global activa.
         </p>
       </div>
 
@@ -360,15 +360,15 @@ export default function TenantCommercialAdmin() {
         </div>
 
         <div className="card">
-          <h3>Seleccionar Tenant</h3>
+          <h3>Seleccionar institución</h3>
           <div className="form-group">
-            <label htmlFor="tenant-preset">Desde mis tenants</label>
+            <label htmlFor="tenant-preset">Desde mis instituciones</label>
             <select
               id="tenant-preset"
               value={tenantOptions.some((x) => x.id === tenantId) ? tenantId : ''}
               onChange={(event) => setTenantId(event.target.value)}
             >
-              <option value="">Selecciona un tenant</option>
+              <option value="">Selecciona una institución</option>
               {tenantOptions.map((tenant) => (
                 <option key={tenant.id} value={tenant.id}>
                   {tenant.label}
@@ -378,7 +378,7 @@ export default function TenantCommercialAdmin() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="tenant-id-input">Tenant ID (UUID)</label>
+            <label htmlFor="tenant-id-input">ID de institución (UUID)</label>
             <input
               id="tenant-id-input"
               type="text"
@@ -394,7 +394,7 @@ export default function TenantCommercialAdmin() {
 
           {commercial ? (
             <p className="notice" style={{ marginTop: 'var(--space-md)' }}>
-              Tenant cargado: <strong>{commercial.name}</strong> ({commercial.slug})
+              Institución cargada: <strong>{commercial.name}</strong> ({commercial.slug})
             </p>
           ) : null}
         </div>
@@ -604,7 +604,7 @@ export default function TenantCommercialAdmin() {
 
         {audits.length === 0 ? (
           <p className="notice" style={{ marginTop: 'var(--space-md)' }}>
-            No hay cambios comerciales registrados para este tenant.
+            No hay cambios comerciales registrados para esta institución.
           </p>
         ) : (
           <div className="table-container" style={{ marginTop: 'var(--space-md)' }}>

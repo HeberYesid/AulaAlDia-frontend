@@ -159,8 +159,8 @@ const NAVIGATION_ITEMS = [
   {
     key: 'admin-commercial',
     to: '/admin/commercial',
-    label: 'Comercial Tenant',
-    contextualTip: 'Gestiona informacion comercial multi-tenant para el seguimiento de planes y facturacion.',
+    label: 'Comercial Institucional',
+    contextualTip: 'Gestiona informacion comercial multiinstitución para el seguimiento de planes y facturacion.',
     icon: ShieldCheck,
     section: 'administration',
     roles: [USER_ROLES.ADMIN],

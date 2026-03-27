@@ -257,7 +257,7 @@ const ADMIN_STEPS = [
   },
   {
     target: navTarget('nav-admin-commercial'),
-    content: 'Comercial Tenant: disponible para administradores globales con gestión multi-tenant.',
+    content: 'Comercial Institucional: disponible para administradores globales con gestión multiinstitución.',
     disableBeacon: true,
   },
   {

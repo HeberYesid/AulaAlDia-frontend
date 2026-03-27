@@ -32,7 +32,7 @@ const TARGET_LABELS = {
   academic_period: 'Periodo académico',
   grading_scale: 'Escala de calificación',
   profile: 'Perfil',
-  tenant: 'Tenant',
+  tenant: 'Institución',
   support_session: 'Sesión de soporte',
   student_tutor_invitation: 'Invitación de acudiente',
   enrollment: 'Matrícula',
@@ -342,7 +342,7 @@ export default function TenantOperationsAudit() {
 
   async function loadAudits({ clearError = true } = {}) {
     if (!activeTenantId) {
-      setError('No hay un tenant activo seleccionado.')
+      setError('No hay una institución activa seleccionada.')
       return
     }
 
@@ -416,7 +416,7 @@ export default function TenantOperationsAudit() {
     }
 
     const exportData = {
-      tenant_id: activeTenantId,
+      institution_id: activeTenantId,
       exported_at: new Date().toISOString(),
       filters: {
         actor_email: auditActorEmail || null,
@@ -436,7 +436,7 @@ export default function TenantOperationsAudit() {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `tenant-operation-audits-${activeTenantId}.json`
+    link.download = `institution-operation-audits-${activeTenantId}.json`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -447,7 +447,7 @@ export default function TenantOperationsAudit() {
     return (
       <div className="card">
         <h2>Acceso restringido</h2>
-        <p>Esta sección está disponible solo para administradores del tenant.</p>
+        <p>Esta sección está disponible solo para administradores de la institución.</p>
       </div>
     )
   }
@@ -455,7 +455,7 @@ export default function TenantOperationsAudit() {
   return (
     <div className="commercial-admin">
       <div className="card">
-        <h2>Auditoría Operativa del Tenant</h2>
+        <h2>Auditoría Operativa Institucional</h2>
         <p className="notice">
           Aquí ves una bitácora completa de actividades realizadas en toda la institución.
         </p>
