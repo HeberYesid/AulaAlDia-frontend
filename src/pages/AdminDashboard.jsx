@@ -263,6 +263,13 @@ export default function AdminDashboard() {
     return academicPeriods.filter((period) => !period.is_closed).slice(0, 3)
   }, [academicPeriods])
 
+  const openPeriodsSummary = useMemo(() => {
+    if (openPeriods.length === 0) return 'Sin períodos académicos abiertos'
+    return openPeriods
+      .map((period) => `${period.label}${period.is_grade_locked ? ' (bloqueado)' : ''}`)
+      .join(', ')
+  }, [openPeriods])
+
   const lockedPeriodsCount = useMemo(() => {
     return academicPeriods.filter((period) => period.is_grade_locked).length
   }, [academicPeriods])
@@ -451,31 +458,33 @@ export default function AdminDashboard() {
         >
           <h2 className="admin-dashboard__section-title">Configuración académica</h2>
           {blockErrors.academicSettings && <Alert type="error" message={blockErrors.academicSettings} />}
+          {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
           {academicSettings ? (
-            <div className="admin-dashboard__info-card">
-              <ul className="admin-dashboard__list admin-dashboard__list--tight-top">
-                <li className="admin-dashboard__list-item">
-                  <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)}
-                </li>
-                <li className="admin-dashboard__list-item">
-                  <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
-                </li>
-                <li className="admin-dashboard__list-item">
-                  <strong>Nota aprobatoria:</strong> {academicSettings.passing_grade ?? '-'}
-                </li>
-                <li className="admin-dashboard__list-item">
-                  <strong>Bloqueo automático al vencer fecha límite:</strong>{' '}
-                  {academicSettings.lock_grades_after_deadline ? 'Sí' : 'No'}
-                </li>
-                <li className="admin-dashboard__list-item">
-                  <strong>Próximo cierre operativo:</strong>{' '}
-                  {nextDeadline ? `${nextDeadline.label} (${formatDate(nextDeadline.grading_deadline)})` : 'Sin cierre programado'}
-                </li>
-                <li className="admin-dashboard__list-item">
-                  <strong>Última actualización:</strong> {formatDate(academicSettings.updated_at)}
-                </li>
-              </ul>
-            </div>
+            <ul className="admin-dashboard__list admin-dashboard__list--tight-top">
+              <li className="admin-dashboard__list-item">
+                <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)}
+              </li>
+              <li className="admin-dashboard__list-item">
+                <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
+              </li>
+              <li className="admin-dashboard__list-item">
+                <strong>Nota aprobatoria:</strong> {academicSettings.passing_grade ?? '-'}
+              </li>
+              <li className="admin-dashboard__list-item">
+                <strong>Bloqueo automático al vencer fecha límite:</strong>{' '}
+                {academicSettings.lock_grades_after_deadline ? 'Sí' : 'No'}
+              </li>
+              <li className="admin-dashboard__list-item">
+                <strong>Próximo cierre operativo:</strong>{' '}
+                {nextDeadline ? `${nextDeadline.label} (${formatDate(nextDeadline.grading_deadline)})` : 'Sin cierre programado'}
+              </li>
+              <li className="admin-dashboard__list-item">
+                <strong>Períodos abiertos:</strong> {openPeriodsSummary}
+              </li>
+              <li className="admin-dashboard__list-item">
+                <strong>Última actualización:</strong> {formatDate(academicSettings.updated_at)}
+              </li>
+            </ul>
           ) : (
             <p className="admin-dashboard__muted">No hay configuración académica cargada para este tenant.</p>
           )}
@@ -491,7 +500,6 @@ export default function AdminDashboard() {
         >
           <h2 className="admin-dashboard__section-title">Calendario y próximos hitos</h2>
           {blockErrors.calendar && <Alert type="error" message={blockErrors.calendar} />}
-          {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
           <h3 className="admin-dashboard__subheading">Eventos próximos</h3>
           {upcomingEvents.length === 0 ? (
             <p className="admin-dashboard__muted">No hay eventos futuros registrados.</p>
@@ -508,15 +516,15 @@ export default function AdminDashboard() {
             </ul>
           )}
 
-          <h3 className="admin-dashboard__subheading admin-dashboard__subheading--spaced">Períodos abiertos</h3>
-          {openPeriods.length === 0 ? (
-            <p className="admin-dashboard__muted">No hay períodos académicos abiertos.</p>
+          <h3 className="admin-dashboard__subheading admin-dashboard__subheading--spaced">Novedades</h3>
+          {blockErrors.notifications && <Alert type="error" message={blockErrors.notifications} />}
+          {criticalNotifications.length === 0 ? (
+            <p className="admin-dashboard__muted">No hay anuncios generales recientes.</p>
           ) : (
             <ul className="admin-dashboard__list admin-dashboard__list--tight-top">
-              {openPeriods.map((period) => (
-                <li key={period.id} className="admin-dashboard__list-item">
-                  {period.label}
-                  {period.is_grade_locked ? ' · Bloqueado' : ''}
+              {criticalNotifications.map((item) => (
+                <li key={item.id} className="admin-dashboard__list-item">
+                  <strong>{item.title || 'Anuncio'}</strong> - {formatDate(item.created_at)}
                 </li>
               ))}
             </ul>
