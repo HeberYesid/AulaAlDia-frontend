@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
@@ -28,7 +28,7 @@ export default function Login() {
   const [retryAfter, setRetryAfter] = useState(0)
   const navigate = useNavigate()
   const location = useLocation()
-  const from = location.state?.from?.pathname || '/'
+  const fromPath = location.state?.from?.pathname
   const tenantIdFromQuery = new URLSearchParams(location.search).get('tenant_id')?.trim() || null
   const authQuerySuffix = tenantIdFromQuery ? `?tenant_id=${encodeURIComponent(tenantIdFromQuery)}` : ''
   const isLockedOut = retryAfter > 0
@@ -39,16 +39,21 @@ export default function Login() {
     setApiActiveTenantId(tenantIdFromQuery)
   }, [tenantIdFromQuery])
 
-  function getPostLoginPath() {
+  const getPostLoginPath = useCallback(() => {
+    if (fromPath && fromPath !== '/login') {
+      return fromPath
+    }
+
     try {
       const raw = localStorage.getItem('auth')
-      if (!raw) return from
+      if (!raw) return '/'
       const auth = JSON.parse(raw)
-      return auth?.user?.role === 'ADMIN' ? '/admin/dashboard' : from
+      const role = auth?.user?.role || user?.role
+      return role === 'ADMIN' ? '/admin/dashboard' : '/'
     } catch {
-      return from
+      return user?.role === 'ADMIN' ? '/admin/dashboard' : '/'
     }
-  }
+  }, [fromPath, user?.role])
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -75,9 +80,9 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate('/', { replace: true })
+      navigate(getPostLoginPath(), { replace: true })
     }
-  }, [user, navigate])
+  }, [user, navigate, getPostLoginPath])
 
   useEffect(() => {
     if (location.state?.message) {
