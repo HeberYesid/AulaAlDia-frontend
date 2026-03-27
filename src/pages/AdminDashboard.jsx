@@ -14,6 +14,60 @@ function toDate(value) {
   return parsed
 }
 
+function toDateOnly(value) {
+  const date = toDate(value)
+  if (!date) return null
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function resolveActiveAcademicPeriod(periods) {
+  if (!Array.isArray(periods) || periods.length === 0) return null
+
+  const today = toDateOnly(new Date())
+  if (!today) return null
+
+  const byOrderAsc = [...periods]
+    .filter((period) => !period?.is_closed)
+    .filter((period) => {
+      const startDate = toDateOnly(period.start_date)
+      const endDate = toDateOnly(period.end_date)
+
+      if (startDate && today < startDate) return false
+      if (endDate && today > endDate) return false
+      return true
+    })
+    .sort((first, second) => {
+      const yearDiff = Number(first.year || 0) - Number(second.year || 0)
+      if (yearDiff !== 0) return yearDiff
+
+      const firstSequence = Number(first.sequence || first.period_number || 0)
+      const secondSequence = Number(second.sequence || second.period_number || 0)
+      return firstSequence - secondSequence
+    })
+
+  return byOrderAsc[0] || null
+}
+
+function filterItemsByAcademicPeriod(items, academicPeriod, dateField) {
+  if (!Array.isArray(items) || items.length === 0 || !academicPeriod) return []
+
+  const startDate = toDateOnly(academicPeriod.start_date)
+  const endDate = toDateOnly(academicPeriod.end_date)
+  const hasBoundaryDates = Boolean(startDate || endDate)
+  const periodYear = Number(academicPeriod.year || 0)
+
+  return items.filter((item) => {
+    const date = toDateOnly(item?.[dateField])
+    if (!date) return false
+    if (!hasBoundaryDates && periodYear > 0 && date.getFullYear() !== periodYear) {
+      return false
+    }
+    if (startDate && date < startDate) return false
+    if (endDate && date > endDate) return false
+    return true
+  })
+}
+
 function isWithinLastDays(value, days) {
   const date = toDate(value)
   if (!date) return false
@@ -200,12 +254,24 @@ export default function AdminDashboard() {
     setLoading(false)
   }
 
+  const activeAcademicPeriod = useMemo(() => {
+    return resolveActiveAcademicPeriod(academicPeriods)
+  }, [academicPeriods])
+
+  const absencesInActivePeriod = useMemo(() => {
+    return filterItemsByAcademicPeriod(absences, activeAcademicPeriod, 'date')
+  }, [absences, activeAcademicPeriod])
+
+  const observationsInActivePeriod = useMemo(() => {
+    return filterItemsByAcademicPeriod(observations, activeAcademicPeriod, 'created_at')
+  }, [observations, activeAcademicPeriod])
+
   const kpis = useMemo(() => {
     const subjectsCount = subjects.length
     const studentsCount = subjects.reduce((acc, subject) => acc + Number(subject.enrollments_count || 0), 0)
-    const totalAbsences = absences.length
-    const unjustifiedAbsences = absences.filter((absence) => !absence.justified).length
-    const recentObservations = observations.filter((item) => isWithinLastDays(item.created_at, 7)).length
+    const totalAbsences = absencesInActivePeriod.length
+    const unjustifiedAbsences = absencesInActivePeriod.filter((absence) => !absence.justified).length
+    const recentObservations = observationsInActivePeriod.filter((item) => isWithinLastDays(item.created_at, 7)).length
     const unreadNotifications = notifications.filter((item) => !item.is_read).length
 
     return {
@@ -216,7 +282,7 @@ export default function AdminDashboard() {
       recentObservations,
       unreadNotifications,
     }
-  }, [subjects, absences, observations, notifications])
+  }, [subjects, absencesInActivePeriod, observationsInActivePeriod, notifications])
 
   const performanceList = useMemo(() => {
     return [...subjectStats]
@@ -227,7 +293,7 @@ export default function AdminDashboard() {
   const riskStudents = useMemo(() => {
     const byStudent = {}
 
-    for (const absence of absences) {
+    for (const absence of absencesInActivePeriod) {
       if (absence.justified) continue
 
       const studentKey = absence.student_email_display || absence.student_name || String(absence.id)
@@ -246,10 +312,10 @@ export default function AdminDashboard() {
       .filter((student) => student.count >= 3)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
-  }, [absences])
+  }, [absencesInActivePeriod])
 
   const recentObservationList = useMemo(() => {
-    return observations
+    return observationsInActivePeriod
       .filter((item) => isWithinLastDays(item.created_at, 7))
       .sort((a, b) => {
         const first = toDate(a.created_at)?.getTime() || 0
@@ -257,7 +323,7 @@ export default function AdminDashboard() {
         return second - first
       })
       .slice(0, 6)
-  }, [observations])
+  }, [observationsInActivePeriod])
 
   const openPeriods = useMemo(() => {
     return academicPeriods.filter((period) => !period.is_closed).slice(0, 3)

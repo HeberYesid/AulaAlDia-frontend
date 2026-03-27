@@ -18,6 +18,14 @@ const renderComponent = () => render(
   </MemoryRouter>
 );
 
+const addDays = (baseDate, days) => {
+  const nextDate = new Date(baseDate);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
+};
+
+const asDateOnly = (value) => value.toISOString().split('T')[0];
+
 describe('AdminDashboard page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -71,5 +79,112 @@ describe('AdminDashboard page', () => {
     await waitFor(() => {
       expect(screen.getByText(/dashboard carg/i)).toBeInTheDocument();
     });
+  });
+
+  it('shows only absences and observations from active period', async () => {
+    const now = new Date();
+    const activeStart = addDays(now, -2);
+    const activeEnd = addDays(now, 10);
+    const inactiveStart = addDays(now, -20);
+    const inactiveEnd = addDays(now, -5);
+
+    api.get.mockImplementation((url) => {
+      if (url.includes('/subjects/')) return Promise.resolve({ data: [] });
+      if (url.includes('/absences/')) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 1,
+              date: asDateOnly(addDays(now, -1)),
+              justified: false,
+              student_name: 'Ana Activa',
+              student_email_display: 'ana@example.com',
+            },
+            {
+              id: 2,
+              date: asDateOnly(addDays(now, -6)),
+              justified: false,
+              student_name: 'Luis Fuera',
+              student_email_display: 'luis@example.com',
+            },
+          ],
+        });
+      }
+      if (url.includes('/observations/')) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 101,
+              created_at: addDays(now, -1).toISOString(),
+              title: 'Observación vigente',
+              category: 'OTHER',
+              student_name: 'Ana Activa',
+            },
+            {
+              id: 102,
+              created_at: addDays(now, -4).toISOString(),
+              title: 'Observación fuera de periodo',
+              category: 'OTHER',
+              student_name: 'Luis Fuera',
+            },
+          ],
+        });
+      }
+      if (url.includes('/notifications/')) return Promise.resolve({ data: [] });
+      if (url.includes('/calendar/all_events/')) return Promise.resolve({ data: [] });
+      if (url.includes('/academic-periods/')) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 1,
+              year: now.getFullYear(),
+              sequence: 1,
+              period_number: 1,
+              start_date: asDateOnly(inactiveStart),
+              end_date: asDateOnly(inactiveEnd),
+              is_closed: false,
+              label: 'Periodo anterior',
+              is_grade_locked: false,
+            },
+            {
+              id: 2,
+              year: now.getFullYear(),
+              sequence: 2,
+              period_number: 2,
+              start_date: asDateOnly(activeStart),
+              end_date: asDateOnly(activeEnd),
+              is_closed: false,
+              label: 'Periodo activo',
+              is_grade_locked: false,
+            },
+          ],
+        });
+      }
+      if (url.includes('/academic-settings/')) {
+        return Promise.resolve({
+          data: {
+            period_scheme: 'SEMESTER',
+            min_grade: '1.0',
+            max_grade: '5.0',
+          },
+        });
+      }
+      return Promise.reject(new Error('not mocked: ' + url));
+    });
+
+    renderComponent();
+
+    await waitFor(() => {
+      const absencesCard = screen.getByRole('link', {
+        name: 'Ir al módulo de asistencia',
+      });
+      const normalizedText = (absencesCard.textContent || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      expect(normalizedText).toContain('Total faltas: 1 | Sin justificar: 1');
+    });
+
+    expect(screen.getByText('Observación vigente')).toBeInTheDocument();
+    expect(screen.queryByText('Observación fuera de periodo')).not.toBeInTheDocument();
   });
 });
