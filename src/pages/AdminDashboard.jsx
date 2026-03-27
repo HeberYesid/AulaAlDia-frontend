@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import SchoolHeader from '../components/SchoolHeader'
@@ -38,6 +38,7 @@ function getPeriodSchemeLabel(value) {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [subjects, setSubjects] = useState([])
@@ -288,6 +289,16 @@ export default function AdminDashboard() {
       .slice(0, 5)
   }, [notifications])
 
+  const handleCardClick = (path) => {
+    navigate(path)
+  }
+
+  const handleCardKeyDown = (event, path) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    handleCardClick(path)
+  }
+
   if (loading) {
     return (
       <div className="loading">
@@ -326,7 +337,14 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid-2 admin-dashboard__grid">
-        <section className="card admin-dashboard__section">
+        <section
+          className="card admin-dashboard__section admin-dashboard__section--interactive"
+          role="link"
+          tabIndex={0}
+          aria-label="Ir a materias"
+          onClick={() => handleCardClick('/subjects')}
+          onKeyDown={(event) => handleCardKeyDown(event, '/subjects')}
+        >
           <h2 className="admin-dashboard__section-title">Rendimiento por materia</h2>
           {blockErrors.performance && <Alert type="error" message={blockErrors.performance} />}
           {performanceList.length === 0 ? (
@@ -359,7 +377,14 @@ export default function AdminDashboard() {
           )}
         </section>
 
-        <section className="card admin-dashboard__section">
+        <section
+          className="card admin-dashboard__section admin-dashboard__section--interactive"
+          role="link"
+          tabIndex={0}
+          aria-label="Ir al módulo de asistencia"
+          onClick={() => handleCardClick('/absences')}
+          onKeyDown={(event) => handleCardKeyDown(event, '/absences')}
+        >
           <h2 className="admin-dashboard__section-title">Ausencias y alertas</h2>
           {blockErrors.absences && <Alert type="error" message={blockErrors.absences} />}
           <p className="admin-dashboard__muted admin-dashboard__muted--tight">
@@ -376,14 +401,16 @@ export default function AdminDashboard() {
               ))}
             </ul>
           )}
-          <div className="admin-dashboard__actions">
-            <Link className="btn secondary" to="/absences" style={{ textDecoration: 'none' }}>
-              Ver módulo de asistencia
-            </Link>
-          </div>
         </section>
 
-        <section className="card admin-dashboard__section">
+        <section
+          className="card admin-dashboard__section admin-dashboard__section--interactive"
+          role="link"
+          tabIndex={0}
+          aria-label="Ir al observador"
+          onClick={() => handleCardClick('/observer')}
+          onKeyDown={(event) => handleCardKeyDown(event, '/observer')}
+        >
           <h2 className="admin-dashboard__section-title">Observaciones recientes</h2>
           {blockErrors.observations && <Alert type="error" message={blockErrors.observations} />}
           {recentObservationList.length === 0 ? (
@@ -412,14 +439,16 @@ export default function AdminDashboard() {
               </table>
             </div>
           )}
-          <div className="admin-dashboard__actions">
-            <Link className="btn secondary" to="/observer" style={{ textDecoration: 'none' }}>
-              Ver observador
-            </Link>
-          </div>
         </section>
 
-        <section className="card admin-dashboard__section">
+        <section
+          className="card admin-dashboard__section admin-dashboard__section--interactive"
+          role="link"
+          tabIndex={0}
+          aria-label="Ir a configuración académica"
+          onClick={() => handleCardClick('/admin/academic-settings')}
+          onKeyDown={(event) => handleCardKeyDown(event, '/admin/academic-settings')}
+        >
           <h2 className="admin-dashboard__section-title">Configuración académica</h2>
           {blockErrors.academicSettings && <Alert type="error" message={blockErrors.academicSettings} />}
           {academicSettings ? (
@@ -452,7 +481,14 @@ export default function AdminDashboard() {
           )}
         </section>
 
-        <section className="card admin-dashboard__section">
+        <section
+          className="card admin-dashboard__section admin-dashboard__section--interactive"
+          role="link"
+          tabIndex={0}
+          aria-label="Ir al calendario completo"
+          onClick={() => handleCardClick('/calendar')}
+          onKeyDown={(event) => handleCardKeyDown(event, '/calendar')}
+        >
           <h2 className="admin-dashboard__section-title">Calendario y próximos hitos</h2>
           {blockErrors.calendar && <Alert type="error" message={blockErrors.calendar} />}
           {blockErrors.periods && <Alert type="error" message={blockErrors.periods} />}
@@ -485,14 +521,16 @@ export default function AdminDashboard() {
               ))}
             </ul>
           )}
-          <div className="admin-dashboard__actions">
-            <Link className="btn secondary" to="/calendar" style={{ textDecoration: 'none' }}>
-              Ver calendario completo
-            </Link>
-          </div>
         </section>
 
-        <section className="card admin-dashboard__section">
+        <section
+          className="card admin-dashboard__section admin-dashboard__section--interactive"
+          role="link"
+          tabIndex={0}
+          aria-label="Ir al módulo de notificaciones"
+          onClick={() => handleCardClick('/notifications')}
+          onKeyDown={(event) => handleCardKeyDown(event, '/notifications')}
+        >
           <h2 className="admin-dashboard__section-title">Notificaciones críticas</h2>
           {blockErrors.notifications && <Alert type="error" message={blockErrors.notifications} />}
           <p className="admin-dashboard__muted admin-dashboard__muted--tight">
@@ -509,11 +547,6 @@ export default function AdminDashboard() {
               ))}
             </ul>
           )}
-          <div className="admin-dashboard__actions">
-            <Link className="btn secondary" to="/notifications" style={{ textDecoration: 'none' }}>
-              Ver notificaciones
-            </Link>
-          </div>
         </section>
 
         <section className="card admin-dashboard__section admin-dashboard__quick-actions">
