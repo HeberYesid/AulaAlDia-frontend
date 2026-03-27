@@ -303,19 +303,6 @@ export default function AcademicSettings() {
         <section className="card">
           <h2>Configuración general</h2>
           <form onSubmit={handleSaveSettings} className="academic-admin__form">
-            <div>
-              <label htmlFor="period-scheme">Esquema del año</label>
-              <select
-                id="period-scheme"
-                value={settingsForm.period_scheme}
-                onChange={(event) => setSettingsForm((current) => ({ ...current, period_scheme: event.target.value }))}
-              >
-                <option value="TRIMESTER">Trimestral</option>
-                <option value="SEMESTER">Semestral</option>
-                <option value="CYCLES">Por ciclos</option>
-              </select>
-            </div>
-
             <div className="academic-admin__grid-3">
               <div>
                 <label htmlFor="min-grade">Nota mínima</label>
