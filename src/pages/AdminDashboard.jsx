@@ -5,8 +5,6 @@ import Alert from '../components/Alert'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
 
-const MS_IN_DAY = 24 * 60 * 60 * 1000
-
 function toDate(value) {
   if (!value) return null
   const parsed = new Date(value)
@@ -68,13 +66,6 @@ function filterItemsByAcademicPeriod(items, academicPeriod, dateField) {
   })
 }
 
-function isWithinLastDays(value, days) {
-  const date = toDate(value)
-  if (!date) return false
-  const threshold = Date.now() - days * MS_IN_DAY
-  return date.getTime() >= threshold
-}
-
 function formatDate(value) {
   const date = toDate(value)
   if (!date) return '-'
@@ -89,6 +80,17 @@ function getPeriodSchemeLabel(value) {
   if (value === 'SEMESTER') return 'Semestral'
   if (value === 'CYCLES') return 'Por ciclos'
   return 'Trimestral'
+}
+
+function formatAcademicPeriodLabel(period) {
+  if (!period) return '-'
+
+  const label = String(period.label || '').trim()
+  if (!label) return '-'
+
+  const simplifiedLabel = label.replace(/^\d{4}\s*[-–—]\s*/u, '')
+  const trimmedLabel = simplifiedLabel.replace(/^Trimestre\s+/iu, '')
+  return trimmedLabel || simplifiedLabel || label
 }
 
 export default function AdminDashboard() {
@@ -269,20 +271,25 @@ export default function AdminDashboard() {
   const kpis = useMemo(() => {
     const subjectsCount = subjects.length
     const studentsCount = subjects.reduce((acc, subject) => acc + Number(subject.enrollments_count || 0), 0)
-    const totalAbsences = absencesInActivePeriod.length
-    const unjustifiedAbsences = absencesInActivePeriod.filter((absence) => !absence.justified).length
-    const recentObservations = observationsInActivePeriod.filter((item) => isWithinLastDays(item.created_at, 7)).length
+    const uniqueTeacherIds = new Set(
+      subjects
+        .map((subject) => subject?.teacher?.id)
+        .filter((teacherId) => teacherId !== null && teacherId !== undefined)
+    )
+    const teachersCount = uniqueTeacherIds.size
+    const currentAcademicYear = activeAcademicPeriod?.year || '-'
+    const currentAcademicPeriodLabel = formatAcademicPeriodLabel(activeAcademicPeriod)
     const unreadNotifications = notifications.filter((item) => !item.is_read).length
 
     return {
       subjectsCount,
       studentsCount,
-      totalAbsences,
-      unjustifiedAbsences,
-      recentObservations,
+      teachersCount,
+      currentAcademicYear,
+      currentAcademicPeriodLabel,
       unreadNotifications,
     }
-  }, [subjects, absencesInActivePeriod, observationsInActivePeriod, notifications])
+  }, [subjects, activeAcademicPeriod, notifications])
 
   const performanceList = useMemo(() => {
     return [...subjectStats]
@@ -300,10 +307,6 @@ export default function AdminDashboard() {
       .map((period) => `${period.label}${period.is_grade_locked ? ' (bloqueado)' : ''}`)
       .join(', ')
   }, [openPeriods])
-
-  const lockedPeriodsCount = useMemo(() => {
-    return academicPeriods.filter((period) => period.is_grade_locked).length
-  }, [academicPeriods])
 
   const nextDeadline = useMemo(() => {
     const periodsWithDeadline = academicPeriods
@@ -361,16 +364,16 @@ export default function AdminDashboard() {
           <div className="stat-label">Estudiantes</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{kpis.unjustifiedAbsences}</div>
-          <div className="stat-label">Faltas sin justificar</div>
+          <div className="stat-value">{kpis.teachersCount}</div>
+          <div className="stat-label">Profesores</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{kpis.recentObservations}</div>
-          <div className="stat-label">Observaciones (7 días)</div>
+          <div className="stat-value">{kpis.currentAcademicYear}</div>
+          <div className="stat-label">Año académico actual</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{lockedPeriodsCount}</div>
-          <div className="stat-label">Períodos bloqueados</div>
+          <div className="stat-value">{kpis.currentAcademicPeriodLabel}</div>
+          <div className="stat-label">Período académico actual</div>
         </div>
       </div>
 
