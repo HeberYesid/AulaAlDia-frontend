@@ -12,7 +12,6 @@ const DEFAULT_GRADE_SETTINGS = {
   max_grade: '5.00',
   passing_grade: '3.00',
   period_scheme: 'TRIMESTER',
-  active_grading_scale: null,
 }
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -91,7 +90,6 @@ export default function SubjectDetail() {
 
   /* ── Grade computations ── */
   const gradeSettings = useMemo(() => dash?.academic_settings || DEFAULT_GRADE_SETTINGS, [dash])
-  const gradeRanges = useMemo(() => gradeSettings?.active_grading_scale?.ranges || [], [gradeSettings])
   const gradeBounds = useMemo(() => ({
     min: Number(gradeSettings?.min_grade ?? 1),
     max: Number(gradeSettings?.max_grade ?? 5),
@@ -101,14 +99,6 @@ export default function SubjectDetail() {
   const academicPeriodsById = useMemo(() => Object.fromEntries(academicPeriods.map(p => [p.id, p])), [academicPeriods])
 
   const lockedPeriods = useMemo(() => academicPeriods.filter(p => p.is_grade_locked), [academicPeriods])
-
-  const getScaleLabel = (score, explicitLabel = null) => {
-    if (explicitLabel) return explicitLabel
-    const numericScore = Number(score)
-    if (score === null || score === undefined || score === '' || Number.isNaN(numericScore)) return null
-    const match = gradeRanges.find(range => numericScore >= Number(range.min_value) && numericScore <= Number(range.max_value))
-    return match?.label || null
-  }
 
   /* ── Student-specific data ── */
   const studentStats = useMemo(() => {
@@ -193,7 +183,6 @@ export default function SubjectDetail() {
         <div className="info-strip">
           <span>
             <strong>Escala:</strong> {gradeBounds.min.toFixed(2)} – {gradeBounds.max.toFixed(2)}
-            {gradeSettings?.active_grading_scale?.name ? ` · ${gradeSettings.active_grading_scale.name}` : ''}
           </span>
           <span><strong>Aprobación:</strong> {gradeBounds.passing.toFixed(2)}</span>
           {lockedPeriods.length > 0 && (
@@ -211,7 +200,6 @@ export default function SubjectDetail() {
           <div className="info-strip">
             <span>
               <strong>Escala:</strong> {gradeBounds.min.toFixed(2)} – {gradeBounds.max.toFixed(2)}
-              {gradeSettings?.active_grading_scale?.name ? ` · ${gradeSettings.active_grading_scale.name}` : ''}
             </span>
           </div>
 
@@ -226,9 +214,6 @@ export default function SubjectDetail() {
                   <div className="grade-hero__value" style={{ color: studentStats.grade >= gradeBounds.passing ? 'var(--success)' : 'var(--danger)' }}>
                     {studentStats.grade?.toFixed(2)}
                   </div>
-                  {getScaleLabel(studentStats.grade, studentStats.grade_label) && (
-                    <p className="grade-hero__label">{getScaleLabel(studentStats.grade, studentStats.grade_label)}</p>
-                  )}
                 </div>
                 <div className="grade-hero__counters">
                   <div className="grade-hero__counter">
@@ -324,7 +309,7 @@ export default function SubjectDetail() {
                     {detailedResults.filter(r => r.student_email === user?.email).map(result => (
                       <tr key={result.id}>
                         <td data-label="Ejercicio">{result.exercise_name}</td>
-                        <td data-label="Resultado"><StatusBadge status={result.status} grade={result.score} label={getScaleLabel(result.score)} /></td>
+                        <td data-label="Resultado"><StatusBadge status={result.status} grade={result.score} /></td>
                         <td data-label="Comentarios" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                           {result.comment || <em style={{ color: 'var(--text-muted)' }}>Sin comentarios</em>}
                         </td>
@@ -397,9 +382,6 @@ export default function SubjectDetail() {
               detailedResults={detailedResults}
               academicPeriodsById={academicPeriodsById}
               gradeBounds={gradeBounds}
-              gradeSettings={gradeSettings}
-              gradeRanges={gradeRanges}
-              getScaleLabel={getScaleLabel}
               loadAll={loadAll}
               setError={setError}
               setSuccess={setSuccess}

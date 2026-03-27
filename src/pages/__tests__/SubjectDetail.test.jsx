@@ -74,7 +74,6 @@ describe('SubjectDetail Component', () => {
         submitted_count: 0,
         average_score: 5.0,
         grade: 4.5,
-        grade_label: 'Superior',
         has_manual_grade: true
       }
     ],
@@ -82,13 +81,6 @@ describe('SubjectDetail Component', () => {
       min_grade: '0.00',
       max_grade: '5.00',
       passing_grade: '3.00',
-      active_grading_scale: {
-        id: 7,
-        name: 'Escala Institucional',
-        ranges: [
-          { id: 1, label: 'Superior', min_value: '4.50', max_value: '5.00', order: 1 },
-        ],
-      },
     },
   }
 
@@ -191,7 +183,6 @@ describe('SubjectDetail Component', () => {
     await waitFor(() => {
       const row = screen.getByText('Algebra Quiz').closest('tr')
       expect(within(row).getByText(/5\.0/)).toBeInTheDocument() 
-      expect(within(row).getByText(/Superior/i)).toBeInTheDocument()
     })
   })
 

@@ -191,11 +191,8 @@ export default function MyResults() {
           <div>
             <h2 style={{ margin: 0 }}>Detalle por materia</h2>
             <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
-              Consulta tu nota final, el equivalente cualitativo y el avance por asignatura.
+              Consulta tu nota final numérica y el avance por asignatura.
             </p>
-          </div>
-          <div className="notice">
-            La interpretación cualitativa depende de la escala activa de tu institución.
           </div>
         </div>
 
@@ -214,7 +211,6 @@ export default function MyResults() {
               {enrs.map((enrollment) => {
                 const stats = enrollment.stats || {}
                 const grade = stats.grade
-                const gradeLabel = stats.grade_label || null
                 const averageScore = stats.average_score
                 const gradedCount = stats.graded_count || 0
                 const totalExercises = stats.total_exercises || 0
@@ -231,7 +227,6 @@ export default function MyResults() {
                         <StatusBadge
                           status={null}
                           grade={grade}
-                          label={gradeLabel}
                           locked={false}
                         />
                       ) : (

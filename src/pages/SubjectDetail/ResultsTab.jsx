@@ -17,8 +17,8 @@ function handleFocusTrap(e, ref) {
 
 export default function ResultsTab({
   user, id, subject, dash, enrollments, exercises, detailedResults,
-  academicPeriodsById, gradeBounds, gradeSettings, gradeRanges,
-  getScaleLabel, loadAll, setError, setSuccess
+  academicPeriodsById, gradeBounds,
+  loadAll, setError, setSuccess
 }) {
   const [resultSearch, setResultSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
@@ -325,7 +325,7 @@ export default function ResultsTab({
                           <td data-label="Calificados">{i.graded_count}</td>
                           <td data-label="Entregados">{i.submitted_count}</td>
                           <td data-label="Promedio"><strong>{i.average_score?.toFixed(2)}</strong></td>
-                          <td data-label="Nota final"><StatusBadge status={null} grade={i.grade} label={getScaleLabel(i.grade, i.grade_label)} /></td>
+                          <td data-label="Nota final"><StatusBadge status={null} grade={i.grade} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -409,7 +409,7 @@ export default function ResultsTab({
                       )}
                       <td data-label="Ejercicio" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={result.exercise_name}>{result.exercise_name}</td>
                       <td data-label="Resultado">
-                        <StatusBadge status={result.status} grade={result.score} label={getScaleLabel(result.score)} locked={isExerciseGradeLocked(result.exercise)} />
+                        <StatusBadge status={result.status} grade={result.score} locked={isExerciseGradeLocked(result.exercise)} />
                       </td>
                       <td data-label="Solución">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
@@ -503,7 +503,7 @@ export default function ResultsTab({
               )}
               <p style={{ margin: 'var(--space-xs) 0' }}>
                 <strong>Actual:</strong>{' '}
-                <StatusBadge status={editingResult.currentScore == null ? 'SUBMITTED' : null} grade={editingResult.currentScore} label={getScaleLabel(editingResult.currentScore)} locked={isExerciseGradeLocked(editingResult.exerciseId)} />
+                <StatusBadge status={editingResult.currentScore == null ? 'SUBMITTED' : null} grade={editingResult.currentScore} locked={isExerciseGradeLocked(editingResult.exerciseId)} />
               </p>
               {editingResult.currentComment && (
                 <div style={{ marginTop: 'var(--space-sm)', padding: 'var(--space-sm)', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--primary)' }}>

@@ -21,11 +21,6 @@ describe('StatusBadge component', () => {
         expect(badge.className).toContain('badge SCORE');
     });
 
-    it('renders score with label', () => {
-        render(<StatusBadge grade="9" label="Alto" />);
-        expect(screen.getByText('9.00 · Alto')).toBeTruthy();
-    });
-
     it('adds LOCKED class when locked', () => {
         render(<StatusBadge grade="5" locked={true} />);
         const badge = screen.getByText('Nota: 5.00');

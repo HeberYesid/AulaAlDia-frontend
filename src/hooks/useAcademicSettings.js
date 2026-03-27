@@ -7,7 +7,6 @@ export const DEFAULT_SETTINGS = {
   max_grade: '5.00',
   passing_grade: '3.00',
   lock_grades_after_deadline: true,
-  active_grading_scale: null,
 }
 
 export const DEFAULT_PERIOD = {
@@ -18,18 +17,6 @@ export const DEFAULT_PERIOD = {
   end_date: '',
   grading_deadline: '',
   lock_after_deadline: true,
-}
-
-export const DEFAULT_SCALE = {
-  name: '',
-  description: '',
-  is_active: false,
-  ranges: [
-    { label: 'Superior', min_value: '4.60', max_value: '5.00', order: 1 },
-    { label: 'Alto', min_value: '4.00', max_value: '4.59', order: 2 },
-    { label: 'Básico', min_value: '3.00', max_value: '3.99', order: 3 },
-    { label: 'Bajo', min_value: '0.00', max_value: '2.99', order: 4 },
-  ],
 }
 
 export const DEFAULT_SCHOOL_YEAR = {
@@ -73,20 +60,6 @@ export function createDefaultPeriod() {
   }
 }
 
-export function createDefaultScale() {
-  return {
-    name: '',
-    description: '',
-    is_active: false,
-    ranges: [
-      { label: 'Superior', min_value: '4.60', max_value: '5.00', order: 1 },
-      { label: 'Alto', min_value: '4.00', max_value: '4.59', order: 2 },
-      { label: 'Básico', min_value: '3.00', max_value: '3.99', order: 3 },
-      { label: 'Bajo', min_value: '0.00', max_value: '2.99', order: 4 },
-    ],
-  }
-}
-
 export function createDefaultSchoolYear() {
   return {
     start_date: '',
@@ -110,38 +83,19 @@ export function buildPeriodForm(period) {
   }
 }
 
-export function buildScaleForm(scale) {
-  return {
-    name: scale.name || '',
-    description: scale.description || '',
-    is_active: Boolean(scale.is_active),
-    ranges: (scale.ranges || []).map((range, index) => ({
-      id: range.id,
-      label: range.label,
-      min_value: String(range.min_value),
-      max_value: String(range.max_value),
-      order: Number(range.order || index + 1),
-    })),
-  }
-}
-
 export function useAcademicSettings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [periods, setPeriods] = useState([])
-  const [scales, setScales] = useState([])
   const [schoolYears, setSchoolYears] = useState([])
   const [settingsForm, setSettingsForm] = useState(DEFAULT_SETTINGS)
   const [periodForm, setPeriodForm] = useState(DEFAULT_PERIOD)
-  const [scaleForm, setScaleForm] = useState(DEFAULT_SCALE)
   const [schoolYearForm, setSchoolYearForm] = useState(DEFAULT_SCHOOL_YEAR)
   const [editingPeriodId, setEditingPeriodId] = useState(null)
-  const [editingScaleId, setEditingScaleId] = useState(null)
   const [savingSettings, setSavingSettings] = useState(false)
   const [savingPeriod, setSavingPeriod] = useState(false)
-  const [savingScale, setSavingScale] = useState(false)
   const [savingSchoolYear, setSavingSchoolYear] = useState(false)
   const [mutatingSchoolYearId, setMutatingSchoolYearId] = useState(null)
   const activeSchoolYear = schoolYears.find((schoolYear) => schoolYear.is_active) || null
@@ -150,16 +104,14 @@ export function useAcademicSettings() {
     setLoading(true)
     setError('')
     try {
-      const [settingsResult, periodsResult, scalesResult, schoolYearsResult] = await Promise.all([
+      const [settingsResult, periodsResult, schoolYearsResult] = await Promise.all([
         api.get('/api/v1/courses/academic-settings/'),
         api.get('/api/v1/courses/academic-periods/'),
-        api.get('/api/v1/courses/grading-scales/'),
         api.get('/api/v1/courses/school-years/'),
       ])
 
       const nextSettings = settingsResult.data || DEFAULT_SETTINGS
       const nextPeriods = periodsResult.data?.results || periodsResult.data || []
-      const nextScales = scalesResult.data?.results || scalesResult.data || []
       const nextSchoolYears = schoolYearsResult.data?.results || schoolYearsResult.data || []
 
       setSettings(nextSettings)
@@ -169,10 +121,8 @@ export function useAcademicSettings() {
         max_grade: String(nextSettings.max_grade ?? '5.00'),
         passing_grade: String(nextSettings.passing_grade ?? '3.00'),
         lock_grades_after_deadline: Boolean(nextSettings.lock_grades_after_deadline),
-        active_grading_scale: nextSettings.active_grading_scale,
       })
       setPeriods(Array.isArray(nextPeriods) ? nextPeriods : [])
-      setScales(Array.isArray(nextScales) ? nextScales : [])
       setSchoolYears(Array.isArray(nextSchoolYears) ? nextSchoolYears : [])
     } catch (err) {
       setError(normalizeApiError(err, 'No se pudo cargar la configuración académica.'))
@@ -180,34 +130,6 @@ export function useAcademicSettings() {
       setLoading(false)
     }
   }, [])
-
-  function updateScaleRange(index, field, value) {
-    setScaleForm((current) => ({
-      ...current,
-      ranges: current.ranges.map((range, rangeIndex) => (
-        rangeIndex === index ? { ...range, [field]: value } : range
-      )),
-    }))
-  }
-
-  function addScaleRange() {
-    setScaleForm((current) => ({
-      ...current,
-      ranges: [
-        ...current.ranges,
-        { label: '', min_value: '', max_value: '', order: current.ranges.length + 1 },
-      ],
-    }))
-  }
-
-  function removeScaleRange(index) {
-    setScaleForm((current) => ({
-      ...current,
-      ranges: current.ranges
-        .filter((_, rangeIndex) => rangeIndex !== index)
-        .map((range, rangeIndex) => ({ ...range, order: rangeIndex + 1 })),
-    }))
-  }
 
   async function handleSaveSettings(event) {
     event.preventDefault()
@@ -221,7 +143,6 @@ export function useAcademicSettings() {
         min_grade: Number(settingsForm.min_grade),
         max_grade: Number(settingsForm.max_grade),
         passing_grade: Number(settingsForm.passing_grade),
-        active_grading_scale: settingsForm.active_grading_scale || null,
       }
       const { data } = await api.patch('/api/v1/courses/academic-settings/', payload)
       setSettings(data)
@@ -231,7 +152,6 @@ export function useAcademicSettings() {
         max_grade: String(data.max_grade),
         passing_grade: String(data.passing_grade),
         lock_grades_after_deadline: Boolean(data.lock_grades_after_deadline),
-        active_grading_scale: data.active_grading_scale,
       })
       setSuccess('Configuración académica actualizada.')
     } catch (err) {
@@ -251,16 +171,16 @@ export function useAcademicSettings() {
       return
     }
 
-    const activeSchoolYearStart = Number(String(activeSchoolYear?.start_date || '').slice(0, 4))
-    if (!editingPeriodId && !Number.isFinite(activeSchoolYearStart)) {
-      setError('No se pudo determinar el año del periodo desde el año escolar activo.')
-      return
-    }
+    const periodYear = Number(periodForm.year)
+    if (!editingPeriodId && activeSchoolYear) {
+      const startYear = Number(String(activeSchoolYear.start_date || '').slice(0, 4))
+      const endYear = Number(String(activeSchoolYear.end_date || '').slice(0, 4))
+      const hasYearBounds = Number.isFinite(startYear) && Number.isFinite(endYear)
 
-    const periodYear = editingPeriodId ? Number(periodForm.year) : activeSchoolYearStart
-    if (!Number.isFinite(periodYear)) {
-      setError('No se pudo determinar el año del periodo.')
-      return
+      if (hasYearBounds && (periodYear < startYear || periodYear > endYear)) {
+        setError(`El año del periodo debe estar entre ${startYear} y ${endYear} según el año escolar activo.`)
+        return
+      }
     }
 
     setSavingPeriod(true)
@@ -316,53 +236,6 @@ export function useAcademicSettings() {
     } catch (err) {
       setError(normalizeApiError(err, 'No se pudo cerrar el periodo académico.'))
     }
-  }
-
-  async function handleCreateScale(event) {
-    event.preventDefault()
-    setSavingScale(true)
-    setError('')
-    setSuccess('')
-
-    try {
-      const payload = {
-        ...scaleForm,
-        ranges: scaleForm.ranges.map((range, index) => ({
-          ...(range.id ? { id: range.id } : {}),
-          ...range,
-          order: Number(range.order || index + 1),
-          min_value: Number(range.min_value),
-          max_value: Number(range.max_value),
-        })),
-      }
-      if (editingScaleId) {
-        await api.patch(`/api/v1/courses/grading-scales/${editingScaleId}/`, payload)
-        setSuccess('Escala de valoración actualizada.')
-      } else {
-        await api.post('/api/v1/courses/grading-scales/', payload)
-        setSuccess('Escala de valoración creada.')
-      }
-      setScaleForm(createDefaultScale())
-      setEditingScaleId(null)
-      loadAcademicAdmin()
-    } catch (err) {
-      setError(normalizeApiError(err, editingScaleId ? 'No se pudo actualizar la escala de valoración.' : 'No se pudo crear la escala de valoración.'))
-    } finally {
-      setSavingScale(false)
-    }
-  }
-
-  function handleEditScale(scale) {
-    setEditingScaleId(scale.id)
-    setScaleForm(buildScaleForm(scale))
-    setError('')
-    setSuccess('')
-  }
-
-  function handleCancelScaleEdit() {
-    setEditingScaleId(null)
-    setScaleForm(createDefaultScale())
-    setError('')
   }
 
   async function handleCreateSchoolYear(event) {
@@ -422,27 +295,19 @@ export function useAcademicSettings() {
     settings,
     schoolYears,
     periods,
-    scales,
     settingsForm,
     schoolYearForm,
     periodForm,
-    scaleForm,
     editingPeriodId,
-    editingScaleId,
     savingSettings,
     savingSchoolYear,
     savingPeriod,
-    savingScale,
     mutatingSchoolYearId,
     activeSchoolYear,
     setSettingsForm,
     setSchoolYearForm,
     setPeriodForm,
-    setScaleForm,
     loadAcademicAdmin,
-    updateScaleRange,
-    addScaleRange,
-    removeScaleRange,
     handleSaveSettings,
     handleCreateSchoolYear,
     handleToggleSchoolYearStatus,
@@ -451,8 +316,5 @@ export function useAcademicSettings() {
     handleEditPeriod,
     handleCancelPeriodEdit,
     handleClosePeriod,
-    handleCreateScale,
-    handleEditScale,
-    handleCancelScaleEdit,
   }
 }

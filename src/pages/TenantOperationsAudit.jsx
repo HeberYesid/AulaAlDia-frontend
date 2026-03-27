@@ -30,7 +30,6 @@ const TARGET_LABELS = {
   observation: 'Observación',
   absence: 'Inasistencia',
   academic_period: 'Periodo académico',
-  grading_scale: 'Escala de calificación',
   profile: 'Perfil',
   tenant: 'Institución',
   support_session: 'Sesión de soporte',

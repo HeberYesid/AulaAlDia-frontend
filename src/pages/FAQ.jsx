@@ -61,12 +61,12 @@ export default function FAQ() {
         {
           question: '¿Cómo veo mis calificaciones?',
           answer:
-            'Puedes ver tus calificaciones en la sección "Mis Resultados" del menú principal. Allí encontrarás todas tus asignaturas con la nota final, el promedio de ejercicios y, si tu institución la configuró, la equivalencia cualitativa asociada a cada materia.',
+            'Puedes ver tus calificaciones en la sección "Mis Resultados" del menú principal. Allí encontrarás todas tus asignaturas con la nota final numérica y el promedio de ejercicios de cada materia.',
         },
         {
           question: '¿Qué significa la nota numérica en mis resultados?',
           answer:
-            'Cada institución puede definir su propia escala operativa, por ejemplo de 0.0 a 5.0 o de 1.0 a 5.0. El sistema calcula tu desempeño con base en esa configuración y también puede mostrar una equivalencia cualitativa, como Superior, Alto, Básico o Bajo.',
+            'Cada institución puede definir su propia escala operativa, por ejemplo de 0.0 a 5.0 o de 1.0 a 5.0. El sistema calcula tu desempeño con base en esa configuración y muestra tus resultados únicamente en formato numérico.',
         },
       ],
     },

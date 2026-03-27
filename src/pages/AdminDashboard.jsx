@@ -428,7 +428,6 @@ export default function AdminDashboard() {
             <div className="admin-dashboard__info-card">
               <p className="admin-dashboard__info-card-copy">
                 <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)} | <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
-                {academicSettings.active_grading_scale_detail?.name ? ` | ${academicSettings.active_grading_scale_detail.name}` : ''}
               </p>
               {nextDeadline ? (
                 <p className="admin-dashboard__info-card-note">

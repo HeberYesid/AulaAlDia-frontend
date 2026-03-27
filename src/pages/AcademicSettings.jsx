@@ -13,27 +13,19 @@ export default function AcademicSettings() {
     success,
     schoolYears,
     periods,
-    scales,
     settingsForm,
     schoolYearForm,
     periodForm,
-    scaleForm,
     editingPeriodId,
-    editingScaleId,
     savingSettings,
     savingSchoolYear,
     savingPeriod,
-    savingScale,
     mutatingSchoolYearId,
     activeSchoolYear,
     setSettingsForm,
     setSchoolYearForm,
     setPeriodForm,
-    setScaleForm,
     loadAcademicAdmin,
-    updateScaleRange,
-    addScaleRange,
-    removeScaleRange,
     handleSaveSettings,
     handleCreateSchoolYear,
     handleToggleSchoolYearStatus,
@@ -42,10 +34,11 @@ export default function AcademicSettings() {
     handleEditPeriod,
     handleCancelPeriodEdit,
     handleClosePeriod,
-    handleCreateScale,
-    handleEditScale,
-    handleCancelScaleEdit,
   } = useAcademicSettings()
+
+  const activeSchoolYearStart = Number(String(activeSchoolYear?.start_date || '').slice(0, 4))
+  const activeSchoolYearEnd = Number(String(activeSchoolYear?.end_date || '').slice(0, 4))
+  const hasActiveSchoolYearRange = Number.isFinite(activeSchoolYearStart) && Number.isFinite(activeSchoolYearEnd)
 
   useEffect(() => {
     loadAcademicAdmin()
@@ -155,10 +148,9 @@ export default function AcademicSettings() {
 
       <div className="card academic-admin__hero">
         <p className="eyebrow">Administración académica</p>
-        <h1>Configuración del año, periodos y escalas</h1>
+        <h1>Configuración del año y periodos</h1>
         <p>
-          Define el esquema del calendario académico, la escala numérica operativa y la
-          traducción cualitativa usada por tu institución.
+          Define el esquema del calendario académico y la escala numérica operativa de tu institución.
         </p>
       </div>
 
@@ -343,23 +335,6 @@ export default function AcademicSettings() {
               </div>
             </div>
 
-            <div>
-              <label htmlFor="active-scale">Escala cualitativa activa</label>
-              <select
-                id="active-scale"
-                value={settingsForm.active_grading_scale || ''}
-                onChange={(event) => setSettingsForm((current) => ({
-                  ...current,
-                  active_grading_scale: event.target.value ? Number(event.target.value) : null,
-                }))}
-              >
-                <option value="">Sin traducción cualitativa</option>
-                {scales.map((scale) => (
-                  <option key={scale.id} value={scale.id}>{scale.name}</option>
-                ))}
-              </select>
-            </div>
-
             <button type="submit" className="btn" disabled={savingSettings}>
               {savingSettings ? 'Guardando...' : 'Guardar configuración'}
             </button>
@@ -380,16 +355,30 @@ export default function AcademicSettings() {
               </p>
             )}
 
-            <div>
-              <label htmlFor="period-sequence">Secuencia</label>
-              <input
-                id="period-sequence"
-                type="number"
-                min="1"
-                value={periodForm.sequence}
-                onChange={(event) => setPeriodForm((current) => ({ ...current, sequence: event.target.value }))}
-                required
-              />
+            <div className="academic-admin__grid-2">
+              <div>
+                <label htmlFor="period-year">Año</label>
+                <input
+                  id="period-year"
+                  type="number"
+                  value={periodForm.year}
+                  min={!editingPeriodId && hasActiveSchoolYearRange ? activeSchoolYearStart : undefined}
+                  max={!editingPeriodId && hasActiveSchoolYearRange ? activeSchoolYearEnd : undefined}
+                  onChange={(event) => setPeriodForm((current) => ({ ...current, year: event.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="period-sequence">Secuencia</label>
+                <input
+                  id="period-sequence"
+                  type="number"
+                  min="1"
+                  value={periodForm.sequence}
+                  onChange={(event) => setPeriodForm((current) => ({ ...current, sequence: event.target.value }))}
+                  required
+                />
+              </div>
             </div>
 
             <div>
@@ -460,130 +449,6 @@ export default function AcademicSettings() {
           </form>
         </section>
       </div>
-
-      <section className="card">
-        <div className="academic-admin__section-header">
-          <div>
-            <h2>Escalas cualitativas</h2>
-            <p>Convierte la nota numérica a etiquetas institucionales.</p>
-          </div>
-        </div>
-
-        <div className="grid cols-2 grid-stack-mobile">
-          <form onSubmit={handleCreateScale} className="academic-admin__form academic-admin__scale-form">
-            <div>
-              <h3 style={{ marginTop: 0 }}>{editingScaleId ? 'Editar escala' : 'Nueva escala'}</h3>
-              <label htmlFor="scale-name">Nombre de la escala</label>
-              <input
-                id="scale-name"
-                value={scaleForm.name}
-                onChange={(event) => setScaleForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder="Escala institucional 2026"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="scale-description">Descripción</label>
-              <textarea
-                id="scale-description"
-                rows="3"
-                value={scaleForm.description}
-                onChange={(event) => setScaleForm((current) => ({ ...current, description: event.target.value }))}
-                placeholder="Uso para básica secundaria"
-              />
-            </div>
-            <label className="academic-admin__checkbox">
-              <input
-                type="checkbox"
-                checked={scaleForm.is_active}
-                onChange={(event) => setScaleForm((current) => ({ ...current, is_active: event.target.checked }))}
-              />
-              <span>Activar esta escala al crearla</span>
-            </label>
-
-            <div className="academic-admin__ranges">
-              {scaleForm.ranges.map((range, index) => (
-                <div key={`${range.label}-${index}`} className="academic-admin__range-row">
-                  <input
-                    aria-label={`Etiqueta del rango ${index + 1}`}
-                    value={range.label}
-                    placeholder="Etiqueta"
-                    onChange={(event) => updateScaleRange(index, 'label', event.target.value)}
-                    required
-                  />
-                  <input
-                    aria-label={`Valor mínimo del rango ${index + 1}`}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="5"
-                    value={range.min_value}
-                    placeholder="Min"
-                    onChange={(event) => updateScaleRange(index, 'min_value', event.target.value)}
-                    required
-                  />
-                  <input
-                    aria-label={`Valor máximo del rango ${index + 1}`}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="5"
-                    value={range.max_value}
-                    placeholder="Max"
-                    onChange={(event) => updateScaleRange(index, 'max_value', event.target.value)}
-                    required
-                  />
-                  <button type="button" className="btn secondary" onClick={() => removeScaleRange(index)}>
-                    Quitar
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className="academic-admin__actions">
-              <button type="button" className="btn secondary" onClick={addScaleRange}>Agregar rango</button>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                {editingScaleId ? (
-                  <button type="button" className="btn secondary" onClick={handleCancelScaleEdit}>
-                    Cancelar edición
-                  </button>
-                ) : null}
-                <button type="submit" className="btn" disabled={savingScale}>
-                  {savingScale ? (editingScaleId ? 'Guardando...' : 'Creando...') : (editingScaleId ? 'Guardar escala' : 'Crear escala')}
-                </button>
-              </div>
-            </div>
-          </form>
-
-          <div className="academic-admin__scale-list">
-            {scales.length === 0 ? (
-              <p>No hay escalas registradas todavía.</p>
-            ) : (
-              scales.map((scale) => (
-                <article key={scale.id} className="academic-admin__scale-card">
-                  <div className="academic-admin__scale-head">
-                    <h3>{scale.name}</h3>
-                    {scale.is_active ? <span className="status-badge success">Activa</span> : null}
-                  </div>
-                  {scale.description ? <p>{scale.description}</p> : null}
-                  <ul className="academic-admin__range-list">
-                    {(scale.ranges || []).map((range) => (
-                      <li key={range.id || `${scale.id}-${range.order}`}>
-                        <strong>{range.label}</strong> {range.min_value} - {range.max_value}
-                      </li>
-                    ))}
-                  </ul>
-                  <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                    <button type="button" className="btn secondary" onClick={() => handleEditScale(scale)}>
-                      Editar escala
-                    </button>
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
 
       <section className="card">
         <h2>Periodos configurados</h2>
