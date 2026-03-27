@@ -424,29 +424,31 @@ export default function AdminDashboard() {
           {blockErrors.academicSettings && <Alert type="error" message={blockErrors.academicSettings} />}
           {academicSettings ? (
             <div className="admin-dashboard__info-card">
-              <p className="admin-dashboard__info-card-copy">
-                <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)} | <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
-              </p>
-              {nextDeadline ? (
-                <p className="admin-dashboard__info-card-note">
-                  Próximo cierre operativo: <strong>{nextDeadline.label}</strong> el {formatDate(nextDeadline.grading_deadline)}
-                </p>
-              ) : null}
-              <div className="admin-dashboard__info-card-actions">
-                <Link className="btn secondary" to="/admin/academic-settings" style={{ textDecoration: 'none' }}>
-                  Ajustar configuración académica
-                </Link>
-              </div>
+              <ul className="admin-dashboard__list admin-dashboard__list--tight-top">
+                <li className="admin-dashboard__list-item">
+                  <strong>Esquema:</strong> {getPeriodSchemeLabel(academicSettings.period_scheme)}
+                </li>
+                <li className="admin-dashboard__list-item">
+                  <strong>Escala:</strong> {academicSettings.min_grade} a {academicSettings.max_grade}
+                </li>
+                <li className="admin-dashboard__list-item">
+                  <strong>Nota aprobatoria:</strong> {academicSettings.passing_grade ?? '-'}
+                </li>
+                <li className="admin-dashboard__list-item">
+                  <strong>Bloqueo automático al vencer fecha límite:</strong>{' '}
+                  {academicSettings.lock_grades_after_deadline ? 'Sí' : 'No'}
+                </li>
+                <li className="admin-dashboard__list-item">
+                  <strong>Próximo cierre operativo:</strong>{' '}
+                  {nextDeadline ? `${nextDeadline.label} (${formatDate(nextDeadline.grading_deadline)})` : 'Sin cierre programado'}
+                </li>
+                <li className="admin-dashboard__list-item">
+                  <strong>Última actualización:</strong> {formatDate(academicSettings.updated_at)}
+                </li>
+              </ul>
             </div>
           ) : (
-            <>
-              <p className="admin-dashboard__muted">No hay configuración académica cargada para este tenant.</p>
-              <div className="admin-dashboard__actions">
-                <Link className="btn secondary" to="/admin/academic-settings" style={{ textDecoration: 'none' }}>
-                  Configurar esquema y escala
-                </Link>
-              </div>
-            </>
+            <p className="admin-dashboard__muted">No hay configuración académica cargada para este tenant.</p>
           )}
         </section>
 
