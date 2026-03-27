@@ -85,6 +85,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user.role === 'STUDENT' || user.role === 'ADMIN') {
+      setLoading(false)
       return
     }
 

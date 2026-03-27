@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import Dashboard from '../Dashboard'
 import * as AuthContext from '../../state/AuthContext'
 import { api } from '../../api/axios'
@@ -113,5 +113,36 @@ describe('Dashboard Component', () => {
 
     expect(await screen.findByText(/access denied/i)).toBeInTheDocument()
     expect(api.get).not.toHaveBeenCalled()
+  })
+
+  it('redirects ADMIN users to /admin/dashboard after loading guard resolves', async () => {
+    vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
+      user: {
+        id: 7,
+        email: 'admin@example.com',
+        first_name: 'Admin',
+        last_name: 'User',
+        role: 'ADMIN',
+      },
+      activeTenantId: 'tenant-1',
+      tenantsLoaded: true,
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      switchTenant: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/admin/dashboard" element={<div>Admin Dashboard Target</div>} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(await screen.findByText('Admin Dashboard Target')).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText(/cargando dashboard/i)).not.toBeInTheDocument()
+    })
   })
 })
