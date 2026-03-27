@@ -54,6 +54,17 @@ const NAVIGATION_ITEMS = [
     showInNavbar: false,
   },
   {
+    key: 'admin-bulletins',
+    to: '/admin/bulletins',
+    label: 'Boletines',
+    contextualTip: 'Consulta y gestiona boletines academicos del conjunto institucional.',
+    icon: FileText,
+    section: 'administration',
+    roles: [USER_ROLES.ADMIN],
+    showInNavbar: false,
+    tourId: 'nav-admin-bulletins',
+  },
+  {
     key: 'subjects',
     to: '/subjects',
     label: 'Materias',

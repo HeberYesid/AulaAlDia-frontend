@@ -32,6 +32,10 @@ vi.mock('../pages/curriculums/GradeLevels', () => ({
   default: () => <div>GradeLevels Mock</div>,
 }))
 
+vi.mock('../pages/AdminBulletins', () => ({
+  default: () => <div>AdminBulletins Mock</div>,
+}))
+
 function renderAppAt(path) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -94,5 +98,28 @@ describe('App admin routes', () => {
     renderAppAt('/admin/grade-levels')
 
     expect(await screen.findByText('GradeLevels Mock')).toBeInTheDocument()
+  })
+
+  it('redirects STUDENT away from /admin/bulletins', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'STUDENT' },
+      loading: false,
+    })
+
+    renderAppAt('/admin/bulletins')
+
+    expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
+    expect(screen.queryByText('AdminBulletins Mock')).not.toBeInTheDocument()
+  })
+
+  it('allows ADMIN into /admin/bulletins', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'ADMIN' },
+      loading: false,
+    })
+
+    renderAppAt('/admin/bulletins')
+
+    expect(await screen.findByText('AdminBulletins Mock')).toBeInTheDocument()
   })
 })
