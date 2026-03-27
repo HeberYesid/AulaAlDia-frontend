@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Alert from '../components/Alert'
 import { useTenantUsers } from '../hooks/useTenantUsers'
 
@@ -9,7 +9,14 @@ const ROLE_LABELS = {
   STUDENT: 'Estudiante',
 }
 
+const DEFAULT_USER_FILTERS = {
+  search: '',
+  role: 'ALL',
+  status: 'all',
+}
+
 export default function AdminUsers() {
+  const [filters, setFilters] = useState(DEFAULT_USER_FILTERS)
   const {
     users,
     loading,
@@ -26,24 +33,53 @@ export default function AdminUsers() {
     removeUser,
   } = useTenantUsers()
 
+  const hasActiveFilters = useMemo(
+    () => (
+      Boolean(filters.search.trim())
+      || filters.role !== 'ALL'
+      || filters.status !== 'all'
+    ),
+    [filters]
+  )
+
   useEffect(() => {
-    loadUsers()
-  }, [loadUsers])
+    loadUsers(filters)
+  }, [filters, loadUsers])
+
+  function handleFilterChange(key) {
+    return (event) => {
+      const { value } = event.target
+      setFilters((current) => ({ ...current, [key]: value }))
+    }
+  }
+
+  function handleResetFilters() {
+    setFilters({ ...DEFAULT_USER_FILTERS })
+  }
 
   async function handleCreate(event) {
     event.preventDefault()
-    await createUser()
+    const wasCreated = await createUser()
+    if (wasCreated && hasActiveFilters) {
+      await loadUsers(filters)
+    }
+  }
+
+  async function handleToggleStatus(user) {
+    const wasUpdated = await toggleUserStatus(user)
+    if (wasUpdated && hasActiveFilters) {
+      await loadUsers(filters)
+    }
   }
 
   async function handleDelete(user) {
     const accepted = window.confirm(`¿Eliminar definitivamente a ${user.email}?`)
     if (!accepted) return
 
-    await removeUser(user)
-  }
-
-  if (loading) {
-    return <div className="card"><p>Cargando usuarios del colegio...</p></div>
+    const wasDeleted = await removeUser(user)
+    if (wasDeleted && hasActiveFilters) {
+      await loadUsers(filters)
+    }
   }
 
   return (
@@ -57,7 +93,7 @@ export default function AdminUsers() {
         <p>
           Crea y administra cuentas de docentes, acudientes y estudiantes dentro de tu institución.
         </p>
-        <p className="admin-users__count">Activos: {activeUsersCount} de {users.length}</p>
+        <p className="admin-users__count">Activos visibles: {activeUsersCount} de {users.length}</p>
       </section>
 
       <section className="card">
@@ -125,7 +161,66 @@ export default function AdminUsers() {
       </section>
 
       <section className="card">
-        <h2>Listado de usuarios</h2>
+        <div className="admin-users__list-header">
+          <div>
+            <h2>Listado de usuarios</h2>
+            <p className="admin-users__list-subtitle">
+              Usa filtros por nombre, correo, rol o estado para encontrar cuentas rápidamente.
+            </p>
+          </div>
+
+          <div className="admin-users__filters" aria-label="Filtros de usuarios">
+            <div className="admin-users__filter-field">
+              <label htmlFor="users-search-filter">Buscar usuario</label>
+              <input
+                id="users-search-filter"
+                type="search"
+                value={filters.search}
+                onChange={handleFilterChange('search')}
+                placeholder="Nombre, apellido o correo"
+              />
+            </div>
+
+            <div className="admin-users__filter-field">
+              <label htmlFor="users-role-filter">Filtrar por rol</label>
+              <select
+                id="users-role-filter"
+                value={filters.role}
+                onChange={handleFilterChange('role')}
+              >
+                <option value="ALL">Todos</option>
+                <option value="TEACHER">Docentes</option>
+                <option value="TUTOR">Acudientes</option>
+                <option value="STUDENT">Estudiantes</option>
+              </select>
+            </div>
+
+            <div className="admin-users__filter-field">
+              <label htmlFor="users-status-filter">Filtrar por estado</label>
+              <select
+                id="users-status-filter"
+                value={filters.status}
+                onChange={handleFilterChange('status')}
+              >
+                <option value="all">Todos</option>
+                <option value="active">Habilitados</option>
+                <option value="inactive">Inhabilitados</option>
+              </select>
+            </div>
+
+            <div className="admin-users__filter-field admin-users__filter-actions">
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={handleResetFilters}
+                disabled={!hasActiveFilters || loading}
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="table-container">
           <table className="table mobile-card-view">
             <thead>
@@ -138,9 +233,17 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {users.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td data-label="Estado" colSpan="5">No hay usuarios registrados en esta institución.</td>
+                  <td data-label="Estado" colSpan="5">Cargando usuarios del colegio...</td>
+                </tr>
+              ) : users.length === 0 ? (
+                <tr>
+                  <td data-label="Estado" colSpan="5">
+                    {hasActiveFilters
+                      ? 'No hay usuarios que coincidan con los filtros actuales.'
+                      : 'No hay usuarios registrados en esta institución.'}
+                  </td>
                 </tr>
               ) : users.map((user) => {
                 const isMutating = mutatingUserId === user.id
@@ -155,7 +258,7 @@ export default function AdminUsers() {
                         <button
                           className={`btn ${user.is_active ? 'warning' : 'success'}`}
                           type="button"
-                          onClick={() => toggleUserStatus(user)}
+                          onClick={() => handleToggleStatus(user)}
                           disabled={isMutating}
                         >
                           {isMutating ? 'Procesando...' : user.is_active ? 'Inhabilitar' : 'Habilitar'}

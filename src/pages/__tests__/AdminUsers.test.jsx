@@ -40,6 +40,64 @@ describe('AdminUsers', () => {
 
     expect(await screen.findByText('Teacher Demo')).toBeInTheDocument()
     expect(listTenantUsers).toHaveBeenCalledTimes(1)
+    expect(listTenantUsers).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: '',
+        role: 'ALL',
+        status: 'all',
+      })
+    )
+  })
+
+  it('applies role, status and search filters when listing users', async () => {
+    const user = userEvent.setup()
+
+    render(<AdminUsers />)
+    await screen.findByText('Teacher Demo')
+
+    await user.selectOptions(screen.getByLabelText(/Filtrar por rol/i), 'STUDENT')
+    await waitFor(() => {
+      expect(listTenantUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          role: 'STUDENT',
+          status: 'all',
+          search: '',
+        })
+      )
+    })
+
+    await user.selectOptions(screen.getByLabelText(/Filtrar por estado/i), 'inactive')
+    await waitFor(() => {
+      expect(listTenantUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          role: 'STUDENT',
+          status: 'inactive',
+          search: '',
+        })
+      )
+    })
+
+    await user.type(screen.getByLabelText(/Buscar usuario/i), 'ana')
+    await waitFor(() => {
+      expect(listTenantUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          role: 'STUDENT',
+          status: 'inactive',
+          search: 'ana',
+        })
+      )
+    })
+
+    await user.click(screen.getByRole('button', { name: /Limpiar filtros/i }))
+    await waitFor(() => {
+      expect(listTenantUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          role: 'ALL',
+          status: 'all',
+          search: '',
+        })
+      )
+    })
   })
 
   it('creates a new tenant user from the form', async () => {
@@ -57,7 +115,7 @@ describe('AdminUsers', () => {
     render(<AdminUsers />)
     await screen.findByText('Teacher Demo')
 
-    await user.selectOptions(screen.getByLabelText(/Rol/i), 'STUDENT')
+    await user.selectOptions(screen.getByLabelText(/^Rol$/i), 'STUDENT')
     await user.type(screen.getByLabelText(/Correo/i), 'new-user@example.com')
     await user.type(screen.getByLabelText(/^Nombre$/i), 'New')
     await user.type(screen.getByLabelText(/Apellido/i), 'User')

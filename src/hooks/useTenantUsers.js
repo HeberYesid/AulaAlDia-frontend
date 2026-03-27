@@ -40,11 +40,11 @@ export function useTenantUsers() {
     [users]
   )
 
-  const loadUsers = useCallback(async () => {
+  const loadUsers = useCallback(async (filters = {}) => {
     setLoading(true)
     setError('')
     try {
-      const nextUsers = await listTenantUsers()
+      const nextUsers = await listTenantUsers(filters)
       setUsers(nextUsers)
     } catch (err) {
       setError(normalizeApiError(err, 'No se pudo cargar el listado de usuarios.'))
@@ -96,8 +96,10 @@ export function useTenantUsers() {
         current.map((item) => (item.id === updated.id ? updated : item))
       )
       setSuccess(successMessage)
+      return true
     } catch (err) {
       setError(normalizeApiError(err, 'No se pudo actualizar el estado del usuario.'))
+      return false
     } finally {
       setMutatingUserId(null)
     }

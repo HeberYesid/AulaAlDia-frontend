@@ -5407,6 +5407,7 @@ a.welcome-panel__notif-link:hover {
   margin-top: var(--space-sm);
   color: var(--text-secondary);
   font-weight: 600;
+  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
 }
 
 .admin-users__form {
@@ -5425,6 +5426,56 @@ a.welcome-panel__notif-link:hover {
   display: flex;
   gap: var(--space-sm);
   flex-wrap: wrap;
+}
+
+.admin-users__list-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.admin-users__list-subtitle {
+  margin-top: 0.35rem;
+  color: var(--text-secondary);
+}
+
+.admin-users__filters {
+  display: grid;
+  gap: var(--space-sm);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  align-items: end;
+}
+
+.admin-users__filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.admin-users__filter-field label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.admin-users__filter-field input,
+.admin-users__filter-field select,
+.admin-users__filter-actions .btn {
+  min-height: 44px;
+}
+
+.admin-users__filter-actions {
+  align-self: stretch;
+}
+
+.admin-users__filter-actions .btn {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .admin-users__filter-actions .btn {
+    width: auto;
+  }
 }
 
 @media (max-width: 768px) {
