@@ -119,7 +119,7 @@ export default function App() {
           <Route
             path="/"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireActiveSchoolYear>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -128,7 +128,7 @@ export default function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireActiveSchoolYear>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -137,7 +137,7 @@ export default function App() {
           <Route
             path="/admin/dashboard"
             element={
-              <ProtectedRoute roles={["ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -146,7 +146,7 @@ export default function App() {
             <Route
               path="/admin/news"
               element={
-                <ProtectedRoute roles={["ADMIN"]} requireTenant>
+                <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                   <AdminNews />
                 </ProtectedRoute>
               }
@@ -155,7 +155,7 @@ export default function App() {
           <Route
             path="/subjects"
             element={
-              <ProtectedRoute roles={["TEACHER", "ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["TEACHER", "ADMIN"]} requireTenant requireActiveSchoolYear>
                 <Subjects />
               </ProtectedRoute>
             }
@@ -164,7 +164,7 @@ export default function App() {
           <Route
             path="/subjects/:id"
             element={
-              <ProtectedRoute roles={["TEACHER", "ADMIN", "STUDENT", "TUTOR"]} requireTenant>
+              <ProtectedRoute roles={["TEACHER", "ADMIN", "STUDENT", "TUTOR"]} requireTenant requireActiveSchoolYear>
                 <SubjectDetail />
               </ProtectedRoute>
             }
@@ -173,7 +173,7 @@ export default function App() {
           <Route
             path="/notifications"
             element={
-              <ProtectedRoute requireTenant>
+              <ProtectedRoute requireTenant requireActiveSchoolYear>
                 <NotificationsPage />
               </ProtectedRoute>
             }
@@ -182,7 +182,7 @@ export default function App() {
           <Route
             path="/calendar"
             element={
-              <ProtectedRoute requireTenant>
+              <ProtectedRoute requireTenant requireActiveSchoolYear>
                 <CalendarPage />
               </ProtectedRoute>
             }
@@ -191,7 +191,7 @@ export default function App() {
           <Route
             path="/observer"
             element={
-              <ProtectedRoute requireTenant>
+              <ProtectedRoute requireTenant requireActiveSchoolYear>
                 <Observer />
               </ProtectedRoute>
             }
@@ -200,7 +200,7 @@ export default function App() {
           <Route
             path="/absences"
             element={
-              <ProtectedRoute requireTenant>
+              <ProtectedRoute requireTenant requireActiveSchoolYear>
                 <Absences />
               </ProtectedRoute>
             }
@@ -209,7 +209,7 @@ export default function App() {
           <Route
             path="/my"
             element={
-              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant>
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant requireActiveSchoolYear>
                 <MyResults />
               </ProtectedRoute>
             }
@@ -218,7 +218,7 @@ export default function App() {
           <Route
             path="/my-subjects"
             element={
-              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant>
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant requireActiveSchoolYear>
                 <MySubjects />
               </ProtectedRoute>
             }
@@ -227,7 +227,7 @@ export default function App() {
           <Route
             path="/my-bulletins"
             element={
-              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant>
+              <ProtectedRoute roles={["STUDENT", "TUTOR"]} requireTenant requireActiveSchoolYear>
                 <MyBulletins />
               </ProtectedRoute>
             }
@@ -280,7 +280,7 @@ export default function App() {
           <Route
             path="/admin/grade-levels"
             element={
-              <ProtectedRoute roles={["ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                 <GradeLevels />
               </ProtectedRoute>
             }
@@ -288,7 +288,7 @@ export default function App() {
           <Route
             path="/admin/sections"
             element={
-              <ProtectedRoute roles={["ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                 <Sections />
               </ProtectedRoute>
             }
@@ -296,7 +296,7 @@ export default function App() {
           <Route
             path="/admin/courses"
             element={
-              <ProtectedRoute roles={["ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                 <Courses />
               </ProtectedRoute>
             }
@@ -304,7 +304,7 @@ export default function App() {
           <Route
             path="/admin/curriculums"
             element={
-              <ProtectedRoute roles={["ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                 <Curriculums />
               </ProtectedRoute>
             }

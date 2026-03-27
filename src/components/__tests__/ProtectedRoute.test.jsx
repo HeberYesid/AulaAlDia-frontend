@@ -208,4 +208,73 @@ describe('ProtectedRoute Component', () => {
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument()
   })
+
+  it('shows loading state while school year gate is being resolved', () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: mockTeacher,
+      loading: false,
+      tenantsLoaded: true,
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      activeTenantId: 'tenant-1',
+      schoolYearGateLoaded: false,
+      hasActiveSchoolYear: null,
+    })
+
+    render(
+      <MemoryRouter>
+        <ProtectedRoute requireTenant requireActiveSchoolYear>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByRole('status', { name: /validando año escolar activo/i })).toBeInTheDocument()
+  })
+
+  it('blocks route when no active school year is configured', () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: mockTeacher,
+      loading: false,
+      tenantsLoaded: true,
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      activeTenantId: 'tenant-1',
+      schoolYearGateLoaded: true,
+      hasActiveSchoolYear: false,
+      activeSchoolYear: null,
+    })
+
+    render(
+      <MemoryRouter>
+        <ProtectedRoute requireTenant requireActiveSchoolYear>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText(/año escolar activo requerido/i)).toBeInTheDocument()
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
+  })
+
+  it('allows exempt role to bypass school year gate', () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { ...mockTeacher, role: 'ADMIN' },
+      loading: false,
+      tenantsLoaded: true,
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      activeTenantId: 'tenant-1',
+      schoolYearGateLoaded: true,
+      hasActiveSchoolYear: false,
+      activeSchoolYear: null,
+    })
+
+    render(
+      <MemoryRouter>
+        <ProtectedRoute requireTenant requireActiveSchoolYear activeSchoolYearExemptRoles={['ADMIN']}>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText('Protected Content')).toBeInTheDocument()
+  })
 })

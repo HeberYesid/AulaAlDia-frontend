@@ -93,6 +93,9 @@ export function AuthProvider({ children }) {
   const [activeTenantId, setActiveTenantId] = useState(null)
   const [tenants, setTenants] = useState([])
   const [tenantsLoaded, setTenantsLoaded] = useState(false)
+  const [hasActiveSchoolYear, setHasActiveSchoolYear] = useState(null)
+  const [activeSchoolYear, setActiveSchoolYear] = useState(null)
+  const [schoolYearGateLoaded, setSchoolYearGateLoaded] = useState(false)
   const lastActivityRef = useRef(Date.now())
 
   function resolveTenantId({ user, active_tenant_id }, fallbackTenantId = null) {
@@ -190,6 +193,33 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function fetchActiveSchoolYearStatus() {
+    if (!access || !user) {
+      setHasActiveSchoolYear(null)
+      setActiveSchoolYear(null)
+      setSchoolYearGateLoaded(false)
+      return
+    }
+
+    setSchoolYearGateLoaded(false)
+    try {
+      const { data } = await api.get('/api/v1/courses/active-school-year-status/')
+      setHasActiveSchoolYear(Boolean(data?.has_active_school_year))
+      setActiveSchoolYear(data?.school_year || null)
+    } catch (error) {
+      const errorCode = error?.response?.data?.error_code
+      if (errorCode === 'NO_ACTIVE_SCHOOL_YEAR' || error?.response?.status === 409) {
+        setHasActiveSchoolYear(false)
+        setActiveSchoolYear(null)
+      } else {
+        setHasActiveSchoolYear(false)
+        setActiveSchoolYear(null)
+      }
+    } finally {
+      setSchoolYearGateLoaded(true)
+    }
+  }
+
   async function refreshMe() {
     try {
       const { data } = await api.get('/api/v1/auth/me/')
@@ -230,6 +260,9 @@ export function AuthProvider({ children }) {
       setActiveTenantId(null)
       setTenants([])
       setTenantsLoaded(false)
+      setHasActiveSchoolYear(null)
+      setActiveSchoolYear(null)
+      setSchoolYearGateLoaded(false)
       setApiActiveTenantId(null)
     }
   }, [access])
@@ -339,6 +372,18 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, access])
 
+  useEffect(() => {
+    if (!user || !access) {
+      setHasActiveSchoolYear(null)
+      setActiveSchoolYear(null)
+      setSchoolYearGateLoaded(false)
+      return
+    }
+
+    fetchActiveSchoolYearStatus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, access, activeTenantId])
+
   const activeTenant = useMemo(() => {
     return (
       tenants.find((tenant) => tenant.tenant_id === activeTenantId) ||
@@ -375,6 +420,9 @@ export function AuthProvider({ children }) {
     activeTenantBranding,
     tenants,
     tenantsLoaded,
+    hasActiveSchoolYear,
+    activeSchoolYear,
+    schoolYearGateLoaded,
     login, 
     googleLogin,
     register, 
@@ -384,6 +432,7 @@ export function AuthProvider({ children }) {
     switchTenant,
     refreshMe,
     fetchMyTenants,
+    fetchActiveSchoolYearStatus,
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

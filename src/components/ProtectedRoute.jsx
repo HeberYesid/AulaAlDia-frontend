@@ -1,12 +1,22 @@
-import { Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 
-export default function ProtectedRoute({ children, roles, allowedRoles, requireTenant = false }) {
+export default function ProtectedRoute({
+  children,
+  roles,
+  allowedRoles,
+  requireTenant = false,
+  requireActiveSchoolYear = false,
+  activeSchoolYearExemptRoles = [],
+}) {
   const {
     user,
     activeTenantId = null,
     tenants = [],
     tenantsLoaded = true,
+    hasActiveSchoolYear = null,
+    activeSchoolYear = null,
+    schoolYearGateLoaded = true,
   } = useAuth()
   const location = useLocation()
   const requiredRoles = Array.isArray(roles)
@@ -44,6 +54,48 @@ export default function ProtectedRoute({ children, roles, allowedRoles, requireT
 
     if (hasTenantCatalog && hasActiveTenant && !hasAuthorizedTenant) {
       return <Navigate to="/" replace state={{ tenantDenied: true }} />
+    }
+  }
+
+  if (requireActiveSchoolYear) {
+    const exemptByRole = Array.isArray(activeSchoolYearExemptRoles)
+      ? activeSchoolYearExemptRoles.includes(user.role)
+      : false
+
+    if (!exemptByRole) {
+      if (!schoolYearGateLoaded) {
+        return (
+          <div className="loading" role="status" aria-label="Validando año escolar activo...">
+            <div className="spinner" aria-hidden="true"></div>
+            <span aria-hidden="true">Validando año escolar activo...</span>
+          </div>
+        )
+      }
+
+      if (hasActiveSchoolYear === false) {
+        return (
+          <section className="card empty-state" aria-live="polite">
+            <h3 className="empty-state__title">Año escolar activo requerido</h3>
+            <p className="empty-state__text">
+              Esta sección solo está disponible cuando la institución tiene un año escolar activo.
+            </p>
+            {user.role === 'ADMIN' ? (
+              <Link to="/admin/academic-settings" className="btn">
+                Ir a Configuración Académica
+              </Link>
+            ) : (
+              <p className="empty-state__text">
+                Solicita a un administrador que active el año escolar para continuar.
+              </p>
+            )}
+            {activeSchoolYear ? (
+              <p className="empty-state__text">
+                Año activo detectado: {activeSchoolYear.label}
+              </p>
+            ) : null}
+          </section>
+        )
+      }
     }
   }
 
