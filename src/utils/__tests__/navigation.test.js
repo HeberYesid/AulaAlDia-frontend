@@ -68,6 +68,14 @@ describe('navigation config', () => {
     expect(sectionIds).not.toContain('administration')
   })
 
+  it('orders admin sidebar sections as configured', () => {
+    const admin = buildUser(USER_ROLES.ADMIN)
+
+    const sectionIds = getNavigationSections(admin, { surface: 'sidebar' }).map((section) => section.id)
+
+    expect(sectionIds).toEqual(['general', 'administration', 'academic', 'communication'])
+  })
+
   it('keeps navbar focused and hides low-priority links', () => {
     const student = buildUser(USER_ROLES.STUDENT)
 

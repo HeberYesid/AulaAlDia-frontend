@@ -17,9 +17,9 @@ import { USER_ROLES } from './constants'
 
 export const NAVIGATION_SECTIONS = [
   { id: 'general', label: 'General' },
+  { id: 'administration', label: 'Administracion' },
   { id: 'academic', label: 'Academico' },
   { id: 'communication', label: 'Comunicacion' },
-  { id: 'administration', label: 'Administracion' },
 ]
 
 const NAVIGATION_ITEMS = [
