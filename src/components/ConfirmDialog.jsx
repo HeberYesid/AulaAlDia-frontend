@@ -52,12 +52,17 @@ export default function ConfirmDialog({ title = '¿Confirmar acción?', message,
         aria-describedby="confirm-dialog-desc"
         ref={dialogRef}
         className="card"
-        style={{ maxWidth: '420px', width: '100%', margin: 0 }}
+        style={{ maxWidth: '620px', width: '100%', margin: 0 }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         <h2 id="confirm-dialog-title" style={{ marginTop: 0, fontSize: '1.1rem' }}>{title}</h2>
-        <p id="confirm-dialog-desc" style={{ color: 'var(--text-secondary)', margin: '0 0 1.5rem 0' }}>{message}</p>
+        <p
+          id="confirm-dialog-desc"
+          style={{ color: 'var(--text-secondary)', margin: '0 0 1.5rem 0', whiteSpace: 'pre-line' }}
+        >
+          {message}
+        </p>
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
           <button className="btn secondary" onClick={onCancel}>Cancelar</button>
           <button className="btn danger" onClick={onConfirm}>Confirmar</button>

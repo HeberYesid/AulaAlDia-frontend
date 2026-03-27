@@ -55,10 +55,11 @@ describe('AcademicSettings', () => {
     },
   ]
 
-  const schoolYearsResponse = []
+  let schoolYearsResponse = []
 
   beforeEach(() => {
     vi.clearAllMocks()
+    schoolYearsResponse = []
 
     api.get.mockImplementation((url) => {
       if (url === '/api/v1/courses/academic-settings/') {
@@ -140,6 +141,81 @@ describe('AcademicSettings', () => {
           ]),
         })
       )
+    })
+  })
+
+  it('asks for confirmation with impact details before deactivating a school year', async () => {
+    const user = userEvent.setup()
+    schoolYearsResponse = [
+      {
+        id: 99,
+        label: '2026',
+        start_date: '2026-01-01',
+        end_date: '2026-12-31',
+        enrollment_open_date: '2026-01-10',
+        enrollment_close_date: '2026-02-10',
+        evaluation_type: 'TRIMESTER',
+        is_active: true,
+      },
+    ]
+
+    api.get.mockImplementation((url) => {
+      if (url === '/api/v1/courses/academic-settings/') {
+        return Promise.resolve({ data: settingsResponse })
+      }
+      if (url === '/api/v1/courses/academic-periods/') {
+        return Promise.resolve({ data: periodsResponse })
+      }
+      if (url === '/api/v1/courses/grading-scales/') {
+        return Promise.resolve({ data: scalesResponse })
+      }
+      if (url === '/api/v1/courses/school-years/') {
+        return Promise.resolve({ data: schoolYearsResponse })
+      }
+      if (url === '/api/v1/courses/school-years/99/deactivation-impact/') {
+        return Promise.resolve({
+          data: {
+            school_year: { id: 99, label: '2026' },
+            impact: {
+              active_school_years_before: 1,
+              active_school_years_after: 0,
+              academic_periods_in_range: 4,
+              open_academic_periods_in_range: 2,
+              closed_academic_periods_in_range: 2,
+              exercises_linked_to_periods: 18,
+              student_results_linked_to_periods: 43,
+              bulletins_linked_to_periods: 9,
+              enrollments_created_in_window: 55,
+            },
+            warnings: ['Tu institución quedará sin año escolar activo hasta que actives o crees uno nuevo.'],
+          },
+        })
+      }
+      return Promise.reject(new Error(`Unexpected GET ${url}`))
+    })
+
+    api.post.mockImplementation((url) => {
+      if (url === '/api/v1/courses/school-years/99/deactivate/') {
+        return Promise.resolve({ data: { id: 99, is_active: false } })
+      }
+      return Promise.reject(new Error(`Unexpected POST ${url}`))
+    })
+
+    render(<AcademicSettings />)
+
+    expect(await screen.findByText(/configuraci.n del a.o, periodos y escalas/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Desactivar/i }))
+
+    expect(await screen.findByRole('heading', { name: /seguro que deseas desactivar este a.o escolar/i })).toBeInTheDocument()
+    expect(screen.getByText(/A.os escolares activos: 1 -> 0\./i)).toBeInTheDocument()
+    expect(screen.getByText(/Advertencias importantes:/i)).toBeInTheDocument()
+    expect(api.post).not.toHaveBeenCalledWith('/api/v1/courses/school-years/99/deactivate/')
+
+    await user.click(screen.getByRole('button', { name: /^Confirmar$/i }))
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith('/api/v1/courses/school-years/99/deactivate/')
     })
   })
 })
