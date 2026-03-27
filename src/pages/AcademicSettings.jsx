@@ -359,18 +359,6 @@ export default function AcademicSettings() {
               </select>
             </div>
 
-            <label className="academic-admin__checkbox">
-              <input
-                type="checkbox"
-                checked={settingsForm.lock_grades_after_deadline}
-                onChange={(event) => setSettingsForm((current) => ({
-                  ...current,
-                  lock_grades_after_deadline: event.target.checked,
-                }))}
-              />
-              <span>Bloquear edición de notas al vencer la fecha límite del periodo</span>
-            </label>
-
             <button type="submit" className="btn" disabled={savingSettings}>
               {savingSettings ? 'Guardando...' : 'Guardar configuración'}
             </button>
