@@ -969,48 +969,51 @@ form {
   gap: var(--space-lg);
 }
 
-/* Tables - Diseño limpio y profesional */
+/* Tables - Estilo minimalista y sin bordes */
 .table-container {
   overflow-x: auto;
   max-width: 100%;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-primary);
-  background: linear-gradient(180deg, var(--bg-card), var(--overlay-bg));
-  box-shadow: var(--shadow-sm);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+  background: transparent;
 }
 
 .table th {
-  background: linear-gradient(90deg, var(--bg-secondary), var(--bg-tertiary));
-  color: var(--text-primary);
+  background: transparent;
   font-weight: 600;
   padding: clamp(0.75rem, 0.6rem + 0.6vw, 1rem) clamp(0.9rem, 0.7rem + 0.8vw, 1.25rem);
   text-align: left;
-  border-bottom: 1px solid var(--border-secondary);
+  border-bottom: none;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  color: var(--text-muted);
 }
 
 .table td {
   padding: clamp(0.75rem, 0.62rem + 0.55vw, 1rem) clamp(0.9rem, 0.7rem + 0.8vw, 1.25rem);
-  border-bottom: 1px solid var(--border-primary);
+  border-bottom: none;
   color: var(--text-secondary);
   transition: background-color var(--transition-fast), color var(--transition-fast);
   font-size: var(--font-size-sm);
 }
 
 .table tr:hover td {
-  background: linear-gradient(90deg, var(--overlay-hover), transparent);
+  background: var(--overlay-hover);
+  background: color-mix(in srgb, var(--overlay-hover) 70%, transparent);
   color: var(--text-primary);
 }
 
-.table tr:last-child td {
-  border-bottom: none;
+.table tbody tr:nth-child(even) td {
+  background: var(--bg-secondary);
+  background: color-mix(in srgb, var(--bg-secondary) 30%, transparent);
 }
 
 /* Badges */
@@ -1759,31 +1762,34 @@ form {
 
 /* Enhanced Table Styles */
 .data-table {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-md);
+  background: transparent;
+  border-radius: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  border: none;
+  box-shadow: none;
 }
 
 .data-table .table th {
-  background: var(--bg-secondary);
+  background: transparent;
   color: var(--text-primary);
   font-weight: 600;
   padding: var(--space-lg);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  border-bottom: none;
 }
 
 .data-table .table td {
   padding: var(--space-lg);
-  border-bottom: 1px solid var(--border-primary);
+  border-bottom: none;
   vertical-align: middle;
 }
 
 .data-table .table tr:hover {
-  background: var(--bg-hover);
+  background: var(--overlay-hover);
+  background: color-mix(in srgb, var(--overlay-hover) 65%, transparent);
 }
 
 /* Action Buttons */
@@ -2971,72 +2977,38 @@ form {
     padding: 0.75rem 1.25rem !important;
   }
 
-  /* Mobile Card View for Tables */
-  .mobile-card-view thead {
-    display: none;
+  /* Mobile table fallback: mantener estructura tabular, no tarjetas por fila */
+  .mobile-card-view {
+    min-width: 40rem;
   }
 
-  .mobile-card-view tbody,
-  .mobile-card-view tr,
-  .mobile-card-view td {
-    display: block;
-    width: 100%;
+  .mobile-card-view thead {
+    display: table-header-group;
+  }
+
+  .mobile-card-view tbody {
+    display: table-row-group;
   }
 
   .mobile-card-view tr {
-    margin-bottom: var(--space-md);
-    background: var(--bg-card);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    box-shadow: var(--shadow-sm);
+    display: table-row;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
   }
 
-  .mobile-card-view td {
-    text-align: right;
-    padding: var(--space-xs) 0;
-    border-bottom: 1px solid var(--border-primary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .mobile-card-view td:last-child {
-    border-bottom: none;
-    justify-content: space-between;
-    padding-top: var(--space-md);
-  }
-
-  .mobile-card-view td[data-label="Acción"],
-  .mobile-card-view td[data-label="Acciones"],
-  .mobile-card-view td[data-label="Action"] {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .mobile-card-view td[data-label="Acción"]::before,
-  .mobile-card-view td[data-label="Acciones"]::before,
-  .mobile-card-view td[data-label="Action"]::before {
-    display: none;
-  }
-
-  .mobile-card-view td[data-label="Acción"] .btn,
-  .mobile-card-view td[data-label="Acciones"] .btn,
-  .mobile-card-view td[data-label="Action"] .btn {
-    width: 100%;
-    justify-content: center;
+  .mobile-card-view td,
+  .mobile-card-view th {
+    display: table-cell;
+    width: auto;
+    white-space: nowrap;
   }
 
   .mobile-card-view td::before {
-    content: attr(data-label);
-    float: left;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    font-size: var(--font-size-xs);
+    content: none;
   }
 }
 
