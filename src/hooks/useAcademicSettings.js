@@ -389,6 +389,13 @@ export function useAcademicSettings() {
     }
   }
 
+  async function getSchoolYearDeactivationImpact(schoolYearId) {
+    const { data } = await api.get(
+      `/api/v1/courses/school-years/${schoolYearId}/deactivation-impact/`
+    )
+    return data
+  }
+
   return {
     loading,
     error,
@@ -419,6 +426,7 @@ export function useAcademicSettings() {
     handleSaveSettings,
     handleCreateSchoolYear,
     handleToggleSchoolYearStatus,
+    getSchoolYearDeactivationImpact,
     handleCreatePeriod,
     handleEditPeriod,
     handleCancelPeriodEdit,

@@ -1,8 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Alert from '../components/Alert'
+import ConfirmDialog from '../components/ConfirmDialog'
 import { useAcademicSettings, toLocalDateTimeInput } from '../hooks/useAcademicSettings'
 
 export default function AcademicSettings() {
+  const [schoolYearConfirmDialog, setSchoolYearConfirmDialog] = useState(null)
+  const [loadingSchoolYearImpactId, setLoadingSchoolYearImpactId] = useState(null)
+
   const {
     loading,
     error,
@@ -32,6 +36,7 @@ export default function AcademicSettings() {
     handleSaveSettings,
     handleCreateSchoolYear,
     handleToggleSchoolYearStatus,
+    getSchoolYearDeactivationImpact,
     handleCreatePeriod,
     handleEditPeriod,
     handleCancelPeriodEdit,
@@ -44,6 +49,74 @@ export default function AcademicSettings() {
   useEffect(() => {
     loadAcademicAdmin()
   }, [loadAcademicAdmin])
+
+  function buildDeactivateSchoolYearMessage(schoolYear, impactPayload) {
+    const impact = impactPayload?.impact || {}
+    const warnings = Array.isArray(impactPayload?.warnings) ? impactPayload.warnings : []
+
+    const activeBefore = Number(impact.active_school_years_before ?? 0)
+    const activeAfter = Number(impact.active_school_years_after ?? 0)
+    const periods = Number(impact.academic_periods_in_range ?? 0)
+    const openPeriods = Number(impact.open_academic_periods_in_range ?? 0)
+    const closedPeriods = Number(impact.closed_academic_periods_in_range ?? Math.max(periods - openPeriods, 0))
+    const exercises = Number(impact.exercises_linked_to_periods ?? 0)
+    const results = Number(impact.student_results_linked_to_periods ?? 0)
+    const bulletins = Number(impact.bulletins_linked_to_periods ?? 0)
+    const enrollments = Number(impact.enrollments_created_in_window ?? 0)
+
+    const detailLines = [
+      `Año a desactivar: ${schoolYear.label}.`,
+      `Años escolares activos: ${activeBefore} -> ${activeAfter}.`,
+      `Periodos en ese rango: ${periods} (${openPeriods} abiertos, ${closedPeriods} cerrados).`,
+      `Ejercicios asociados a esos periodos: ${exercises}.`,
+      `Resultados de estudiantes asociados: ${results}.`,
+      `Boletines asociados: ${bulletins}.`,
+      `Inscripciones creadas en la vigencia: ${enrollments}.`,
+    ]
+
+    if (warnings.length > 0) {
+      detailLines.push('')
+      detailLines.push('Advertencias importantes:')
+      warnings.forEach((warning) => detailLines.push(`- ${warning}`))
+    }
+
+    return detailLines.join('\n')
+  }
+
+  async function handleSchoolYearStatusAction(schoolYear) {
+    if (!schoolYear.is_active) {
+      await handleToggleSchoolYearStatus(schoolYear)
+      return
+    }
+
+    setLoadingSchoolYearImpactId(schoolYear.id)
+    try {
+      const impactPayload = await getSchoolYearDeactivationImpact(schoolYear.id)
+      setSchoolYearConfirmDialog({
+        title: '¿Seguro que deseas desactivar este año escolar?',
+        message: buildDeactivateSchoolYearMessage(schoolYear, impactPayload),
+        onConfirm: async () => {
+          setSchoolYearConfirmDialog(null)
+          await handleToggleSchoolYearStatus(schoolYear)
+        },
+      })
+    } catch {
+      setSchoolYearConfirmDialog({
+        title: '¿Seguro que deseas desactivar este año escolar?',
+        message: [
+          `Año a desactivar: ${schoolYear.label}.`,
+          'No se pudo cargar el impacto detallado en este momento.',
+          'Si continúas, tu institución podría quedar sin año escolar activo hasta activar o crear uno nuevo.',
+        ].join('\n'),
+        onConfirm: async () => {
+          setSchoolYearConfirmDialog(null)
+          await handleToggleSchoolYearStatus(schoolYear)
+        },
+      })
+    } finally {
+      setLoadingSchoolYearImpactId(null)
+    }
+  }
 
   if (loading) {
     return <div className="card"><p>Cargando configuración académica...</p></div>
@@ -179,11 +252,13 @@ export default function AcademicSettings() {
                           <button
                             type="button"
                             className="btn secondary"
-                            disabled={mutatingSchoolYearId === schoolYear.id}
-                            onClick={() => handleToggleSchoolYearStatus(schoolYear)}
+                            disabled={mutatingSchoolYearId === schoolYear.id || loadingSchoolYearImpactId === schoolYear.id}
+                            onClick={() => handleSchoolYearStatusAction(schoolYear)}
                           >
                             {mutatingSchoolYearId === schoolYear.id
                               ? 'Actualizando...'
+                              : loadingSchoolYearImpactId === schoolYear.id
+                                ? 'Analizando impacto...'
                               : schoolYear.is_active
                                 ? 'Desactivar'
                                 : 'Activar'}
@@ -561,6 +636,15 @@ export default function AcademicSettings() {
           </div>
         )}
       </section>
+
+      {schoolYearConfirmDialog ? (
+        <ConfirmDialog
+          title={schoolYearConfirmDialog.title}
+          message={schoolYearConfirmDialog.message}
+          onConfirm={schoolYearConfirmDialog.onConfirm}
+          onCancel={() => setSchoolYearConfirmDialog(null)}
+        />
+      ) : null}
     </div>
   )
 }
