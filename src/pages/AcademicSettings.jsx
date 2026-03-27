@@ -83,9 +83,34 @@ export default function AcademicSettings() {
     return detailLines.join('\n')
   }
 
+  function buildActivateSchoolYearMessage(nextSchoolYear, currentActiveSchoolYear) {
+    return [
+      `Vas a activar: ${nextSchoolYear.label}.`,
+      `Esto desactivará automáticamente el año escolar activo actual: ${currentActiveSchoolYear.label}.`,
+      'Asegúrate de que este cambio corresponde al periodo académico vigente.',
+    ].join('\n')
+  }
+
   async function handleSchoolYearStatusAction(schoolYear) {
     if (!schoolYear.is_active) {
-      await handleToggleSchoolYearStatus(schoolYear)
+      const currentActiveSchoolYear = schoolYears.find((candidate) => (
+        candidate.is_active && candidate.id !== schoolYear.id
+      ))
+
+      if (!currentActiveSchoolYear) {
+        await handleToggleSchoolYearStatus(schoolYear)
+        return
+      }
+
+      setSchoolYearConfirmDialog({
+        title: '¿Seguro que deseas desactivar este año escolar?',
+        message: buildActivateSchoolYearMessage(schoolYear, currentActiveSchoolYear),
+        onConfirm: async () => {
+          setSchoolYearConfirmDialog(null)
+          await handleToggleSchoolYearStatus(schoolYear)
+        },
+      })
+
       return
     }
 
