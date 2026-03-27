@@ -474,6 +474,29 @@ body.sidebar-collapsed .app-body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 55%, transparent) transparent;
+  scrollbar-gutter: stable;
+}
+
+.sidebar__nav::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar__nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar__nav::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-muted) 52%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.sidebar__nav:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-primary) 58%, transparent);
+  background-clip: content-box;
 }
 
 .sidebar__section {
@@ -1558,6 +1581,15 @@ form {
   height: 100%;
 }
 
+.admin-dashboard__section--interactive {
+  cursor: pointer;
+}
+
+.admin-dashboard__section--interactive:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .admin-dashboard__section-title {
   margin: 0;
 }
@@ -1589,11 +1621,6 @@ form {
 
 .admin-dashboard__list-item:last-child {
   margin-bottom: 0;
-}
-
-.admin-dashboard__actions {
-  margin-top: auto;
-  padding-top: var(--space-sm);
 }
 
 .admin-dashboard__info-card {
@@ -1653,7 +1680,6 @@ form {
 }
 
 @media (max-width: 767px) {
-  .admin-dashboard__actions .btn,
   .admin-dashboard__info-card-actions .btn {
     width: 100%;
     justify-content: center;
