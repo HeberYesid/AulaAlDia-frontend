@@ -290,41 +290,6 @@ export default function AdminDashboard() {
       .slice(0, 5)
   }, [subjectStats])
 
-  const riskStudents = useMemo(() => {
-    const byStudent = {}
-
-    for (const absence of absencesInActivePeriod) {
-      if (absence.justified) continue
-
-      const studentKey = absence.student_email_display || absence.student_name || String(absence.id)
-      if (!byStudent[studentKey]) {
-        byStudent[studentKey] = {
-          name: absence.student_name || absence.student_email_display || 'Estudiante',
-          email: absence.student_email_display || '',
-          count: 0,
-        }
-      }
-
-      byStudent[studentKey].count += 1
-    }
-
-    return Object.values(byStudent)
-      .filter((student) => student.count >= 3)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
-  }, [absencesInActivePeriod])
-
-  const recentObservationList = useMemo(() => {
-    return observationsInActivePeriod
-      .filter((item) => isWithinLastDays(item.created_at, 7))
-      .sort((a, b) => {
-        const first = toDate(a.created_at)?.getTime() || 0
-        const second = toDate(b.created_at)?.getTime() || 0
-        return second - first
-      })
-      .slice(0, 6)
-  }, [observationsInActivePeriod])
-
   const openPeriods = useMemo(() => {
     return academicPeriods.filter((period) => !period.is_closed).slice(0, 3)
   }, [academicPeriods])
@@ -458,22 +423,11 @@ export default function AdminDashboard() {
           onClick={() => handleCardClick('/absences')}
           onKeyDown={(event) => handleCardKeyDown(event, '/absences')}
         >
-          <h2 className="admin-dashboard__section-title">Ausencias y alertas</h2>
+          <h2 className="admin-dashboard__section-title">Ausencias</h2>
           {blockErrors.absences && <Alert type="error" message={blockErrors.absences} />}
-          <p className="admin-dashboard__muted admin-dashboard__muted--tight">
-            Total faltas: <strong>{kpis.totalAbsences}</strong> | Sin justificar: <strong>{kpis.unjustifiedAbsences}</strong>
+          <p className="admin-dashboard__muted">
+            Hay un total de <strong>{absencesInActivePeriod.length}</strong> ausencias en este periodo.
           </p>
-          {riskStudents.length === 0 ? (
-            <p className="admin-dashboard__muted">No hay estudiantes en riesgo por faltas en este momento.</p>
-          ) : (
-            <ul className="admin-dashboard__list">
-              {riskStudents.map((student) => (
-                <li key={student.email || student.name} className="admin-dashboard__list-item">
-                  <strong>{student.name}</strong> ({student.count} faltas sin justificar)
-                </li>
-              ))}
-            </ul>
-          )}
         </section>
 
         <section
@@ -484,34 +438,11 @@ export default function AdminDashboard() {
           onClick={() => handleCardClick('/observer')}
           onKeyDown={(event) => handleCardKeyDown(event, '/observer')}
         >
-          <h2 className="admin-dashboard__section-title">Observaciones recientes</h2>
+          <h2 className="admin-dashboard__section-title">Observador</h2>
           {blockErrors.observations && <Alert type="error" message={blockErrors.observations} />}
-          {recentObservationList.length === 0 ? (
-            <p className="admin-dashboard__muted">No hay observaciones en los últimos 7 días.</p>
-          ) : (
-            <div className="data-table admin-dashboard__table">
-              <table className="table mobile-card-view">
-                <thead>
-                  <tr>
-                    <th scope="col">Fecha</th>
-                    <th scope="col">Estudiante</th>
-                    <th scope="col">Categoría</th>
-                    <th scope="col">Título</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentObservationList.map((item) => (
-                    <tr key={item.id}>
-                      <td data-label="Fecha">{formatDate(item.created_at)}</td>
-                      <td data-label="Estudiante">{item.student_name || item.student_email_display || '-'}</td>
-                      <td data-label="Categoría">{item.category || '-'}</td>
-                      <td data-label="Título">{item.title || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <p className="admin-dashboard__muted">
+            Hay un total de <strong>{observationsInActivePeriod.length}</strong> observaciones en este periodo.
+          </p>
         </section>
 
         <section

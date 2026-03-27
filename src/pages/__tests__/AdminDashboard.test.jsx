@@ -81,7 +81,7 @@ describe('AdminDashboard page', () => {
     });
   });
 
-  it('shows only absences and observations from active period', async () => {
+  it('shows absences and observer totals for active period', async () => {
     const now = new Date();
     const activeStart = addDays(now, -2);
     const activeEnd = addDays(now, 10);
@@ -175,16 +175,17 @@ describe('AdminDashboard page', () => {
     renderComponent();
 
     await waitFor(() => {
-      const absencesCard = screen.getByRole('link', {
-        name: 'Ir al módulo de asistencia',
-      });
-      const normalizedText = (absencesCard.textContent || '')
-        .replace(/\s+/g, ' ')
-        .trim();
-      expect(normalizedText).toContain('Total faltas: 1 | Sin justificar: 1');
+      expect(screen.getByText('Ausencias')).toBeInTheDocument();
+      expect(screen.getByText('Observador')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Observación vigente')).toBeInTheDocument();
-    expect(screen.queryByText('Observación fuera de periodo')).not.toBeInTheDocument();
+    const absencesCard = screen.getByRole('link', { name: 'Ir al módulo de asistencia' });
+    const observerCard = screen.getByRole('link', { name: 'Ir al observador' });
+
+    const absencesText = (absencesCard.textContent || '').replace(/\s+/g, ' ');
+    const observerText = (observerCard.textContent || '').replace(/\s+/g, ' ');
+
+    expect(absencesText).toContain('Hay un total de 1 ausencias en este periodo.');
+    expect(observerText).toContain('Hay un total de 1 observaciones en este periodo.');
   });
 });
