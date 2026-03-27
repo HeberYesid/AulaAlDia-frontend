@@ -144,6 +144,7 @@ export function useAcademicSettings() {
   const [savingScale, setSavingScale] = useState(false)
   const [savingSchoolYear, setSavingSchoolYear] = useState(false)
   const [mutatingSchoolYearId, setMutatingSchoolYearId] = useState(null)
+  const activeSchoolYear = schoolYears.find((schoolYear) => schoolYear.is_active) || null
 
   const loadAcademicAdmin = useCallback(async () => {
     setLoading(true)
@@ -242,13 +243,31 @@ export function useAcademicSettings() {
 
   async function handleCreatePeriod(event) {
     event.preventDefault()
-    setSavingPeriod(true)
     setError('')
     setSuccess('')
 
+    if (!editingPeriodId && !activeSchoolYear) {
+      setError('Para crear un periodo académico, primero activa un año escolar.')
+      return
+    }
+
+    const activeSchoolYearStart = Number(String(activeSchoolYear?.start_date || '').slice(0, 4))
+    if (!editingPeriodId && !Number.isFinite(activeSchoolYearStart)) {
+      setError('No se pudo determinar el año del periodo desde el año escolar activo.')
+      return
+    }
+
+    const periodYear = editingPeriodId ? Number(periodForm.year) : activeSchoolYearStart
+    if (!Number.isFinite(periodYear)) {
+      setError('No se pudo determinar el año del periodo.')
+      return
+    }
+
+    setSavingPeriod(true)
+
     try {
       const payload = {
-        year: Number(periodForm.year),
+        year: periodYear,
         sequence: Number(periodForm.sequence),
         period_number: Number(periodForm.sequence),
         name: periodForm.name,
@@ -415,6 +434,7 @@ export function useAcademicSettings() {
     savingPeriod,
     savingScale,
     mutatingSchoolYearId,
+    activeSchoolYear,
     setSettingsForm,
     setSchoolYearForm,
     setPeriodForm,

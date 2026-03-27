@@ -144,6 +144,40 @@ describe('AcademicSettings', () => {
     })
   })
 
+  it('shows the active school year context in the period creation form', async () => {
+    schoolYearsResponse = [
+      {
+        id: 5,
+        label: '2026-2027',
+        start_date: '2026-01-01',
+        end_date: '2027-12-31',
+        enrollment_open_date: '2026-01-10',
+        enrollment_close_date: '2026-02-10',
+        evaluation_type: 'TRIMESTER',
+        is_active: true,
+      },
+    ]
+
+    render(<AcademicSettings />)
+
+    expect(await screen.findByText(/configuraci.n del a.o, periodos y escalas/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Este periodo se crear. dentro del a.o escolar activo/i)
+    ).toBeInTheDocument()
+    expect(screen.getAllByText(/2026-2027/i).length).toBeGreaterThan(0)
+  })
+
+  it('disables period creation when there is no active school year', async () => {
+    render(<AcademicSettings />)
+
+    expect(await screen.findByText(/configuraci.n del a.o, periodos y escalas/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/^Año$/i)).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/Debes activar un a.o escolar para poder crear periodos acad.micos/i)
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Crear periodo/i })).toBeDisabled()
+  })
+
   it('asks for confirmation with impact details before deactivating a school year', async () => {
     const user = userEvent.setup()
     schoolYearsResponse = [

@@ -25,6 +25,7 @@ export default function AcademicSettings() {
     savingPeriod,
     savingScale,
     mutatingSchoolYearId,
+    activeSchoolYear,
     setSettingsForm,
     setSchoolYearForm,
     setPeriodForm,
@@ -368,26 +369,27 @@ export default function AcademicSettings() {
         <section className="card">
           <h2>{editingPeriodId ? 'Editar periodo' : 'Crear periodo'}</h2>
           <form onSubmit={handleCreatePeriod} className="academic-admin__form">
-            <div className="academic-admin__grid-2">
-              <div>
-                <label htmlFor="period-year">Año</label>
-                <input
-                  id="period-year"
-                  type="number"
-                  value={periodForm.year}
-                  onChange={(event) => setPeriodForm((current) => ({ ...current, year: event.target.value }))}
-                />
-              </div>
-              <div>
-                <label htmlFor="period-sequence">Secuencia</label>
-                <input
-                  id="period-sequence"
-                  type="number"
-                  min="1"
-                  value={periodForm.sequence}
-                  onChange={(event) => setPeriodForm((current) => ({ ...current, sequence: event.target.value }))}
-                />
-              </div>
+            {editingPeriodId ? null : activeSchoolYear ? (
+              <p className="alert info">
+                Este periodo se creará dentro del año escolar activo <strong>{activeSchoolYear.label}</strong>
+                {' '}({activeSchoolYear.start_date} - {activeSchoolYear.end_date}).
+              </p>
+            ) : (
+              <p className="alert warning">
+                Debes activar un año escolar para poder crear periodos académicos.
+              </p>
+            )}
+
+            <div>
+              <label htmlFor="period-sequence">Secuencia</label>
+              <input
+                id="period-sequence"
+                type="number"
+                min="1"
+                value={periodForm.sequence}
+                onChange={(event) => setPeriodForm((current) => ({ ...current, sequence: event.target.value }))}
+                required
+              />
             </div>
 
             <div>
@@ -443,7 +445,11 @@ export default function AcademicSettings() {
               <span>Bloquear notas al superar la fecha límite</span>
             </label>
 
-            <button type="submit" className="btn" disabled={savingPeriod}>
+            <button
+              type="submit"
+              className="btn"
+              disabled={savingPeriod || (!editingPeriodId && !activeSchoolYear)}
+            >
               {savingPeriod ? (editingPeriodId ? 'Guardando...' : 'Creando...') : (editingPeriodId ? 'Guardar periodo' : 'Crear periodo')}
             </button>
             {editingPeriodId ? (
