@@ -192,134 +192,79 @@ export default function AcademicSettings() {
           </div>
         </div>
 
-        <div className="grid cols-2 grid-stack-mobile">
-          <form onSubmit={handleCreateSchoolYear} className="academic-admin__form">
-            <div className="academic-admin__grid-2">
-              <div>
-                <label htmlFor="school-year-start">Fecha inicio</label>
-                <input
-                  id="school-year-start"
-                  type="date"
-                  value={schoolYearForm.start_date}
-                  onChange={(event) => setSchoolYearForm((current) => ({ ...current, start_date: event.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="school-year-end">Fecha fin</label>
-                <input
-                  id="school-year-end"
-                  type="date"
-                  value={schoolYearForm.end_date}
-                  onChange={(event) => setSchoolYearForm((current) => ({ ...current, end_date: event.target.value }))}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="academic-admin__grid-2">
-              <div>
-                <label htmlFor="school-year-enrollment-open">Apertura matrícula</label>
-                <input
-                  id="school-year-enrollment-open"
-                  type="date"
-                  value={schoolYearForm.enrollment_open_date}
-                  onChange={(event) => setSchoolYearForm((current) => ({ ...current, enrollment_open_date: event.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="school-year-enrollment-close">Cierre matrícula</label>
-                <input
-                  id="school-year-enrollment-close"
-                  type="date"
-                  value={schoolYearForm.enrollment_close_date}
-                  onChange={(event) => setSchoolYearForm((current) => ({ ...current, enrollment_close_date: event.target.value }))}
-                  required
-                />
-              </div>
-            </div>
-
+        <form onSubmit={handleCreateSchoolYear} className="academic-admin__form">
+          <div className="academic-admin__grid-2">
             <div>
-              <label htmlFor="school-year-evaluation-type">Tipo de evaluación</label>
-              <select
-                id="school-year-evaluation-type"
-                value={schoolYearForm.evaluation_type}
-                onChange={(event) => setSchoolYearForm((current) => ({ ...current, evaluation_type: event.target.value }))}
-              >
-                <option value="TRIMESTER">Trimestral</option>
-                <option value="SEMESTER">Semestral</option>
-                <option value="CYCLES">Por ciclos</option>
-              </select>
-            </div>
-
-            <label className="academic-admin__checkbox">
+              <label htmlFor="school-year-start">Fecha inicio</label>
               <input
-                type="checkbox"
-                checked={schoolYearForm.is_active}
-                onChange={(event) => setSchoolYearForm((current) => ({ ...current, is_active: event.target.checked }))}
+                id="school-year-start"
+                type="date"
+                value={schoolYearForm.start_date}
+                onChange={(event) => setSchoolYearForm((current) => ({ ...current, start_date: event.target.value }))}
+                required
               />
-              <span>Crear como año escolar activo</span>
-            </label>
+            </div>
+            <div>
+              <label htmlFor="school-year-end">Fecha fin</label>
+              <input
+                id="school-year-end"
+                type="date"
+                value={schoolYearForm.end_date}
+                onChange={(event) => setSchoolYearForm((current) => ({ ...current, end_date: event.target.value }))}
+                required
+              />
+            </div>
+          </div>
 
-            <button type="submit" className="btn" disabled={savingSchoolYear}>
-              {savingSchoolYear ? 'Creando...' : 'Crear año escolar'}
-            </button>
-          </form>
+          <div className="academic-admin__grid-2">
+            <div>
+              <label htmlFor="school-year-enrollment-open">Apertura matrícula</label>
+              <input
+                id="school-year-enrollment-open"
+                type="date"
+                value={schoolYearForm.enrollment_open_date}
+                onChange={(event) => setSchoolYearForm((current) => ({ ...current, enrollment_open_date: event.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="school-year-enrollment-close">Cierre matrícula</label>
+              <input
+                id="school-year-enrollment-close"
+                type="date"
+                value={schoolYearForm.enrollment_close_date}
+                onChange={(event) => setSchoolYearForm((current) => ({ ...current, enrollment_close_date: event.target.value }))}
+                required
+              />
+            </div>
+          </div>
 
           <div>
-            {schoolYears.length === 0 ? (
-              <p>No hay años escolares registrados.</p>
-            ) : (
-              <div className="table-container">
-                <table className="table mobile-card-view">
-                  <thead>
-                    <tr>
-                      <th scope="col">Año escolar</th>
-                      <th scope="col">Matrícula</th>
-                      <th scope="col">Tipo evaluación</th>
-                      <th scope="col">Estado</th>
-                      <th scope="col">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {schoolYears.map((schoolYear) => (
-                      <tr key={schoolYear.id}>
-                        <td data-label="Año escolar">
-                          <strong>{schoolYear.label}</strong><br />
-                          {schoolYear.start_date} - {schoolYear.end_date}
-                        </td>
-                        <td data-label="Matrícula">
-                          {schoolYear.enrollment_open_date}<br />{schoolYear.enrollment_close_date}
-                        </td>
-                        <td data-label="Tipo evaluación">{schoolYear.evaluation_type}</td>
-                        <td data-label="Estado">
-                          {schoolYear.is_active ? <span className="status-badge success">Activo</span> : 'Inactivo'}
-                        </td>
-                        <td data-label="Acciones">
-                          <button
-                            type="button"
-                            className="btn secondary"
-                            disabled={mutatingSchoolYearId === schoolYear.id || loadingSchoolYearImpactId === schoolYear.id}
-                            onClick={() => handleSchoolYearStatusAction(schoolYear)}
-                          >
-                            {mutatingSchoolYearId === schoolYear.id
-                              ? 'Actualizando...'
-                              : loadingSchoolYearImpactId === schoolYear.id
-                                ? 'Analizando impacto...'
-                              : schoolYear.is_active
-                                ? 'Desactivar'
-                                : 'Activar'}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <label htmlFor="school-year-evaluation-type">Tipo de evaluación</label>
+            <select
+              id="school-year-evaluation-type"
+              value={schoolYearForm.evaluation_type}
+              onChange={(event) => setSchoolYearForm((current) => ({ ...current, evaluation_type: event.target.value }))}
+            >
+              <option value="TRIMESTER">Trimestral</option>
+              <option value="SEMESTER">Semestral</option>
+              <option value="CYCLES">Por ciclos</option>
+            </select>
           </div>
-        </div>
+
+          <label className="academic-admin__checkbox">
+            <input
+              type="checkbox"
+              checked={schoolYearForm.is_active}
+              onChange={(event) => setSchoolYearForm((current) => ({ ...current, is_active: event.target.checked }))}
+            />
+            <span>Crear como año escolar activo</span>
+          </label>
+
+          <button type="submit" className="btn" disabled={savingSchoolYear}>
+            {savingSchoolYear ? 'Creando...' : 'Crear año escolar'}
+          </button>
+        </form>
       </section>
 
       <div className="grid cols-2 grid-stack-mobile">
@@ -529,6 +474,60 @@ export default function AcademicSettings() {
                           Cerrar
                         </button>
                       </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>Años escolares configurados</h2>
+        {schoolYears.length === 0 ? (
+          <p>No hay años escolares registrados.</p>
+        ) : (
+          <div className="table-container">
+            <table className="table mobile-card-view">
+              <thead>
+                <tr>
+                  <th scope="col">Año escolar</th>
+                  <th scope="col">Matrícula</th>
+                  <th scope="col">Tipo evaluación</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schoolYears.map((schoolYear) => (
+                  <tr key={schoolYear.id}>
+                    <td data-label="Año escolar">
+                      <strong>{schoolYear.label}</strong><br />
+                      {schoolYear.start_date} - {schoolYear.end_date}
+                    </td>
+                    <td data-label="Matrícula">
+                      {schoolYear.enrollment_open_date}<br />{schoolYear.enrollment_close_date}
+                    </td>
+                    <td data-label="Tipo evaluación">{schoolYear.evaluation_type}</td>
+                    <td data-label="Estado">
+                      {schoolYear.is_active ? <span className="status-badge success">Activo</span> : 'Inactivo'}
+                    </td>
+                    <td data-label="Acciones">
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        disabled={mutatingSchoolYearId === schoolYear.id || loadingSchoolYearImpactId === schoolYear.id}
+                        onClick={() => handleSchoolYearStatusAction(schoolYear)}
+                      >
+                        {mutatingSchoolYearId === schoolYear.id
+                          ? 'Actualizando...'
+                          : loadingSchoolYearImpactId === schoolYear.id
+                            ? 'Analizando impacto...'
+                          : schoolYear.is_active
+                            ? 'Desactivar'
+                            : 'Activar'}
+                      </button>
                     </td>
                   </tr>
                 ))}
