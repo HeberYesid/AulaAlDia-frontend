@@ -315,11 +315,12 @@ body.sidebar-collapsed .app-body {
 }
 
 .academic-admin__form--school-year {
-  gap: clamp(1.1rem, 0.95rem + 0.5vw, 1.6rem);
+  gap: clamp(1.3rem, 1.05rem + 0.65vw, 1.95rem);
+  padding-top: clamp(0.25rem, 0.15rem + 0.35vw, 0.55rem);
 }
 
 .academic-admin__form--school-year .academic-admin__grid-2 {
-  row-gap: clamp(1rem, 0.85rem + 0.45vw, 1.4rem);
+  row-gap: clamp(1.15rem, 0.95rem + 0.55vw, 1.65rem);
 }
 
 .academic-admin__grid-2,
