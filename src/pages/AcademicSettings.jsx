@@ -192,7 +192,7 @@ export default function AcademicSettings() {
           </div>
         </div>
 
-        <form onSubmit={handleCreateSchoolYear} className="academic-admin__form">
+        <form onSubmit={handleCreateSchoolYear} className="academic-admin__form academic-admin__form--school-year">
           <div className="academic-admin__grid-2">
             <div>
               <label htmlFor="school-year-start">Fecha inicio</label>
@@ -261,7 +261,7 @@ export default function AcademicSettings() {
             <span>Crear como año escolar activo</span>
           </label>
 
-          <button type="submit" className="btn" disabled={savingSchoolYear}>
+          <button type="submit" className="btn academic-admin__submit" disabled={savingSchoolYear}>
             {savingSchoolYear ? 'Creando...' : 'Crear año escolar'}
           </button>
         </form>

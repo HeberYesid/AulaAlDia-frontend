@@ -314,6 +314,14 @@ body.sidebar-collapsed .app-body {
   gap: var(--space-md);
 }
 
+.academic-admin__form--school-year {
+  gap: clamp(1.1rem, 0.95rem + 0.5vw, 1.6rem);
+}
+
+.academic-admin__form--school-year .academic-admin__grid-2 {
+  row-gap: clamp(1rem, 0.85rem + 0.45vw, 1.4rem);
+}
+
 .academic-admin__grid-2,
 .academic-admin__grid-3 {
   display: grid;
@@ -331,7 +339,26 @@ body.sidebar-collapsed .app-body {
 .academic-admin__checkbox {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--space-sm);
+  margin-bottom: 0;
+}
+
+.academic-admin__checkbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.academic-admin__checkbox span {
+  line-height: 1.4;
+}
+
+.academic-admin__form--school-year .academic-admin__submit {
+  justify-self: end;
+  width: auto;
+  min-width: clamp(12.5rem, 11.5rem + 2vw, 14.5rem);
 }
 
 .academic-admin__section-header,
