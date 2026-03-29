@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../api/axios";
+import { getApiErrorMessage } from "../utils/apiErrorMessage";
 
 export default function HierarchicalSelector({ onSelectSubject }) {
   const [gradeLevels, setGradeLevels] = useState([]);
@@ -30,7 +31,12 @@ export default function HierarchicalSelector({ onSelectSubject }) {
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Error al cargar datos.");
+      setError(
+        getApiErrorMessage(err, {
+          action: 'cargar grados y materias',
+          fallback: 'No se pudieron cargar los grados y materias. Revisa tu acceso a la institucion e intentalo nuevamente.',
+        })
+      );
     } finally {
       setLoading(false);
     }
@@ -47,7 +53,12 @@ export default function HierarchicalSelector({ onSelectSubject }) {
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Error al cargar cursos.");
+      setError(
+        getApiErrorMessage(err, {
+          action: 'cargar los cursos del grado seleccionado',
+          fallback: 'No se pudieron cargar los cursos del grado seleccionado. Intentalo nuevamente.',
+        })
+      );
     } finally {
       setLoading(false);
     }

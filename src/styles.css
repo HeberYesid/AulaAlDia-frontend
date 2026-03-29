@@ -1627,6 +1627,17 @@ form {
 
 .admin-dashboard__table {
   flex: 1;
+  overflow-x: hidden;
+}
+
+.admin-dashboard__table .table {
+  table-layout: fixed;
+}
+
+.admin-dashboard__table .table th,
+.admin-dashboard__table .table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .admin-dashboard__muted {

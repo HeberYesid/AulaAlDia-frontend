@@ -3,6 +3,7 @@ import { useAuth } from '../state/AuthContext'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useStudentSearch } from '../hooks/useStudentSearch'
 import { useObservations, CATEGORIES, CATEGORY_MAP, INITIAL_FORM } from '../hooks/useObservations'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function Observer() {
   const { user } = useAuth()
@@ -94,9 +95,12 @@ export default function Observer() {
       const data = err?.response?.data
       if (data) {
         const messages = Object.values(data).flat().join(' ')
-        setFormError(messages || 'Error al crear la observación.')
+        setFormError(messages || getApiErrorMessage(err, {
+          action: 'crear la observacion',
+          fallback: 'No se pudo crear la observacion. Verifica estudiante, categoria y descripcion.',
+        }))
       } else {
-        setFormError('Error de conexión.')
+        setFormError('No se pudo crear la observacion porque no hay conexion con el servidor. Intentalo de nuevo.')
       }
     } finally {
       setSubmitting(false)

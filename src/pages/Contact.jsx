@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { sendContactMessage } from '../api/contact'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import '../styles.css'
 
 export default function Contact() {
@@ -126,27 +127,10 @@ export default function Contact() {
       }
     } catch (error) {
       console.error('Error al enviar mensaje:', error)
-      
-      // Extraer mensaje de error específico del backend
-      let errorMessage = 'Hubo un error al enviar el mensaje. Por favor intenta de nuevo.'
-      
-      if (error.response?.data) {
-        const errorData = error.response.data
-        
-        // Si hay errores de validación de campos
-        if (errorData.details) {
-          const firstError = Object.values(errorData.details)[0]
-          errorMessage = Array.isArray(firstError) ? firstError[0] : firstError
-        }
-        // Si hay un mensaje de error general
-        else if (errorData.error) {
-          errorMessage = errorData.error
-        }
-        // Si hay mensaje directo
-        else if (errorData.message) {
-          errorMessage = errorData.message
-        }
-      }
+      const errorMessage = getApiErrorMessage(error, {
+        action: 'enviar tu mensaje de contacto',
+        fallback: 'No se pudo enviar tu mensaje de contacto. Revisa los campos del formulario e intentalo nuevamente.',
+      })
       
       setStatus({
         type: 'error',
@@ -171,7 +155,7 @@ export default function Contact() {
     setTurnstileToken('')
     setStatus({
       type: 'error',
-      message: 'Error en la verificación de seguridad. Por favor intenta de nuevo.',
+      message: 'No se pudo completar la verificacion de seguridad. Recarga el captcha e intentalo nuevamente.',
     })
   }
 

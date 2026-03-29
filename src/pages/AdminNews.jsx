@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function AdminNews() {
   const [activeTab, setActiveTab] = useState('announcements') // 'announcements' | 'events'
@@ -41,7 +42,10 @@ export default function AdminNews() {
       }
     } catch (err) {
       console.error(err)
-      setError('Error al cargar la información.')
+      setError(getApiErrorMessage(err, {
+        action: 'cargar anuncios y eventos institucionales',
+        fallback: 'No se pudo cargar la informacion de anuncios y eventos. Intentalo nuevamente.',
+      }))
     } finally {
       setLoading(false)
     }
@@ -110,8 +114,12 @@ export default function AdminNews() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error(err)
-      const detail = err.response?.data?.detail || err.message
-      setError(`Ocurrió un error al guardar: ${detail}`)
+      setError(getApiErrorMessage(err, {
+        action: editingItem ? 'actualizar el registro' : 'crear el registro',
+        fallback: editingItem
+          ? 'No se pudo actualizar el registro. Verifica titulo, contenido y fechas.'
+          : 'No se pudo crear el registro. Verifica titulo, contenido y fechas.',
+      }))
     }
   }
 
@@ -126,7 +134,10 @@ export default function AdminNews() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error(err)
-      setError("Error al eliminar el registro.")
+      setError(getApiErrorMessage(err, {
+        action: 'eliminar el registro',
+        fallback: 'No se pudo eliminar el registro. Verifica permisos e intentalo nuevamente.',
+      }))
     }
   }
 

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function ForgotPassword() {
   const captchaRef = useRef(null)
@@ -32,7 +33,10 @@ export default function ForgotPassword() {
     } catch (err) {
       console.error('Error:', err)
       const turnstileError = err.response?.data?.turnstile_token
-      setError(turnstileError || err.response?.data?.detail || 'Error al enviar el código')
+      setError(turnstileError || getApiErrorMessage(err, {
+        action: 'enviar el codigo de recuperacion',
+        fallback: 'No se pudo enviar el codigo de recuperacion. Verifica el correo e intentalo nuevamente.',
+      }))
       setTurnstileToken('')
       captchaRef.current?.reset?.()
     } finally {

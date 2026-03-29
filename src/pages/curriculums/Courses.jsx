@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../../api/axios";
+import { getApiErrorMessage } from '../../utils/apiErrorMessage';
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -41,7 +42,10 @@ export default function Courses() {
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Error al cargar los cursos. Intente nuevamente.");
+      setError(getApiErrorMessage(err, {
+        action: 'cargar los cursos',
+        fallback: 'No se pudieron cargar los cursos. Verifica tu institucion activa e intentalo nuevamente.',
+      }));
     } finally {
       setLoading(false);
     }
@@ -100,7 +104,12 @@ export default function Courses() {
       fetchData();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.detail || "Ocurrió un error al guardar el curso.");
+      setError(getApiErrorMessage(err, {
+        action: editingId ? 'actualizar el curso' : 'crear el curso',
+        fallback: editingId
+          ? 'No se pudo actualizar el curso. Verifica grado, seccion y nombre para mostrar.'
+          : 'No se pudo crear el curso. Verifica grado, seccion y nombre para mostrar.',
+      }));
     } finally {
       setSubmitting(false);
     }

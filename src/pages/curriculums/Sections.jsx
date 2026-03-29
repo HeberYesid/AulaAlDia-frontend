@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../../api/axios";
+import { getApiErrorMessage } from '../../utils/apiErrorMessage';
 
 export default function Sections() {
   const [sections, setSections] = useState([]);
@@ -23,7 +24,10 @@ export default function Sections() {
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Error al cargar las secciones. Intente nuevamente.");
+      setError(getApiErrorMessage(err, {
+        action: 'cargar las secciones',
+        fallback: 'No se pudieron cargar las secciones. Verifica tu institucion activa e intentalo nuevamente.',
+      }));
     } finally {
       setLoading(false);
     }
@@ -60,10 +64,12 @@ export default function Sections() {
       fetchSections();
     } catch (err) {
       console.error(err);
-      alert(
-        err.response?.data?.detail ||
-          "Ocurrió un error al guardar la sección."
-      );
+      setError(getApiErrorMessage(err, {
+        action: editingId ? 'actualizar la seccion' : 'crear la seccion',
+        fallback: editingId
+          ? 'No se pudo actualizar la seccion. Verifica el nombre e intentalo nuevamente.'
+          : 'No se pudo crear la seccion. Verifica el nombre e intentalo nuevamente.',
+      }));
     } finally {
       setSubmitting(false);
     }

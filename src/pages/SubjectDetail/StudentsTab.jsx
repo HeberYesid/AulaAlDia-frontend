@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { api } from '../../api/axios'
 import CSVUpload from '../../components/CSVUpload'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 export default function StudentsTab({ user, id, enrollments, loadAll, setError, setSuccess }) {
   const [email, setEmail] = useState('')
@@ -59,10 +60,12 @@ export default function StudentsTab({ user, id, enrollments, loadAll, setError, 
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      const errorMsg = err.response?.data?.detail ||
-        err.response?.data?.student_email?.[0] ||
+      const errorMsg = err.response?.data?.student_email?.[0] ||
         err.response?.data?.non_field_errors?.[0] ||
-        'No se pudo inscribir el estudiante. Verifica permisos y correo.'
+        getApiErrorMessage(err, {
+          action: 'inscribir al estudiante en la materia',
+          fallback: 'No se pudo inscribir al estudiante. Verifica el correo, la materia y tus permisos.',
+        })
       setError(errorMsg)
     }
   }

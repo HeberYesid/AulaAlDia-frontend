@@ -1,6 +1,7 @@
 import { Fragment, useMemo, useState } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 const PLAN_OPTIONS = [
   { value: 'SCHOOL', label: 'School' },
@@ -10,7 +11,10 @@ const PLAN_OPTIONS = [
 function normalizeApiErrors(error) {
   const payload = error?.response?.data
   if (!payload || typeof payload !== 'object') {
-    return 'No se pudo procesar la solicitud.'
+    return getApiErrorMessage(error, {
+      action: 'procesar la solicitud comercial',
+      fallback: 'No se pudo procesar la solicitud comercial. Intentalo nuevamente.',
+    })
   }
 
   if (payload.detail && typeof payload.detail === 'string') {
