@@ -212,20 +212,25 @@ export default function AdminDashboard() {
 
     try {
       if (nextSubjects.length > 0) {
-        const dashboards = await Promise.allSettled(
-          nextSubjects.map((subject) => api.get(`/api/v1/courses/subjects/${subject.id}/dashboard/`))
+        const subjectIds = nextSubjects.map((subject) => subject.id).join(',')
+        const { data } = await api.get('/api/v1/courses/subjects/dashboard-batch/', {
+          params: { ids: subjectIds },
+        })
+
+        const dashboards = Array.isArray(data?.results) ? data.results : []
+        const dashboardsBySubjectId = new Map(
+          dashboards.map((item) => [item.subject_id, item])
         )
 
-        const nextSubjectStats = dashboards
-          .map((result, index) => {
-            if (result.status !== 'fulfilled') return null
-            const raw = result.value.data || {}
+        const nextSubjectStats = nextSubjects
+          .map((subject) => {
+            const raw = dashboardsBySubjectId.get(subject.id) || {}
             const aggregates = raw.aggregates || {}
             const avgGrade = Number(aggregates.avg_grade ?? aggregates.avg_score ?? 0)
 
             return {
-              subjectId: nextSubjects[index].id,
-              subjectName: nextSubjects[index].name,
+              subjectId: subject.id,
+              subjectName: subject.name,
               avgGrade,
             }
           })
@@ -233,8 +238,7 @@ export default function AdminDashboard() {
 
         setSubjectStats(nextSubjectStats)
 
-        const hasFailures = dashboards.some((item) => item.status === 'rejected')
-        if (hasFailures) {
+        if (dashboards.length < nextSubjects.length) {
           nextBlockErrors.performance = 'Algunas métricas por materia no estuvieron disponibles.'
         }
       } else {
