@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../../api/axios'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
+import { unwrapListData } from '../../utils/pagination'
 
 export default function Curriculums() {
   const [curriculums, setCurriculums] = useState([])
@@ -18,7 +19,7 @@ export default function Curriculums() {
     try {
       setLoading(true)
       const res = await api.get('/api/v1/courses/curriculums/')
-      setCurriculums(res.data)
+      setCurriculums(unwrapListData(res.data))
       setError(null)
     } catch (err) {
       console.error(err)

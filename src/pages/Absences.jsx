@@ -3,6 +3,7 @@ import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { unwrapListData } from '../utils/pagination'
 
 const INITIAL_FORM = {
   student_id: '',
@@ -42,7 +43,7 @@ export default function Absences() {
     setLoading(true)
     try {
       const res = await api.get('/api/v1/courses/absences/')
-      setAbsences(res.data)
+      setAbsences(unwrapListData(res.data))
     } catch (err) {
       console.error('Error loading absences:', err)
     } finally {
@@ -53,7 +54,7 @@ export default function Absences() {
   const loadSubjects = async () => {
     try {
       const res = await api.get('/api/v1/courses/subjects/')
-      setSubjects(res.data)
+      setSubjects(unwrapListData(res.data))
     } catch (err) {
       console.error('Error loading subjects:', err)
     }
@@ -68,7 +69,7 @@ export default function Absences() {
     setLoadingStudents(true)
     try {
       const res = await api.get(`/api/v1/courses/subjects/${subjectId}/enrollments/`)
-      const enrollments = Array.isArray(res.data) ? res.data : []
+      const enrollments = unwrapListData(res.data)
       const students = enrollments
         .map((enrollment) => enrollment.student)
         .filter(Boolean)

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../../api/axios'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
+import { unwrapListData } from '../../utils/pagination'
 
 export default function GradeLevels() {
   const [grades, setGrades] = useState([])
@@ -18,7 +19,7 @@ export default function GradeLevels() {
     try {
       setLoading(true)
       const res = await api.get('/api/v1/courses/grade-levels/')
-      setGrades(res.data)
+      setGrades(unwrapListData(res.data))
       setError(null)
     } catch (err) {
       console.error(err)

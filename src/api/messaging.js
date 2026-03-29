@@ -1,8 +1,9 @@
 import { api } from './axios';
+import { unwrapListData } from '../utils/pagination';
 
 export const getConversations = async () => {
     const { data } = await api.get('/api/v1/messaging/conversations/');
-    return data;
+    return unwrapListData(data);
 };
 
 export const getConversation = async (id) => {
@@ -35,7 +36,7 @@ export const getMessages = async (conversationId) => {
     // Let's assume we can filter by conversation in the MessageViewSet.
     // I'll update the backend view to support filtering.
     const { data } = await api.get(`/api/v1/messaging/messages/?conversation=${conversationId}`);
-    return data;
+    return unwrapListData(data);
 };
 
 export const sendMessage = async (conversationId, content) => {
@@ -45,5 +46,5 @@ export const sendMessage = async (conversationId, content) => {
 
 export const searchUsers = async (query) => {
     const { data } = await api.get(`/api/v1/messaging/users/?search=${query}`);
-    return data;
+    return unwrapListData(data);
 };

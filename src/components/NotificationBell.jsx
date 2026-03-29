@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { api } from '../api/axios'
+import { unwrapListData } from '../utils/pagination'
 
 export default function NotificationBell({ sidebarMode = false, collapsed = false }) {
   const [notifications, setNotifications] = useState([])
@@ -28,7 +29,8 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
     setLoading(true)
     try {
       const response = await api.get('/api/v1/courses/notifications/')
-      setNotifications(response.data.slice(0, 10)) // Only show last 10
+      const items = unwrapListData(response.data)
+      setNotifications(items.slice(0, 10)) // Only show last 10
     } catch (err) {
       console.error('Error loading notifications:', err)
     } finally {

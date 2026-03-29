@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { api } from '../api/axios'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { unwrapListData } from '../utils/pagination'
 
 export default function NotificationsPage() {
   const [items, setItems] = useState([])
@@ -13,10 +14,11 @@ export default function NotificationsPage() {
     try {
       // Usar la misma API que NotificationBell
       const response = await api.get('/api/v1/courses/notifications/')
-      setItems(response.data)
+      const nextItems = unwrapListData(response.data)
+      setItems(nextItems)
       
       // Contar las no leídas
-      const unreadCount = response.data.filter(n => !n.is_read).length
+      const unreadCount = nextItems.filter((n) => !n.is_read).length
       setUnread(unreadCount)
     } catch (err) {
       console.error('Error loading notifications:', err)

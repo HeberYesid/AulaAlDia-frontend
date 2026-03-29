@@ -9,6 +9,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { unwrapListData } from '../utils/pagination'
 
 export default function Dashboard() {
   const {
@@ -44,7 +45,7 @@ export default function Dashboard() {
     setError('')
     try {
       const { data } = await api.get('/api/v1/courses/subjects/')
-      setSubjects(data)
+      setSubjects(unwrapListData(data))
       setTenantAccessDenied(false)
     } catch (err) {
       if (err.response?.status === 403) {
