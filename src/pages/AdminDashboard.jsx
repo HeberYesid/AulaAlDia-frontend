@@ -4,6 +4,7 @@ import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 function toDate(value) {
   if (!value) return null
@@ -203,7 +204,10 @@ export default function AdminDashboard() {
         setAcademicSettings(null)
       }
     } catch (err) {
-      setError('No se pudo cargar el panel de administración. Intenta nuevamente.')
+      setError(getApiErrorMessage(err, {
+        action: 'cargar el panel de administracion',
+        fallback: 'No se pudo cargar el panel de administracion. Verifica tu acceso e intentalo nuevamente.',
+      }))
     }
 
     try {
@@ -217,17 +221,11 @@ export default function AdminDashboard() {
             if (result.status !== 'fulfilled') return null
             const raw = result.value.data || {}
             const aggregates = raw.aggregates || {}
-            const submitted = Number(aggregates.total_submitted_results || 0)
-            const graded = Number(aggregates.total_graded_results || 0)
-            const avgScore = Number(aggregates.avg_score || 0)
-            const avgGrade = Number(aggregates.avg_grade || 0)
+            const avgGrade = Number(aggregates.avg_grade ?? aggregates.avg_score ?? 0)
 
             return {
               subjectId: nextSubjects[index].id,
               subjectName: nextSubjects[index].name,
-              submitted,
-              graded,
-              avgScore,
               avgGrade,
             }
           })
@@ -293,7 +291,7 @@ export default function AdminDashboard() {
 
   const performanceList = useMemo(() => {
     return [...subjectStats]
-      .sort((a, b) => b.avgScore - a.avgScore)
+      .sort((a, b) => b.avgGrade - a.avgGrade)
       .slice(0, 5)
   }, [subjectStats])
 
@@ -392,13 +390,11 @@ export default function AdminDashboard() {
             <p className="admin-dashboard__muted">No hay métricas disponibles aún.</p>
           ) : (
             <div className="data-table admin-dashboard__table">
-              <table className="table mobile-card-view">
+              <table className="table">
                 <thead>
                   <tr>
                     <th scope="col">Materia</th>
-                    <th scope="col">Prom. puntaje</th>
-                    <th scope="col">Entregados</th>
-                    <th scope="col">Calificados</th>
+                    <th scope="col">Prom. calificación</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -407,9 +403,7 @@ export default function AdminDashboard() {
                       <td data-label="Materia">
                         <strong>{item.subjectName}</strong>
                       </td>
-                      <td data-label="Prom. puntaje">{item.avgScore.toFixed(2)}</td>
-                      <td data-label="Entregados">{item.submitted}</td>
-                      <td data-label="Calificados">{item.graded}</td>
+                      <td data-label="Prom. calificación">{item.avgGrade.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
