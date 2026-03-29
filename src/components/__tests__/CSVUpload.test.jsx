@@ -91,7 +91,7 @@ describe('CSVUpload Component', () => {
     await user.click(submitBtn)
     
     await waitFor(() => {
-      expect(screen.getByText('Error al cargar CSV')).toBeInTheDocument()
+      expect(screen.getByText('No se pudo cargar el archivo CSV porque no hay conexion con el servidor. Revisa tu internet e intentalo de nuevo.')).toBeInTheDocument()
     })
   })
 })

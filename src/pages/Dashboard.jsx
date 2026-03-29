@@ -8,6 +8,7 @@ import WelcomePanel from '../components/WelcomePanel'
 import ConfirmDialog from '../components/ConfirmDialog'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function Dashboard() {
   const {
@@ -51,7 +52,10 @@ export default function Dashboard() {
         setSubjects([])
         return
       }
-      setError(`No se pudieron cargar las materias: ${err.response?.data?.detail || err.message}`)
+      setError(getApiErrorMessage(err, {
+        action: 'cargar las materias del panel',
+        fallback: 'No se pudieron cargar las materias del panel. Verifica tu institucion activa e intentalo nuevamente.',
+      }))
     } finally {
       setLoading(false)
     }
@@ -69,7 +73,10 @@ export default function Dashboard() {
       await switchTenant(selectedTenantId)
       setTenantAccessDenied(false)
     } catch (err) {
-      setError(`No se pudo activar la institución seleccionada: ${err.response?.data?.detail || err.message}`)
+      setError(getApiErrorMessage(err, {
+        action: 'activar la institucion seleccionada',
+        fallback: 'No se pudo activar la institucion seleccionada. Verifica que pertenezcas a esa institucion.',
+      }))
       setLoading(false)
     }
   }
@@ -167,7 +174,10 @@ export default function Dashboard() {
           setTimeout(() => setSuccess(''), 3000)
         } catch (err) {
           console.error('Error deleting subject:', err)
-          setError(`No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
+          setError(getApiErrorMessage(err, {
+            action: `eliminar la materia ${subject.name}`,
+            fallback: 'No se pudo eliminar la materia. Puede tener informacion relacionada o permisos restringidos.',
+          }))
         }
       },
     })

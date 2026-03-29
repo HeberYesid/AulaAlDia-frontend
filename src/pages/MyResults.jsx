@@ -1,6 +1,7 @@
-﻿import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/axios'
 import StatusBadge from '../components/StatusBadge'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 const DEFAULT_PASSING_GRADE = 3
 
@@ -102,7 +103,10 @@ export default function MyResults() {
       document.body.removeChild(link)
     } catch (err) {
       console.error('Error al exportar:', err)
-      setExportError('Error al exportar los datos. Inténtalo nuevamente.')
+      setExportError(getApiErrorMessage(err, {
+        action: 'exportar tus resultados a CSV',
+        fallback: 'No se pudo exportar tus resultados a CSV. Intentalo nuevamente en unos minutos.',
+      }))
     }
   }
 

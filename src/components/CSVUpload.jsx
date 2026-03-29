@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../api/axios'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function CSVUpload({ label, uploadUrl, onComplete }) {
   const [file, setFile] = useState(null)
@@ -20,7 +21,10 @@ export default function CSVUpload({ label, uploadUrl, onComplete }) {
       setMessage('Carga realizada con éxito')
       onComplete && onComplete(data)
     } catch (err) {
-      setMessage('Error al cargar CSV')
+      setMessage(getApiErrorMessage(err, {
+        action: 'cargar el archivo CSV',
+        fallback: 'No se pudo cargar el archivo CSV. Verifica el formato de columnas y vuelve a intentarlo.',
+      }))
     } finally {
       setLoading(false)
     }

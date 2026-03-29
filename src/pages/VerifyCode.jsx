@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api } from '../api/axios'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function VerifyCode() {
   const { user } = useAuth()
@@ -71,9 +72,11 @@ export default function VerifyCode() {
       }, 2000)
       
     } catch (err) {
-      const errorMessage = err.response?.data?.non_field_errors?.[0] 
-        || err.response?.data?.detail 
-        || 'Error al verificar el código'
+      const errorMessage = err.response?.data?.non_field_errors?.[0]
+        || getApiErrorMessage(err, {
+          action: 'verificar el codigo',
+          fallback: 'No se pudo verificar el codigo. Revisa el correo y que el codigo tenga 6 digitos.',
+        })
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -99,10 +102,12 @@ export default function VerifyCode() {
       setCode('') // Limpiar el código anterior
       
     } catch (err) {
-      const errorMessage = err.response?.data?.non_field_errors?.[0] 
-        || err.response?.data?.detail 
+      const errorMessage = err.response?.data?.non_field_errors?.[0]
         || err.response?.data?.email?.[0]
-        || 'Error al reenviar el código'
+        || getApiErrorMessage(err, {
+          action: 'reenviar el codigo de verificacion',
+          fallback: 'No se pudo reenviar el codigo de verificacion. Verifica el correo e intentalo nuevamente.',
+        })
       setError(errorMessage)
     } finally {
       setResendLoading(false)

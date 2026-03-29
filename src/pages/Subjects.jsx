@@ -4,16 +4,13 @@ import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 import HierarchicalSelector from '../components/HierarchicalSelector'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 function normalizeApiError(error, fallback) {
-  const detail = error?.response?.data?.detail
-  if (typeof detail === 'string' && detail.trim()) return detail
-
-  const firstEntry = Object.values(error?.response?.data || {})[0]
-  if (Array.isArray(firstEntry) && firstEntry[0]) return firstEntry[0]
-  if (typeof firstEntry === 'string' && firstEntry.trim()) return firstEntry
-
-  return fallback
+  return getApiErrorMessage(error, {
+    action: 'completar la accion en materias',
+    fallback,
+  })
 }
 
 export default function Subjects() {
@@ -43,7 +40,10 @@ export default function Subjects() {
       load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo crear la materia.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo crear la materia. Verifica el nombre y tu institucion activa.'
+      ))
     }
   }
 
@@ -57,7 +57,11 @@ export default function Subjects() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error deleting subject:', err)
-      setError(`No se pudo eliminar la materia: ${err.response?.data?.detail || err.message}`)
+      const errorMessage = getApiErrorMessage(err, {
+        action: `eliminar la materia ${subject.name}`,
+        fallback: 'No se pudo eliminar la materia. Puede tener registros relacionados o permisos restringidos.',
+      })
+      setError(errorMessage)
     }
   }
 

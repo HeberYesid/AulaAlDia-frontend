@@ -6,6 +6,7 @@ import StatusBadge from '../../components/StatusBadge'
 import StudentsTab from './StudentsTab'
 import ExercisesTab from './ExercisesTab'
 import ResultsTab from './ResultsTab'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const DEFAULT_GRADE_SETTINGS = {
   min_grade: '1.00',
@@ -76,7 +77,7 @@ export default function SubjectDetail() {
         setAcademicPeriods(results[5].data?.results || results[5].data || [])
       }
     } catch {
-      setError('No se pudo cargar la información de la materia.')
+      setError('No se pudo cargar la informacion completa de la materia. Revisa tu acceso a esta institucion e intentalo nuevamente.')
     } finally {
       setLoading(false)
     }
@@ -135,7 +136,10 @@ export default function SubjectDetail() {
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error al subir la solución')
+      setError(getApiErrorMessage(err, {
+        action: 'subir tu solucion del ejercicio',
+        fallback: 'No se pudo subir la solucion del ejercicio. Verifica el archivo, el tamano y el estado del periodo academico.',
+      }))
     }
   }
 

@@ -5,6 +5,7 @@ import {
   updateTenantUserStatus,
   deleteTenantUser,
 } from '../api/users'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 const DEFAULT_FORM = {
   email: '',
@@ -14,16 +15,11 @@ const DEFAULT_FORM = {
   role: 'TEACHER',
 }
 
-function normalizeApiError(error, fallbackMessage) {
-  const detail = error?.response?.data?.detail
-  if (typeof detail === 'string' && detail.trim()) return detail
-
-  const data = error?.response?.data || {}
-  const firstEntry = Object.values(data)[0]
-  if (Array.isArray(firstEntry) && firstEntry[0]) return firstEntry[0]
-  if (typeof firstEntry === 'string' && firstEntry.trim()) return firstEntry
-
-  return fallbackMessage
+function normalizeApiError(error, fallbackMessage, action = 'completar esta accion') {
+  return getApiErrorMessage(error, {
+    action,
+    fallback: fallbackMessage,
+  })
 }
 
 export function useTenantUsers() {
@@ -47,7 +43,11 @@ export function useTenantUsers() {
       const nextUsers = await listTenantUsers(filters)
       setUsers(nextUsers)
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo cargar el listado de usuarios.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo cargar el listado de usuarios de la institucion.',
+        'cargar el listado de usuarios'
+      ))
       setUsers([])
     } finally {
       setLoading(false)
@@ -71,7 +71,11 @@ export function useTenantUsers() {
       setSuccess('Usuario creado correctamente. Revisa su correo para verificar la cuenta.')
       return true
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo crear el usuario.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo crear el usuario. Verifica correo, rol y datos obligatorios.',
+        'crear el usuario'
+      ))
       return false
     } finally {
       setCreating(false)
@@ -98,7 +102,11 @@ export function useTenantUsers() {
       setSuccess(successMessage)
       return true
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo actualizar el estado del usuario.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo actualizar el estado del usuario. Puede que no tengas permisos o que el usuario no este disponible.',
+        'actualizar el estado del usuario'
+      ))
       return false
     } finally {
       setMutatingUserId(null)
@@ -118,7 +126,11 @@ export function useTenantUsers() {
       setSuccess('Usuario eliminado correctamente.')
       return true
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo eliminar el usuario.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo eliminar el usuario. Verifica que no sea una cuenta protegida o en uso.',
+        'eliminar el usuario'
+      ))
       return false
     } finally {
       setMutatingUserId(null)

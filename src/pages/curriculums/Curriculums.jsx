@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../../api/axios'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 export default function Curriculums() {
   const [curriculums, setCurriculums] = useState([])
@@ -21,7 +22,10 @@ export default function Curriculums() {
       setError(null)
     } catch (err) {
       console.error(err)
-      setError('Error al cargar las mallas curriculares.')
+      setError(getApiErrorMessage(err, {
+        action: 'cargar las mallas curriculares',
+        fallback: 'No se pudieron cargar las mallas curriculares. Verifica tu institucion activa e intentalo nuevamente.',
+      }))
     } finally {
       setLoading(false)
     }
@@ -36,7 +40,10 @@ export default function Curriculums() {
       fetchCurriculums()
     } catch (err) {
       console.error(err)
-      alert('Error al guardar la malla.')
+      setError(getApiErrorMessage(err, {
+        action: 'guardar la malla curricular',
+        fallback: 'No se pudo guardar la malla curricular. Revisa el nombre y el alcance seleccionado.',
+      }))
     }
   }
 
@@ -52,7 +59,10 @@ export default function Curriculums() {
       fetchCurriculums();
     } catch (err) {
       console.error(err);
-      alert('Error al clonar la malla.');
+      setError(getApiErrorMessage(err, {
+        action: 'clonar la malla para el grado indicado',
+        fallback: 'No se pudo clonar la malla. Verifica que el ID del grado exista y pertenezca a tu institucion.',
+      }));
     }
   }
 
@@ -65,7 +75,10 @@ export default function Curriculums() {
       fetchCurriculums();
     } catch (err) {
       console.error(err);
-      alert('Error al desvincular la malla.');
+      setError(getApiErrorMessage(err, {
+        action: 'desvincular la malla curricular',
+        fallback: 'No se pudo desvincular la malla curricular. Intentalo nuevamente.',
+      }));
     }
   }
 

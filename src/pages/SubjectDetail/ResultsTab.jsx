@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { api } from '../../api/axios'
 import StatusBadge from '../../components/StatusBadge'
 import CSVUpload from '../../components/CSVUpload'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
@@ -110,7 +111,7 @@ export default function ResultsTab({
       link.parentNode.removeChild(link)
       window.URL.revokeObjectURL(url)
     } catch {
-      setError('No se pudo exportar el CSV. Verifica permisos.')
+      setError('No se pudo exportar el CSV de resultados. Verifica permisos y que la materia tenga informacion disponible.')
     } finally {
       setExporting(false)
     }
@@ -163,7 +164,10 @@ export default function ResultsTab({
       loadAll()
       setTimeout(() => setSuccess(''), 5000)
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || err.response?.data?.score?.[0] || 'No se pudo actualizar el resultado.'
+      const errorMsg = err.response?.data?.score?.[0] || getApiErrorMessage(err, {
+        action: 'actualizar el resultado del estudiante',
+        fallback: 'No se pudo actualizar el resultado. Verifica la nota, el periodo academico y tus permisos.',
+      })
       setError(errorMsg)
     }
   }
@@ -210,7 +214,10 @@ export default function ResultsTab({
       loadAll()
       setTimeout(() => setSuccess(''), 5000)
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || err.response?.data?.score?.[0] || 'No se pudo crear el resultado.'
+      const errorMsg = err.response?.data?.score?.[0] || getApiErrorMessage(err, {
+        action: 'crear el resultado del estudiante',
+        fallback: 'No se pudo crear el resultado. Verifica que el estudiante, el ejercicio y la nota sean validos.',
+      })
       setError(errorMsg)
     }
   }
@@ -230,7 +237,7 @@ export default function ResultsTab({
       })
       setNewComment(response.data.feedback)
     } catch {
-      setError('Error al generar feedback con IA. Intenta de nuevo.')
+      setError('No se pudo generar retroalimentacion con IA para este resultado. Intenta nuevamente en unos momentos.')
     } finally {
       setGeneratingAI(false)
     }
@@ -252,7 +259,7 @@ export default function ResultsTab({
       })
       setCreateComment(response.data.feedback)
     } catch {
-      setError('Error al generar feedback con IA. Intenta de nuevo.')
+      setError('No se pudo generar retroalimentacion con IA para este resultado. Intenta nuevamente en unos momentos.')
     } finally {
       setGeneratingAI(false)
     }

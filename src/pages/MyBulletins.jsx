@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import StatusBadge from '../components/StatusBadge'
 import { useAuth } from '../state/AuthContext'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function MyBulletins() {
   const [bulletins, setBulletins] = useState([])
@@ -38,11 +39,14 @@ export default function MyBulletins() {
       }
 
       if (err.message === 'Network Error') {
-        setError('No se pudo conectar con el servidor para cargar los boletines.')
+        setError('No se pudieron cargar tus boletines porque no hay conexion con el servidor. Revisa tu internet e intentalo de nuevo.')
         return
       }
 
-      setError(err.response?.data?.detail || 'No se pudieron cargar los boletines.')
+      setError(getApiErrorMessage(err, {
+        action: 'cargar tus boletines',
+        fallback: 'No se pudieron cargar tus boletines. Verifica tu institucion activa e intentalo nuevamente.',
+      }))
     } finally {
       setLoading(false)
     }
@@ -73,9 +77,12 @@ export default function MyBulletins() {
       }
 
       if (err.message === 'Network Error') {
-        setError('No se pudo conectar con el servidor para cargar el detalle del boletín.')
+        setError('No se pudo cargar el detalle del boletin porque no hay conexion con el servidor. Revisa tu internet e intentalo de nuevo.')
       } else {
-        setError(err.response?.data?.detail || 'No se pudo cargar el detalle del boletín.')
+        setError(getApiErrorMessage(err, {
+          action: 'cargar el detalle del boletin',
+          fallback: 'No se pudo cargar el detalle del boletin. Es posible que no tengas acceso a ese registro.',
+        }))
       }
       setExpandedBulletinId(null)
     } finally {

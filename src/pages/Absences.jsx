@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 const INITIAL_FORM = {
   student_id: '',
@@ -170,9 +171,12 @@ export default function Absences() {
       const data = err.response?.data
       if (data) {
         const messages = Object.values(data).flat().join(' ')
-        setFormError(messages || 'Error al registrar la falta.')
+        setFormError(messages || getApiErrorMessage(err, {
+          action: 'registrar la falta de asistencia',
+          fallback: 'No se pudo registrar la falta. Verifica estudiante, materia y fecha.',
+        }))
       } else {
-        setFormError('Error de conexión.')
+        setFormError('No se pudo registrar la falta porque no hay conexion con el servidor. Intentalo de nuevo.')
       }
     } finally {
       setSubmitting(false)

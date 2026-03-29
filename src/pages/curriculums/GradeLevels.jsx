@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../../api/axios'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 export default function GradeLevels() {
   const [grades, setGrades] = useState([])
@@ -21,7 +22,10 @@ export default function GradeLevels() {
       setError(null)
     } catch (err) {
       console.error(err)
-      setError('Error al cargar los grados.')
+      setError(getApiErrorMessage(err, {
+        action: 'cargar los grados',
+        fallback: 'No se pudieron cargar los grados. Verifica tu institucion activa e intentalo nuevamente.',
+      }))
     } finally {
       setLoading(false)
     }
@@ -36,7 +40,10 @@ export default function GradeLevels() {
       fetchGrades()
     } catch (err) {
       console.error(err)
-      alert('Error al guardar el grado.')
+      setError(getApiErrorMessage(err, {
+        action: 'guardar el grado',
+        fallback: 'No se pudo guardar el grado. Verifica el nombre y el orden ingresado.',
+      }))
     }
   }
   

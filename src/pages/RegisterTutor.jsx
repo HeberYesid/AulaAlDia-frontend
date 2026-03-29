@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api, setApiActiveTenantId } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function RegisterTutor() {
   const { user, activeTenantId } = useAuth()
@@ -73,7 +74,10 @@ export default function RegisterTutor() {
         if (ignore) return
 
         setInvitation(null)
-        setInvitationError(err.response?.data?.detail || 'No se pudo validar la invitacion.')
+        setInvitationError(getApiErrorMessage(err, {
+          action: 'validar la invitacion de acudiente',
+          fallback: 'No se pudo validar la invitacion de acudiente. Verifica el codigo e intentalo de nuevo.',
+        }))
       } finally {
         if (!ignore) {
           setIsLoadingInvitation(false)
@@ -127,7 +131,10 @@ export default function RegisterTutor() {
       })
     } catch (err) {
       const errorData = err.response?.data
-      let errorMessage = 'No se pudo registrar. Verifica los datos.'
+      let errorMessage = getApiErrorMessage(err, {
+        action: 'completar el registro de acudiente',
+        fallback: 'No se pudo completar el registro de acudiente. Revisa los datos e intentalo nuevamente.',
+      })
 
       if (errorData?.invitation_code) {
         errorMessage = errorData.invitation_code[0] || errorData.invitation_code

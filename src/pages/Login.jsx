@@ -3,6 +3,7 @@ import { useAuth } from '../state/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { setApiActiveTenantId } from '../api/axios'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 function formatRetryAfter(seconds) {
   const totalSeconds = Math.max(0, Number(seconds) || 0)
@@ -67,7 +68,10 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Google Login Error:', err)
-      const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'Error al iniciar sesión con Google'
+      const errorMessage = getApiErrorMessage(err, {
+        action: 'iniciar sesion con Google',
+        fallback: 'No se pudo iniciar sesion con Google. Verifica tu cuenta e intentalo nuevamente.',
+      })
       setError(errorMessage)
     } finally {
       setIsLoading(false)
@@ -75,7 +79,7 @@ export default function Login() {
   }
 
   const handleGoogleError = () => {
-    setError('Error al iniciar sesión con Google')
+    setError('No se pudo iniciar sesion con Google. Verifica tu cuenta e intentalo nuevamente.')
   }
 
   useEffect(() => {
@@ -125,7 +129,10 @@ export default function Login() {
       navigate(getPostLoginPath())
     } catch (err) {
       const retryAfterSeconds = Number(err.response?.data?.retry_after || 0)
-      const errorMessage = err.response?.data?.detail || 'Error al iniciar sesión'
+      const errorMessage = getApiErrorMessage(err, {
+        action: 'iniciar sesion',
+        fallback: 'No se pudo iniciar sesion. Verifica tu correo y contrasena.',
+      })
       setError(errorMessage)
 
       if (retryAfterSeconds > 0) {

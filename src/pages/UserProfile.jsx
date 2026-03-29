@@ -6,6 +6,7 @@ import { useAuth } from '../state/AuthContext'
 import { resetTour } from '../components/AppTour'
 import ThemeToggle from '../components/ThemeToggle'
 import { useTheme } from '../state/ThemeContext'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function UserProfile() {
   const { updateUser } = useAuth()
@@ -77,7 +78,10 @@ export default function UserProfile() {
       }
     } catch (err) {
       console.error('Error loading profile:', err)
-      setError('No se pudo cargar el perfil')
+      setError(getApiErrorMessage(err, {
+        action: 'cargar tu perfil',
+        fallback: 'No se pudo cargar tu perfil. Intentalo nuevamente en unos minutos.',
+      }))
     } finally {
       setLoading(false)
     }
@@ -110,7 +114,10 @@ export default function UserProfile() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error updating profile:', err)
-      setError(err.response?.data?.detail || 'No se pudo actualizar el perfil')
+      setError(getApiErrorMessage(err, {
+        action: 'actualizar tu perfil',
+        fallback: 'No se pudo actualizar tu perfil. Verifica nombre y apellido e intentalo de nuevo.',
+      }))
     }
   }
 
@@ -149,7 +156,10 @@ export default function UserProfile() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error changing password:', err)
-      setError(err.response?.data?.detail || err.response?.data?.current_password?.[0] || 'No se pudo cambiar la contraseña')
+      setError(err.response?.data?.current_password?.[0] || getApiErrorMessage(err, {
+        action: 'cambiar tu contrasena',
+        fallback: 'No se pudo cambiar tu contrasena. Verifica la contrasena actual y los requisitos de seguridad.',
+      }))
     }
   }
 
@@ -174,7 +184,10 @@ export default function UserProfile() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error updating timeout:', err)
-      setError(err.response?.data?.detail || err.response?.data?.session_timeout?.[0] || 'No se pudo actualizar el timeout')
+      setError(err.response?.data?.session_timeout?.[0] || getApiErrorMessage(err, {
+        action: 'actualizar el tiempo de sesion',
+        fallback: 'No se pudo actualizar el tiempo de sesion. Debe estar entre 5 y 120 minutos.',
+      }))
     }
   }
 
@@ -198,7 +211,10 @@ export default function UserProfile() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Error inviting tutor:', err)
-      setError(err.response?.data?.detail || err.response?.data?.email?.[0] || 'No se pudo enviar la invitacion del acudiente')
+      setError(err.response?.data?.email?.[0] || getApiErrorMessage(err, {
+        action: 'enviar la invitacion al acudiente',
+        fallback: 'No se pudo enviar la invitacion al acudiente. Verifica el correo e intentalo nuevamente.',
+      }))
     } finally {
       setIsSubmittingTutorInvite(false)
     }

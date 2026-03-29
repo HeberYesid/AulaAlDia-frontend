@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { api } from '../../api/axios'
 import ConfirmDialog from '../../components/ConfirmDialog'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
@@ -95,10 +96,12 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      const errorMsg = err.response?.data?.detail ||
-        err.response?.data?.name?.[0] ||
+      const errorMsg = err.response?.data?.name?.[0] ||
         err.response?.data?.non_field_errors?.[0] ||
-        'No se pudo crear el ejercicio.'
+        getApiErrorMessage(err, {
+          action: 'crear el ejercicio',
+          fallback: 'No se pudo crear el ejercicio. Verifica el nombre, la fecha limite y el periodo academico.',
+        })
       setError(errorMsg)
     }
   }
@@ -110,7 +113,7 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
     } catch {
-      setError('No se pudo eliminar el ejercicio.')
+      setError('No se pudo eliminar el ejercicio. Es posible que tenga resultados asociados o que no tengas permisos.')
     }
   }
 
@@ -156,10 +159,12 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      const errorMsg = err.response?.data?.detail ||
-        err.response?.data?.name?.[0] ||
+      const errorMsg = err.response?.data?.name?.[0] ||
         err.response?.data?.non_field_errors?.[0] ||
-        'No se pudo actualizar el ejercicio.'
+        getApiErrorMessage(err, {
+          action: 'actualizar el ejercicio',
+          fallback: 'No se pudo actualizar el ejercicio. Verifica los campos del formulario y vuelve a intentarlo.',
+        })
       setError(errorMsg)
     }
   }

@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api, setApiActiveTenantId } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function Register() {
   const { user } = useAuth()
@@ -73,7 +74,10 @@ export default function Register() {
       })
     } catch (err) {
       const d = err.response?.data
-      let msg = 'No se pudo registrar. Verifica los datos.'
+      let msg = getApiErrorMessage(err, {
+        action: 'completar el registro de tu cuenta',
+        fallback: 'No se pudo completar el registro de tu cuenta. Revisa los datos e intentalo nuevamente.',
+      })
       if (d?.email) {
         msg = d.email[0] ?? d.email
         if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('unique'))

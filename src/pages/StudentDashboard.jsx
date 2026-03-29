@@ -6,6 +6,7 @@ import WelcomePanel from '../components/WelcomePanel'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
 import { useAuth } from '../state/AuthContext'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function StudentDashboard() {
   const [dashboard, setDashboard] = useState(null)
@@ -42,11 +43,14 @@ export default function StudentDashboard() {
       }
 
       if (err.message === 'Network Error') {
-        setError('No se pudo conectar con el servidor para cargar el dashboard.')
+        setError('No se pudo cargar tu dashboard porque no hay conexion con el servidor. Revisa tu internet e intentalo de nuevo.')
         return
       }
 
-      setError(err.response?.data?.detail || 'No se pudo cargar el dashboard')
+      setError(getApiErrorMessage(err, {
+        action: 'cargar tu dashboard',
+        fallback: 'No se pudo cargar tu dashboard academico. Intentalo nuevamente en unos minutos.',
+      }))
     } finally {
       setLoading(false)
     }
@@ -69,7 +73,7 @@ export default function StudentDashboard() {
     return (
       <div className="container">
         <div className="card">
-          <p style={{ color: 'var(--danger)' }}>{error || 'Error al cargar dashboard'}</p>
+          <p style={{ color: 'var(--danger)' }}>{error || 'No se pudo cargar tu dashboard academico en este momento.'}</p>
         </div>
       </div>
     )

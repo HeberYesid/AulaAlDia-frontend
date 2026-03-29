@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { api } from '../api/axios'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export const DEFAULT_SETTINGS = {
   period_scheme: 'TRIMESTER',
@@ -37,15 +38,8 @@ export function toLocalDateTimeInput(value) {
   return localDate.toISOString().slice(0, 16)
 }
 
-export function normalizeApiError(error, fallback) {
-  const detail = error?.response?.data?.detail
-  if (typeof detail === 'string' && detail.trim()) return detail
-
-  const firstEntry = Object.values(error?.response?.data || {})[0]
-  if (Array.isArray(firstEntry) && firstEntry[0]) return firstEntry[0]
-  if (typeof firstEntry === 'string' && firstEntry.trim()) return firstEntry
-
-  return fallback
+export function normalizeApiError(error, fallback, action = 'completar esta accion') {
+  return getApiErrorMessage(error, { action, fallback })
 }
 
 export function createDefaultPeriod() {
@@ -125,7 +119,11 @@ export function useAcademicSettings() {
       setPeriods(Array.isArray(nextPeriods) ? nextPeriods : [])
       setSchoolYears(Array.isArray(nextSchoolYears) ? nextSchoolYears : [])
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo cargar la configuración académica.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo cargar la configuracion academica para esta institucion.',
+        'cargar la configuracion academica'
+      ))
     } finally {
       setLoading(false)
     }
@@ -155,7 +153,11 @@ export function useAcademicSettings() {
       })
       setSuccess('Configuración académica actualizada.')
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo actualizar la configuración académica.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo actualizar la configuracion academica. Revisa la escala y los rangos de notas.',
+        'actualizar la configuracion academica'
+      ))
     } finally {
       setSavingSettings(false)
     }
@@ -207,7 +209,13 @@ export function useAcademicSettings() {
       setEditingPeriodId(null)
       loadAcademicAdmin()
     } catch (err) {
-      setError(normalizeApiError(err, editingPeriodId ? 'No se pudo actualizar el periodo académico.' : 'No se pudo crear el periodo académico.'))
+      setError(normalizeApiError(
+        err,
+        editingPeriodId
+          ? 'No se pudo actualizar el periodo academico. Verifica fechas, secuencia y estado del periodo.'
+          : 'No se pudo crear el periodo academico. Verifica fechas, secuencia y estado del periodo.',
+        editingPeriodId ? 'actualizar el periodo academico' : 'crear el periodo academico'
+      ))
     } finally {
       setSavingPeriod(false)
     }
@@ -234,7 +242,11 @@ export function useAcademicSettings() {
       setSuccess(data?.detail || 'Periodo cerrado correctamente.')
       loadAcademicAdmin()
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo cerrar el periodo académico.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo cerrar el periodo academico. Verifica que no tenga validaciones pendientes.',
+        'cerrar el periodo academico'
+      ))
     }
   }
 
@@ -258,7 +270,11 @@ export function useAcademicSettings() {
       setSuccess('Año escolar creado correctamente.')
       loadAcademicAdmin()
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo crear el año escolar.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo crear el ano escolar. Verifica fechas de inicio, fin y matriculas.',
+        'crear el ano escolar'
+      ))
     } finally {
       setSavingSchoolYear(false)
     }
@@ -275,7 +291,11 @@ export function useAcademicSettings() {
       setSuccess(schoolYear.is_active ? 'Año escolar desactivado.' : 'Año escolar activado.')
       loadAcademicAdmin()
     } catch (err) {
-      setError(normalizeApiError(err, 'No se pudo actualizar el estado del año escolar.'))
+      setError(normalizeApiError(
+        err,
+        'No se pudo actualizar el estado del ano escolar. Revisa si hay periodos o cursos que impidan el cambio.',
+        'actualizar el estado del ano escolar'
+      ))
     } finally {
       setMutatingSchoolYearId(null)
     }

@@ -73,7 +73,7 @@ describe('TenantCommercialAdmin', () => {
     render(<TenantCommercialAdmin />)
 
     await user.selectOptions(
-      screen.getByLabelText(/desde mis tenants/i),
+      screen.getByLabelText(/desde mis instituciones/i),
       '11111111-1111-1111-1111-111111111111'
     )
     await user.click(screen.getByRole('button', { name: /cargar configuraci.n comercial/i }))

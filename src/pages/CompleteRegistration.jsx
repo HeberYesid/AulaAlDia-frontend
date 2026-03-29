@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api, setApiActiveTenantId } from '../api/axios'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 /**
  * Optional post-Google-auth step.
@@ -46,7 +47,10 @@ export default function CompleteRegistration() {
       navigate('/')
     } catch (err) {
       const d = err.response?.data
-      setError(d?.error || d?.detail || 'No se pudo completar el registro.')
+      setError(d?.error || d?.detail || getApiErrorMessage(err, {
+        action: 'completar el acceso restringido',
+        fallback: 'No se pudo completar el acceso restringido. Verifica el codigo de invitacion e intentalo nuevamente.',
+      }))
     } finally {
       setIsLoading(false)
     }

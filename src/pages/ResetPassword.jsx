@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { api } from '../api/axios'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
@@ -41,7 +42,10 @@ export default function ResetPassword() {
       setTimeout(() => navigate('/login'), 2000)
     } catch (err) {
       console.error('Error:', err)
-      setError(err.response?.data?.detail || 'Error al restablecer la contraseña')
+      setError(getApiErrorMessage(err, {
+        action: 'restablecer tu contrasena',
+        fallback: 'No se pudo restablecer tu contrasena. Verifica el codigo y la nueva contrasena.',
+      }))
     } finally {
       setLoading(false)
     }
