@@ -79,7 +79,7 @@ describe('TenantCommercialAdmin', () => {
     await user.click(screen.getByRole('button', { name: /cargar configuraci.n comercial/i }))
 
     expect(await screen.findByText(/configuraci.n comercial cargada/i)).toBeInTheDocument()
-    expect(screen.getByText(/tenant cargado:/i)).toBeInTheDocument()
+    expect(screen.getByText(/instituci.n cargada:/i)).toBeInTheDocument()
     expect(api.get).toHaveBeenNthCalledWith(
       1,
       '/api/v1/auth/tenants/11111111-1111-1111-1111-111111111111/commercial/'
