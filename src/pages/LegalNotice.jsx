@@ -5,7 +5,7 @@ import {
   LEGAL_LINKS,
 } from '../constants/legalLinks'
 
-export default function PrivacyPolicy() {
+export default function LegalNotice() {
   return (
     <article className="legal-page">
       <header className="legal-page__header">

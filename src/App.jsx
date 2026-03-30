@@ -4,6 +4,10 @@ import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/PublicLayout'
 import ContextualTipBanner from './components/ContextualTipBanner'
+import LegalNotice from './pages/LegalNotice'
+import TermsConditions from './pages/TermsConditions'
+import HabeasData from './pages/HabeasData'
+import Pqrs from './pages/Pqrs'
 
 class ErrorBoundary extends Component {
   state = { error: null }
@@ -47,10 +51,6 @@ const UserProfile = lazy(() => import('./pages/UserProfile'))
 const Home = lazy(() => import('./pages/Home'))
 const FAQ = lazy(() => import('./pages/FAQ'))
 const Contact = lazy(() => import('./pages/Contact'))
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
-const TermsConditions = lazy(() => import('./pages/TermsConditions'))
-const HabeasData = lazy(() => import('./pages/HabeasData'))
-const Pqrs = lazy(() => import('./pages/Pqrs'))
 const CalendarPage = lazy(() => import('./pages/Calendar'))
 const Messages = lazy(() => import('./pages/messaging/Messages'))
 const Observer = lazy(() => import('./pages/Observer'))
@@ -87,7 +87,7 @@ export default function App() {
           <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/faq" element={<PublicLayout><FAQ /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-          <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
+          <Route path="/privacy" element={<PublicLayout><LegalNotice /></PublicLayout>} />
           <Route path="/terms" element={<PublicLayout><TermsConditions /></PublicLayout>} />
           <Route path="/habeas-data" element={<PublicLayout><HabeasData /></PublicLayout>} />
           <Route path="/pqrs" element={<PublicLayout><Pqrs /></PublicLayout>} />
