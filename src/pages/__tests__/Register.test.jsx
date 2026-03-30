@@ -85,11 +85,24 @@ describe('Register Component', () => {
     await user.type(lastNameInput, 'Pérez')
     await user.type(emailInput, 'juan@example.com')
     await user.type(passwordInput, 'password123')
+    await user.click(screen.getByLabelText(/Autorizo el tratamiento de mis datos personales/i))
     
     expect(firstNameInput).toHaveValue('Juan')
     expect(lastNameInput).toHaveValue('Pérez')
     expect(emailInput).toHaveValue('juan@example.com')
     expect(passwordInput).toHaveValue('password123')
+    expect(screen.getByLabelText(/Autorizo el tratamiento de mis datos personales/i)).toBeChecked()
+  })
+
+  it('shows legal consent links in registration flow', () => {
+    window.history.pushState({}, '', `/register?tenant_id=${TENANT_ID}`)
+
+    renderWithProviders(<Register />)
+
+    expect(screen.getByRole('link', { name: /Politica de Privacidad/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Terminos y Condiciones/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Politica de Habeas Data/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /canal PQRS/i })).toBeInTheDocument()
   })
 
   it('shows form for student registration only when tenant_id is present', () => {

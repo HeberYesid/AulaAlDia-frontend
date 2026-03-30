@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import PublicLayout from '../PublicLayout';
 
 vi.mock('../PublicNavBar', () => ({
@@ -9,9 +10,11 @@ vi.mock('../PublicNavBar', () => ({
 describe('PublicLayout component', () => {
     it('renders PublicNavBar and children', () => {
         render(
-            <PublicLayout>
-                <div data-testid="child-element">Test Content</div>
-            </PublicLayout>
+            <MemoryRouter>
+                <PublicLayout>
+                    <div data-testid="child-element">Test Content</div>
+                </PublicLayout>
+            </MemoryRouter>
         );
         
         expect(screen.getByTestId('public-nav-bar')).toBeTruthy();

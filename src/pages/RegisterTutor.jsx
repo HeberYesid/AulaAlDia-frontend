@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api, setApiActiveTenantId } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import LegalConsentField from '../components/LegalConsentField'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function RegisterTutor() {
@@ -29,6 +30,7 @@ export default function RegisterTutor() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [legalAcceptance, setLegalAcceptance] = useState(false)
   const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -107,6 +109,11 @@ export default function RegisterTutor() {
       return
     }
 
+    if (!legalAcceptance) {
+      setError('Debes aceptar el tratamiento de datos y los terminos legales para continuar.')
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('Las contrasenas no coinciden. Por favor verifica.')
       return
@@ -121,6 +128,7 @@ export default function RegisterTutor() {
         last_name: lastName,
         invitation_code: invitationCode,
         turnstile_token: turnstileToken,
+        legal_acceptance: legalAcceptance,
       })
 
       navigate('/verify-code', {
@@ -332,7 +340,15 @@ export default function RegisterTutor() {
             />
           </div>
 
-          <button className="btn auth-btn" type="submit" disabled={isLoading || isLoadingInvitation || Boolean(invitationError) || !isCaptchaReady || !turnstileToken || !invitationCode}>
+          <LegalConsentField
+            id="register-tutor-legal-consent"
+            checked={legalAcceptance}
+            onChange={setLegalAcceptance}
+            disabled={isLoading}
+            contextLabel="Autorizo el tratamiento de mis datos personales para habilitar mi acceso de acudiente invitado."
+          />
+
+          <button className="btn auth-btn" type="submit" disabled={isLoading || isLoadingInvitation || Boolean(invitationError) || !isCaptchaReady || !turnstileToken || !invitationCode || !legalAcceptance}>
             {isLoading ? 'Creando cuenta...' : isLoadingInvitation ? 'Validando invitación...' : invitationError ? 'Invitación no disponible' : 'Completar acceso'}
           </button>
 
@@ -343,6 +359,10 @@ export default function RegisterTutor() {
         <div className="auth-footer">
           <p>¿Ya tienes cuenta? <Link to={`/login${authQuerySuffix}`} className="link">Inicia sesión aquí</Link></p>
           <p>Si necesitas ayuda con la invitación, contacta al estudiante o a la institución.</p>
+          <p className="auth-legal-links">
+            <Link to="/privacy">Privacidad</Link> · <Link to="/terms">Terminos</Link> ·{' '}
+            <Link to="/habeas-data">Habeas Data</Link> · <Link to="/pqrs">PQRS</Link>
+          </p>
         </div>
       </div>
     </div>

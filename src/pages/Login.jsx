@@ -283,6 +283,10 @@ export default function Login() {
           <p>
             ¿No tienes cuenta? <Link to={`/register${authQuerySuffix}`} className="link">Regístrate aquí</Link>
           </p>
+          <p className="auth-legal-links">
+            <Link to="/privacy">Privacidad</Link> · <Link to="/terms">Terminos</Link> ·{' '}
+            <Link to="/habeas-data">Habeas Data</Link> · <Link to="/pqrs">PQRS</Link>
+          </p>
         </div>
       </div>
     </div>

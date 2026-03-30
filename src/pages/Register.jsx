@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api, setApiActiveTenantId } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import LegalConsentField from '../components/LegalConsentField'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function Register() {
@@ -19,6 +20,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [legalAcceptance, setLegalAcceptance] = useState(false)
   const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -51,6 +53,10 @@ export default function Register() {
       setError('Por favor completa la verificacion de seguridad.')
       return
     }
+    if (!legalAcceptance) {
+      setError('Debes aceptar el tratamiento de datos y los terminos legales para continuar.')
+      return
+    }
     if (password !== confirmPassword) {
       setError('Las contrasenas no coinciden.')
       return
@@ -64,6 +70,7 @@ export default function Register() {
         first_name: firstName,
         last_name: lastName,
         turnstile_token: turnstileToken,
+        legal_acceptance: legalAcceptance,
       }
       await api.post('/api/v1/auth/register/', payload)
       navigate('/verify-code', {
@@ -219,6 +226,14 @@ export default function Register() {
                 />
               </div>
 
+              <LegalConsentField
+                id="register-legal-consent"
+                checked={legalAcceptance}
+                onChange={setLegalAcceptance}
+                disabled={isLoading}
+                contextLabel="Autorizo el tratamiento de mis datos personales para crear y administrar mi cuenta en AulaAlDia."
+              />
+
               {!isCaptchaReady && (
                 <div style={{ padding: 'var(--space-sm)', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', textAlign: 'center' }}>
                   Esperando verificacion de seguridad...
@@ -228,7 +243,7 @@ export default function Register() {
               <button
                 className="btn auth-btn"
                 type="submit"
-                disabled={isLoading || !isCaptchaReady || !turnstileToken}
+                disabled={isLoading || !isCaptchaReady || !turnstileToken || !legalAcceptance}
               >
                 {isLoading ? (
                   <><div className="spinner" aria-hidden="true"></div>Creando cuenta...</>
@@ -255,6 +270,10 @@ export default function Register() {
 
         <div className="auth-footer">
           <p>Ya tienes cuenta? <Link to={`/login${authQuerySuffix}`} className="link">Inicia sesion aqui</Link></p>
+          <p className="auth-legal-links">
+            <Link to="/privacy">Privacidad</Link> · <Link to="/terms">Terminos</Link> ·{' '}
+            <Link to="/habeas-data">Habeas Data</Link> · <Link to="/pqrs">PQRS</Link>
+          </p>
         </div>
       </div>
     </div>

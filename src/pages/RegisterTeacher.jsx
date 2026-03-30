@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { api, setApiActiveTenantId } from '../api/axios'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import LegalConsentField from '../components/LegalConsentField'
 import { APP_CONFIG, VALIDATION_MESSAGES } from '../utils/constants'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
@@ -30,6 +31,7 @@ export default function RegisterTeacher() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [legalAcceptance, setLegalAcceptance] = useState(false)
   const [isCaptchaReady, setIsCaptchaReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -108,6 +110,11 @@ export default function RegisterTeacher() {
       return
     }
 
+    if (!legalAcceptance) {
+      setError('Debes aceptar el tratamiento de datos y los terminos legales para continuar.')
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('Las contrasenas no coinciden. Por favor verifica.')
       return
@@ -122,6 +129,7 @@ export default function RegisterTeacher() {
         last_name: lastName,
         invitation_code: invitationCode,
         turnstile_token: turnstileToken,
+        legal_acceptance: legalAcceptance,
       })
 
       navigate('/verify-code', {
@@ -327,6 +335,14 @@ export default function RegisterTeacher() {
               onReady={() => setIsCaptchaReady(true)}
             />
           </div>
+
+          <LegalConsentField
+            id="register-teacher-legal-consent"
+            checked={legalAcceptance}
+            onChange={setLegalAcceptance}
+            disabled={isLoading}
+            contextLabel="Autorizo el tratamiento de mis datos personales para habilitar mi acceso de profesor invitado."
+          />
           
           {!isCaptchaReady && (
             <div style={{ 
@@ -344,7 +360,7 @@ export default function RegisterTeacher() {
           <button
             className="btn auth-btn" 
             type="submit"
-            disabled={isLoading || isLoadingInvitation || Boolean(invitationError) || !isCaptchaReady || !turnstileToken || !invitationCode}
+            disabled={isLoading || isLoadingInvitation || Boolean(invitationError) || !isCaptchaReady || !turnstileToken || !invitationCode || !legalAcceptance}
           >
             {isLoading ? (
               <><div className="spinner"></div>Creando cuenta...</>
@@ -383,6 +399,10 @@ export default function RegisterTeacher() {
         <div className="auth-footer">
           <p>Ya tienes cuenta? <Link to={`/login${authQuerySuffix}`} className="link">Inicia sesion aqui</Link></p>
           <p>Si necesitas acceso y no recibiste invitacion, contacta a tu institucion.</p>
+          <p className="auth-legal-links">
+            <Link to="/privacy">Privacidad</Link> · <Link to="/terms">Terminos</Link> ·{' '}
+            <Link to="/habeas-data">Habeas Data</Link> · <Link to="/pqrs">PQRS</Link>
+          </p>
         </div>
       </div>
     </div>

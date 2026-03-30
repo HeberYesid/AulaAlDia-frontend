@@ -45,6 +45,7 @@ describe('RegisterTeacher page', () => {
         
         await user.type(screen.getByLabelText(/^Contrasena$/i), 'Password123!');
         await user.type(screen.getByLabelText(/Confirmar Contrasena/i), 'Password123!');
+        await user.click(screen.getByLabelText(/Autorizo el tratamiento de mis datos personales/i));
         
         await user.click(screen.getByRole('button', { name: /Verify Captcha/i }));
         await user.click(screen.getByRole('button', { name: /Completar acceso de profesor/i }));
@@ -54,7 +55,8 @@ describe('RegisterTeacher page', () => {
             first_name: 'John',
             last_name: 'Doe',
             invitation_code: 'INV123',
-            turnstile_token: 'fake-token'
+            turnstile_token: 'fake-token',
+            legal_acceptance: true,
         }));
     });
 });

@@ -7,6 +7,7 @@ import { api } from './axios'
  * @param {string} data.email - Email de contacto
  * @param {string} data.subject - Asunto del mensaje
  * @param {string} data.message - Contenido del mensaje
+ * @param {boolean} data.legal_acceptance - Confirmacion de tratamiento de datos
  * @returns {Promise} - Respuesta del servidor
  */
 export async function sendContactMessage(data) {
