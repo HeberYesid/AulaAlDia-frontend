@@ -30,6 +30,7 @@ describe('navigation config', () => {
     const keys = sidebarItems.map((item) => item.key)
 
     expect(keys).toContain('admin-dashboard')
+    expect(keys).toContain('admin-support')
     expect(keys).toContain('admin-users')
     expect(keys).toContain('admin-bulletins')
     expect(keys).not.toContain('dashboard')

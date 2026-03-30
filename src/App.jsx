@@ -36,6 +36,7 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const AdminNews = lazy(() => import('./pages/AdminNews'))
+const AdminSupportTickets = lazy(() => import('./pages/AdminSupportTickets'))
 const Subjects = lazy(() => import('./pages/Subjects'))
 const SubjectDetail = lazy(() => import('./pages/SubjectDetail'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
@@ -149,6 +150,15 @@ export default function App() {
               element={
                 <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                   <AdminNews />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/support"
+              element={
+                <ProtectedRoute roles={["ADMIN"]} requireTenant>
+                  <AdminSupportTickets />
                 </ProtectedRoute>
               }
             />

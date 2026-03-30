@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   Users,
   Megaphone,
+  LifeBuoy,
 } from 'lucide-react'
 import { USER_ROLES } from './constants'
 
@@ -52,6 +53,17 @@ const NAVIGATION_ITEMS = [
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+  },
+  {
+    key: 'admin-support',
+    to: '/admin/support',
+    label: 'Atencion al Cliente',
+    contextualTip: 'Crea tickets para contactar soporte tecnico y consulta el estado de cada solicitud institucional.',
+    icon: LifeBuoy,
+    section: 'administration',
+    roles: [USER_ROLES.ADMIN],
+    showInNavbar: false,
+    tourId: 'nav-admin-support',
   },
   {
     key: 'admin-bulletins',
