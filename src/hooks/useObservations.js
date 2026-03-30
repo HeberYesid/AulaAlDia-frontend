@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { api } from '../api/axios'
+import { unwrapListData } from '../utils/pagination'
 
 export const CATEGORIES = [
   { value: 'MISBEHAVIOR', label: 'Mal comportamiento', color: '#ef4444' },
@@ -32,7 +33,7 @@ export function useObservations(user) {
     setLoading(true)
     try {
       const res = await api.get('/api/v1/courses/observations/')
-      setObservations(res.data)
+      setObservations(unwrapListData(res.data))
     } catch (err) {
       console.error('Error loading observations:', err)
     } finally {
@@ -43,7 +44,7 @@ export function useObservations(user) {
   const loadSubjects = useCallback(async () => {
     try {
       const res = await api.get('/api/v1/courses/subjects/')
-      setSubjects(res.data)
+      setSubjects(unwrapListData(res.data))
     } catch (err) {
       console.error('Error loading subjects:', err)
     }

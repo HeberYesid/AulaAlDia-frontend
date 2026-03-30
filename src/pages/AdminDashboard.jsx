@@ -5,6 +5,7 @@ import Alert from '../components/Alert'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { unwrapListData } from '../utils/pagination'
 
 function toDate(value) {
   if (!value) return null
@@ -139,36 +140,36 @@ export default function AdminDashboard() {
       ])
 
       if (subjectsResult.status === 'fulfilled') {
-        nextSubjects = subjectsResult.value.data?.results || subjectsResult.value.data || []
-        setSubjects(Array.isArray(nextSubjects) ? nextSubjects : [])
+        nextSubjects = unwrapListData(subjectsResult.value.data)
+        setSubjects(nextSubjects)
       } else {
         nextBlockErrors.subjects = 'No se pudieron cargar las materias.'
         setSubjects([])
       }
 
       if (absencesResult.status === 'fulfilled') {
-        setAbsences(Array.isArray(absencesResult.value.data) ? absencesResult.value.data : [])
+        setAbsences(unwrapListData(absencesResult.value.data))
       } else {
         nextBlockErrors.absences = 'No se pudieron cargar las faltas.'
         setAbsences([])
       }
 
       if (observationsResult.status === 'fulfilled') {
-        setObservations(Array.isArray(observationsResult.value.data) ? observationsResult.value.data : [])
+        setObservations(unwrapListData(observationsResult.value.data))
       } else {
         nextBlockErrors.observations = 'No se pudieron cargar las observaciones.'
         setObservations([])
       }
 
       if (notificationsResult.status === 'fulfilled') {
-        setNotifications(Array.isArray(notificationsResult.value.data) ? notificationsResult.value.data : [])
+        setNotifications(unwrapListData(notificationsResult.value.data))
       } else {
         nextBlockErrors.notifications = 'No se pudieron cargar las notificaciones.'
         setNotifications([])
       }
 
       if (calendarResult.status === 'fulfilled') {
-        const events = Array.isArray(calendarResult.value.data) ? calendarResult.value.data : []
+        const events = unwrapListData(calendarResult.value.data)
         const now = new Date()
         const future = events
           .filter((event) => {
@@ -190,8 +191,8 @@ export default function AdminDashboard() {
       }
 
       if (periodsResult.status === 'fulfilled') {
-        const periods = periodsResult.value.data?.results || periodsResult.value.data || []
-        setAcademicPeriods(Array.isArray(periods) ? periods : [])
+        const periods = unwrapListData(periodsResult.value.data)
+        setAcademicPeriods(periods)
       } else {
         nextBlockErrors.periods = 'No se pudieron cargar los periodos académicos.'
         setAcademicPeriods([])
@@ -217,7 +218,7 @@ export default function AdminDashboard() {
           params: { ids: subjectIds },
         })
 
-        const dashboards = Array.isArray(data?.results) ? data.results : []
+        const dashboards = unwrapListData(data)
         const dashboardsBySubjectId = new Map(
           dashboards.map((item) => [item.subject_id, item])
         )
