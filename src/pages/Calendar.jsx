@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar'
 import format from 'date-fns/format'
 import parse from 'date-fns/parse'
@@ -29,25 +29,16 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
-  useEffect(() => {
-    fetchSubjects()
-    fetchEvents()
-  }, [])
-
-  useEffect(() => {
-    fetchEvents()
-  }, [selectedSubject])
-
-  const fetchSubjects = async () => {
+  const fetchSubjects = useCallback(async () => {
     try {
       const { data } = await api.get('/api/v1/courses/subjects/')
       setSubjects(data.results || data)
     } catch (error) {
       console.error('Error fetching subjects:', error)
     }
-  }
+  }, [])
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true)
     try {
       const params = {}
@@ -69,7 +60,15 @@ export default function CalendarPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedSubject])
+
+  useEffect(() => {
+    fetchSubjects()
+  }, [fetchSubjects])
+
+  useEffect(() => {
+    fetchEvents()
+  }, [fetchEvents])
 
   const eventStyleGetter = (event) => {
     const style = {

@@ -12,13 +12,13 @@ export function useStudentSearch(initialValue = '', enabled = true) {
 
     if (!enabled || trimmedSearch.length < 2) {
       setOptions([])
-      if (loading) setLoading(false)
+      setLoading(false)
       return undefined
     }
 
     if (selectedStudent && trimmedSearch === selectedStudent.full_name) {
       setOptions([])
-      if (loading) setLoading(false)
+      setLoading(false)
       return undefined
     }
 

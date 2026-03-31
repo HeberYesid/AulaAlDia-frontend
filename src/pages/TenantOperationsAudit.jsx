@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
 
@@ -339,7 +339,7 @@ export default function TenantOperationsAudit() {
     setExpandedAuditId(null)
   }
 
-  async function loadAudits({ clearError = true } = {}) {
+  const loadAudits = useCallback(async ({ clearError = true } = {}) => {
     if (!activeTenantId) {
       setError('No hay una institución activa seleccionada.')
       return
@@ -375,7 +375,9 @@ export default function TenantOperationsAudit() {
       }
 
       setAllAudits(collectedAudits)
-      applyLocalFilters(collectedAudits, { markApplied: false })
+      setAudits(collectedAudits)
+      setFiltersApplied(false)
+      setExpandedAuditId(null)
     } catch (requestError) {
       setError(normalizeApiErrors(requestError))
       setAllAudits([])
@@ -384,14 +386,14 @@ export default function TenantOperationsAudit() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTenantId])
 
   useEffect(() => {
     if (!isTenantAdmin || !activeTenantId) {
       return
     }
     loadAudits({ clearError: false })
-  }, [activeTenantId, isTenantAdmin])
+  }, [activeTenantId, isTenantAdmin, loadAudits])
 
   async function applyFilters() {
     applyLocalFilters(allAudits)

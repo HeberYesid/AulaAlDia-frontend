@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { api } from '../api/axios'
 import { showPasswordChangeToast } from '../utils/toast'
@@ -38,29 +38,18 @@ export default function UserProfile() {
   const [isSubmittingTutorInvite, setIsSubmittingTutorInvite] = useState(false)
   const [highlightTutorSection, setHighlightTutorSection] = useState(false)
 
-  useEffect(() => {
-    loadUserProfile()
+  const loadTutorInvitationStatus = useCallback(async () => {
+    try {
+      const response = await api.get('/api/v1/auth/student-tutor-invitation/')
+      setTutorInvitationStatus(response.data)
+      setTutorInviteEmail(response.data.pending_invitation?.email || '')
+    } catch {
+      setTutorInvitationStatus(null)
+      setTutorInviteEmail('')
+    }
   }, [])
 
-  // Mover suavemente hacia la sección si hay un hash en la URL y resaltarla
-  useEffect(() => {
-    if (!loading && user && location.hash) {
-      setTimeout(() => {
-        const id = location.hash.replace('#', '')
-        const element = document.getElementById(id)
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          
-          if (id === 'tutor-invite-section') {
-            setHighlightTutorSection(true)
-            setTimeout(() => setHighlightTutorSection(false), 3000)
-          }
-        }
-      }, 100)
-    }
-  }, [loading, user, location.hash])
-
-  async function loadUserProfile() {
+  const loadUserProfile = useCallback(async () => {
     setLoading(true)
     try {
       const response = await api.get('/api/v1/auth/profile/')
@@ -85,18 +74,29 @@ export default function UserProfile() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [loadTutorInvitationStatus])
 
-  async function loadTutorInvitationStatus() {
-    try {
-      const response = await api.get('/api/v1/auth/student-tutor-invitation/')
-      setTutorInvitationStatus(response.data)
-      setTutorInviteEmail(response.data.pending_invitation?.email || '')
-    } catch {
-      setTutorInvitationStatus(null)
-      setTutorInviteEmail('')
+  useEffect(() => {
+    loadUserProfile()
+  }, [loadUserProfile])
+
+  // Mover suavemente hacia la sección si hay un hash en la URL y resaltarla
+  useEffect(() => {
+    if (!loading && user && location.hash) {
+      setTimeout(() => {
+        const id = location.hash.replace('#', '')
+        const element = document.getElementById(id)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          
+          if (id === 'tutor-invite-section') {
+            setHighlightTutorSection(true)
+            setTimeout(() => setHighlightTutorSection(false), 3000)
+          }
+        }
+      }, 100)
     }
-  }
+  }, [loading, user, location.hash])
 
   async function handleUpdateProfile(e) {
     e.preventDefault()
