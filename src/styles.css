@@ -639,6 +639,219 @@ body.sidebar-collapsed .app-body {
   width: 100%;
 }
 
+.notification-bell {
+  position: relative;
+}
+
+.notification-bell__trigger {
+  border: none;
+  background: none;
+}
+
+.notification-bell__trigger--sidebar {
+  width: 100%;
+}
+
+.notification-bell__trigger--standalone {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.notification-bell__trigger--standalone:hover {
+  transform: scale(1.08);
+  color: var(--text-accent);
+}
+
+.notification-bell__trigger--standalone:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.notification-bell__icon-wrapper {
+  position: relative;
+}
+
+.notification-bell__badge {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.notification-bell__badge--sidebar {
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  font-size: 0.6rem;
+}
+
+.notification-bell__badge--standalone {
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  font-size: 0.7rem;
+  animation: notification-bell-pulse 2s infinite;
+}
+
+.notification-bell__dropdown {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-xl);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.2s ease;
+  overflow: hidden;
+}
+
+.notification-bell__header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--bg-secondary);
+}
+
+.notification-bell__title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.notification-bell__mark-all,
+.notification-bell__view-all {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+}
+
+.notification-bell__mark-all {
+  font-size: 0.85rem;
+}
+
+.notification-bell__view-all {
+  font-size: 0.9rem;
+}
+
+.notification-bell__list {
+  overflow-y: auto;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--bg-card);
+}
+
+.notification-bell__state {
+  padding: 2rem;
+  text-align: center;
+}
+
+.notification-bell__state--empty {
+  color: var(--text-secondary);
+}
+
+.notification-bell__empty-icon {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.notification-bell__item {
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.notification-bell__item-button {
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  cursor: pointer;
+  background: var(--bg-card);
+  border: none;
+  display: block;
+  color: inherit;
+  font: inherit;
+  transition: background-color var(--transition-fast);
+}
+
+.notification-bell__item-button:hover {
+  background: var(--bg-hover);
+}
+
+.notification-bell__item-button--unread {
+  background: var(--overlay-bg);
+}
+
+.notification-bell__item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: 0.5rem;
+}
+
+.notification-bell__item-title {
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.notification-bell__item-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+}
+
+.notification-bell__item-message {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.notification-bell__item-time {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.notification-bell__footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border-primary);
+  text-align: center;
+  background: var(--bg-secondary);
+}
+
+@keyframes notification-bell-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
 /* Footer: notifications + profile + logout */
 .sidebar__footer {
   display: flex;
