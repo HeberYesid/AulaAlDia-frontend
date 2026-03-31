@@ -1876,6 +1876,10 @@ form {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
+.admin-dashboard__stats-grid {
+  margin-bottom: var(--space-lg);
+}
+
 .admin-dashboard__section {
   display: flex;
   flex-direction: column;
