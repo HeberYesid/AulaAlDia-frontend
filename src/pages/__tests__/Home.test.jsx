@@ -31,6 +31,8 @@ describe('Home page', () => {
     expect(contactLinks.length).toBeGreaterThan(0);
     
     expect(screen.getByText('Características principales')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Únete a la waitlist de AulaAlDía/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Quiero entrar a la waitlist/i })).toBeInTheDocument();
   });
 
   it('renders redirect to Dashboard for authenticated user', () => {

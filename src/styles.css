@@ -4151,6 +4151,7 @@ a.welcome-panel__notif-link:hover {
 /* Override container constraints for sections needing full-width bg */
 .landing-page .landing-hero,
 .landing-page .landing-stats,
+.landing-page .landing-waitlist,
 .landing-page .landing-cta-final {
   margin-left: calc(-1 * var(--space-md));
   margin-right: calc(-1 * var(--space-md));
@@ -5354,7 +5355,114 @@ a.welcome-panel__notif-link:hover {
   text-align: center;
 }
 
-/* ---- 12. CTA FINAL ---- */
+/* ---- 12. WAITLIST ---- */
+.landing-waitlist {
+  padding: var(--space-2xl) 0;
+  border-top: 1px solid var(--border-primary);
+  border-bottom: 1px solid var(--border-primary);
+  background:
+    radial-gradient(ellipse 70% 60% at 100% 0%, rgba(201, 123, 47, 0.18) 0%, transparent 72%),
+    radial-gradient(ellipse 65% 48% at 0% 100%, rgba(45, 106, 104, 0.14) 0%, transparent 72%);
+}
+
+[data-theme="light"] .landing-waitlist {
+  background:
+    radial-gradient(ellipse 70% 60% at 100% 0%, rgba(201, 123, 47, 0.12) 0%, transparent 72%),
+    radial-gradient(ellipse 65% 48% at 0% 100%, rgba(45, 106, 104, 0.09) 0%, transparent 72%);
+}
+
+.landing-waitlist__inner {
+  max-width: 880px;
+  margin: 0 auto;
+  background: linear-gradient(145deg, var(--bg-card), var(--overlay-bg));
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: clamp(1rem, 2.8vw, 2rem);
+}
+
+.landing-waitlist__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.landing-waitlist h2 {
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.landing-waitlist__intro {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.landing-waitlist__alert {
+  margin-top: var(--space-md);
+  margin-bottom: 0;
+}
+
+.landing-waitlist__form {
+  margin-top: var(--space-lg);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.landing-waitlist__field {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.landing-waitlist__field label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.landing-waitlist__field input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.7rem 0.8rem;
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.landing-waitlist__field input:focus {
+  outline: none;
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--overlay-hover) 60%, transparent);
+}
+
+.landing-waitlist__field input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.landing-waitlist__submit {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-width: 270px;
+}
+
+.landing-waitlist__footnote {
+  margin-top: var(--space-md);
+  margin-bottom: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---- 13. CTA FINAL ---- */
 .landing-cta-final {
   padding: var(--space-2xl) 0;
   background: linear-gradient(135deg, rgba(201, 123, 47, 0.2) 0%, rgba(45, 106, 104, 0.16) 100%);
@@ -5369,6 +5477,7 @@ a.welcome-panel__notif-link:hover {
 /* Dark mode cohesion — reduce visible section boxes on landing */
 [data-theme="dark"] .landing-page .landing-hero,
 [data-theme="dark"] .landing-page .landing-stats,
+[data-theme="dark"] .landing-page .landing-waitlist,
 [data-theme="dark"] .landing-page .landing-cta-final,
 [data-theme="dark"] .landing-about {
   background: transparent;
@@ -5390,6 +5499,7 @@ a.welcome-panel__notif-link:hover {
 [data-theme="dark"] .landing-testimonials__card,
 [data-theme="dark"] .landing-screenshots__mock,
 [data-theme="dark"] .landing-faq-preview__item,
+[data-theme="dark"] .landing-waitlist__inner,
 [data-theme="dark"] .landing-about__tech {
   background: color-mix(in srgb, var(--bg-card) 76%, transparent);
   backdrop-filter: blur(4px);
@@ -5547,6 +5657,7 @@ a.welcome-panel__notif-link:hover {
   /* Landing sections — no overflow */
   .landing-page .landing-hero,
   .landing-page .landing-stats,
+  .landing-page .landing-waitlist,
   .landing-page .landing-cta-final,
   .landing-about {
     margin-left: calc(-1 * var(--space-sm));
@@ -5609,6 +5720,15 @@ a.welcome-panel__notif-link:hover {
 
   .landing-faq-preview {
     max-width: 100%;
+  }
+
+  .landing-waitlist__form {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-waitlist__submit {
+    width: 100%;
+    min-width: 0;
   }
 
   .landing-cta-final__inner {

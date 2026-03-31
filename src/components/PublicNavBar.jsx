@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { label: 'Características', scrollId: 'features' },
   { label: 'Cómo funciona', scrollId: 'how-it-works' },
   { label: 'Planes', scrollId: 'pricing' },
+  { label: 'Waitlist', scrollId: 'waitlist' },
 ]
 
 const LEGAL_LINKS = [

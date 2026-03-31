@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+import { joinWaitlist } from '../api/contact'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 const PREVIEW_FAQS = [
   {
@@ -20,6 +22,63 @@ const PREVIEW_FAQS = [
 export default function Home() {
   const { isAuthenticated } = useAuth()
   const [openFaq, setOpenFaq] = useState(null)
+  const [waitlistData, setWaitlistData] = useState({
+    name: '',
+    email: '',
+  })
+  const [isWaitlistSubmitting, setIsWaitlistSubmitting] = useState(false)
+  const [waitlistStatus, setWaitlistStatus] = useState({ type: '', message: '' })
+
+  const handleWaitlistChange = (event) => {
+    const { name, value } = event.target
+    setWaitlistData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleWaitlistSubmit = async (event) => {
+    event.preventDefault()
+    setWaitlistStatus({ type: '', message: '' })
+
+    const normalizedName = waitlistData.name.trim()
+    const normalizedEmail = waitlistData.email.trim().toLowerCase()
+
+    if (!normalizedName || !normalizedEmail) {
+      setWaitlistStatus({
+        type: 'error',
+        message: 'Completa tu nombre y correo para unirte a la waitlist.',
+      })
+      return
+    }
+
+    setIsWaitlistSubmitting(true)
+
+    try {
+      const response = await joinWaitlist({
+        name: normalizedName,
+        email: normalizedEmail,
+      })
+
+      setWaitlistStatus({
+        type: 'success',
+        message:
+          response.message ||
+          'Quedaste registrado en la waitlist. Te avisaremos cuando abramos nuevos cupos.',
+      })
+      setWaitlistData({ name: '', email: '' })
+    } catch (error) {
+      const message = getApiErrorMessage(error, {
+        action: 'unirte a la waitlist',
+        fallback:
+          'No pudimos registrarte en la waitlist en este momento. Inténtalo nuevamente.',
+      })
+
+      setWaitlistStatus({ type: 'error', message })
+    } finally {
+      setIsWaitlistSubmitting(false)
+    }
+  }
 
   return (
     <div className="home-page landing-page">
@@ -524,7 +583,78 @@ export default function Home() {
       </section>
 
       {/* ============================================================
-          12. CTA FINAL
+          12. WAITLIST
+      ============================================================ */}
+      <section className="landing-waitlist" id="waitlist" aria-label="Registro a la waitlist">
+        <div className="landing-waitlist__inner">
+          <p className="landing-waitlist__eyebrow">Próximos lanzamientos</p>
+          <h2>Únete a la waitlist de AulaAlDía</h2>
+          <p className="landing-waitlist__intro">
+            Recibe acceso anticipado a nuevas funciones académicas, reportes avanzados y
+            herramientas de automatización para docentes y coordinadores.
+          </p>
+
+          {waitlistStatus.message && (
+            <div
+              className={`alert alert-${waitlistStatus.type} landing-waitlist__alert`}
+              role="status"
+              aria-live="polite"
+            >
+              {waitlistStatus.message}
+            </div>
+          )}
+
+          <form className="landing-waitlist__form" onSubmit={handleWaitlistSubmit} noValidate>
+            <div className="landing-waitlist__field">
+              <label htmlFor="waitlist-name">Nombre</label>
+              <input
+                id="waitlist-name"
+                name="name"
+                type="text"
+                value={waitlistData.name}
+                onChange={handleWaitlistChange}
+                placeholder="Ej: Laura Martínez"
+                autoComplete="name"
+                maxLength={120}
+                required
+                disabled={isWaitlistSubmitting}
+              />
+            </div>
+
+            <div className="landing-waitlist__field">
+              <label htmlFor="waitlist-email">Correo institucional</label>
+              <input
+                id="waitlist-email"
+                name="email"
+                type="email"
+                value={waitlistData.email}
+                onChange={handleWaitlistChange}
+                placeholder="tu@colegio.edu"
+                autoComplete="email"
+                inputMode="email"
+                spellCheck={false}
+                required
+                disabled={isWaitlistSubmitting}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary btn-lg landing-waitlist__submit"
+              disabled={isWaitlistSubmitting}
+            >
+              {isWaitlistSubmitting ? 'Registrando…' : 'Quiero entrar a la waitlist'}
+            </button>
+          </form>
+
+          <p className="landing-waitlist__footnote">
+            Sin spam. Solo novedades del producto y apertura de cupos.
+          </p>
+        </div>
+      </section>
+
+      {/* ============================================================
+          13. CTA FINAL
       ============================================================ */}
       <section className="landing-cta-final" id="cta-final" aria-label="Comenzar con AulaAlDía">
         <div className="landing-cta-final__inner">
