@@ -1,7 +1,12 @@
 ﻿import { useEffect, useState } from 'react'
-import { api } from '../api/axios'
 import ConfirmDialog from '../components/ConfirmDialog'
-import { unwrapListData } from '../utils/pagination'
+import {
+  deleteAllCourseNotifications,
+  deleteCourseNotification,
+  listCourseNotifications,
+  markAllCourseNotificationsRead,
+  updateCourseNotificationReadState,
+} from '../api/notifications'
 
 export default function NotificationsPage() {
   const [items, setItems] = useState([])
@@ -12,9 +17,7 @@ export default function NotificationsPage() {
   async function load() {
     setLoading(true)
     try {
-      // Usar la misma API que NotificationBell
-      const response = await api.get('/api/v1/courses/notifications/')
-      const nextItems = unwrapListData(response.data)
+      const nextItems = await listCourseNotifications()
       setItems(nextItems)
       
       // Contar las no leídas
@@ -33,7 +36,7 @@ export default function NotificationsPage() {
 
   async function markAll() {
     try {
-      await api.post('/api/v1/courses/notifications/mark-all-read/')
+      await markAllCourseNotificationsRead()
       load()
     } catch (err) {
       console.error('Error marking all as read:', err)
@@ -42,7 +45,7 @@ export default function NotificationsPage() {
 
   async function toggleRead(item) {
     try {
-      await api.patch(`/api/v1/courses/notifications/${item.id}/`, { is_read: !item.is_read })
+      await updateCourseNotificationReadState(item.id, !item.is_read)
       load()
     } catch (err) {
       console.error('Error toggling read status:', err)
@@ -56,7 +59,7 @@ export default function NotificationsPage() {
       onConfirm: async () => {
         setConfirmDialog(null)
         try {
-          await api.delete(`/api/v1/courses/notifications/${id}/`)
+          await deleteCourseNotification(id)
           load()
         } catch (err) {
           console.error('Error deleting notification:', err)
@@ -72,7 +75,7 @@ export default function NotificationsPage() {
       onConfirm: async () => {
         setConfirmDialog(null)
         try {
-          await api.post('/api/v1/courses/notifications/delete-all/')
+          await deleteAllCourseNotifications()
           load()
         } catch (err) {
           console.error('Error deleting all notifications:', err)

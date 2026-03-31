@@ -1,36 +1,18 @@
 import { Fragment, useMemo, useState } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
-import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { normalizeApiErrorWithDetails } from '../api/errors'
 
 const PLAN_OPTIONS = [
   { value: 'SCHOOL', label: 'School' },
   { value: 'ENTERPRISE', label: 'Enterprise' },
 ]
 
-function normalizeApiErrors(error) {
-  const payload = error?.response?.data
-  if (!payload || typeof payload !== 'object') {
-    return getApiErrorMessage(error, {
-      action: 'procesar la solicitud comercial',
-      fallback: 'No se pudo procesar la solicitud comercial. Intentalo nuevamente.',
-    })
-  }
-
-  if (payload.detail && typeof payload.detail === 'string') {
-    return payload.detail
-  }
-
-  const lines = []
-  Object.entries(payload).forEach(([field, value]) => {
-    if (Array.isArray(value)) {
-      lines.push(`${field}: ${value.join(' ')}`)
-      return
-    }
-    lines.push(`${field}: ${String(value)}`)
+function normalizeCommercialApiError(error) {
+  return normalizeApiErrorWithDetails(error, {
+    action: 'procesar la solicitud comercial',
+    fallback: 'No se pudo procesar la solicitud comercial. Intentalo nuevamente.',
   })
-
-  return lines.join(' | ')
 }
 
 export default function TenantCommercialAdmin() {
@@ -97,7 +79,7 @@ export default function TenantCommercialAdmin() {
       const { data } = await api.get('/api/v1/auth/support-access/session/')
       setSupportStatus(data)
     } catch (err) {
-      setError(normalizeApiErrors(err))
+      setError(normalizeCommercialApiError(err))
     } finally {
       setLoadingSupport(false)
     }
@@ -119,7 +101,7 @@ export default function TenantCommercialAdmin() {
       })
       setSuccess(data.message || 'Sesión de soporte activada.')
     } catch (err) {
-      setError(normalizeApiErrors(err))
+      setError(normalizeCommercialApiError(err))
     } finally {
       setLoadingSupport(false)
     }
@@ -140,7 +122,7 @@ export default function TenantCommercialAdmin() {
       })
       setSuccess(data.message || 'Sesión de soporte revocada.')
     } catch (err) {
-      setError(normalizeApiErrors(err))
+      setError(normalizeCommercialApiError(err))
     } finally {
       setLoadingSupport(false)
     }
@@ -161,7 +143,7 @@ export default function TenantCommercialAdmin() {
       await loadCommercialAudits(20, false, 0)
       setSuccess('Configuración comercial cargada.')
     } catch (err) {
-      setError(normalizeApiErrors(err))
+      setError(normalizeCommercialApiError(err))
       setCommercial(null)
       setAudits([])
       setAuditTotalCount(0)
@@ -200,7 +182,7 @@ export default function TenantCommercialAdmin() {
       setAuditTotalCount(data?.total_count || 0)
       setExpandedAuditId(null)
     } catch (err) {
-      setError(normalizeApiErrors(err))
+      setError(normalizeCommercialApiError(err))
       setAudits([])
       setAuditTotalCount(0)
     } finally {
@@ -284,7 +266,7 @@ export default function TenantCommercialAdmin() {
       setSuccess(data.message || 'Configuración comercial actualizada.')
       setResetDefaults(false)
     } catch (err) {
-      setError(normalizeApiErrors(err))
+      setError(normalizeCommercialApiError(err))
     } finally {
       setSavingCommercial(false)
     }

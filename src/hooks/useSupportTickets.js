@@ -1,18 +1,12 @@
 import { useCallback, useMemo, useState } from 'react'
 import { createSupportTicket, listSupportTickets } from '../api/supportTickets'
-import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { normalizeApiError } from '../api/errors'
 
 const DEFAULT_FORM = {
   subject: '',
   message: '',
 }
 
-function normalizeApiError(error, fallbackMessage, action = 'completar esta accion') {
-  return getApiErrorMessage(error, {
-    action,
-    fallback: fallbackMessage,
-  })
-}
 
 export function useSupportTickets() {
   const [tickets, setTickets] = useState([])
@@ -34,11 +28,12 @@ export function useSupportTickets() {
       const nextTickets = await listSupportTickets(filters)
       setTickets(nextTickets)
     } catch (err) {
-      setError(normalizeApiError(
-        err,
-        'No se pudo cargar el historial de tickets de soporte.',
-        'cargar el historial de tickets'
-      ))
+      setError(
+        normalizeApiError(err, {
+          fallback: 'No se pudo cargar el historial de tickets de soporte.',
+          action: 'cargar el historial de tickets',
+        })
+      )
       setTickets([])
     } finally {
       setLoading(false)
@@ -60,11 +55,12 @@ export function useSupportTickets() {
       setSuccess('Ticket creado correctamente. Te contactaremos por este canal en cuanto sea revisado.')
       return true
     } catch (err) {
-      setError(normalizeApiError(
-        err,
-        'No se pudo crear el ticket. Revisa el asunto y el detalle del mensaje.',
-        'crear el ticket de soporte'
-      ))
+      setError(
+        normalizeApiError(err, {
+          fallback: 'No se pudo crear el ticket. Revisa el asunto y el detalle del mensaje.',
+          action: 'crear el ticket de soporte',
+        })
+      )
       return false
     } finally {
       setCreating(false)

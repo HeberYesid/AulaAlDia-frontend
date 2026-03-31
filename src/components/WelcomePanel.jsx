@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Bell, Clock, MapPin, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
-import { api } from '../api/axios'
-import { unwrapListData } from '../utils/pagination'
+import { listCourseNotifications } from '../api/notifications'
 
 const ROLE_LABEL = {
   STUDENT: 'Estudiante',
@@ -51,8 +50,7 @@ export default function WelcomePanel() {
 
   const loadNotifications = useCallback(async () => {
     try {
-      const { data } = await api.get('/api/v1/courses/notifications/?limit=5')
-      const items = unwrapListData(data)
+      const items = await listCourseNotifications({ limit: 5 })
       setNotifications(items.slice(0, 5))
       setUnreadCount(items.filter((notification) => !notification.is_read).length)
     } catch {

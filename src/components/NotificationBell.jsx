@@ -1,8 +1,12 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
-import { api } from '../api/axios'
-import { unwrapListData } from '../utils/pagination'
+import {
+  getCourseNotificationsUnreadCount,
+  listCourseNotifications,
+  markAllCourseNotificationsRead,
+  markCourseNotificationRead,
+} from '../api/notifications'
 
 export default function NotificationBell({ sidebarMode = false, collapsed = false }) {
   const [notifications, setNotifications] = useState([])
@@ -17,8 +21,8 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   // Load unread count
   async function loadUnreadCount() {
     try {
-      const response = await api.get('/api/v1/courses/notifications/unread-count/')
-      setUnreadCount(response.data.unread_count)
+      const count = await getCourseNotificationsUnreadCount()
+      setUnreadCount(count)
     } catch (err) {
       console.error('Error loading unread count:', err)
     }
@@ -28,8 +32,7 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   async function loadNotifications() {
     setLoading(true)
     try {
-      const response = await api.get('/api/v1/courses/notifications/')
-      const items = unwrapListData(response.data)
+      const items = await listCourseNotifications()
       setNotifications(items.slice(0, 10)) // Only show last 10
     } catch (err) {
       console.error('Error loading notifications:', err)
@@ -41,7 +44,7 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   // Mark notification as read
   async function markAsRead(notificationId) {
     try {
-      await api.post(`/api/v1/courses/notifications/${notificationId}/mark-read/`)
+      await markCourseNotificationRead(notificationId)
       loadUnreadCount()
       loadNotifications()
     } catch (err) {
@@ -52,7 +55,7 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   // Mark all as read
   async function markAllAsRead() {
     try {
-      await api.post('/api/v1/courses/notifications/mark-all-read/')
+      await markAllCourseNotificationsRead()
       loadUnreadCount()
       loadNotifications()
     } catch (err) {
@@ -63,8 +66,8 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   // Handle notification click
   function handleNotificationClick(notification) {
     markAsRead(notification.id)
-    if (notification.link) {
-      navigate(notification.link)
+    if (notification.link || notification.link_url) {
+      navigate(notification.link || notification.link_url)
     }
     setShowDropdown(false)
   }

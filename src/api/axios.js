@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { API_ENDPOINTS } from './endpoints'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
 export const AUTH_INVALIDATED_EVENT = 'aulaaldia:auth-invalidated'
@@ -31,6 +33,20 @@ function notifyAuthInvalidated() {
   if (typeof window === 'undefined') return
 
   window.dispatchEvent(new CustomEvent(AUTH_INVALIDATED_EVENT))
+}
+
+function attachUserMessage(error) {
+  if (!error || typeof error !== 'object') {
+    return error
+  }
+
+  if (!error.userMessage) {
+    error.userMessage = getApiErrorMessage(error, {
+      action: 'completar esta accion',
+    })
+  }
+
+  return error
 }
 
 function getActiveTenantId() {
@@ -85,7 +101,7 @@ api.interceptors.response.use(
       original._retry = true
       const auth = getTokens()
       if (!auth?.refresh) {
-        return Promise.reject(error)
+        return Promise.reject(attachUserMessage(error))
       }
       if (isRefreshing) {
         return new Promise((resolve) => {
@@ -97,7 +113,7 @@ api.interceptors.response.use(
       }
       isRefreshing = true
       try {
-        const { data } = await axios.post(`${API_BASE}/api/v1/auth/token/refresh/`, {
+        const { data } = await axios.post(`${API_BASE}${API_ENDPOINTS.auth.tokenRefresh}`, {
           refresh: auth.refresh,
         })
         setTokens({
@@ -112,9 +128,9 @@ api.interceptors.response.use(
         isRefreshing = false
         localStorage.removeItem('auth')
         notifyAuthInvalidated()
-        return Promise.reject(e)
+        return Promise.reject(attachUserMessage(e))
       }
     }
-    return Promise.reject(error)
+    return Promise.reject(attachUserMessage(error))
   }
 )
