@@ -3997,19 +3997,34 @@ a.welcome-panel__notif-link:hover {
 }
 
 .public-navbar__login {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-md);
-  transition: color var(--transition-fast), background var(--transition-fast);
+  border: 1px solid color-mix(in srgb, var(--border-accent) 68%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 88%, transparent), color-mix(in srgb, var(--primary-dark) 92%, transparent));
+  color: #fffdf8;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast), border-color var(--transition-fast);
 }
 
 .public-navbar__login:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: #fffdf8;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  filter: saturate(1.05);
   text-decoration: none;
+}
+
+.public-navbar__login:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 72%, white);
+  outline-offset: 3px;
 }
 
 .public-navbar__cta-btn {
