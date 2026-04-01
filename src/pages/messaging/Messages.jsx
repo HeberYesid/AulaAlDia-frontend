@@ -15,6 +15,15 @@ import EmptyState from './EmptyState';
 import NewChatModal from './NewChatModal';
 import './Messages.css';
 
+const CONVERSATIONS_POLL_INTERVAL_MS = 30000;
+const MESSAGES_POLL_INTERVAL_MS = 12000;
+
+const hasUnreadIncomingMessages = (messageList, currentUserId) => {
+    return messageList.some(
+        (message) => !message.is_read && message.sender?.id !== currentUserId
+    );
+};
+
 const Messages = () => {
     const { user } = useAuth();
     const { conversationId } = useParams();
@@ -42,11 +51,14 @@ const Messages = () => {
         try {
             const data = await getMessages(conversationId);
             setMessages(data);
-            await markAsRead(conversationId);
+
+            if (hasUnreadIncomingMessages(data, user.id)) {
+                await markAsRead(conversationId);
+            }
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
-    }, []);
+    }, [user.id]);
 
     /* ── Polling ───────────────────────────────────────── */
     useEffect(() => {
@@ -56,7 +68,10 @@ const Messages = () => {
         };
 
         refreshConversations();
-        const interval = window.setInterval(refreshConversations, 10000);
+        const interval = window.setInterval(
+            refreshConversations,
+            CONVERSATIONS_POLL_INTERVAL_MS
+        );
 
         document.addEventListener('visibilitychange', refreshConversations);
         window.addEventListener('focus', refreshConversations);
@@ -77,7 +92,7 @@ const Messages = () => {
         };
 
         refreshMessages();
-        const interval = window.setInterval(refreshMessages, 5000);
+        const interval = window.setInterval(refreshMessages, MESSAGES_POLL_INTERVAL_MS);
 
         document.addEventListener('visibilitychange', refreshMessages);
         window.addEventListener('focus', refreshMessages);

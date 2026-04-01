@@ -13,6 +13,7 @@ const PANEL_MAX_HEIGHT = 520
 const PANEL_MARGIN = 8
 const PANEL_OPEN_DOWNWARD_THRESHOLD = 200
 const MIN_PANEL_HEIGHT = 180
+const UNREAD_COUNT_POLL_INTERVAL_MS = 60000
 
 function resolveNotificationLink(notification) {
   return notification.link || notification.link_url || null
@@ -201,14 +202,24 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
     return undefined
   }, [showDropdown])
 
-  // Load unread count on mount and poll every 30 seconds
+  // Load unread count on mount and poll while the page is visible
   useEffect(() => {
-    void loadUnreadCount()
-    const interval = window.setInterval(() => {
+    const refreshUnreadCount = () => {
+      if (document.visibilityState !== 'visible') return
       void loadUnreadCount()
-    }, 30000)
+    }
 
-    return () => window.clearInterval(interval)
+    refreshUnreadCount()
+    const interval = window.setInterval(refreshUnreadCount, UNREAD_COUNT_POLL_INTERVAL_MS)
+
+    window.addEventListener('focus', refreshUnreadCount)
+    document.addEventListener('visibilitychange', refreshUnreadCount)
+
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener('focus', refreshUnreadCount)
+      document.removeEventListener('visibilitychange', refreshUnreadCount)
+    }
   }, [loadUnreadCount])
 
   // Toggle dropdown

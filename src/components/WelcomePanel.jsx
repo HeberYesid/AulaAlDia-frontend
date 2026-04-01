@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Bell, Clock, MapPin, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
@@ -18,6 +18,8 @@ const NOTIF_TYPE_ICON = {
   NEW_MESSAGE: '💬',
   GENERAL: '🔔',
 }
+
+const DASHBOARD_NOTIFICATIONS_POLL_INTERVAL_MS = 60000
 
 function formatDateTime(isoString) {
   if (!isoString) return null
@@ -47,25 +49,39 @@ export default function WelcomePanel() {
   const { user, lastLoginAt, lastLoginIp } = useAuth()
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
+  const requestInFlightRef = useRef(false)
 
   const loadNotifications = useCallback(async () => {
+    if (requestInFlightRef.current) return
+    requestInFlightRef.current = true
+
     try {
       const items = await listCourseNotifications({ limit: 5 })
       setNotifications(items.slice(0, 5))
       setUnreadCount(items.filter((notification) => !notification.is_read).length)
     } catch {
       // keep silent to avoid noisy UX in dashboard
+    } finally {
+      requestInFlightRef.current = false
     }
   }, [])
 
   useEffect(() => {
-    loadNotifications()
+    const refreshNotifications = () => {
+      if (document.visibilityState !== 'visible') return
+      void loadNotifications()
+    }
 
-    const intervalId = setInterval(loadNotifications, 15000)
-    const handleFocus = () => loadNotifications()
+    refreshNotifications()
+
+    const intervalId = window.setInterval(
+      refreshNotifications,
+      DASHBOARD_NOTIFICATIONS_POLL_INTERVAL_MS,
+    )
+    const handleFocus = () => refreshNotifications()
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        loadNotifications()
+        refreshNotifications()
       }
     }
 
@@ -73,7 +89,7 @@ export default function WelcomePanel() {
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      clearInterval(intervalId)
+      window.clearInterval(intervalId)
       window.removeEventListener('focus', handleFocus)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
