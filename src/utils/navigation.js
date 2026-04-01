@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   Users,
   Megaphone,
+  Star,
 } from 'lucide-react'
 import { USER_ROLES } from './constants'
 
@@ -94,6 +95,28 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     showInNavbar: false,
     tourId: 'nav-my-subjects',
+  },
+  {
+    key: 'teacher-evaluations-student',
+    to: '/teacher-evaluations',
+    label: 'Eval. Docente',
+    contextualTip: 'Evalua a tus docentes por materia activa. Tus respuestas son anonimas y se muestran de forma agregada.',
+    icon: Star,
+    section: 'academic',
+    roles: [USER_ROLES.STUDENT],
+    showInNavbar: false,
+    tourId: 'nav-teacher-evaluations',
+  },
+  {
+    key: 'teacher-evaluations-staff',
+    to: '/teacher-evaluations',
+    label: 'Eval. Docente',
+    contextualTip: 'Consulta resultados anonimos y agregados de evaluacion docente por materia.',
+    icon: Star,
+    section: 'academic',
+    roles: [USER_ROLES.TEACHER, USER_ROLES.ADMIN],
+    showInNavbar: false,
+    tourId: 'nav-teacher-evaluations',
   },
   {
     key: 'my-bulletins',

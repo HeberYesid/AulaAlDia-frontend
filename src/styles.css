@@ -5546,3 +5546,230 @@ a.welcome-panel__notif-link:hover {
     flex-direction: column;
   }
 }
+
+.teacher-eval {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.teacher-eval__title {
+  margin: 0;
+}
+
+.teacher-eval__subtitle {
+  margin-top: var(--space-sm);
+  margin-bottom: 0;
+  color: var(--text-secondary);
+}
+
+.teacher-eval__stats-grid {
+  margin-bottom: 0;
+}
+
+.teacher-eval__form {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.teacher-eval__selected-context {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-secondary);
+}
+
+.teacher-eval__ratings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-md);
+}
+
+.teacher-eval__rating-group {
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+  min-inline-size: 0;
+}
+
+.teacher-eval__rating-group legend {
+  padding: 0 var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.teacher-eval__stars {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.teacher-eval__star-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.teacher-eval__star-label input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.teacher-eval__star-label span {
+  display: inline-block;
+  font-size: var(--font-size-2xl);
+  line-height: 1;
+}
+
+.teacher-eval__star-label span.is-active {
+  color: var(--accent);
+}
+
+.teacher-eval__star-label input:focus-visible + span {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.teacher-eval__char-counter {
+  margin-top: var(--space-xs);
+  margin-bottom: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.teacher-eval__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.teacher-eval__meta {
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.teacher-eval__table td {
+  vertical-align: top;
+}
+
+.teacher-eval__report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.teacher-eval__report-card {
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.teacher-eval__report-header h3 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
+
+.teacher-eval__report-header p {
+  margin: var(--space-xs) 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.teacher-eval__report-teacher {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.teacher-eval__metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+}
+
+.teacher-eval__metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.teacher-eval__metric-grid div {
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  display: grid;
+  gap: 0.2rem;
+}
+
+.teacher-eval__metric-grid span {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.teacher-eval__metric-grid strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+}
+
+.teacher-eval__comments h4 {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.teacher-eval__comments ul {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.teacher-eval__comments li {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+}
+
+.teacher-eval__comments p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.teacher-eval__comments small {
+  display: block;
+  margin-top: var(--space-xs);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 767px) {
+  .teacher-eval__actions {
+    justify-content: stretch;
+  }
+
+  .teacher-eval__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .teacher-eval__metric-grid {
+    grid-template-columns: 1fr;
+  }
+}

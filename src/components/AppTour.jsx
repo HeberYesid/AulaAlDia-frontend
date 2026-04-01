@@ -76,6 +76,11 @@ const STUDENT_STEPS = [
     disableBeacon: true,
   },
   {
+    target: navTarget('nav-teacher-evaluations'),
+    content: 'Eval. Docente: califica de forma anonima a tus profesores en materias activas.',
+    disableBeacon: true,
+  },
+  {
     target: navTarget('nav-my-bulletins'),
     content: 'Boletines: genera y descarga reportes de desempeño académico.',
     disableBeacon: true,
@@ -176,6 +181,11 @@ const TEACHER_STEPS = [
     disableBeacon: true,
   },
   {
+    target: navTarget('nav-teacher-evaluations'),
+    content: 'Eval. Docente: revisa resultados agregados y anonimos por materia.',
+    disableBeacon: true,
+  },
+  {
     target: '.sidebar__profile',
     content: 'Perfil: personaliza datos, configuración y reinicia este tour cuando quieras.',
     disableBeacon: true,
@@ -253,6 +263,11 @@ const ADMIN_STEPS = [
   {
     target: navTarget('nav-admin-academic-settings'),
     content: 'Config. Académica: gestiona periodos, escalas de calificación y parámetros institucionales.',
+    disableBeacon: true,
+  },
+  {
+    target: navTarget('nav-teacher-evaluations'),
+    content: 'Eval. Docente: monitorea indicadores anonimos por docente y materia.',
     disableBeacon: true,
   },
   {
