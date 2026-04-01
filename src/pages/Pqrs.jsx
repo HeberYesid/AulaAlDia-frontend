@@ -4,6 +4,7 @@ import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_LINKS,
 } from '../constants/legalLinks'
+import { LEGAL_CONTACT_EMAIL, LEGAL_DATA_RIGHTS_SUBJECT } from '../constants/legalContact'
 
 export default function Pqrs() {
   return (
@@ -26,7 +27,8 @@ export default function Pqrs() {
         <ol>
           <li>
             Usa el formulario de <Link to="/contact">contacto</Link> y selecciona el
-            asunto correspondiente.
+            asunto <strong>{LEGAL_DATA_RIGHTS_SUBJECT.label}</strong> para consultas,
+            rectificaciones, supresiones o revocatorias.
            </li>
           <li>
             Describe de forma clara los hechos, fechas y datos de contacto para
@@ -52,7 +54,10 @@ export default function Pqrs() {
         <h2>3. Canales habilitados</h2>
         <ul>
           <li>Formulario web: <Link to="/contact">/contact</Link></li>
-          <li>Correo de soporte: support@aulaaldia.com</li>
+          <li>
+            Correo institucional:{' '}
+            <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
+          </li>
           <li>Politica de privacidad: <Link to="/privacy">/privacy</Link></li>
         </ul>
       </section>

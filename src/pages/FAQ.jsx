@@ -21,7 +21,7 @@ export default function FAQ() {
         {
           question: '¿Quién puede usar AulaAlDía?',
           answer:
-            'AulaAlDía está diseñado para tres tipos de usuarios: Estudiantes (pueden ver sus asignaturas y resultados), Profesores (pueden crear asignaturas, registrar estudiantes y calificar)',
+            'AulaAlDía está diseñado para tres tipos de usuarios: Estudiantes (pueden ver sus asignaturas y resultados), Profesores (pueden crear asignaturas, registrar estudiantes y calificar), Administradores (tienen control total sobre la plataforma y pueden gestionar usuarios, asignaturas y configuraciones). El acceso a ciertas funcionalidades depende del rol del usuario.',
         },
         {
           question: '¿AulaAlDía es gratis o tiene planes pagos?',

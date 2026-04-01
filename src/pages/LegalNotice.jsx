@@ -4,6 +4,11 @@ import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_LINKS,
 } from '../constants/legalLinks'
+import {
+  LEGAL_CONTACT_EMAIL,
+  LEGAL_DATA_RIGHTS_SUBJECT,
+  LEGAL_SECURITY_PROVIDER,
+} from '../constants/legalContact'
 
 export default function LegalNotice() {
   return (
@@ -61,6 +66,27 @@ export default function LegalNotice() {
           Conservamos datos durante la vigencia de la relacion de servicio y segun los
           periodos requeridos por ley. Aplicamos controles de acceso, autenticacion y
           segregacion por institucion para proteger la informacion.
+        </p>
+      </section>
+
+      <section className="legal-page__section">
+        <h2>6. Verificacion de seguridad y terceros</h2>
+        <p>
+          Los formularios publicos usan <strong>{LEGAL_SECURITY_PROVIDER}</strong> para
+          reducir spam, abuso y suplantacion. Ese servicio puede recibir datos tecnicos
+          del navegador e IP solo con fines de seguridad.
+        </p>
+      </section>
+
+      <section className="legal-page__section">
+        <h2>7. Canales de atencion</h2>
+        <p>
+          Para ejercer derechos de titular, presentar reclamos o revocar autorizacion
+          usa <Link to="/pqrs">PQRS</Link> o escribe a{' '}
+          <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>. Si tu
+          solicitud es de datos personales, selecciona el asunto{' '}
+          <strong> {LEGAL_DATA_RIGHTS_SUBJECT.label}</strong> en el formulario de
+          contacto.
         </p>
       </section>
 

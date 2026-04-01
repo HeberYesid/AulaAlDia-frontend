@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom'
 import { sendContactMessage } from '../api/contact'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
 import LegalConsentField from '../components/LegalConsentField'
+import {
+  LEGAL_CONTACT_EMAIL,
+  LEGAL_CONTACT_RESPONSE_WINDOW,
+  LEGAL_DATA_RIGHTS_SUBJECT,
+} from '../constants/legalContact'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import '../styles.css'
 
@@ -191,16 +196,18 @@ export default function Contact() {
           <div className="contact-info-item">
             <div className="contact-icon">📧</div>
             <div>
-              <h3>Email</h3>
-              <p>heberyesiddazatoloza@gmail.com</p>
+              <h3>Canal institucional</h3>
+              <p>
+                <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
+              </p>
             </div>
           </div>
 
           <div className="contact-info-item">
             <div className="contact-icon">💬</div>
             <div>
-              <h3>Soporte</h3>
-              <p>Tiempo de respuesta: 24-48 horas</p>
+              <h3>Tiempo de respuesta</h3>
+              <p>{LEGAL_CONTACT_RESPONSE_WINDOW}</p>
             </div>
           </div>
 
@@ -241,6 +248,10 @@ export default function Contact() {
               <Link to="/terms">Terminos</Link>,{' '}
               <Link to="/habeas-data">Habeas Data</Link> y canal{' '}
               <Link to="/pqrs">PQRS</Link>.
+            </p>
+            <p>
+              Para consultas, rectificaciones, supresiones o revocatorias selecciona el
+              asunto <strong>{LEGAL_DATA_RIGHTS_SUBJECT.label}</strong>.
             </p>
           </div>
         </div>
@@ -301,6 +312,9 @@ export default function Contact() {
                 <option value="registro">Problema con Registro</option>
                 <option value="calificaciones">Consulta sobre Calificaciones</option>
                 <option value="profesor">Solicitud de Acceso como Profesor</option>
+                <option value={LEGAL_DATA_RIGHTS_SUBJECT.value}>
+                  {LEGAL_DATA_RIGHTS_SUBJECT.label}
+                </option>
                 <option value="bug">Reportar un Error</option>
                 <option value="sugerencia">Sugerencia o Mejora</option>
                 <option value="otro">Otro</option>

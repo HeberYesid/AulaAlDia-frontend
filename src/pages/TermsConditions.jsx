@@ -4,6 +4,7 @@ import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_LINKS,
 } from '../constants/legalLinks'
+import { LEGAL_CONTACT_EMAIL, LEGAL_SECURITY_PROVIDER } from '../constants/legalContact'
 
 export default function TermsConditions() {
   return (
@@ -59,8 +60,16 @@ export default function TermsConditions() {
         <h2>5. Soporte y reclamaciones</h2>
         <p>
           Para soporte tecnico, reclamos o solicitudes legales usa el canal de{' '}
-          <Link to="/pqrs">PQRS</Link> o el formulario de{' '}
-          <Link to="/contact">contacto</Link>.
+          <Link to="/pqrs">PQRS</Link>, el formulario de <Link to="/contact">contacto</Link>{' '}
+          o escribe a <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>.
+        </p>
+      </section>
+
+      <section className="legal-page__section">
+        <h2>6. Verificacion de seguridad</h2>
+        <p>
+          Los formularios publicos pueden apoyarse en <strong>{LEGAL_SECURITY_PROVIDER}</strong>
+          para reducir spam y automatizacion abusiva.
         </p>
       </section>
 

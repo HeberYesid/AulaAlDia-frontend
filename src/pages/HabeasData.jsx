@@ -4,6 +4,10 @@ import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_LINKS,
 } from '../constants/legalLinks'
+import {
+  LEGAL_CONTACT_EMAIL,
+  LEGAL_DATA_RIGHTS_SUBJECT,
+} from '../constants/legalContact'
 
 export default function HabeasData() {
   return (
@@ -54,6 +58,23 @@ export default function HabeasData() {
           Cuando se requiere autorizacion, el sistema conserva evidencia minima de
           version legal aceptada, fecha/hora, direccion IP y user-agent del evento.
         </p>
+      </section>
+
+      <section className="legal-page__section">
+        <h2>5. Canales para ejercer tus derechos</h2>
+        <ul>
+          <li>
+            Formulario de contacto: selecciona el asunto{' '}
+            <strong>{LEGAL_DATA_RIGHTS_SUBJECT.label}</strong>
+          </li>
+          <li>
+            Correo institucional:{' '}
+            <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
+          </li>
+          <li>
+            Canal PQRS: <Link to="/pqrs">/pqrs</Link>
+          </li>
+        </ul>
       </section>
 
       <footer className="legal-page__footer">

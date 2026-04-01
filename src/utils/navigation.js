@@ -13,6 +13,7 @@ import {
   Users,
   Megaphone,
   Star,
+  LifeBuoy,
 } from 'lucide-react'
 import { USER_ROLES } from './constants'
 
