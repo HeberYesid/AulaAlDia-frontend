@@ -11,11 +11,6 @@ const NAV_LINKS = [
   { label: 'Waitlist', scrollId: 'waitlist' },
 ]
 
-const LEGAL_LINKS = [
-  { label: 'Privacidad', to: '/privacy' },
-  { label: 'PQRS', to: '/pqrs' },
-]
-
 function scrollToSection(id) {
   const el = document.getElementById(id)
   if (el) {
@@ -105,11 +100,6 @@ export default function PublicNavBar() {
           ))}
           <Link to="/faq" className="public-navbar__link">FAQ</Link>
           <Link to="/contact" className="public-navbar__link">Contacto</Link>
-          {LEGAL_LINKS.map((link) => (
-            <Link key={link.to} to={link.to} className="public-navbar__link">
-              {link.label}
-            </Link>
-          ))}
         </nav>
 
         {/* CTA buttons — desktop */}
@@ -174,16 +164,6 @@ export default function PublicNavBar() {
           >
             Contacto
           </Link>
-          {LEGAL_LINKS.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="public-navbar__mobile-link"
-              onClick={() => setMobileOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
           <div className="public-navbar__mobile-cta">
             <ThemeToggle />
             {isAuthenticated ? (
