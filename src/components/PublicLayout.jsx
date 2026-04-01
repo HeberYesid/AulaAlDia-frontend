@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import PublicNavBar from './PublicNavBar'
+import ThemeToggle from './ThemeToggle'
 import { LEGAL_LINKS } from '../constants/legalLinks'
 
 export default function PublicLayout({ children }) {
@@ -20,6 +21,9 @@ export default function PublicLayout({ children }) {
             ))}
           </nav>
         </footer>
+      </div>
+      <div className="public-layout__theme-toggle">
+        <ThemeToggle />
       </div>
     </>
   )

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { getBrandInitials } from '../utils/branding'
-import ThemeToggle from './ThemeToggle'
 
 const NAV_LINKS = [
   { label: 'Características', scrollId: 'features' },
@@ -104,7 +103,6 @@ export default function PublicNavBar() {
 
         {/* CTA buttons — desktop */}
         <div className="public-navbar__cta">
-          <ThemeToggle />
           {isAuthenticated ? (
             <Link to="/" className="btn btn-primary public-navbar__cta-btn">
               Ir al Dashboard
@@ -112,9 +110,6 @@ export default function PublicNavBar() {
           ) : (
             <>
               <Link to={`/login${authQuerySuffix}`} className="public-navbar__login">Iniciar Sesión</Link>
-              <Link to={`/register${authQuerySuffix}`} className="btn btn-primary public-navbar__cta-btn">
-                Registrarse
-              </Link>
             </>
           )}
         </div>
@@ -165,7 +160,6 @@ export default function PublicNavBar() {
             Contacto
           </Link>
           <div className="public-navbar__mobile-cta">
-            <ThemeToggle />
             {isAuthenticated ? (
               <Link
                 to="/"
@@ -182,13 +176,6 @@ export default function PublicNavBar() {
                   onClick={() => setMobileOpen(false)}
                 >
                   Iniciar Sesión
-                </Link>
-                <Link
-                  to={`/register${authQuerySuffix}`}
-                  className="btn btn-primary"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Registrarse
                 </Link>
               </>
             )}

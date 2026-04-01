@@ -4084,9 +4084,17 @@ a.welcome-panel__notif-link:hover {
   justify-content: center;
 }
 
-.public-navbar__mobile-cta .theme-toggle {
-  width: 100%;
-  justify-content: center;
+.public-layout__theme-toggle {
+  position: fixed;
+  left: calc(clamp(1rem, 2vw, 1.5rem) + env(safe-area-inset-left));
+  bottom: calc(clamp(1rem, 2vw, 1.5rem) + env(safe-area-inset-bottom));
+  z-index: 120;
+}
+
+.public-layout__theme-toggle .theme-toggle {
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* =================================================================

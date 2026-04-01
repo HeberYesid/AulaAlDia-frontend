@@ -9,10 +9,6 @@ vi.mock('../../state/AuthContext', () => ({
     useAuth: vi.fn()
 }));
 
-vi.mock('../ThemeToggle', () => ({
-    default: () => <button type="button" className="theme-toggle">Tema</button>
-}));
-
 const renderWithRouter = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
 describe('PublicNavBar component', () => {
@@ -29,7 +25,7 @@ describe('PublicNavBar component', () => {
         expect(screen.getByText('Test Brand')).toBeTruthy();
         expect(screen.getByText('Características')).toBeTruthy();
         expect(screen.getByText('Iniciar Sesión')).toBeTruthy();
-        expect(screen.getByText('Registrarse')).toBeTruthy();
+        expect(screen.queryByText('Registrarse')).toBeNull();
     });
 
     it('renders "Ir al Dashboard" when authenticated', () => {

@@ -7,6 +7,10 @@ vi.mock('../PublicNavBar', () => ({
     default: () => <div data-testid="public-nav-bar" />
 }));
 
+vi.mock('../ThemeToggle', () => ({
+    default: () => <button type="button" data-testid="theme-toggle">Tema</button>
+}));
+
 describe('PublicLayout component', () => {
     it('renders PublicNavBar and children', () => {
         render(
@@ -20,5 +24,6 @@ describe('PublicLayout component', () => {
         expect(screen.getByTestId('public-nav-bar')).toBeTruthy();
         expect(screen.getByTestId('child-element')).toBeTruthy();
         expect(screen.getByText('Test Content')).toBeTruthy();
+        expect(screen.getByTestId('theme-toggle')).toBeTruthy();
     });
 });
