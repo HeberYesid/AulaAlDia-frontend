@@ -36,8 +36,8 @@ vi.mock('../pages/AdminBulletins', () => ({
   default: () => <div>AdminBulletins Mock</div>,
 }))
 
-vi.mock('../pages/AdminSupportTickets', () => ({
-  default: () => <div>AdminSupportTickets Mock</div>,
+vi.mock('../pages/TeacherEvaluations', () => ({
+  default: () => <div>TeacherEvaluations Mock</div>,
 }))
 
 function renderAppAt(path) {
@@ -127,26 +127,38 @@ describe('App admin routes', () => {
     expect(await screen.findByText('AdminBulletins Mock')).toBeInTheDocument()
   })
 
-  it('redirects STUDENT away from /admin/support', async () => {
+  it('allows STUDENT into /teacher-evaluations', async () => {
     AuthContext.useAuth.mockReturnValue({
       user: { id: 1, role: 'STUDENT' },
       loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      schoolYearGateLoaded: true,
+      hasActiveSchoolYear: true,
+      activeSchoolYear: { id: 1, label: '2026' },
     })
 
-    renderAppAt('/admin/support')
+    renderAppAt('/teacher-evaluations')
 
-    expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
-    expect(screen.queryByText('AdminSupportTickets Mock')).not.toBeInTheDocument()
+    expect(await screen.findByText('TeacherEvaluations Mock')).toBeInTheDocument()
   })
 
-  it('allows ADMIN into /admin/support', async () => {
+  it('redirects TUTOR away from /teacher-evaluations', async () => {
     AuthContext.useAuth.mockReturnValue({
-      user: { id: 1, role: 'ADMIN' },
+      user: { id: 1, role: 'TUTOR' },
       loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      schoolYearGateLoaded: true,
+      hasActiveSchoolYear: true,
+      activeSchoolYear: { id: 1, label: '2026' },
     })
 
-    renderAppAt('/admin/support')
+    renderAppAt('/teacher-evaluations')
 
-    expect(await screen.findByText('AdminSupportTickets Mock')).toBeInTheDocument()
+    expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
+    expect(screen.queryByText('TeacherEvaluations Mock')).not.toBeInTheDocument()
   })
 })

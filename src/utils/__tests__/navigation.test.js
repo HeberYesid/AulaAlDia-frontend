@@ -21,6 +21,7 @@ describe('navigation config', () => {
 
     expect(keys).not.toContain('messages')
     expect(keys).toContain('my-results')
+    expect(keys).not.toContain('teacher-evaluations-student')
   })
 
   it('shows admin dashboard and admin-only items for admin', () => {
@@ -56,6 +57,24 @@ describe('navigation config', () => {
 
     expect(studentMyItem?.label).toBe('Resultados')
     expect(tutorMyItem?.label).toBe('Progreso')
+  })
+
+  it('shows teacher evaluation entry only for student, teacher and admin', () => {
+    const student = buildUser(USER_ROLES.STUDENT)
+    const teacher = buildUser(USER_ROLES.TEACHER)
+    const admin = buildUser(USER_ROLES.ADMIN)
+    const tutor = buildUser(USER_ROLES.TUTOR)
+
+    const studentKeys = getNavigationItems(student, { surface: 'sidebar' }).map((item) => item.key)
+    const teacherKeys = getNavigationItems(teacher, { surface: 'sidebar' }).map((item) => item.key)
+    const adminKeys = getNavigationItems(admin, { surface: 'sidebar' }).map((item) => item.key)
+    const tutorKeys = getNavigationItems(tutor, { surface: 'sidebar' }).map((item) => item.key)
+
+    expect(studentKeys).toContain('teacher-evaluations-student')
+    expect(teacherKeys).toContain('teacher-evaluations-staff')
+    expect(adminKeys).toContain('teacher-evaluations-staff')
+    expect(tutorKeys).not.toContain('teacher-evaluations-student')
+    expect(tutorKeys).not.toContain('teacher-evaluations-staff')
   })
 
   it('groups sidebar items by sections', () => {
