@@ -8,6 +8,31 @@ import {
   updateCourseNotificationReadState,
 } from '../api/notifications'
 
+const NOTIFICATION_TYPE_LABELS = {
+  ENROLLMENT: 'Inscripción',
+  RESULT_CREATED: 'Resultado',
+  RESULT_UPDATED: 'Actualización',
+  EXERCISE_CREATED: 'Ejercicio',
+}
+
+const NOTIFICATION_TYPE_CLASSNAMES = {
+  ENROLLMENT: 'notifications-page__type-badge--enrollment',
+  RESULT_CREATED: 'notifications-page__type-badge--result-created',
+  RESULT_UPDATED: 'notifications-page__type-badge--result-updated',
+  EXERCISE_CREATED: 'notifications-page__type-badge--exercise-created',
+}
+
+const getNotificationTypeLabel = (notificationType) => {
+  return NOTIFICATION_TYPE_LABELS[notificationType] || 'General'
+}
+
+const getNotificationTypeBadgeClassName = (notificationType) => {
+  return [
+    'notifications-page__type-badge',
+    NOTIFICATION_TYPE_CLASSNAMES[notificationType] || 'notifications-page__type-badge--general',
+  ].join(' ')
+}
+
 export default function NotificationsPage() {
   const [items, setItems] = useState([])
   const [unread, setUnread] = useState(0)
@@ -87,7 +112,7 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <div className="card">
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <div className="notifications-page__loading">
           <div className="spinner" role="status" aria-label="Cargando notificaciones..."></div>
           <p>Cargando notificaciones...</p>
         </div>
@@ -97,15 +122,15 @@ export default function NotificationsPage() {
 
   return (
     <>
-    <div className="card">
-      <div className="notification-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
+    <div className="card notifications-page">
+      <div className="notification-header notifications-page__header">
         <div>
-          <h1 style={{ margin: 0 }}>Notificaciones</h1>
-          <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
+          <h1 className="notifications-page__title">Notificaciones</h1>
+          <p className="notifications-page__subtitle">
             {unread > 0 ? `Tienes ${unread} notificación${unread > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
           </p>
         </div>
-        <div className="notification-actions" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="notification-actions notifications-page__actions">
           {unread > 0 && (
             <button className="btn secondary" onClick={markAll}>
               Marcar todas como leídas
@@ -120,119 +145,79 @@ export default function NotificationsPage() {
       </div>
 
       {items.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-          <p style={{ fontSize: '3rem', margin: 0 }}></p>
-          <p style={{ fontSize: '1.2rem', margin: '1rem 0 0 0' }}>No tienes notificaciones</p>
+        <div className="notifications-page__empty-state">
+          <p className="notifications-page__empty-icon"></p>
+          <p className="notifications-page__empty-message">No tienes notificaciones</p>
         </div>
       ) : (
-        <div className="table-container" style={{ marginTop: '1rem' }}>
-          <table className="table mobile-card-view" style={{ width: '100%' }}>
+        <div className="table-container notifications-page__table-container">
+          <table className="table mobile-card-view notifications-page__table">
             <thead>
               <tr>
                 <th scope="col">Tipo</th>
                 <th scope="col">Título</th>
                 <th scope="col">Mensaje</th>
                 <th scope="col">Fecha</th>
-                <th scope="col" style={{ textAlign: 'center' }}>Estado</th>
-                <th scope="col" style={{ textAlign: 'center' }}>Acciones</th>
+                <th scope="col" className="notifications-page__th-center">Estado</th>
+                <th scope="col" className="notifications-page__th-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {items.map((n) => (
-                <tr key={n.id} style={{ 
-                  background: n.is_read ? 'transparent' : 'rgba(var(--primary-rgb, 59, 130, 246), 0.05)',
-                  borderLeft: n.is_read ? 'none' : '3px solid var(--primary)'
-                }}>
+                <tr
+                  key={n.id}
+                  className={`notifications-page__row${n.is_read ? '' : ' notifications-page__row--unread'}`}
+                >
                   <td data-label="Tipo">
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '0.3rem 0.6rem',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      background: n.notification_type === 'ENROLLMENT' ? '#10b981' :
-                                 n.notification_type === 'RESULT_CREATED' ? '#3b82f6' :
-                                 n.notification_type === 'RESULT_UPDATED' ? '#f59e0b' :
-                                 n.notification_type === 'EXERCISE_CREATED' ? '#8b5cf6' :
-                                 '#6b7280',
-                      color: 'white',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {n.notification_type === 'ENROLLMENT' ? 'Inscripción' :
-                       n.notification_type === 'RESULT_CREATED' ? 'Resultado' :
-                       n.notification_type === 'RESULT_UPDATED' ? 'Actualización' :
-                       n.notification_type === 'EXERCISE_CREATED' ? 'Ejercicio' : 'General'}
+                    <span className={getNotificationTypeBadgeClassName(n.notification_type)}>
+                      {getNotificationTypeLabel(n.notification_type)}
                     </span>
                   </td>
-                  <td data-label="Título" style={{ 
-                    fontWeight: n.is_read ? 'normal' : '600',
-                    fontSize: '0.9rem'
-                  }}>
+                  <td
+                    data-label="Título"
+                    className={`notifications-page__title-cell${n.is_read ? '' : ' notifications-page__title-cell--unread'}`}
+                  >
                     {n.title}
                   </td>
-                  <td data-label="Mensaje" style={{ 
-                    fontSize: '0.85rem',
-                    color: n.is_read ? 'var(--text-secondary)' : 'var(--text)'
-                  }}>
+                  <td
+                    data-label="Mensaje"
+                    className={`notifications-page__message-cell${n.is_read ? '' : ' notifications-page__message-cell--unread'}`}
+                  >
                     {n.message}
                   </td>
-                  <td data-label="Fecha" style={{ 
-                    fontSize: '0.8rem', 
-                    color: 'var(--text-secondary)',
-                    whiteSpace: 'nowrap'
-                  }}>
+                  <td data-label="Fecha" className="notifications-page__date-cell">
                     {new Date(n.created_at).toLocaleDateString('es', {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric'
                     })}
                     <br />
-                    <span style={{ fontSize: '0.75rem' }}>
+                    <span className="notifications-page__time-cell">
                       {new Date(n.created_at).toLocaleTimeString('es', {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
                     </span>
                   </td>
-                  <td data-label="Estado" style={{ textAlign: 'center' }}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '0.25rem 0.6rem',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      background: n.is_read ? '#e5e7eb' : 'var(--primary)',
-                      color: n.is_read ? '#6b7280' : 'white',
-                      whiteSpace: 'nowrap'
-                    }}>
+                  <td data-label="Estado" className="notifications-page__status-cell">
+                    <span className={`notifications-page__status-badge${n.is_read ? ' notifications-page__status-badge--read' : ' notifications-page__status-badge--new'}`}>
                       {n.is_read ? 'Leída' : 'Nueva'}
                     </span>
                   </td>
-                  <td data-label="Acciones" style={{ textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                  <td data-label="Acciones" className="notifications-page__actions-cell">
+                    <div className="notifications-page__row-actions">
                       <button 
-                        className="btn sm"
+                        className="btn sm notifications-page__action-btn"
                         onClick={() => toggleRead(n)}
                         aria-label={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
                         title={n.is_read ? 'Marcar como no leída' : 'Marcar como leída'}
-                        style={{
-                          padding: '0.3rem 0.6rem',
-                          fontSize: '0.75rem',
-                          whiteSpace: 'nowrap',
-                          minWidth: 'auto'
-                        }}
                       >
                         {n.is_read ? 'No leída' : 'Marcar'}
                       </button>
                       <button 
-                        className="btn sm danger"
+                        className="btn sm danger notifications-page__action-btn"
                         onClick={() => deleteNotification(n.id)}
                         aria-label={`Eliminar notificación: ${n.message?.substring(0, 60)}`}
-                        style={{
-                          padding: '0.3rem 0.6rem',
-                          fontSize: '0.75rem',
-                          minWidth: 'auto'
-                        }}
                       >
                         Eliminar
                       </button>

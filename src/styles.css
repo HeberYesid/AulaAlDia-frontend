@@ -709,6 +709,7 @@ body.sidebar-collapsed .app-body {
 }
 
 .notification-bell__dropdown {
+  position: fixed;
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: 12px;
@@ -5548,6 +5549,555 @@ a.welcome-panel__notif-link:hover {
 
 .landing-cta-final__link:hover {
   color: var(--text-primary);
+}
+
+/* ===============================================
+   Admin News, Absences, Notifications
+   =============================================== */
+
+/* Admin news */
+.admin-news__header {
+  margin-bottom: var(--space-lg);
+}
+
+.admin-news__title {
+  margin: 0;
+}
+
+.admin-news__subtitle {
+  margin: var(--space-xs) 0 0;
+  color: var(--text-secondary);
+}
+
+.admin-news__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.admin-news__tabs {
+  flex: 1 1 auto;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.admin-news__tab {
+  flex: 1 1 13rem;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.admin-news__create-btn {
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+.admin-news__loading,
+.absences__loading,
+.notifications-page__loading {
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.admin-news__loading .spinner,
+.absences__loading .spinner,
+.notifications-page__loading .spinner {
+  margin-inline: auto;
+  margin-right: 0;
+  margin-bottom: var(--space-sm);
+}
+
+.admin-news__empty {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--text-muted);
+}
+
+.admin-news__actions-header {
+  text-align: right;
+}
+
+.admin-news__row-title {
+  display: block;
+}
+
+.admin-news__row-preview {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.admin-news__status {
+  font-weight: 700;
+}
+
+.admin-news__status--active {
+  color: var(--success);
+}
+
+.admin-news__status--inactive {
+  color: var(--text-muted);
+}
+
+.admin-news__actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.admin-news__action-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-width: auto;
+}
+
+.admin-news__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 8, 20, 0.56);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+}
+
+.admin-news__modal-card {
+  width: 100%;
+  max-width: 32rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-news__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.admin-news__modal-title {
+  margin: 0;
+}
+
+.admin-news__modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  color: var(--text-primary);
+}
+
+.admin-news__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.admin-news__field-control {
+  width: 100%;
+}
+
+.admin-news__textarea {
+  resize: vertical;
+}
+
+.admin-news__textarea--announcement {
+  min-height: 100px;
+}
+
+.admin-news__textarea--description {
+  min-height: 80px;
+}
+
+.admin-news__date-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-sm);
+  align-items: end;
+}
+
+.admin-news__date-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.admin-news__datetime-field {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.admin-news__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.admin-news__form-btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Absences */
+.absences__header-card,
+.absences__form-card,
+.absences__filters-card {
+  margin-bottom: var(--space-lg);
+}
+
+.absences__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.absences__header-title {
+  margin: 0;
+}
+
+.absences__header-subtitle {
+  color: var(--text-secondary);
+  margin: 0.5rem 0 0;
+}
+
+.absences__form-title {
+  margin-top: 0;
+}
+
+.absences__form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.absences__justified-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.absences__justified-checkbox {
+  width: auto;
+}
+
+.absences__justified-label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.absences__reason-group {
+  margin-top: var(--space-md);
+}
+
+.absences__reason-input {
+  resize: vertical;
+}
+
+.absences__form-error {
+  color: var(--danger);
+  margin-top: var(--space-sm);
+}
+
+.absences__form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.absences__stats-grid {
+  margin-bottom: var(--space-lg);
+}
+
+.absences__stat-value--justified {
+  color: var(--success);
+}
+
+.absences__stat-value--unjustified {
+  color: var(--danger);
+}
+
+.absences__filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.absences__empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.absences__empty-icon {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.absences__empty-message {
+  font-size: 1.2rem;
+  margin: 1rem 0 0;
+}
+
+.absences__table-wrapper {
+  overflow-x: auto;
+}
+
+.absences__table {
+  width: 100%;
+}
+
+.absences__th-center,
+.absences__status-cell,
+.absences__actions-cell {
+  text-align: center;
+}
+
+.absences__row {
+  cursor: pointer;
+}
+
+.absences__date-cell,
+.absences__student-cell,
+.absences__subject-cell,
+.absences__recorded-by-cell {
+  font-size: 0.85rem;
+}
+
+.absences__date-cell,
+.absences__recorded-by-cell,
+.absences__student-email {
+  color: var(--text-secondary);
+}
+
+.absences__date-cell {
+  white-space: nowrap;
+}
+
+.absences__student-email {
+  font-size: 0.75rem;
+}
+
+.absences__status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.absences__status-badge--justified {
+  background: var(--success);
+}
+
+.absences__status-badge--unjustified {
+  background: var(--danger);
+}
+
+.absences__reason-cell {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.absences__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.absences__action-btn {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  min-width: auto;
+}
+
+/* Notifications page */
+.notifications-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: 1rem;
+}
+
+.notifications-page__title {
+  margin: 0;
+}
+
+.notifications-page__subtitle {
+  color: var(--text-secondary);
+  margin: 0.5rem 0 0;
+}
+
+.notifications-page__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.notifications-page__empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.notifications-page__empty-icon {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.notifications-page__empty-icon:empty::before {
+  content: '🔔';
+}
+
+.notifications-page__empty-message {
+  font-size: 1.2rem;
+  margin: 1rem 0 0;
+}
+
+.notifications-page__table-container {
+  margin-top: 1rem;
+}
+
+.notifications-page__table {
+  width: 100%;
+}
+
+.notifications-page__th-center,
+.notifications-page__status-cell,
+.notifications-page__actions-cell {
+  text-align: center;
+}
+
+.notifications-page__row--unread {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border-left: 3px solid var(--primary);
+}
+
+.notifications-page__type-badge {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.notifications-page__type-badge--enrollment {
+  background: #10b981;
+}
+
+.notifications-page__type-badge--result-created {
+  background: #3b82f6;
+}
+
+.notifications-page__type-badge--result-updated {
+  background: #f59e0b;
+}
+
+.notifications-page__type-badge--exercise-created {
+  background: #8b5cf6;
+}
+
+.notifications-page__type-badge--general {
+  background: #6b7280;
+}
+
+.notifications-page__title-cell {
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.notifications-page__title-cell--unread {
+  font-weight: 600;
+}
+
+.notifications-page__message-cell {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.notifications-page__message-cell--unread {
+  color: var(--text-primary);
+}
+
+.notifications-page__date-cell {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.notifications-page__time-cell {
+  font-size: 0.75rem;
+}
+
+.notifications-page__status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.notifications-page__status-badge--read {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.notifications-page__status-badge--new {
+  background: var(--primary);
+  color: #fff;
+}
+
+.notifications-page__row-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.notifications-page__action-btn {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  min-width: auto;
+}
+
+@media (max-width: 768px) {
+  .admin-news__create-btn,
+  .admin-news__form-btn,
+  .absences__form-actions .btn,
+  .notifications-page__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-news__actions,
+  .notifications-page__row-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-news__actions-header {
+    text-align: left;
+  }
 }
 
 @keyframes surface-enter {

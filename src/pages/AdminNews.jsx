@@ -164,45 +164,43 @@ export default function AdminNews() {
         />
       )}
 
-      <div className="page-header" style={{ marginBottom: 'var(--space-lg)' }}>
-        <h1 style={{ margin: 0 }}>Gestión de Novedades e Institucional</h1>
-        <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-xs) 0 0 0' }}>Administra los anuncios generales y eventos institucionales del portal.</p>
+      <div className="page-header admin-news__header">
+        <h1 className="admin-news__title">Gestión de Novedades e Institucional</h1>
+        <p className="admin-news__subtitle">Administra los anuncios generales y eventos institucionales del portal.</p>
       </div>
 
       <Alert type="error" message={error} />
       <Alert type="success" message={success} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
-        <div className="subject-tabs" style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', flex: '1 1 auto', margin: 0 }}>
+      <div className="admin-news__toolbar">
+        <div className="subject-tabs admin-news__tabs">
           <button
-            className={`subject-tab ${activeTab === 'announcements' ? 'subject-tab--active' : ''}`}
+            className={`subject-tab admin-news__tab ${activeTab === 'announcements' ? 'subject-tab--active' : ''}`}
             onClick={() => setActiveTab('announcements')}
-            style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap', margin: 0 }}
           >
             Anuncios Generales
           </button>
           <button
-            className={`subject-tab ${activeTab === 'events' ? 'subject-tab--active' : ''}`}
+            className={`subject-tab admin-news__tab ${activeTab === 'events' ? 'subject-tab--active' : ''}`}
             onClick={() => setActiveTab('events')}
-            style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap', margin: 0 }}
           >
             Eventos Institucionales
           </button>
         </div>
         
-        <button className="btn primary" onClick={() => openModal()} style={{ whiteSpace: 'nowrap', flex: '0 1 auto' }}>
+        <button className="btn primary admin-news__create-btn" onClick={() => openModal()}>
           Crear {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}
         </button>
       </div>
 
       {loading && data.length === 0 ? (
-        <div style={{ padding: 'var(--space-2xl)', textAlign: 'center' }}>
+        <div className="admin-news__loading">
           <div className="spinner"></div>
         </div>
       ) : (
         <div className="card">
           {data.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
+            <div className="admin-news__empty">
               No hay {activeTab === 'announcements' ? 'anuncios' : 'eventos'} para mostrar.
             </div>
           ) : (
@@ -216,15 +214,15 @@ export default function AdminNews() {
                     ) : (
                       <th scope="col">Fechas</th>
                     )}
-                    <th scope="col" style={{ textAlign: 'right' }}>Acciones</th>
+                    <th scope="col" className="admin-news__actions-header">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.map(item => (
                     <tr key={item.id}>
                       <td data-label="Título">
-                        <strong style={{ display: 'block' }}>{item.title}</strong>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        <strong className="admin-news__row-title">{item.title}</strong>
+                        <span className="admin-news__row-preview">
                           {activeTab === 'announcements' ? 
                            (item.content?.length > 50 ? item.content.substring(0, 50) + '...' : item.content) : 
                            (item.description ? (item.description.length > 50 ? item.description.substring(0, 50) + '...' : item.description) : '')}
@@ -233,8 +231,8 @@ export default function AdminNews() {
                       {activeTab === 'announcements' ? (
                         <td data-label="Estado">
                           {item.is_active ? 
-                           <span style={{ color: 'var(--success-color, green)', fontWeight: 'bold' }}>Activo</span> : 
-                           <span style={{ color: 'var(--text-muted)' }}>Inactivo</span>}
+                           <span className="admin-news__status admin-news__status--active">Activo</span> : 
+                           <span className="admin-news__status admin-news__status--inactive">Inactivo</span>}
                         </td>
                       ) : (
                         <td data-label="Fechas">
@@ -242,11 +240,11 @@ export default function AdminNews() {
                         </td>
                       )}
                       <td data-label="Acciones">
-                        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                          <button onClick={() => openModal(item)} className="btn secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }} aria-label={`Editar ${item.title}`}>
+                        <div className="admin-news__actions">
+                          <button onClick={() => openModal(item)} className="btn secondary admin-news__action-btn" aria-label={`Editar ${item.title}`}>
                             Editar
                           </button>
-                          <button onClick={() => handleDeleteClick(item)} className="btn danger" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }} aria-label={`Eliminar ${item.title}`}>
+                          <button onClick={() => handleDeleteClick(item)} className="btn danger admin-news__action-btn" aria-label={`Eliminar ${item.title}`}>
                             Eliminar
                           </button>
                         </div>
@@ -261,29 +259,24 @@ export default function AdminNews() {
       )}
 
       {isModalOpen && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-md)'
-        }}
+        <div className="admin-news__modal-backdrop"
         onClick={(e) => {
           if (e.target === e.currentTarget) closeModal();
         }}
         role="dialog"
         aria-modal="true"
         >
-          <div className="card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-              <h2 style={{ margin: 0 }}>{editingItem ? 'Editar' : 'Crear'} {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}</h2>
-              <button onClick={closeModal} className="btn-close" aria-label="Cerrar modal" style={{ background: 'transparent', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '0 0.5rem' }}>&times;</button>
+          <div className="card admin-news__modal-card">
+            <div className="admin-news__modal-header">
+              <h2 className="admin-news__modal-title">{editingItem ? 'Editar' : 'Crear'} {activeTab === 'announcements' ? 'Anuncio' : 'Evento'}</h2>
+              <button onClick={closeModal} className="btn-close admin-news__modal-close" aria-label="Cerrar modal">&times;</button>
             </div>
             
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+            <form onSubmit={handleSubmit} className="admin-news__form">
               <div>
                 <label>Título</label>
                 <input 
-                  className="input-field" 
-                  style={{ width: '100%' }}
+                  className="input-field admin-news__field-control" 
                   value={title} 
                   onChange={e => setTitle(e.target.value)} 
                   required 
@@ -295,8 +288,7 @@ export default function AdminNews() {
                   <div>
                     <label>Contenido</label>
                     <textarea 
-                      className="input-field" 
-                      style={{ width: '100%', minHeight: '100px', resize: 'vertical' }}
+                      className="input-field admin-news__field-control admin-news__textarea admin-news__textarea--announcement"
                       value={content} 
                       onChange={e => setContent(e.target.value)} 
                       required 
@@ -309,32 +301,29 @@ export default function AdminNews() {
                   <div>
                     <label>Descripción</label>
                     <textarea 
-                      className="input-field" 
-                      style={{ width: '100%', minHeight: '80px', resize: 'vertical' }}
+                      className="input-field admin-news__field-control admin-news__textarea admin-news__textarea--description"
                       value={content} 
                       onChange={e => setContent(e.target.value)} 
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-sm)', alignItems: 'end' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                  <div className="admin-news__date-grid">
+                    <div className="admin-news__date-field">
                       <label htmlFor="event-start">Inicio</label>
                       <input 
                         id="event-start"
                         type="datetime-local" 
-                        className="input-field" 
-                        style={{ width: '100%', minHeight: '42px', boxSizing: 'border-box' }}
+                        className="input-field admin-news__datetime-field"
                         value={dateStart} 
                         onChange={e => setDateStart(e.target.value)} 
                         required 
                       />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                    <div className="admin-news__date-field">
                       <label htmlFor="event-end">Fin</label>
                       <input 
                         id="event-end"
                         type="datetime-local" 
-                        className="input-field" 
-                        style={{ width: '100%', minHeight: '42px', boxSizing: 'border-box' }}
+                        className="input-field admin-news__datetime-field"
                         value={dateEnd} 
                         onChange={e => setDateEnd(e.target.value)} 
                         required 
@@ -344,8 +333,7 @@ export default function AdminNews() {
                   <div>
                     <label>Tipo de Evento</label>
                     <select 
-                      className="input-field" 
-                      style={{ width: '100%' }}
+                      className="input-field admin-news__field-control"
                       value={eventType} 
                       onChange={e => setEventType(e.target.value)}
                     >
@@ -361,9 +349,9 @@ export default function AdminNews() {
                 </>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-sm)', marginTop: 'var(--space-md)', flexWrap: 'wrap' }}>
-                <button type="button" onClick={closeModal} className="btn secondary" style={{ flex: '1', minWidth: '100px' }}>Cancelar</button>
-                <button type="submit" className="btn primary" style={{ flex: '1', minWidth: '100px' }}>Guardar</button>
+              <div className="admin-news__form-actions">
+                <button type="button" onClick={closeModal} className="btn secondary admin-news__form-btn">Cancelar</button>
+                <button type="submit" className="btn primary admin-news__form-btn">Guardar</button>
               </div>
             </form>
           </div>

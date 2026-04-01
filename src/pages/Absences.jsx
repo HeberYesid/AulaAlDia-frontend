@@ -18,6 +18,12 @@ const buildStudentLabel = (student) => {
   return fullName ? `${fullName} (${student.email})` : student.email
 }
 
+const getAbsenceStatusClassName = (justified) => {
+  return justified
+    ? 'absences__status-badge absences__status-badge--justified'
+    : 'absences__status-badge absences__status-badge--unjustified'
+}
+
 export default function Absences() {
   const { user } = useAuth()
   const isTeacherOrAdmin = user?.role === 'TEACHER' || user?.role === 'ADMIN'
@@ -207,7 +213,7 @@ export default function Absences() {
   if (loading) {
     return (
       <div className="card">
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <div className="absences__loading">
           <div className="spinner" role="status" aria-label="Cargando faltas de asistencia..."></div>
           <p>Cargando faltas de asistencia...</p>
         </div>
@@ -219,19 +225,11 @@ export default function Absences() {
     <>
     <div className="fade-in">
       {/* Header */}
-      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 'var(--space-md)',
-          }}
-        >
+      <div className="card absences__header-card">
+        <div className="absences__header-content">
           <div>
-            <h1 style={{ margin: 0 }}><span aria-hidden="true">📋 </span>Faltas de Asistencia</h1>
-            <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
+            <h1 className="absences__header-title"><span aria-hidden="true">📋 </span>Faltas de Asistencia</h1>
+            <p className="absences__header-subtitle">
               {isTeacherOrAdmin
                 ? 'Registra y consulta las faltas de asistencia de los estudiantes.'
                 : user?.role === 'TUTOR'
@@ -254,16 +252,10 @@ export default function Absences() {
 
       {/* Create form (teacher/admin only) */}
       {showForm && isTeacherOrAdmin && (
-        <div className="card" id="absence-form" style={{ marginBottom: 'var(--space-lg)' }}>
-          <h3 style={{ marginTop: 0 }}>Registrar Falta</h3>
+        <div className="card absences__form-card" id="absence-form">
+          <h3 className="absences__form-title">Registrar Falta</h3>
           <form onSubmit={handleSubmit}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: 'var(--space-md)',
-              }}
-            >
+            <div className="absences__form-grid">
               <div className="form-group">
                 <label htmlFor="abs-subject">Materia *</label>
                 <select
@@ -320,28 +312,21 @@ export default function Absences() {
               </div>
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-sm)',
-                marginTop: 'var(--space-md)',
-              }}
-            >
+            <div className="absences__justified-row">
               <input
                 id="abs-justified"
                 type="checkbox"
                 name="justified"
                 checked={form.justified}
                 onChange={handleFormChange}
-                style={{ width: 'auto' }}
+                className="absences__justified-checkbox"
               />
-              <label htmlFor="abs-justified" style={{ margin: 0, cursor: 'pointer' }}>
+              <label htmlFor="abs-justified" className="absences__justified-label">
                 Falta justificada
               </label>
             </div>
 
-            <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+            <div className="form-group absences__reason-group">
               <label htmlFor="abs-reason">Motivo (opcional)</label>
               <textarea
                 id="abs-reason"
@@ -350,16 +335,16 @@ export default function Absences() {
                 onChange={handleFormChange}
                 rows={3}
                 placeholder="Motivo de la falta o justificación..."
-                style={{ resize: 'vertical' }}
+                className="absences__reason-input"
               />
             </div>
 
             {formError && (
-              <p style={{ color: 'var(--danger)', marginTop: 'var(--space-sm)' }} role="alert">
+              <p className="absences__form-error" role="alert">
                 {formError}
               </p>
             )}
-            <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
+            <div className="absences__form-actions">
               <button type="submit" className="btn primary" disabled={submitting}>
                 {submitting ? 'Guardando...' : 'Guardar Falta'}
               </button>
@@ -381,19 +366,19 @@ export default function Absences() {
       )}
 
       {/* Stats */}
-      <div className="stats-grid" style={{ marginBottom: 'var(--space-lg)' }}>
+      <div className="stats-grid absences__stats-grid">
         <div className="stat-card">
           <div className="stat-value">{stats.total}</div>
           <div className="stat-label">Total Faltas</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value" style={{ color: '#10b981' }}>
+          <div className="stat-value absences__stat-value--justified">
             {stats.justified}
           </div>
           <div className="stat-label">Justificadas</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value" style={{ color: '#ef4444' }}>
+          <div className="stat-value absences__stat-value--unjustified">
             {stats.unjustified}
           </div>
           <div className="stat-label">Injustificadas</div>
@@ -401,14 +386,8 @@ export default function Absences() {
       </div>
 
       {/* Filters */}
-      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 'var(--space-md)',
-          }}
-        >
+      <div className="card absences__filters-card">
+        <div className="absences__filters-grid">
           <div className="form-group">
             <label htmlFor="abs-search">Buscar</label>
             <input
@@ -452,17 +431,17 @@ export default function Absences() {
       {/* Absences list */}
       <div className="card">
         {filteredAbsences.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-            <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
-            <p style={{ fontSize: '1.2rem', margin: '1rem 0 0 0' }}>
+          <div className="absences__empty-state">
+            <p className="absences__empty-icon">📭</p>
+            <p className="absences__empty-message">
               {absences.length === 0
                 ? 'No hay faltas de asistencia registradas.'
                 : 'No se encontraron faltas con esos filtros.'}
             </p>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="table mobile-card-view" style={{ width: '100%' }}>
+          <div className="absences__table-wrapper">
+            <table className="table mobile-card-view absences__table">
               <thead>
                 <tr>
                   <th scope="col">Fecha</th>
@@ -470,10 +449,10 @@ export default function Absences() {
                     <th scope="col">Estudiante</th>
                   )}
                   <th scope="col">Materia</th>
-                  <th scope="col" style={{ textAlign: 'center' }}>Estado</th>
+                  <th scope="col" className="absences__th-center">Estado</th>
                   <th scope="col">Motivo</th>
                   <th scope="col">Registrado por</th>
-                  <th scope="col" style={{ textAlign: 'center' }}>Acciones</th>
+                  <th scope="col" className="absences__th-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -486,21 +465,14 @@ export default function Absences() {
                   return (
                     <tr
                       key={a.id}
-                      style={{ cursor: 'pointer' }}
+                      className="absences__row"
                       onClick={() => handleToggleExpand(a.id)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') handleToggleExpand(a.id)
                       }}
                       tabIndex={0}
                     >
-                      <td
-                        data-label="Fecha"
-                        style={{
-                          fontSize: '0.85rem',
-                          color: 'var(--text-secondary)',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
+                      <td data-label="Fecha" className="absences__date-cell">
                         {new Date(a.date + 'T00:00:00').toLocaleDateString('es', {
                           day: 'numeric',
                           month: 'short',
@@ -508,39 +480,23 @@ export default function Absences() {
                         })}
                       </td>
                       {(isTeacherOrAdmin || user?.role === 'TUTOR') && (
-                        <td data-label="Estudiante" style={{ fontSize: '0.85rem' }}>
+                        <td data-label="Estudiante" className="absences__student-cell">
                           <strong>{a.student_name || '—'}</strong>
                           <br />
-                          <span
-                            style={{
-                              fontSize: '0.75rem',
-                              color: 'var(--text-secondary)',
-                            }}
-                          >
+                          <span className="absences__student-email">
                             {a.student_email_display}
                           </span>
                         </td>
                       )}
-                      <td data-label="Materia" style={{ fontSize: '0.85rem' }}>
+                      <td data-label="Materia" className="absences__subject-cell">
                         <strong>{a.subject_name}</strong>
                       </td>
-                      <td data-label="Estado" style={{ textAlign: 'center' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            padding: '0.25rem 0.6rem',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            background: a.justified ? '#10b981' : '#ef4444',
-                            color: 'white',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
+                      <td data-label="Estado" className="absences__status-cell">
+                        <span className={getAbsenceStatusClassName(a.justified)}>
                           {a.justified ? 'Justificada' : 'Injustificada'}
                         </span>
                       </td>
-                      <td data-label="Motivo" style={{ fontWeight: '500', fontSize: '0.9rem' }}>
+                      <td data-label="Motivo" className="absences__reason-cell">
                         {a.reason
                           ? isExpanded
                             ? a.reason
@@ -549,52 +505,30 @@ export default function Absences() {
                               : a.reason
                           : '—'}
                       </td>
-                      <td
-                        data-label="Registrado por"
-                        style={{
-                          fontSize: '0.85rem',
-                          color: 'var(--text-secondary)',
-                        }}
-                      >
+                      <td data-label="Registrado por" className="absences__recorded-by-cell">
                         {a.recorded_by_name || '—'}
                       </td>
-                      <td data-label="Acciones" style={{ textAlign: 'center' }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: '0.5rem',
-                            justifyContent: 'center',
-                          }}
-                        >
+                      <td data-label="Acciones" className="absences__actions-cell">
+                        <div className="absences__actions">
                           <button
-                            className="btn sm"
+                            className="btn sm absences__action-btn"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleToggleExpand(a.id)
                             }}
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Ocultar detalle de falta del ${a.date}` : `Ver detalle de falta del ${a.date}`}
-                            style={{
-                              padding: '0.3rem 0.6rem',
-                              fontSize: '0.75rem',
-                              minWidth: 'auto',
-                            }}
                           >
                             {isExpanded ? 'Ocultar' : 'Ver'}
                           </button>
                           {canDelete && (
                             <button
-                              className="btn sm danger"
+                              className="btn sm danger absences__action-btn"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleDelete(a.id)
                               }}
                               title="Eliminar falta"
-                              style={{
-                                padding: '0.3rem 0.6rem',
-                                fontSize: '0.75rem',
-                                minWidth: 'auto',
-                              }}
                             >
                               Eliminar
                             </button>
