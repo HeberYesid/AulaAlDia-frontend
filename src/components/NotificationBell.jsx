@@ -91,9 +91,10 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   const [unreadCount, setUnreadCount] = useState(0)
   const [showDropdown, setShowDropdown] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [dropdownStyle, setDropdownStyle] = useState({})
+  const [dropdownLayout, setDropdownLayout] = useState(null)
   const dropdownRef = useRef(null)
   const buttonRef = useRef(null)
+  const panelRef = useRef(null)
   const navigate = useNavigate()
 
   const loadUnreadCount = useCallback(async () => {
@@ -147,10 +148,21 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   const updateDropdownPosition = useCallback(() => {
     if (!buttonRef.current) return
 
-    setDropdownStyle(
+    setDropdownLayout(
       buildDropdownStyle(buttonRef.current.getBoundingClientRect(), sidebarMode),
     )
   }, [sidebarMode])
+
+  useEffect(() => {
+    if (!showDropdown || !panelRef.current || !dropdownLayout) return
+
+    panelRef.current.style.top = dropdownLayout.top === 'auto' ? 'auto' : `${dropdownLayout.top}px`
+    panelRef.current.style.right = dropdownLayout.right === 'auto' ? 'auto' : `${dropdownLayout.right}px`
+    panelRef.current.style.bottom = dropdownLayout.bottom === 'auto' ? 'auto' : `${dropdownLayout.bottom}px`
+    panelRef.current.style.left = dropdownLayout.left === 'auto' ? 'auto' : `${dropdownLayout.left}px`
+    panelRef.current.style.width = `${dropdownLayout.width}px`
+    panelRef.current.style.maxHeight = `${dropdownLayout.maxHeight}px`
+  }, [dropdownLayout, showDropdown])
 
   const handleToggleDropdown = useCallback(() => {
     setShowDropdown((current) => {
@@ -286,7 +298,7 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
 
       {/* Dropdown */}
       {showDropdown && (
-        <div className="notification-bell__dropdown" style={dropdownStyle}>
+        <div ref={panelRef} className="notification-bell__dropdown">
           {/* Header */}
           <div className="notification-bell__header">
             <h3 className="notification-bell__title">Notificaciones</h3>
