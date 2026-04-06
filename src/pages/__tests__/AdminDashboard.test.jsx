@@ -62,6 +62,31 @@ describe('AdminDashboard page', () => {
     });
   });
 
+  it('renders five stat cards in dashboard stats grid', async () => {
+    api.get.mockImplementation((url) => {
+      if (url.includes('/dashboard/')) {
+        return Promise.resolve({ data: { aggregates: { total_submitted_results: 5, total_graded_results: 5, avg_score: 4.5, avg_grade: 4.5 } } });
+      }
+      if (url.includes('/subjects/')) return Promise.resolve({ data: { results: [{ id: 1, name: 'Math', enrollments_count: 10 }] } });
+      if (url.includes('/absences/')) return Promise.resolve({ data: [] });
+      if (url.includes('/observations/')) return Promise.resolve({ data: [] });
+      if (url.includes('/notifications/')) return Promise.resolve({ data: [] });
+      if (url.includes('/calendar/all_events/')) return Promise.resolve({ data: [] });
+      if (url.includes('/academic-periods/')) return Promise.resolve({ data: [] });
+      if (url.includes('/academic-settings/')) return Promise.resolve({ data: { period_scheme: 'SEMESTER', min_grade: '1.0', max_grade: '5.0' } });
+      return Promise.reject(new Error('not mocked: ' + url));
+    });
+
+    const { container } = renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Math')).toBeInTheDocument();
+    });
+
+    const statCards = container.querySelectorAll('.stats-grid .stat-card');
+    expect(statCards).toHaveLength(5);
+  });
+
   it('renders blocks with partial errors gracefully', async () => {
     api.get.mockImplementation((url) => {
       if (url.includes('/subjects/')) return Promise.reject(new Error('Failed subjects'));

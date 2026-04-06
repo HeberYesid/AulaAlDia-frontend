@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Alert from '../components/Alert'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
+import StatCard from '../components/StatCard'
 import useAdminDashboardData from '../hooks/useAdminDashboardData'
 
 function toDate(value) {
@@ -54,6 +55,14 @@ export default function AdminDashboard() {
     handleCardClick(path)
   }
 
+  const statsItems = [
+    { label: 'Materias', value: kpis.subjectsCount },
+    { label: 'Estudiantes', value: kpis.studentsCount },
+    { label: 'Profesores', value: kpis.teachersCount },
+    { label: 'Año académico actual', value: kpis.currentAcademicYear },
+    { label: 'Período académico actual', value: kpis.currentAcademicPeriodLabel },
+  ]
+
   if (loading) {
     return (
       <div className="loading">
@@ -69,26 +78,9 @@ export default function AdminDashboard() {
       <Alert type="error" message={error} />
 
       <div className="stats-grid admin-dashboard__stats-grid">
-        <div className="stat-card">
-          <div className="stat-value">{kpis.subjectsCount}</div>
-          <div className="stat-label">Materias</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{kpis.studentsCount}</div>
-          <div className="stat-label">Estudiantes</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{kpis.teachersCount}</div>
-          <div className="stat-label">Profesores</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{kpis.currentAcademicYear}</div>
-          <div className="stat-label">Año académico actual</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{kpis.currentAcademicPeriodLabel}</div>
-          <div className="stat-label">Período académico actual</div>
-        </div>
+        {statsItems.map((item) => (
+          <StatCard key={item.label} label={item.label} value={item.value} />
+        ))}
       </div>
 
       <div className="grid-2 admin-dashboard__grid">
