@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../../api/axios";
 import { getApiErrorMessage } from '../../utils/apiErrorMessage';
+import { unwrapListData } from '../../utils/pagination';
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -35,10 +36,10 @@ export default function Courses() {
           api.get("/api/v1/courses/course-sections/"),
           api.get("/api/v1/courses/academic-settings/"), // Assuming periods are part of settings or similar, keeping it simple for now or fetch if separate endpoint
         ]);
-      setCourses(coursesRes.data);
-      setGradeLevels(gradesRes.data);
-      setSections(sectionsRes.data);
-      // setAcademicPeriods(periodsRes.data.results || periodsRes.data); // Adjust based on actual API
+      setCourses(unwrapListData(coursesRes.data));
+      setGradeLevels(unwrapListData(gradesRes.data));
+      setSections(unwrapListData(sectionsRes.data));
+      setAcademicPeriods(unwrapListData(periodsRes.data));
       setError(null);
     } catch (err) {
       console.error(err);

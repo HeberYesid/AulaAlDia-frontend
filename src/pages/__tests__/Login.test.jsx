@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -7,6 +7,11 @@ import { useAuth } from '../../state/AuthContext'
 import * as axios from '../../api/axios'
 
 const mockNavigate = vi.fn()
+
+const ROUTER_FUTURE_FLAGS = {
+  v7_startTransition: true,
+  v7_relativeSplatPath: true,
+}
 
 vi.mock('../../api/axios', async (importOriginal) => {
   const actual = await importOriginal();
@@ -41,7 +46,7 @@ vi.mock('@react-oauth/google', () => ({
 
 describe('Login Component', () => {
   const renderLogin = () => render(
-    <MemoryRouter>
+    <MemoryRouter future={ROUTER_FUTURE_FLAGS}>
       <Login />
     </MemoryRouter>
   )
@@ -50,11 +55,16 @@ describe('Login Component', () => {
     vi.clearAllMocks()
     localStorage.clear()
     mockNavigate.mockReset()
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id')
     useAuth.mockReturnValue({
       login: vi.fn(),
       googleLogin: vi.fn(),
       user: null,
     })
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   it('renders login form', () => {
@@ -180,9 +190,19 @@ describe('Login Component', () => {
     expect(registerLink.closest('a')).toHaveAttribute('href', '/register')
   })
 
+  it('hides Google login when client ID is missing', () => {
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '')
+    renderLogin()
+
+    expect(screen.queryByRole('button', { name: /google login mock/i })).not.toBeInTheDocument()
+  })
+
   it('preserves tenant_id from the URL', () => {
     render(
-      <MemoryRouter initialEntries={['/login?tenant_id=22222222-2222-2222-2222-222222222222']}>
+      <MemoryRouter
+        initialEntries={['/login?tenant_id=22222222-2222-2222-2222-222222222222']}
+        future={ROUTER_FUTURE_FLAGS}
+      >
         <Login />
       </MemoryRouter>
     )
@@ -203,7 +223,10 @@ describe('Login Component', () => {
     })
 
     render(
-      <MemoryRouter initialEntries={['/login?tenant_id=22222222-2222-2222-2222-222222222222']}>
+      <MemoryRouter
+        initialEntries={['/login?tenant_id=22222222-2222-2222-2222-222222222222']}
+        future={ROUTER_FUTURE_FLAGS}
+      >
         <Login />
       </MemoryRouter>
     )

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { api } from '../api/axios'
+import { unwrapListData } from '../utils/pagination'
 
 function toDate(value) {
   if (!value) return null
@@ -22,8 +23,8 @@ export default function SidebarBanner() {
           api.get('/api/v1/courses/announcements/')
         ])
         
-        const allEvents = Array.isArray(eventsRes.data) ? eventsRes.data : []
-        const allAnnouncements = Array.isArray(annRes.data) ? annRes.data : []
+        const allEvents = unwrapListData(eventsRes.data)
+        const allAnnouncements = unwrapListData(annRes.data)
         
         const now = new Date()
         

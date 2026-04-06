@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { api } from '../api/axios'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { unwrapListData } from '../utils/pagination'
 
 export default function AdminNews() {
   const [activeTab, setActiveTab] = useState('announcements') // 'announcements' | 'events'
@@ -24,20 +25,17 @@ export default function AdminNews() {
   
   const [confirmDelete, setConfirmDelete] = useState(null)
 
-  useEffect(() => {
-    loadData()
-  }, [activeTab])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
       if (activeTab === 'announcements') {
         const res = await api.get('/api/v1/courses/announcements/')
-        setData(res.data)
+        setData(unwrapListData(res.data))
       } else {
         const res = await api.get('/api/v1/courses/calendar/')
-        const institutionalEvents = res.data.filter(e => !e.subject)
+        const calendarItems = unwrapListData(res.data)
+        const institutionalEvents = calendarItems.filter((e) => !e.subject)
         setData(institutionalEvents)
       }
     } catch (err) {
@@ -49,7 +47,11 @@ export default function AdminNews() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTab])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   function openModal(item = null) {
     setError('')

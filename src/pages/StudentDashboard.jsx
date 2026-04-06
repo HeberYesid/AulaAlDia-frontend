@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
@@ -16,16 +16,7 @@ export default function StudentDashboard() {
   const { user, logout } = useAuth()
   const [showTutorNotice, setShowTutorNotice] = useState(false)
 
-  useEffect(() => {
-    loadDashboard()
-    
-    // Si no tiene acudiente
-    if (user?.role === 'STUDENT' && !user.tutor_email) {
-      setShowTutorNotice(true)
-    }
-  }, [user])
-
-  async function loadDashboard() {
+  const loadDashboard = useCallback(async () => {
     setLoading(true)
     try {
       const response = await api.get('/api/v1/courses/student-dashboard/')
@@ -54,7 +45,16 @@ export default function StudentDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [logout, navigate])
+
+  useEffect(() => {
+    loadDashboard()
+
+    // Si no tiene acudiente
+    if (user?.role === 'STUDENT' && !user.tutor_email) {
+      setShowTutorNotice(true)
+    }
+  }, [loadDashboard, user])
 
   if (loading) {
     return (

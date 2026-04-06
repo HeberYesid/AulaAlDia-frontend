@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../../api/axios'
 import { useAuth } from '../../state/AuthContext'
@@ -7,6 +7,7 @@ import StudentsTab from './StudentsTab'
 import ExercisesTab from './ExercisesTab'
 import ResultsTab from './ResultsTab'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
+import { unwrapListData } from '../../utils/pagination'
 
 const DEFAULT_GRADE_SETTINGS = {
   min_grade: '1.00',
@@ -54,7 +55,7 @@ export default function SubjectDetail() {
   useEffect(() => { if (uploadingExercise) uploadSolutionDialogRef.current?.focus() }, [uploadingExercise])
 
   /* ── Data loading ── */
-  const loadAll = async () => {
+  const loadAll = useCallback(async () => {
     setLoading(true)
     try {
       const promises = [
@@ -69,21 +70,21 @@ export default function SubjectDetail() {
       }
       const results = await Promise.all(promises)
       setSubject(results[0].data)
-      setEnrollments(results[1].data)
+      setEnrollments(unwrapListData(results[1].data))
       setDash(results[2].data)
-      setExercises(results[3].data)
-      setDetailedResults(results[4].data)
+      setExercises(unwrapListData(results[3].data))
+      setDetailedResults(unwrapListData(results[4].data))
       if (results[5]) {
-        setAcademicPeriods(results[5].data?.results || results[5].data || [])
+        setAcademicPeriods(unwrapListData(results[5].data))
       }
     } catch {
       setError('No se pudo cargar la informacion completa de la materia. Revisa tu acceso a esta institucion e intentalo nuevamente.')
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, user?.role])
 
-  useEffect(() => { loadAll() }, [id])
+  useEffect(() => { loadAll() }, [loadAll])
 
   useEffect(() => {
     if (user?.role === 'STUDENT' || user?.role === 'TUTOR') setActiveTab('results')

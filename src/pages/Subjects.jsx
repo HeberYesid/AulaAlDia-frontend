@@ -5,6 +5,7 @@ import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 import HierarchicalSelector from '../components/HierarchicalSelector'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { unwrapListData } from '../utils/pagination'
 
 function normalizeApiError(error, fallback) {
   return getApiErrorMessage(error, {
@@ -22,7 +23,7 @@ export default function Subjects() {
 
   async function load() {
     const { data } = await api.get('/api/v1/courses/subjects/')
-    setItems(data)
+    setItems(unwrapListData(data))
   }
 
   useEffect(() => {

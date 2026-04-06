@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../../api/axios";
 import { getApiErrorMessage } from '../../utils/apiErrorMessage';
+import { unwrapListData } from '../../utils/pagination';
 
 export default function Sections() {
   const [sections, setSections] = useState([]);
@@ -20,7 +21,7 @@ export default function Sections() {
     try {
       setLoading(true);
       const res = await api.get("/api/v1/courses/course-sections/");
-      setSections(res.data);
+      setSections(unwrapListData(res.data));
       setError(null);
     } catch (err) {
       console.error(err);

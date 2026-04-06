@@ -33,6 +33,7 @@ export default function Login() {
   const tenantIdFromQuery = new URLSearchParams(location.search).get('tenant_id')?.trim() || null
   const authQuerySuffix = tenantIdFromQuery ? `?tenant_id=${encodeURIComponent(tenantIdFromQuery)}` : ''
   const isLockedOut = retryAfter > 0
+  const isGoogleSignInEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim())
 
   useEffect(() => {
     if (!tenantIdFromQuery) return
@@ -261,27 +262,35 @@ export default function Login() {
           </div>
         </form>
 
-        <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
-          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
-          <span style={{ padding: '0 10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>O</span>
-          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
-        </div>
+        {isGoogleSignInEnabled && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
+              <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+              <span style={{ padding: '0 10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>O</span>
+              <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+            </div>
 
-        <div className="google-login-container" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            theme="filled_blue"
-            shape="pill"
-            text="signin_with"
-            locale="es"
-            width="250"
-          />
-        </div>
+            <div className="google-login-container" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                theme="filled_blue"
+                shape="pill"
+                text="signin_with"
+                locale="es"
+                width="250"
+              />
+            </div>
+          </>
+        )}
 
         <div className="auth-footer">
           <p>
             ¿No tienes cuenta? <Link to={`/register${authQuerySuffix}`} className="link">Regístrate aquí</Link>
+          </p>
+          <p className="auth-legal-links">
+            <Link to="/privacy">Privacidad</Link> · <Link to="/terms">Terminos</Link> ·{' '}
+            <Link to="/habeas-data">Habeas Data</Link> · <Link to="/pqrs">PQRS</Link>
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
+import { normalizeApiErrorWithDetails } from '../api/errors'
 
 const CATEGORY_OPTIONS = [
   { value: '', label: 'Todas' },
@@ -80,30 +81,11 @@ const OMITTED_METADATA_KEYS = new Set([
   'route_kwargs',
 ])
 
-function normalizeApiErrors(error) {
-  const payload = error?.response?.data
-  if (!payload || typeof payload !== 'object') {
-    const statusCode = error?.response?.status
-    const fallbackMessage = error?.message || 'Respuesta inválida del servidor.'
-    return statusCode
-      ? `No se pudo cargar la auditoría operativa (${statusCode}). ${fallbackMessage}`
-      : `No se pudo cargar la auditoría operativa. ${fallbackMessage}`
-  }
-
-  if (payload.detail && typeof payload.detail === 'string') {
-    return payload.detail
-  }
-
-  const lines = []
-  Object.entries(payload).forEach(([field, value]) => {
-    if (Array.isArray(value)) {
-      lines.push(`${field}: ${value.join(' ')}`)
-      return
-    }
-    lines.push(`${field}: ${String(value)}`)
+function normalizeAuditApiError(error) {
+  return normalizeApiErrorWithDetails(error, {
+    action: 'cargar la auditoria operativa',
+    fallback: 'No se pudo cargar la auditoria operativa. Respuesta invalida del servidor.',
   })
-
-  return lines.join(' | ')
 }
 
 export default function TenantOperationsAudit() {
@@ -339,7 +321,7 @@ export default function TenantOperationsAudit() {
     setExpandedAuditId(null)
   }
 
-  async function loadAudits({ clearError = true } = {}) {
+  const loadAudits = useCallback(async ({ clearError = true } = {}) => {
     if (!activeTenantId) {
       setError('No hay una institución activa seleccionada.')
       return
@@ -375,23 +357,25 @@ export default function TenantOperationsAudit() {
       }
 
       setAllAudits(collectedAudits)
-      applyLocalFilters(collectedAudits, { markApplied: false })
+      setAudits(collectedAudits)
+      setFiltersApplied(false)
+      setExpandedAuditId(null)
     } catch (requestError) {
-      setError(normalizeApiErrors(requestError))
+      setError(normalizeAuditApiError(requestError))
       setAllAudits([])
       setAudits([])
       setFiltersApplied(false)
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTenantId])
 
   useEffect(() => {
     if (!isTenantAdmin || !activeTenantId) {
       return
     }
     loadAudits({ clearError: false })
-  }, [activeTenantId, isTenantAdmin])
+  }, [activeTenantId, isTenantAdmin, loadAudits])
 
   async function applyFilters() {
     applyLocalFilters(allAudits)

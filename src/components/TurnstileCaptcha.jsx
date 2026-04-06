@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react'
 
 const TurnstileCaptcha = forwardRef(({
   id,
@@ -90,7 +90,7 @@ const TurnstileCaptcha = forwardRef(({
     }
   }, [widgetId])
 
-  const reset = () => {
+  const reset = useCallback(() => {
     if (widgetId && window.turnstile) {
       try {
         window.turnstile.reset(widgetId)
@@ -98,9 +98,9 @@ const TurnstileCaptcha = forwardRef(({
         console.error('Error resetting Turnstile:', error)
       }
     }
-  }
+  }, [widgetId])
 
-  const getResponse = () => {
+  const getResponse = useCallback(() => {
     if (widgetId && window.turnstile) {
       try {
         return window.turnstile.getResponse(widgetId)
@@ -110,13 +110,13 @@ const TurnstileCaptcha = forwardRef(({
       }
     }
     return null
-  }
+  }, [widgetId])
 
   // Expose reset and getResponse methods via ref
   useImperativeHandle(ref, () => ({
     reset,
-    getResponse
-  }), [widgetId])
+    getResponse,
+  }), [reset, getResponse])
 
   if (!isLoaded) {
     return (

@@ -1,7 +1,89 @@
-﻿import { useState, useEffect, useRef } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
-import { api } from '../api/axios'
+import {
+  getCourseNotificationsUnreadCount,
+  listCourseNotifications,
+  markAllCourseNotificationsRead,
+  markCourseNotificationRead,
+} from '../api/notifications'
+
+const PANEL_MAX_WIDTH = 380
+const PANEL_MAX_HEIGHT = 520
+const PANEL_MARGIN = 8
+const PANEL_OPEN_DOWNWARD_THRESHOLD = 200
+const MIN_PANEL_HEIGHT = 180
+
+function resolveNotificationLink(notification) {
+  return notification.link || notification.link_url || null
+}
+
+function getBadgeLabel(unreadCount) {
+  return unreadCount > 9 ? '9+' : unreadCount
+}
+
+function buildDropdownStyle(buttonRect, sidebarMode) {
+  const viewportHeight = window.innerHeight
+  const viewportWidth = window.innerWidth
+  const width = Math.min(PANEL_MAX_WIDTH, Math.max(240, viewportWidth - PANEL_MARGIN * 2))
+
+  if (sidebarMode) {
+    const preferredLeft = buttonRect.right + PANEL_MARGIN
+    const left = Math.min(
+      Math.max(PANEL_MARGIN, preferredLeft),
+      Math.max(PANEL_MARGIN, viewportWidth - width - PANEL_MARGIN),
+    )
+
+    const spaceBelow = viewportHeight - buttonRect.bottom
+    const spaceAbove = buttonRect.top
+    const openDownward = (
+      spaceBelow >= PANEL_OPEN_DOWNWARD_THRESHOLD
+      || spaceBelow >= spaceAbove
+    )
+
+    if (openDownward) {
+      const top = Math.max(PANEL_MARGIN, buttonRect.top)
+      return {
+        position: 'fixed',
+        top,
+        left,
+        bottom: 'auto',
+        width,
+        maxHeight: Math.min(
+          PANEL_MAX_HEIGHT,
+          Math.max(MIN_PANEL_HEIGHT, viewportHeight - top - PANEL_MARGIN),
+        ),
+      }
+    }
+
+    const bottom = Math.max(PANEL_MARGIN, viewportHeight - buttonRect.bottom)
+    return {
+      position: 'fixed',
+      bottom,
+      left,
+      top: 'auto',
+      width,
+      maxHeight: Math.min(
+        PANEL_MAX_HEIGHT,
+        Math.max(MIN_PANEL_HEIGHT, buttonRect.bottom - PANEL_MARGIN),
+      ),
+    }
+  }
+
+  const right = Math.max(PANEL_MARGIN, viewportWidth - buttonRect.right)
+  const top = buttonRect.bottom + PANEL_MARGIN
+  return {
+    position: 'fixed',
+    top,
+    right,
+    left: 'auto',
+    width,
+    maxHeight: Math.min(
+      PANEL_MAX_HEIGHT,
+      Math.max(MIN_PANEL_HEIGHT, viewportHeight - top - PANEL_MARGIN),
+    ),
+  }
+}
 
 export default function NotificationBell({ sidebarMode = false, collapsed = false }) {
   const [notifications, setNotifications] = useState([])
@@ -13,114 +95,96 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
   const buttonRef = useRef(null)
   const navigate = useNavigate()
 
-  // Load unread count
-  async function loadUnreadCount() {
+  const loadUnreadCount = useCallback(async () => {
     try {
-      const response = await api.get('/api/v1/courses/notifications/unread-count/')
-      setUnreadCount(response.data.unread_count)
+      const count = await getCourseNotificationsUnreadCount()
+      setUnreadCount(count)
     } catch (err) {
       console.error('Error loading unread count:', err)
     }
-  }
+  }, [])
 
-  // Load notifications when dropdown opens
-  async function loadNotifications() {
+  const loadNotifications = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await api.get('/api/v1/courses/notifications/')
-      setNotifications(response.data.slice(0, 10)) // Only show last 10
+      const items = await listCourseNotifications()
+      setNotifications(items.slice(0, 10))
     } catch (err) {
       console.error('Error loading notifications:', err)
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  // Mark notification as read
-  async function markAsRead(notificationId) {
+  const markAsRead = useCallback(async (notificationId) => {
     try {
-      await api.post(`/api/v1/courses/notifications/${notificationId}/mark-read/`)
-      loadUnreadCount()
-      loadNotifications()
+      await markCourseNotificationRead(notificationId)
+      await Promise.all([loadUnreadCount(), loadNotifications()])
     } catch (err) {
       console.error('Error marking notification as read:', err)
     }
-  }
+  }, [loadNotifications, loadUnreadCount])
 
-  // Mark all as read
-  async function markAllAsRead() {
+  const markAllAsRead = useCallback(async () => {
     try {
-      await api.post('/api/v1/courses/notifications/mark-all-read/')
-      loadUnreadCount()
-      loadNotifications()
+      await markAllCourseNotificationsRead()
+      await Promise.all([loadUnreadCount(), loadNotifications()])
     } catch (err) {
       console.error('Error marking all as read:', err)
     }
-  }
+  }, [loadNotifications, loadUnreadCount])
 
-  // Handle notification click
-  function handleNotificationClick(notification) {
-    markAsRead(notification.id)
-    if (notification.link) {
-      navigate(notification.link)
+  const handleNotificationClick = useCallback((notification) => {
+    void markAsRead(notification.id)
+    const targetLink = resolveNotificationLink(notification)
+    if (targetLink) {
+      navigate(targetLink)
     }
     setShowDropdown(false)
-  }
+  }, [markAsRead, navigate])
 
-  // Toggle dropdown
-  function toggleDropdown() {
-    if (!showDropdown) {
-      loadNotifications()
-      if (buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect()
-        const PANEL_WIDTH = 380
-        const MARGIN = 8
-        const vh = window.innerHeight
+  const updateDropdownPosition = useCallback(() => {
+    if (!buttonRef.current) return
 
-        if (sidebarMode) {
-          // Open to the right of the sidebar
-          const left = rect.right + MARGIN
-          const spaceBelow = vh - rect.bottom
-          const spaceAbove = rect.bottom // bottom of button = space above if we open upward
-          const panelMaxHeight = Math.min(520, Math.max(spaceAbove, spaceBelow) - 16)
+    setDropdownStyle(
+      buildDropdownStyle(buttonRef.current.getBoundingClientRect(), sidebarMode),
+    )
+  }, [sidebarMode])
 
-          if (spaceBelow >= 200 || spaceBelow >= spaceAbove) {
-            // open downward from button top
-            setDropdownStyle({
-              position: 'fixed',
-              top: Math.max(8, rect.top),
-              left,
-              bottom: 'auto',
-              width: PANEL_WIDTH,
-              maxHeight: Math.min(520, vh - rect.top - 16),
-            })
-          } else {
-            // open upward from button bottom
-            setDropdownStyle({
-              position: 'fixed',
-              bottom: vh - rect.bottom,
-              left,
-              top: 'auto',
-              width: PANEL_WIDTH,
-              maxHeight: Math.min(520, rect.bottom - 16),
-            })
-          }
-        } else {
-          // Standalone mode: open below the button, aligned right
-          const right = window.innerWidth - rect.right
-          setDropdownStyle({
-            position: 'fixed',
-            top: rect.bottom + MARGIN,
-            right: Math.max(8, right),
-            left: 'auto',
-            width: PANEL_WIDTH,
-            maxHeight: Math.min(520, vh - rect.bottom - MARGIN - 8),
-          })
-        }
+  const handleToggleDropdown = useCallback(() => {
+    setShowDropdown((current) => {
+      if (!current) {
+        void loadNotifications()
+        updateDropdownPosition()
       }
+
+      return !current
+    })
+  }, [loadNotifications, updateDropdownPosition])
+
+  const handleViewAll = useCallback(() => {
+    navigate('/notifications')
+    setShowDropdown(false)
+  }, [navigate])
+
+  const badgeLabel = getBadgeLabel(unreadCount)
+
+  // Recalculate dropdown position while it is open
+  useEffect(() => {
+    if (!showDropdown) return undefined
+
+    const reposition = () => {
+      updateDropdownPosition()
     }
-    setShowDropdown(!showDropdown)
-  }
+
+    window.addEventListener('resize', reposition)
+    window.addEventListener('scroll', reposition, true)
+
+    return () => {
+      window.removeEventListener('resize', reposition)
+      window.removeEventListener('scroll', reposition, true)
+    }
+  }, [showDropdown, updateDropdownPosition])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -134,50 +198,52 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
+    return undefined
   }, [showDropdown])
 
   // Load unread count on mount and poll every 30 seconds
   useEffect(() => {
-    loadUnreadCount()
-    const interval = setInterval(loadUnreadCount, 30000) // Poll every 30s
-    return () => clearInterval(interval)
-  }, [])
+    void loadUnreadCount()
+    const interval = window.setInterval(() => {
+      void loadUnreadCount()
+    }, 30000)
+
+    return () => window.clearInterval(interval)
+  }, [loadUnreadCount])
+
+  // Toggle dropdown
+  function getSidebarTriggerClasses() {
+    return [
+      'sidebar__nav-item',
+      'notification-bell__trigger',
+      'notification-bell__trigger--sidebar',
+      showDropdown ? 'sidebar__nav-item--active' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  }
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative' }} className="notification-bell">
+    <div ref={dropdownRef} className="notification-bell">
       {/* Trigger button — sidebar style or standalone style */}
       {sidebarMode ? (
         <button
           ref={buttonRef}
-          onClick={toggleDropdown}
-          className={`sidebar__nav-item${showDropdown ? ' sidebar__nav-item--active' : ''}`}
+          type="button"
+          onClick={handleToggleDropdown}
+          className={getSidebarTriggerClasses()}
           aria-label={`Notificaciones (${unreadCount} no leídas)`}
           aria-expanded={showDropdown}
           title={collapsed ? 'Notificaciones' : undefined}
-          style={{ width: '100%' }}
         >
-          <span className="sidebar__nav-icon" style={{ position: 'relative', flexShrink: 0 }}>
+          <span className="sidebar__nav-icon notification-bell__icon-wrapper">
             <Bell size={20} strokeWidth={1.75} />
             {unreadCount > 0 && (
               <span
                 aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  top: '-6px',
-                  right: '-6px',
-                  background: 'var(--danger)',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '16px',
-                  height: '16px',
-                  fontSize: '0.6rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 'bold',
-                }}
+                className="notification-bell__badge notification-bell__badge--sidebar"
               >
-                {unreadCount > 9 ? '9+' : unreadCount}
+                {badgeLabel}
               </span>
             )}
           </span>
@@ -188,18 +254,9 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
       ) : (
         <button
           ref={buttonRef}
-          onClick={toggleDropdown}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            position: 'relative',
-            fontSize: '1.5rem',
-            color: 'var(--text)',
-            transition: 'transform 0.2s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          type="button"
+          onClick={handleToggleDropdown}
+          className="notification-bell__trigger notification-bell__trigger--standalone"
           aria-label={`Notificaciones (${unreadCount} no leídas)`}
           aria-expanded={showDropdown}
           title="Notificaciones"
@@ -208,24 +265,9 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
           {unreadCount > 0 && (
             <span
               aria-hidden="true"
-              style={{
-                position: 'absolute',
-                top: '-5px',
-                right: '-5px',
-                background: 'var(--danger)',
-                color: 'white',
-                borderRadius: '50%',
-                width: '20px',
-                height: '20px',
-                fontSize: '0.7rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                animation: 'pulse 2s infinite'
-              }}
+              className="notification-bell__badge notification-bell__badge--standalone"
             >
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {badgeLabel}
             </span>
           )}
         </button>
@@ -233,45 +275,15 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
 
       {/* Dropdown */}
       {showDropdown && (
-        <div
-          style={{
-            ...dropdownStyle,
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-primary)',
-            borderRadius: '12px',
-            boxShadow: 'var(--shadow-xl)',
-            zIndex: 1000,
-            display: 'flex',
-            flexDirection: 'column',
-            animation: 'fadeIn 0.2s ease',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="notification-bell__dropdown" style={dropdownStyle}>
           {/* Header */}
-          <div
-            style={{
-              padding: '1rem',
-              borderBottom: '1px solid var(--border-primary)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              background: 'var(--bg-secondary)',
-              borderTopLeftRadius: '12px',
-              borderTopRightRadius: '12px'
-            }}
-          >
-            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Notificaciones</h3>
+          <div className="notification-bell__header">
+            <h3 className="notification-bell__title">Notificaciones</h3>
             {unreadCount > 0 && (
               <button
+                type="button"
                 onClick={markAllAsRead}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--primary)',
-                  cursor: 'pointer',
-                  fontSize: '0.85rem',
-                  textDecoration: 'underline'
-                }}
+                className="notification-bell__mark-all"
               >
                 Marcar todas leídas
               </button>
@@ -279,56 +291,37 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
           </div>
 
           {/* Notifications List */}
-          <ul role="list" style={{ overflowY: 'auto', flex: 1, background: 'var(--bg-card)', margin: 0, padding: 0, listStyle: 'none' }}>
+          <ul role="list" className="notification-bell__list">
             {loading ? (
-              <li style={{ padding: '2rem', textAlign: 'center' }}>
+              <li className="notification-bell__state">
                 <div className="spinner" role="status" aria-label="Cargando notificaciones"></div>
               </li>
             ) : notifications.length === 0 ? (
-              <li style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                <p style={{ fontSize: '2rem', margin: 0 }} aria-hidden="true"></p>
+              <li className="notification-bell__state notification-bell__state--empty">
+                <p className="notification-bell__empty-icon" aria-hidden="true"></p>
                 <p>No tienes notificaciones</p>
               </li>
             ) : (
               notifications.map((notification) => (
-                <li key={notification.id} style={{ borderBottom: '1px solid var(--border-primary)' }}>
+                <li key={notification.id} className="notification-bell__item">
                   <button
+                    type="button"
                     onClick={() => handleNotificationClick(notification)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '1rem',
-                      cursor: 'pointer',
-                      background: notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)',
-                      transition: 'background 0.2s ease',
-                      border: 'none',
-                      display: 'block',
-                      color: 'inherit',
-                      font: 'inherit'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = notification.is_read ? 'var(--bg-card)' : 'var(--overlay-bg)'}
+                    className={[
+                      'notification-bell__item-button',
+                      !notification.is_read ? 'notification-bell__item-button--unread' : '',
+                    ].filter(Boolean).join(' ')}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                      <strong style={{ fontSize: '0.95rem', flex: 1 }}>{notification.title}</strong>
+                    <div className="notification-bell__item-head">
+                      <strong className="notification-bell__item-title">{notification.title}</strong>
                       {!notification.is_read && (
-                        <span
-                          aria-hidden="true"
-                          style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            background: 'var(--primary)',
-                            marginLeft: '0.5rem',
-                            flexShrink: 0
-                          }}
-                        ></span>
+                        <span aria-hidden="true" className="notification-bell__item-dot"></span>
                       )}
                     </div>
-                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <p className="notification-bell__item-message">
                       {notification.message}
                     </p>
-                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    <p className="notification-bell__item-time">
                       {notification.time_ago}
                     </p>
                   </button>
@@ -339,29 +332,11 @@ export default function NotificationBell({ sidebarMode = false, collapsed = fals
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div
-              style={{
-                padding: '0.75rem',
-                borderTop: '1px solid var(--border-primary)',
-                textAlign: 'center',
-                background: 'var(--bg-secondary)',
-                borderBottomLeftRadius: '12px',
-                borderBottomRightRadius: '12px'
-              }}
-            >
+            <div className="notification-bell__footer">
               <button
-                onClick={() => {
-                  navigate('/notifications')
-                  setShowDropdown(false)
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--primary)',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  textDecoration: 'underline'
-                }}
+                type="button"
+                onClick={handleViewAll}
+                className="notification-bell__view-all"
               >
                 Ver todas las notificaciones
               </button>

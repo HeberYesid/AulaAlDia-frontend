@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/axios'
 import StatusBadge from '../components/StatusBadge'
@@ -16,11 +16,7 @@ export default function MyBulletins() {
   const navigate = useNavigate()
   const { logout } = useAuth()
 
-  useEffect(() => {
-    loadBulletins()
-  }, [])
-
-  const loadBulletins = async () => {
+  const loadBulletins = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
@@ -50,7 +46,11 @@ export default function MyBulletins() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [logout, navigate])
+
+  useEffect(() => {
+    loadBulletins()
+  }, [loadBulletins])
 
   const loadBulletinDetail = async (bulletinId) => {
     if (expandedBulletinId === bulletinId) {

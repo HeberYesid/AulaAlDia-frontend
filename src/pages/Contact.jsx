@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { sendContactMessage } from '../api/contact'
 import TurnstileCaptcha from '../components/TurnstileCaptcha'
+import LegalConsentField from '../components/LegalConsentField'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import '../styles.css'
 
@@ -14,6 +16,7 @@ export default function Contact() {
   const [status, setStatus] = useState({ type: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [legalAcceptance, setLegalAcceptance] = useState(false)
   const turnstileRef = useRef(null)
 
   const handleChange = (e) => {
@@ -100,11 +103,21 @@ export default function Contact() {
       return
     }
 
+    if (!legalAcceptance) {
+      setStatus({
+        type: 'error',
+        message: 'Debes aceptar el tratamiento de datos personales para enviar el mensaje.',
+      })
+      setIsSubmitting(false)
+      return
+    }
+
     // Enviar mensaje al backend
     try {
       const response = await sendContactMessage({
         ...formData,
-        turnstile_token: turnstileToken
+        turnstile_token: turnstileToken,
+        legal_acceptance: legalAcceptance,
       })
 
       setStatus({
@@ -119,6 +132,7 @@ export default function Contact() {
         subject: '',
         message: '',
       })
+      setLegalAcceptance(false)
       
       // Resetear captcha
       setTurnstileToken('')
@@ -218,8 +232,15 @@ export default function Contact() {
             <h3>Antes de contactarnos</h3>
             <p>
               Te recomendamos revisar nuestra sección de{' '}
-              <a href="/faq">Preguntas Frecuentes</a> donde podrías encontrar
+              <Link to="/faq">Preguntas Frecuentes</Link> donde podrías encontrar
               respuesta a tu consulta de forma inmediata.
+            </p>
+            <p>
+              Tambien puedes consultar nuestras politicas de{' '}
+              <Link to="/privacy">Privacidad</Link>,{' '}
+              <Link to="/terms">Terminos</Link>,{' '}
+              <Link to="/habeas-data">Habeas Data</Link> y canal{' '}
+              <Link to="/pqrs">PQRS</Link>.
             </p>
           </div>
         </div>
@@ -315,10 +336,18 @@ export default function Contact() {
               />
             </div>
 
+            <LegalConsentField
+              id="contact-legal-consent"
+              checked={legalAcceptance}
+              onChange={setLegalAcceptance}
+              disabled={isSubmitting}
+              contextLabel="Autorizo el tratamiento de mis datos personales para gestionar esta solicitud de contacto o PQRS."
+            />
+
             <button
               type="submit"
               className="btn btn-primary btn-block"
-              disabled={isSubmitting || !turnstileToken}
+              disabled={isSubmitting || !turnstileToken || !legalAcceptance}
             >
               {isSubmitting ? 'Enviando…' : 'Enviar Mensaje'}
             </button>

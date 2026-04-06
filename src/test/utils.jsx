@@ -8,7 +8,7 @@ import { ThemeProvider } from '../state/ThemeContext'
  */
 export function renderWithProviders(ui, options = {}) {
   const Wrapper = ({ children }) => (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ThemeProvider>
           {children}

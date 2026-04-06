@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../api/axios";
 import { getApiErrorMessage } from "../utils/apiErrorMessage";
+import { unwrapListData } from "../utils/pagination";
 
 export default function HierarchicalSelector({ onSelectSubject }) {
   const [gradeLevels, setGradeLevels] = useState([]);
@@ -25,9 +26,9 @@ export default function HierarchicalSelector({ onSelectSubject }) {
         api.get("/api/v1/courses/grade-levels/"),
         api.get("/api/v1/courses/subjects/")
       ]);
-      setGradeLevels(gradesRes.data);
+      setGradeLevels(unwrapListData(gradesRes.data));
       // We store all subjects. We will filter them based on selections.
-      setSubjects(subjectsRes.data);
+      setSubjects(unwrapListData(subjectsRes.data));
       setError(null);
     } catch (err) {
       console.error(err);
@@ -46,9 +47,10 @@ export default function HierarchicalSelector({ onSelectSubject }) {
     try {
       setLoading(true);
       const res = await api.get(`/api/v1/courses/courses/?grade_level=${gradeId}`);
+      const courses = unwrapListData(res.data);
       // Usually would be filtered by query param if backend supported it,
       // or we can filter locally. Assuming the endpoint returns all for now, filter locally:
-      const filtered = res.data.filter(c => c.grade_level === parseInt(gradeId, 10));
+      const filtered = courses.filter(c => c.grade_level === parseInt(gradeId, 10));
       setCourses(filtered);
       setError(null);
     } catch (err) {

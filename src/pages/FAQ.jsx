@@ -24,9 +24,9 @@ export default function FAQ() {
             'AulaAlDía está diseñado para tres tipos de usuarios: Estudiantes (pueden ver sus asignaturas y resultados), Profesores (pueden crear asignaturas, registrar estudiantes y calificar)',
         },
         {
-          question: '¿Es gratis usar AulaAlDía?',
+          question: '¿AulaAlDía es gratis o tiene planes pagos?',
           answer:
-            'Sí, AulaAlDía es un proyecto de código abierto y gratuito para uso académico. Puedes registrarte como estudiante o solicitar acceso como profesor sin costo alguno.',
+            'AulaAlDia opera con planes institucionales de pago (Basico, Profesional y Empresarial). Puedes solicitar una demo sin costo desde la pagina de contacto antes de contratar.',
         },
       ],
     },

@@ -28,7 +28,10 @@ export default [
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        {
+          allowConstantExport: true,
+          allowExportNames: ['resetTour', 'useAuth', 'useTheme'],
+        },
       ],
       'no-unused-vars': 'off',
       'no-extra-boolean-cast': 'off',

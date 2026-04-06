@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Bell, Clock, MapPin, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
-import { api } from '../api/axios'
+import { listCourseNotifications } from '../api/notifications'
 
 const ROLE_LABEL = {
   STUDENT: 'Estudiante',
@@ -50,8 +50,7 @@ export default function WelcomePanel() {
 
   const loadNotifications = useCallback(async () => {
     try {
-      const { data } = await api.get('/api/v1/notifs/items/?limit=5')
-      const items = Array.isArray(data) ? data : (data.results ?? [])
+      const items = await listCourseNotifications({ limit: 5 })
       setNotifications(items.slice(0, 5))
       setUnreadCount(items.filter((notification) => !notification.is_read).length)
     } catch {
@@ -147,10 +146,10 @@ export default function WelcomePanel() {
                 key={n.id}
                 className={`welcome-panel__notif-item${n.is_read ? '' : ' welcome-panel__notif-item--unread'}`}
               >
-                {n.link_url ? (
-                  <Link to={n.link_url} className="welcome-panel__notif-link">
+                {(n.link || n.link_url) ? (
+                  <Link to={(n.link || n.link_url)} className="welcome-panel__notif-link">
                     <span className="welcome-panel__notif-icon" aria-hidden="true">
-                      {NOTIF_TYPE_ICON[n.type] ?? '🔔'}
+                      {NOTIF_TYPE_ICON[n.notification_type || n.type] ?? '🔔'}
                     </span>
                     <div className="welcome-panel__notif-body">
                       <span className="welcome-panel__notif-title">{n.title}</span>
@@ -163,7 +162,7 @@ export default function WelcomePanel() {
                 ) : (
                   <div className="welcome-panel__notif-link">
                     <span className="welcome-panel__notif-icon" aria-hidden="true">
-                      {NOTIF_TYPE_ICON[n.type] ?? '🔔'}
+                      {NOTIF_TYPE_ICON[n.notification_type || n.type] ?? '🔔'}
                     </span>
                     <div className="welcome-panel__notif-body">
                       <span className="welcome-panel__notif-title">{n.title}</span>

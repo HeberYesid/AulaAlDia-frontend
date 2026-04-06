@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { api } from '../api/axios'
-import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import { normalizeApiError as normalizeClientApiError } from '../api/errors'
 
 export const DEFAULT_SETTINGS = {
   period_scheme: 'TRIMESTER',
@@ -39,7 +39,7 @@ export function toLocalDateTimeInput(value) {
 }
 
 export function normalizeApiError(error, fallback, action = 'completar esta accion') {
-  return getApiErrorMessage(error, { action, fallback })
+  return normalizeClientApiError(error, { action, fallback })
 }
 
 export function createDefaultPeriod() {

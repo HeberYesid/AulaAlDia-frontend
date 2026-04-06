@@ -4,6 +4,10 @@ import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/PublicLayout'
 import ContextualTipBanner from './components/ContextualTipBanner'
+import LegalNotice from './pages/LegalNotice'
+import TermsConditions from './pages/TermsConditions'
+import HabeasData from './pages/HabeasData'
+import Pqrs from './pages/Pqrs'
 
 class ErrorBoundary extends Component {
   state = { error: null }
@@ -36,6 +40,7 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const AdminNews = lazy(() => import('./pages/AdminNews'))
+const AdminSupportTickets = lazy(() => import('./pages/AdminSupportTickets'))
 const Subjects = lazy(() => import('./pages/Subjects'))
 const SubjectDetail = lazy(() => import('./pages/SubjectDetail'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
@@ -84,6 +89,10 @@ export default function App() {
           <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/faq" element={<PublicLayout><FAQ /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+          <Route path="/privacy" element={<PublicLayout><LegalNotice /></PublicLayout>} />
+          <Route path="/terms" element={<PublicLayout><TermsConditions /></PublicLayout>} />
+          <Route path="/habeas-data" element={<PublicLayout><HabeasData /></PublicLayout>} />
+          <Route path="/pqrs" element={<PublicLayout><Pqrs /></PublicLayout>} />
           
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -151,6 +160,15 @@ export default function App() {
               element={
                 <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                   <AdminNews />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/support"
+              element={
+                <ProtectedRoute roles={["ADMIN"]} requireTenant>
+                  <AdminSupportTickets />
                 </ProtectedRoute>
               }
             />

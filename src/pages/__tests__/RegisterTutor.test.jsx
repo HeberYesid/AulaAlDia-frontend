@@ -45,6 +45,7 @@ describe('RegisterTutor page', () => {
         
         await user.type(screen.getByLabelText(/^Contraseña$/i), 'Password123!');
         await user.type(screen.getByLabelText(/Confirmar Contraseña/i), 'Password123!');
+        await user.click(screen.getByLabelText(/Autorizo el tratamiento de mis datos personales/i));
         
         await user.click(screen.getByRole('button', { name: /Verify Captcha/i }));
         await user.click(screen.getByRole('button', { name: /Completar acceso/i }));
@@ -54,7 +55,8 @@ describe('RegisterTutor page', () => {
             first_name: 'Jane',
             last_name: 'Doe',
             invitation_code: 'INV456',
-            turnstile_token: 'fake-token'
+            turnstile_token: 'fake-token',
+            legal_acceptance: true,
         }));
     });
 });
