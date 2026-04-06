@@ -40,6 +40,10 @@ vi.mock('../pages/TeacherEvaluations', () => ({
   default: () => <div>TeacherEvaluations Mock</div>,
 }))
 
+vi.mock('../pages/AdminTeacherAttendance', () => ({
+  default: () => <div>AdminTeacherAttendance Mock</div>,
+}))
+
 function renderAppAt(path) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -160,5 +164,40 @@ describe('App admin routes', () => {
 
     expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
     expect(screen.queryByText('TeacherEvaluations Mock')).not.toBeInTheDocument()
+  })
+
+  it('allows ADMIN into /admin/teacher-attendance', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'ADMIN' },
+      loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      schoolYearGateLoaded: true,
+      hasActiveSchoolYear: true,
+      activeSchoolYear: { id: 1, label: '2026' },
+    })
+
+    renderAppAt('/admin/teacher-attendance')
+
+    expect(await screen.findByText('AdminTeacherAttendance Mock')).toBeInTheDocument()
+  })
+
+  it('redirects TEACHER away from /admin/teacher-attendance', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'TEACHER' },
+      loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      schoolYearGateLoaded: true,
+      hasActiveSchoolYear: true,
+      activeSchoolYear: { id: 1, label: '2026' },
+    })
+
+    renderAppAt('/admin/teacher-attendance')
+
+    expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
+    expect(screen.queryByText('AdminTeacherAttendance Mock')).not.toBeInTheDocument()
   })
 })

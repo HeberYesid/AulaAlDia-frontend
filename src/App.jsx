@@ -56,6 +56,7 @@ const AcademicSettings = lazy(() => import('./pages/AcademicSettings'))
 const AdminUsers = lazy(() => import('./pages/AdminUsers'))
 const AdminBulletins = lazy(() => import('./pages/AdminBulletins'))
 const TeacherEvaluations = lazy(() => import('./pages/TeacherEvaluations'))
+const AdminTeacherAttendance = lazy(() => import('./pages/AdminTeacherAttendance'))
 
 const Curriculums = lazy(() => import('./pages/curriculums/Curriculums'))
 const GradeLevels = lazy(() => import('./pages/curriculums/GradeLevels'))
@@ -293,6 +294,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
                 <AdminBulletins />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/teacher-attendance"
+            element={
+              <ProtectedRoute roles={["ADMIN"]} requireTenant requireActiveSchoolYear>
+                <AdminTeacherAttendance />
               </ProtectedRoute>
             }
           />

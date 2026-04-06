@@ -9,6 +9,11 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import {
+  checkInTeacherAttendance,
+  checkOutTeacherAttendance,
+  fetchTeacherAttendanceCurrent,
+} from '../hooks/useTeacherAttendance'
 
 export default function Dashboard() {
   const {
@@ -25,6 +30,12 @@ export default function Dashboard() {
   const [confirmDialog, setConfirmDialog] = useState(null)
   const [tenantAccessDenied, setTenantAccessDenied] = useState(false)
   const [selectedTenantId, setSelectedTenantId] = useState('')
+  const [teacherAttendance, setTeacherAttendance] = useState({
+    loading: false,
+    hasOpenShift: false,
+    shift: null,
+  })
+  const [teacherAttendanceError, setTeacherAttendanceError] = useState('')
 
   const hasTenantCatalog = Array.isArray(tenants) && tenants.length > 0
   const hasActiveTenant = Boolean(activeTenantId)
@@ -108,6 +119,78 @@ export default function Dashboard() {
 
     loadSubjects()
   }, [user, tenantsLoaded, shouldPromptTenantSelection, shouldDenyTenantAccess, activeTenantId])
+
+  async function loadTeacherAttendance() {
+    if (user.role !== 'TEACHER') return
+    setTeacherAttendance((prev) => ({ ...prev, loading: true }))
+    setTeacherAttendanceError('')
+    try {
+      const data = await fetchTeacherAttendanceCurrent()
+      setTeacherAttendance({
+        loading: false,
+        hasOpenShift: Boolean(data?.has_open_shift),
+        shift: data?.shift || null,
+      })
+    } catch (err) {
+      setTeacherAttendance((prev) => ({ ...prev, loading: false }))
+      setTeacherAttendanceError(getApiErrorMessage(err, {
+        action: 'cargar el estado de asistencia docente',
+        fallback: 'No se pudo cargar tu estado de asistencia docente.',
+      }))
+    }
+  }
+
+  async function handleTeacherCheckIn() {
+    setTeacherAttendance((prev) => ({ ...prev, loading: true }))
+    setTeacherAttendanceError('')
+    try {
+      const data = await checkInTeacherAttendance()
+      setTeacherAttendance({
+        loading: false,
+        hasOpenShift: Boolean(data?.shift),
+        shift: data?.shift || null,
+      })
+    } catch (err) {
+      setTeacherAttendance((prev) => ({ ...prev, loading: false }))
+      setTeacherAttendanceError(getApiErrorMessage(err, {
+        action: 'marcar entrada docente',
+        fallback: 'No se pudo marcar tu entrada docente.',
+      }))
+    }
+  }
+
+  async function handleTeacherCheckOut() {
+    setTeacherAttendance((prev) => ({ ...prev, loading: true }))
+    setTeacherAttendanceError('')
+    try {
+      const data = await checkOutTeacherAttendance()
+      setTeacherAttendance({
+        loading: false,
+        hasOpenShift: Boolean(data?.shift),
+        shift: data?.shift || null,
+      })
+    } catch (err) {
+      setTeacherAttendance((prev) => ({ ...prev, loading: false }))
+      setTeacherAttendanceError(getApiErrorMessage(err, {
+        action: 'marcar salida docente',
+        fallback: 'No se pudo marcar tu salida docente.',
+      }))
+    }
+  }
+
+  useEffect(() => {
+    if (
+      user.role !== 'TEACHER'
+      || !tenantsLoaded
+      || shouldPromptTenantSelection
+      || shouldDenyTenantAccess
+    ) {
+      return
+    }
+
+    loadTeacherAttendance()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.role, tenantsLoaded, shouldPromptTenantSelection, shouldDenyTenantAccess, activeTenantId])
 
   // Si es estudiante, mostrar StudentDashboard
   if (user.role === 'STUDENT') {
@@ -197,6 +280,32 @@ export default function Dashboard() {
       <>
       <div className="fade-in">
         <SchoolHeader />
+
+        {user.role === 'TEACHER' && (
+          <div className="card">
+            <h2 style={{ marginBottom: 'var(--space-sm)' }}>Asistencia Docente</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+              Estado actual: {teacherAttendance.hasOpenShift ? 'Turno abierto' : 'Sin turno abierto'}
+            </p>
+            {teacherAttendanceError ? <Alert type="error" message={teacherAttendanceError} /> : null}
+            <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+              <button
+                className="btn primary"
+                onClick={handleTeacherCheckIn}
+                disabled={teacherAttendance.loading || teacherAttendance.hasOpenShift}
+              >
+                Marcar entrada
+              </button>
+              <button
+                className="btn secondary"
+                onClick={handleTeacherCheckOut}
+                disabled={teacherAttendance.loading || !teacherAttendance.hasOpenShift}
+              >
+                Marcar salida
+              </button>
+            </div>
+          </div>
+        )}
         
         {/* Mensajes de éxito/error */}
         <Alert type="success" message={success} />

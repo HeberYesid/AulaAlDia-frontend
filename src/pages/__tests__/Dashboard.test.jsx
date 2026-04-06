@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import Dashboard from '../Dashboard'
 import * as AuthContext from '../../state/AuthContext'
 import { api } from '../../api/axios'
+import * as attendanceHook from '../../hooks/useTeacherAttendance'
 
 vi.mock('../../api/axios', () => ({
   api: {
@@ -14,6 +15,12 @@ vi.mock('../../api/axios', () => ({
   },
   AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
   setApiActiveTenantId: vi.fn(),
+}))
+
+vi.mock('../../hooks/useTeacherAttendance', () => ({
+  fetchTeacherAttendanceCurrent: vi.fn(),
+  checkInTeacherAttendance: vi.fn(),
+  checkOutTeacherAttendance: vi.fn(),
 }))
 
 const mockTeacherUser = {
@@ -33,6 +40,9 @@ describe('Dashboard Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    attendanceHook.fetchTeacherAttendanceCurrent.mockResolvedValue({ has_open_shift: false, shift: null })
+    attendanceHook.checkInTeacherAttendance.mockResolvedValue({ result: 'created' })
+    attendanceHook.checkOutTeacherAttendance.mockResolvedValue({ result: 'closed' })
   })
 
   it('renders dashboard for authenticated user', async () => {
@@ -143,6 +153,29 @@ describe('Dashboard Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByLabelText(/cargando dashboard/i)).not.toBeInTheDocument()
+    })
+  })
+
+  it('shows teacher attendance card and can check in', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
+      user: mockTeacherUser,
+      loading: false,
+      activeTenantId: 'tenant-1',
+      tenantsLoaded: true,
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      switchTenant: vi.fn(),
+    })
+
+    renderDashboard()
+
+    expect(await screen.findByRole('heading', { name: /asistencia docente/i })).toBeInTheDocument()
+
+    const checkInButton = await screen.findByRole('button', { name: /marcar entrada/i })
+    checkInButton.click()
+
+    await waitFor(() => {
+      expect(attendanceHook.checkInTeacherAttendance).toHaveBeenCalledTimes(1)
     })
   })
 })

@@ -33,6 +33,7 @@ describe('navigation config', () => {
     expect(keys).toContain('admin-dashboard')
     expect(keys).toContain('admin-users')
     expect(keys).toContain('admin-bulletins')
+    expect(keys).toContain('admin-teacher-attendance')
     expect(keys).not.toContain('dashboard')
   })
 

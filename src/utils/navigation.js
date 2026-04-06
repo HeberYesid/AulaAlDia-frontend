@@ -13,6 +13,7 @@ import {
   Users,
   Megaphone,
   Star,
+  Clock3,
 } from 'lucide-react'
 import { USER_ROLES } from './constants'
 
@@ -64,6 +65,16 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
     tourId: 'nav-admin-bulletins',
+  },
+  {
+    key: 'admin-teacher-attendance',
+    to: '/admin/teacher-attendance',
+    label: 'Asistencia Docente',
+    contextualTip: 'Supervisa entradas y salidas docentes para detectar novedades operativas del equipo.',
+    icon: Clock3,
+    section: 'administration',
+    roles: [USER_ROLES.ADMIN],
+    showInNavbar: false,
   },
   {
     key: 'subjects',
