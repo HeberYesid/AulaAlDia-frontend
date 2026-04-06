@@ -14,6 +14,7 @@ import {
   Megaphone,
   Star,
   Clock3,
+  LifeBuoy,
 } from 'lucide-react'
 import { USER_ROLES } from './constants'
 
