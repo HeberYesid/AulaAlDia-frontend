@@ -75,6 +75,63 @@ function formatAcademicPeriodLabel(period) {
   return trimmedLabel || simplifiedLabel || label
 }
 
+function normalizeMessage(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+function extractErrorDetail(error) {
+  const payload = error?.response?.data
+  if (!payload) return ''
+
+  if (typeof payload === 'string') return payload
+
+  if (typeof payload !== 'object') return ''
+
+  if (typeof payload.detail === 'string') return payload.detail
+  if (Array.isArray(payload.detail) && payload.detail.length > 0) {
+    return String(payload.detail[0] || '')
+  }
+
+  if (typeof payload.message === 'string') return payload.message
+  return ''
+}
+
+function getDashboardBlockErrorMessage(error, { sectionLabel }) {
+  const errorCode = error?.response?.data?.error_code
+  const normalizedDetail = normalizeMessage(extractErrorDetail(error))
+
+  if (
+    errorCode === 'NO_ACTIVE_SCHOOL_YEAR' ||
+    normalizedDetail.includes('no hay un ano escolar activo')
+  ) {
+    return `Todavía no hay un año escolar activo para ver ${sectionLabel}. Activa uno en Configuración académica.`
+  }
+
+  if (
+    errorCode === 'NO_ACTIVE_ACADEMIC_PERIOD' ||
+    normalizedDetail.includes('no hay un periodo academico vigente')
+  ) {
+    return `Todavía no hay un período abierto para hoy en ${sectionLabel}. Abre uno o ajusta sus fechas en Configuración académica.`
+  }
+
+  if (error?.response?.status === 403) {
+    return `No tienes permiso para ver ${sectionLabel}.`
+  }
+
+  if (error?.response?.status >= 500) {
+    return `No pudimos cargar ${sectionLabel} por un problema temporal. Inténtalo de nuevo en unos minutos.`
+  }
+
+  return getApiErrorMessage(error, {
+    action: `cargar ${sectionLabel}`,
+    fallback: `No pudimos cargar ${sectionLabel}. Inténtalo nuevamente.`,
+  })
+}
+
 export default function useAdminDashboardData() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -118,28 +175,39 @@ export default function useAdminDashboardData() {
         nextSubjects = unwrapListData(subjectsResult.value.data)
         setSubjects(nextSubjects)
       } else {
-        nextBlockErrors.subjects = 'No se pudieron cargar las materias.'
+        nextBlockErrors.subjects = getDashboardBlockErrorMessage(subjectsResult.reason, {
+          sectionLabel: 'las materias',
+        })
         setSubjects([])
       }
 
       if (absencesResult.status === 'fulfilled') {
         setAbsences(unwrapListData(absencesResult.value.data))
       } else {
-        nextBlockErrors.absences = 'No se pudieron cargar las faltas.'
+        nextBlockErrors.absences = getDashboardBlockErrorMessage(absencesResult.reason, {
+          sectionLabel: 'las faltas',
+        })
         setAbsences([])
       }
 
       if (observationsResult.status === 'fulfilled') {
         setObservations(unwrapListData(observationsResult.value.data))
       } else {
-        nextBlockErrors.observations = 'No se pudieron cargar las observaciones.'
+        nextBlockErrors.observations = getDashboardBlockErrorMessage(observationsResult.reason, {
+          sectionLabel: 'las observaciones',
+        })
         setObservations([])
       }
 
       if (notificationsResult.status === 'fulfilled') {
         setNotifications(unwrapListData(notificationsResult.value.data))
       } else {
-        nextBlockErrors.notifications = 'No se pudieron cargar las notificaciones.'
+        nextBlockErrors.notifications = getDashboardBlockErrorMessage(
+          notificationsResult.reason,
+          {
+            sectionLabel: 'las notificaciones',
+          }
+        )
         setNotifications([])
       }
 
@@ -161,7 +229,9 @@ export default function useAdminDashboardData() {
 
         setUpcomingEvents(future)
       } else {
-        nextBlockErrors.calendar = 'No se pudieron cargar los eventos del calendario.'
+        nextBlockErrors.calendar = getDashboardBlockErrorMessage(calendarResult.reason, {
+          sectionLabel: 'los eventos del calendario',
+        })
         setUpcomingEvents([])
       }
 
@@ -169,14 +239,21 @@ export default function useAdminDashboardData() {
         const periods = unwrapListData(periodsResult.value.data)
         setAcademicPeriods(periods)
       } else {
-        nextBlockErrors.periods = 'No se pudieron cargar los periodos académicos.'
+        nextBlockErrors.periods = getDashboardBlockErrorMessage(periodsResult.reason, {
+          sectionLabel: 'los períodos académicos',
+        })
         setAcademicPeriods([])
       }
 
       if (settingsResult.status === 'fulfilled') {
         setAcademicSettings(settingsResult.value.data || null)
       } else {
-        nextBlockErrors.academicSettings = 'No se pudo cargar la configuración académica.'
+        nextBlockErrors.academicSettings = getDashboardBlockErrorMessage(
+          settingsResult.reason,
+          {
+            sectionLabel: 'la configuración académica',
+          }
+        )
         setAcademicSettings(null)
       }
     } catch (err) {
@@ -220,15 +297,17 @@ export default function useAdminDashboardData() {
       } else {
         setSubjectStats([])
       }
-    } catch {
-      nextBlockErrors.performance = 'No se pudieron cargar las métricas de rendimiento.'
+    } catch (performanceError) {
+      nextBlockErrors.performance = getDashboardBlockErrorMessage(performanceError, {
+        sectionLabel: 'las métricas de rendimiento',
+      })
       setSubjectStats([])
     }
 
     setBlockErrors(nextBlockErrors)
 
     if (Object.keys(nextBlockErrors).length > 0) {
-      setError('El dashboard cargó parcialmente. Revisa los bloques con alerta.')
+      setError('Algunas secciones no se pudieron actualizar. Revisa los mensajes en rojo para resolverlo.')
     }
 
     setLoading(false)
