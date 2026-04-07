@@ -17,6 +17,19 @@ export default function Sections() {
     fetchSections();
   }, []);
 
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape" && !submitting) {
+        closeModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isModalOpen, submitting]);
+
   const fetchSections = async () => {
     try {
       setLoading(true);
@@ -77,8 +90,8 @@ export default function Sections() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page-header">
+    <div className="admin-page sections-page">
+      <div className="sections-page__header">
         <h1>Gestión de Secciones</h1>
         <button className="btn btn-primary" onClick={openCreateModal}>
           Nueva Sección
@@ -87,60 +100,72 @@ export default function Sections() {
 
       {error && <div className="alert alert-danger">{error}</div>}
 
-      <div className="table-container">
-        <table className="table mobile-card-view">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+      <div className="card sections-page__list-card">
+        <div className="sections-page__list-header">
+          <h2>Listado</h2>
+        </div>
+
+        <div className="table-container sections-table-container">
+          <table className="table mobile-card-view sections-table">
+            <thead>
               <tr>
-                <td data-label="Estado" colSpan="4" className="text-center">Cargando...</td>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
-            ) : sections.length === 0 ? (
-              <tr>
-                <td data-label="Estado" colSpan="4" className="text-center">
-                  No hay secciones registradas.
-                </td>
-              </tr>
-            ) : (
-              sections.map((sec) => (
-                <tr key={sec.id}>
-                  <td data-label="ID">{sec.id}</td>
-                  <td data-label="Nombre">{sec.name}</td>
-                  <td data-label="Estado">
-                    <span
-                      className={`badge ${
-                        sec.is_active ? "badge-success" : "badge-secondary"
-                      }`}
-                    >
-                      {sec.is_active ? "Activo" : "Inactivo"}
-                    </span>
-                  </td>
-                  <td data-label="Acciones">
-                    <button
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => openEditModal(sec)}
-                    >
-                      Editar
-                    </button>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td data-label="Estado" colSpan="4" className="text-center">Cargando...</td>
+                </tr>
+              ) : sections.length === 0 ? (
+                <tr>
+                  <td data-label="Estado" colSpan="4" className="text-center">
+                    No hay secciones registradas.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                sections.map((sec) => (
+                  <tr key={sec.id}>
+                    <td data-label="ID">{sec.id}</td>
+                    <td data-label="Nombre">{sec.name}</td>
+                    <td data-label="Estado">
+                      <span
+                        className={`badge ${
+                          sec.is_active ? "badge-success" : "badge-secondary"
+                        }`}
+                      >
+                        {sec.is_active ? "Activo" : "Inactivo"}
+                      </span>
+                    </td>
+                    <td data-label="Acciones">
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => openEditModal(sec)}
+                      >
+                        Editar
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {isModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
-            <h2>{editingId ? "Editar Sección" : "Nueva Sección"}</h2>
+        <div className="sections-modal-backdrop" onClick={!submitting ? closeModal : undefined}>
+          <div
+            className="sections-modal modal-responsive"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sections-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="sections-modal-title">{editingId ? "Editar Sección" : "Nueva Sección"}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Nombre (ej. A, B, C)</label>
@@ -154,33 +179,34 @@ export default function Sections() {
                   required
                 />
               </div>
-              <div className="form-group checkbox-group">
-                <label>
+              <div className="form-group sections-modal__checkbox-group">
+                <label className="sections-modal__checkbox" htmlFor="section-active-checkbox">
+                  <span>Activo</span>
                   <input
+                    id="section-active-checkbox"
                     type="checkbox"
                     checked={formData.is_active}
                     onChange={(e) =>
                       setFormData({ ...formData, is_active: e.target.checked })
                     }
                   />
-                  Activo
                 </label>
               </div>
-              <div className="modal-actions">
+              <div className="sections-modal__actions">
+                <button
+                  type="submit"
+                  className="btn sections-modal__save"
+                  disabled={submitting}
+                >
+                  {submitting ? "Guardando..." : "Guardar"}
+                </button>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn sections-modal__cancel"
                   onClick={closeModal}
                   disabled={submitting}
                 >
                   Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={submitting}
-                >
-                  {submitting ? "Guardando..." : "Guardar"}
                 </button>
               </div>
             </form>
