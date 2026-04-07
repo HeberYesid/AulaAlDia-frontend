@@ -80,7 +80,7 @@ export default function ProtectedRoute({
               Esta sección solo está disponible cuando la institución tiene un año escolar activo.
             </p>
             {user.role === 'ADMIN' ? (
-              <Link to="/admin/academic-settings" className="btn">
+              <Link to="/admin/academic-settings" className="btn empty-state__action">
                 Ir a Configuración Académica
               </Link>
             ) : (

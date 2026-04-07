@@ -109,6 +109,18 @@ describe('navigation config', () => {
     expect(navbarKeys).not.toContain('absences')
   })
 
+  it.each([
+    ['admin', buildUser(USER_ROLES.ADMIN)],
+    ['teacher', buildUser(USER_ROLES.TEACHER)],
+    ['student', buildUser(USER_ROLES.STUDENT)],
+    ['tutor', buildUser(USER_ROLES.TUTOR)],
+  ])('keeps sidebar icons distinct for %s', (_label, user) => {
+    const sidebarItems = getNavigationItems(user, { surface: 'sidebar' })
+    const iconRefs = sidebarItems.map((item) => item.icon)
+
+    expect(new Set(iconRefs).size).toBe(iconRefs.length)
+  })
+
   it('resolves contextual tip for exact sidebar route', () => {
     const teacher = buildUser(USER_ROLES.TEACHER)
 
