@@ -7,7 +7,7 @@ export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [gradeLevels, setGradeLevels] = useState([]);
   const [sections, setSections] = useState([]);
-  const [academicPeriods, setAcademicPeriods] = useState([]);
+  const [schoolYears, setSchoolYears] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,7 +16,7 @@ export default function Courses() {
     grade_level: "",
     section: "",
     display_name: "",
-    academic_period: "",
+    school_year: "",
     is_active: true,
   });
   const [editingId, setEditingId] = useState(null);
@@ -34,12 +34,12 @@ export default function Courses() {
           api.get("/api/v1/courses/courses/"),
           api.get("/api/v1/courses/grade-levels/"),
           api.get("/api/v1/courses/course-sections/"),
-          api.get("/api/v1/courses/academic-settings/"), // Assuming periods are part of settings or similar, keeping it simple for now or fetch if separate endpoint
+          api.get("/api/v1/courses/school-years/"),
         ]);
       setCourses(unwrapListData(coursesRes.data));
       setGradeLevels(unwrapListData(gradesRes.data));
       setSections(unwrapListData(sectionsRes.data));
-      setAcademicPeriods(unwrapListData(periodsRes.data));
+      setSchoolYears(unwrapListData(periodsRes.data));
       setError(null);
     } catch (err) {
       console.error(err);
@@ -53,38 +53,38 @@ export default function Courses() {
   };
 
   const openCreateModal = () => {
-    setFormData({
-      grade_level: "",
-      section: "",
-      display_name: "",
-      academic_period: "",
-      is_active: true,
-    });
+      setFormData({
+        grade_level: "",
+        section: "",
+        display_name: "",
+        school_year: "",
+        is_active: true,
+      });
     setEditingId(null);
     setIsModalOpen(true);
   };
 
   const openEditModal = (course) => {
-    setFormData({
-      grade_level: course.grade_level || "",
-      section: course.section || "",
-      display_name: course.display_name || "",
-      academic_period: course.academic_period || "",
-      is_active: course.is_active,
-    });
+      setFormData({
+        grade_level: course.grade_level || "",
+        section: course.section || "",
+        display_name: course.display_name || "",
+        school_year: course.school_year || "",
+        is_active: course.is_active,
+      });
     setEditingId(course.id);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setFormData({
-      grade_level: "",
-      section: "",
-      display_name: "",
-      academic_period: "",
-      is_active: true,
-    });
+      setFormData({
+        grade_level: "",
+        section: "",
+        display_name: "",
+        school_year: "",
+        is_active: true,
+      });
     setEditingId(null);
   };
 
@@ -94,7 +94,7 @@ export default function Courses() {
       setSubmitting(true);
       const payload = { ...formData };
       if (!payload.section) payload.section = null;
-      if (!payload.academic_period) payload.academic_period = null;
+      if (!payload.school_year) payload.school_year = null;
 
       if (editingId) {
         await api.patch(`/api/v1/courses/courses/${editingId}/`, payload);
@@ -236,6 +236,24 @@ export default function Courses() {
                   {sections.map((sec) => (
                     <option key={sec.id} value={sec.id}>
                       {sec.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Año Académico</label>
+                <select
+                  className="form-control"
+                  value={formData.school_year}
+                  onChange={(e) =>
+                    setFormData({ ...formData, school_year: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Seleccione un año</option>
+                  {schoolYears.map((year) => (
+                    <option key={year.id} value={year.id}>
+                      {year.label || `${year.start_date} - ${year.end_date}`}
                     </option>
                   ))}
                 </select>
