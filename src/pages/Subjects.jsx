@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
+import { useAuth } from '../state/AuthContext'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 import HierarchicalSelector from '../components/HierarchicalSelector'
@@ -15,15 +16,42 @@ function normalizeApiError(error, fallback) {
 }
 
 export default function Subjects() {
+  const { user } = useAuth()
   const [items, setItems] = useState([])
+  const [courses, setCourses] = useState([])
+  const [teachers, setTeachers] = useState([])
   const [name, setName] = useState('')
+  const [courseId, setCourseId] = useState('')
+  const [teacherId, setTeacherId] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(null)
 
   async function load() {
-    const { data } = await api.get('/api/v1/courses/subjects/')
-    setItems(unwrapListData(data))
+    if (user?.role === 'ADMIN') {
+      const [subjectsRes, coursesRes, teachersRes] = await Promise.all([
+        api.get('/api/v1/courses/subjects/'),
+        api.get('/api/v1/courses/courses/'),
+        api.get('/api/v1/auth/tenant-users/', {
+          params: {
+            role: 'TEACHER',
+            status: 'active',
+          },
+        }),
+      ])
+      setItems(unwrapListData(subjectsRes.data))
+      setCourses(unwrapListData(coursesRes.data))
+      setTeachers(unwrapListData(teachersRes.data))
+      return
+    }
+
+    const [subjectsRes, coursesRes] = await Promise.all([
+      api.get('/api/v1/courses/subjects/'),
+      api.get('/api/v1/courses/courses/'),
+    ])
+    setItems(unwrapListData(subjectsRes.data))
+    setCourses(unwrapListData(coursesRes.data))
+    setTeachers([])
   }
 
   useEffect(() => {
@@ -35,15 +63,21 @@ export default function Subjects() {
     setError('')
     setSuccess('')
     try {
-      await api.post('/api/v1/courses/subjects/', { name })
+      await api.post('/api/v1/courses/subjects/', {
+        name,
+        course_id: Number(courseId),
+        teacher_id: Number(teacherId),
+      })
       setName('')
+      setCourseId('')
+      setTeacherId('')
       setSuccess('Materia creada exitosamente')
       load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(normalizeApiError(
         err,
-        'No se pudo crear la materia. Verifica el nombre y tu institucion activa.'
+        'No se pudo crear la materia. Verifica nombre, curso, docente y tu institucion activa.'
       ))
     }
   }
@@ -102,16 +136,55 @@ export default function Subjects() {
       />
 
       <div className="grid cols-2 grid-stack-mobile">
-        <div className="card">
-          <h2>Crear materia</h2>
-          <form onSubmit={createSubject}>
-            <div>
-              <label htmlFor="subject-name">Nombre</label>
-              <input id="subject-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Matemáticas" />
-            </div>
-            <button className="btn" type="submit">Crear Materia</button>
-          </form>
-        </div>
+        {user?.role === 'ADMIN' ? (
+          <div className="card">
+            <h2>Crear materia</h2>
+            <form onSubmit={createSubject}>
+              <div>
+                <label htmlFor="subject-name">Nombre</label>
+                <input id="subject-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Matemáticas" />
+              </div>
+              <div>
+                <label htmlFor="subject-course">Curso</label>
+                <select
+                  id="subject-course"
+                  value={courseId}
+                  onChange={(e) => setCourseId(e.target.value)}
+                  required
+                >
+                  <option value="">Selecciona un curso</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.display_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="subject-teacher">Docente</label>
+                <select
+                  id="subject-teacher"
+                  value={teacherId}
+                  onChange={(e) => setTeacherId(e.target.value)}
+                  required
+                >
+                  <option value="">Selecciona un docente</option>
+                  {teachers.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.full_name || teacher.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button className="btn" type="submit">Crear Materia</button>
+            </form>
+          </div>
+        ) : (
+          <div className="card">
+            <h2>Gestión de materias</h2>
+            <p>Solo administradores pueden crear materias nuevas.</p>
+          </div>
+        )}
         <div className="card">
           <h2>Mis materias</h2>
           {items.length === 0 ? (
@@ -141,13 +214,15 @@ export default function Subjects() {
                           >
                             Ver
                           </Link>
-                          <button
-                            onClick={() => handleDeleteClick(s)}
-                            className="btn danger"
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                          >
-                            Eliminar
-                          </button>
+                          {user?.role === 'ADMIN' && (
+                            <button
+                              onClick={() => handleDeleteClick(s)}
+                              className="btn danger"
+                              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                            >
+                              Eliminar
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
