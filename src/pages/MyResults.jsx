@@ -10,6 +10,12 @@ export default function MyResults() {
   const [loading, setLoading] = useState(true)
   const [exportError, setExportError] = useState('')
 
+  const officialStatusMeta = {
+    DRAFT: { label: 'Borrador', color: 'var(--text-muted)' },
+    APPROVED: { label: 'Aprobado', color: 'var(--warning)' },
+    ISSUED: { label: 'Emitido', color: 'var(--success)' },
+  }
+
   async function load() {
     setLoading(true)
     try {
@@ -106,6 +112,20 @@ export default function MyResults() {
       setExportError(getApiErrorMessage(err, {
         action: 'exportar tus resultados a CSV',
         fallback: 'No se pudo exportar tus resultados a CSV. Intentalo nuevamente en unos minutos.',
+      }))
+    }
+  }
+
+  async function downloadOfficialBulletin(bulletinId) {
+    if (!bulletinId) return
+    try {
+      await api.get(`/api/v1/courses/my-bulletins/${bulletinId}/official-pdf/`, {
+        responseType: 'blob',
+      })
+    } catch (err) {
+      setExportError(getApiErrorMessage(err, {
+        action: 'descargar el boletín oficial',
+        fallback: 'No se pudo descargar el boletín oficial.',
       }))
     }
   }
@@ -220,11 +240,18 @@ export default function MyResults() {
                 const totalExercises = stats.total_exercises || 0
                 const totalAbsences = stats.total_absences || 0
                 const unjustifiedAbsences = stats.unjustified_absences || 0
+                const bulletinStatus = stats.bulletin_official_status
+                const statusMeta = bulletinStatus ? officialStatusMeta[bulletinStatus] : null
 
                 return (
                   <tr key={enrollment.enrollment_id}>
                     <td data-label="Materia">
                       <strong>{enrollment.subject_name}</strong>
+                      {statusMeta && (
+                        <div style={{ marginTop: 'var(--space-xs)', fontSize: 'var(--font-size-xs)', color: statusMeta.color, fontWeight: 700 }}>
+                          {statusMeta.label}
+                        </div>
+                      )}
                     </td>
                     <td data-label="Nota final">
                       {grade != null ? (
@@ -250,6 +277,23 @@ export default function MyResults() {
                     <td data-label="Faltas">
                       {totalAbsences}
                       {unjustifiedAbsences > 0 ? ` (${unjustifiedAbsences} sin justificar)` : ''}
+                      {stats.financial_hold_active && stats.financial_hold_message ? (
+                        <div className="notice danger" style={{ marginTop: 'var(--space-xs)' }}>
+                          {stats.financial_hold_message}
+                        </div>
+                      ) : null}
+                      {stats.can_download_official_pdf && stats.bulletin_id ? (
+                        <div style={{ marginTop: 'var(--space-xs)' }}>
+                          <button
+                            type="button"
+                            className="btn secondary"
+                            onClick={() => downloadOfficialBulletin(stats.bulletin_id)}
+                            aria-label="Descargar boletín oficial"
+                          >
+                            Descargar boletín oficial
+                          </button>
+                        </div>
+                      ) : null}
                     </td>
                   </tr>
                 )

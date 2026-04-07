@@ -45,6 +45,13 @@ export default function AdminBulletins() {
   const [detailByBulletinId, setDetailByBulletinId] = useState({})
   const [detailErrorByBulletinId, setDetailErrorByBulletinId] = useState({})
   const [loadingDetailId, setLoadingDetailId] = useState(null)
+  const [actionLoadingByBulletinId, setActionLoadingByBulletinId] = useState({})
+
+  const officialStatusMeta = {
+    DRAFT: { label: 'Borrador', color: 'var(--text-muted)' },
+    APPROVED: { label: 'Aprobado', color: 'var(--warning)' },
+    ISSUED: { label: 'Emitido', color: 'var(--success)' },
+  }
 
   const loadBulletins = useCallback(async () => {
     setLoading(true)
@@ -111,6 +118,64 @@ export default function AdminBulletins() {
       setDetailErrorByBulletinId((current) => ({ ...current, [bulletinId]: message }))
     } finally {
       setLoadingDetailId((current) => (current === bulletinId ? null : current))
+    }
+  }
+
+  function setActionLoading(bulletinId, action, value) {
+    setActionLoadingByBulletinId((current) => ({
+      ...current,
+      [bulletinId]: {
+        ...(current[bulletinId] || {}),
+        [action]: value,
+      },
+    }))
+  }
+
+  async function approveBulletin(bulletinId) {
+    setActionLoading(bulletinId, 'approve', true)
+    try {
+      await api.post(`/api/v1/courses/admin-bulletins/${bulletinId}/approve/`, {
+        official_comment: 'Aprobado por administración',
+      })
+      await loadBulletins()
+    } catch (err) {
+      setError(getApiErrorMessage(err, {
+        action: 'aprobar el boletín',
+        fallback: 'No se pudo aprobar el boletín.',
+      }))
+    } finally {
+      setActionLoading(bulletinId, 'approve', false)
+    }
+  }
+
+  async function issueBulletin(bulletinId) {
+    setActionLoading(bulletinId, 'issue', true)
+    try {
+      await api.post(`/api/v1/courses/admin-bulletins/${bulletinId}/issue/`)
+      await loadBulletins()
+    } catch (err) {
+      setError(getApiErrorMessage(err, {
+        action: 'emitir el boletín',
+        fallback: 'No se pudo emitir el boletín oficial.',
+      }))
+    } finally {
+      setActionLoading(bulletinId, 'issue', false)
+    }
+  }
+
+  async function downloadOfficialPdf(bulletinId) {
+    setActionLoading(bulletinId, 'download', true)
+    try {
+      await api.get(`/api/v1/courses/admin-bulletins/${bulletinId}/official-pdf/`, {
+        responseType: 'blob',
+      })
+    } catch (err) {
+      setError(getApiErrorMessage(err, {
+        action: 'descargar el PDF oficial',
+        fallback: 'No se pudo descargar el PDF oficial.',
+      }))
+    } finally {
+      setActionLoading(bulletinId, 'download', false)
     }
   }
 
@@ -249,6 +314,7 @@ export default function AdminBulletins() {
                   <th style={{ textAlign: 'center' }}>Periodo</th>
                   <th style={{ textAlign: 'center' }}>Promedio</th>
                   <th style={{ textAlign: 'center' }}>Materias</th>
+                  <th style={{ textAlign: 'center' }}>Estado oficial</th>
                   <th>Generado</th>
                   <th style={{ textAlign: 'right' }}>Acción</th>
                 </tr>
@@ -259,6 +325,8 @@ export default function AdminBulletins() {
                   const detail = detailByBulletinId[bulletin.id]
                   const detailError = detailErrorByBulletinId[bulletin.id]
                   const isLoadingDetail = loadingDetailId === bulletin.id
+                  const actionLoading = actionLoadingByBulletinId[bulletin.id] || {}
+                  const statusMeta = officialStatusMeta[bulletin.official_status] || officialStatusMeta.DRAFT
 
                   return [
                     <tr key={`bulletin-${bulletin.id}`}>
@@ -276,22 +344,63 @@ export default function AdminBulletins() {
                           {Number.parseFloat(bulletin.average_grade || 0).toFixed(2)}
                         </td>
                         <td data-label="Materias" style={{ textAlign: 'center' }}>{bulletin.total_subjects}</td>
+                        <td
+                          data-label="Estado oficial"
+                          style={{ textAlign: 'center', fontWeight: 700, color: statusMeta.color }}
+                        >
+                          {statusMeta.label}
+                        </td>
                         <td data-label="Generado">{formatDate(bulletin.created_at)}</td>
                         <td data-label="Acción" style={{ textAlign: 'right' }}>
-                          <button
-                            type="button"
-                            className="btn secondary"
-                            onClick={() => loadBulletinDetail(bulletin.id)}
-                            aria-expanded={isExpanded}
-                            aria-label={`Ver detalle de ${bulletin.student_email}`}
-                          >
-                            {isExpanded ? 'Ocultar' : 'Ver detalle'}
-                          </button>
+                          <div style={{ display: 'inline-flex', gap: 'var(--space-xs)', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                            {bulletin.official_status === 'DRAFT' && (
+                              <button
+                                type="button"
+                                className="btn warning"
+                                disabled={actionLoading.approve}
+                                onClick={() => approveBulletin(bulletin.id)}
+                                aria-label="Aprobar boletín"
+                              >
+                                Aprobar
+                              </button>
+                            )}
+                            {bulletin.official_status === 'APPROVED' && (
+                              <button
+                                type="button"
+                                className="btn primary"
+                                disabled={actionLoading.issue}
+                                onClick={() => issueBulletin(bulletin.id)}
+                                aria-label="Emitir boletín"
+                              >
+                                Emitir
+                              </button>
+                            )}
+                            {bulletin.official_status === 'ISSUED' && (
+                              <button
+                                type="button"
+                                className="btn secondary"
+                                disabled={actionLoading.download}
+                                onClick={() => downloadOfficialPdf(bulletin.id)}
+                                aria-label="Descargar PDF oficial"
+                              >
+                                PDF oficial
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="btn secondary"
+                              onClick={() => loadBulletinDetail(bulletin.id)}
+                              aria-expanded={isExpanded}
+                              aria-label={`Ver detalle de ${bulletin.student_email}`}
+                            >
+                              {isExpanded ? 'Ocultar' : 'Ver detalle'}
+                            </button>
+                          </div>
                         </td>
                       </tr>,
                     isExpanded ? (
                         <tr key={`detail-${bulletin.id}`}>
-                          <td colSpan={7} data-label="Detalle" style={{ padding: 0 }}>
+                          <td colSpan={8} data-label="Detalle" style={{ padding: 0 }}>
                             <div className="card" style={{ margin: 'var(--space-sm)', borderLeft: '4px solid var(--primary)' }}>
                               {isLoadingDetail ? (
                                 <div className="loading">
@@ -305,6 +414,11 @@ export default function AdminBulletins() {
                                   <h3 style={{ margin: 0 }}>
                                     Detalle de {detail.student_name || detail.student_email} — {detail.period_label}
                                   </h3>
+                                  {!!detail.official_comment && (
+                                    <div className="notice" style={{ whiteSpace: 'pre-wrap' }}>
+                                      <strong>Comentario oficial:</strong> {detail.official_comment}
+                                    </div>
+                                  )}
 
                                   <div className="table-container">
                                     <table className="table mobile-card-view">

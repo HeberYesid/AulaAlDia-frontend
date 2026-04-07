@@ -9,6 +9,7 @@ import { useAuth } from '../../state/AuthContext'
 vi.mock('../../api/axios', () => ({
   api: {
     get: vi.fn(),
+    post: vi.fn(),
   },
   AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
   setApiActiveTenantId: vi.fn(),
@@ -63,6 +64,7 @@ describe('AdminBulletins page', () => {
             period_label: '2026 - Periodo 1',
             average_grade: 4.3,
             total_subjects: 5,
+            official_status: 'DRAFT',
             created_at: '2026-03-20T12:00:00Z',
           },
           {
@@ -73,6 +75,7 @@ describe('AdminBulletins page', () => {
             period_label: '2026 - Periodo 2',
             average_grade: 3.7,
             total_subjects: 6,
+            official_status: 'APPROVED',
             created_at: '2026-06-20T12:00:00Z',
           },
         ],
@@ -114,6 +117,7 @@ describe('AdminBulletins page', () => {
             period_label: '2026 - Periodo 1',
             average_grade: 4.3,
             total_subjects: 1,
+            official_status: 'ISSUED',
             created_at: '2026-03-20T12:00:00Z',
           },
         ],
@@ -125,6 +129,8 @@ describe('AdminBulletins page', () => {
         student_name: 'Ana Perez',
         student_email: 'ana@example.com',
         period_label: '2026 - Periodo 1',
+        official_status: 'ISSUED',
+        official_comment: 'Comentario oficial de rectoría',
         entries: [
           {
             id: 101,
@@ -151,6 +157,58 @@ describe('AdminBulletins page', () => {
     await waitFor(() => {
       expect(screen.getByText(/Detalle de Ana Perez/)).toBeInTheDocument()
       expect(screen.getByText('Matematicas')).toBeInTheDocument()
+      expect(screen.getByText(/Comentario oficial de rectoría/i)).toBeInTheDocument()
     })
+  })
+
+  it('allows admin to approve and issue from list actions', async () => {
+    api.get.mockResolvedValueOnce({
+      data: {
+        bulletins: [
+          {
+            id: 11,
+            student_name: 'Eva Rios',
+            student_email: 'eva@example.com',
+            period_number: 1,
+            period_label: '2026 - Periodo 1',
+            average_grade: 4.1,
+            total_subjects: 3,
+            official_status: 'DRAFT',
+            created_at: '2026-03-20T12:00:00Z',
+          },
+        ],
+      },
+    })
+    api.get.mockResolvedValueOnce({
+      data: {
+        bulletins: [
+          {
+            id: 11,
+            student_name: 'Eva Rios',
+            student_email: 'eva@example.com',
+            period_number: 1,
+            period_label: '2026 - Periodo 1',
+            average_grade: 4.1,
+            total_subjects: 3,
+            official_status: 'APPROVED',
+            created_at: '2026-03-20T12:00:00Z',
+          },
+        ],
+      },
+    })
+    api.post.mockResolvedValueOnce({ data: { official_status: 'APPROVED' } })
+    api.post.mockResolvedValueOnce({ data: { official_status: 'ISSUED' } })
+
+    const user = userEvent.setup()
+    renderComponent()
+
+    expect(await screen.findByText('Eva Rios')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Aprobar boletín/i }))
+    expect(await screen.findByRole('button', { name: /Emitir boletín/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Emitir boletín/i }))
+
+    expect(api.post).toHaveBeenNthCalledWith(1, '/api/v1/courses/admin-bulletins/11/approve/', expect.any(Object))
+    expect(api.post).toHaveBeenNthCalledWith(2, '/api/v1/courses/admin-bulletins/11/issue/')
   })
 })

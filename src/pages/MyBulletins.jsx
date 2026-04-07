@@ -13,6 +13,7 @@ export default function MyBulletins() {
   const [expandedBulletinId, setExpandedBulletinId] = useState(null)
   const [bulletinDetail, setBulletinDetail] = useState(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [downloadLoading, setDownloadLoading] = useState(false)
   const navigate = useNavigate()
   const { logout } = useAuth()
 
@@ -134,6 +135,28 @@ export default function MyBulletins() {
     return 'var(--danger)'
   }
 
+  const officialStatusMeta = {
+    DRAFT: { label: 'Borrador', color: 'var(--text-muted)' },
+    APPROVED: { label: 'Aprobado', color: 'var(--warning)' },
+    ISSUED: { label: 'Emitido', color: 'var(--success)' },
+  }
+
+  const downloadOfficialPdf = async (bulletinId) => {
+    setDownloadLoading(true)
+    try {
+      await api.get(`/api/v1/courses/my-bulletins/${bulletinId}/official-pdf/`, {
+        responseType: 'blob',
+      })
+    } catch (err) {
+      setError(getApiErrorMessage(err, {
+        action: 'descargar el boletín oficial',
+        fallback: 'No se pudo descargar el boletín oficial.',
+      }))
+    } finally {
+      setDownloadLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="card">
@@ -249,6 +272,22 @@ export default function MyBulletins() {
           >
             {yearBulletins.map((bulletin) => (
               <div key={bulletin.id}>
+                {(() => {
+                  const status = officialStatusMeta[bulletin.official_status] || officialStatusMeta.DRAFT
+                  return (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        marginBottom: 'var(--space-xs)',
+                        fontSize: 'var(--font-size-xs)',
+                        color: status.color,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {status.label}
+                    </span>
+                  )
+                })()}
                 {/* Period card */}
                 <button
                   type="button"
@@ -355,6 +394,32 @@ export default function MyBulletins() {
                         >
                           Detalle — {bulletinDetail.period_label}
                         </h4>
+
+                        {bulletinDetail.official_comment && (
+                          <div className="notice" style={{ marginBottom: 'var(--space-sm)' }}>
+                            <strong>Comentario oficial:</strong> {bulletinDetail.official_comment}
+                          </div>
+                        )}
+
+                        {bulletin.financial_hold_active && bulletin.financial_hold_message && (
+                          <div className="notice danger" role="alert" style={{ marginBottom: 'var(--space-sm)' }}>
+                            {bulletin.financial_hold_message}
+                          </div>
+                        )}
+
+                        {bulletin.can_download_official_pdf && bulletin.official_status === 'ISSUED' && (
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-sm)' }}>
+                            <button
+                              type="button"
+                              className="btn secondary"
+                              onClick={() => downloadOfficialPdf(bulletin.id)}
+                              disabled={downloadLoading}
+                              aria-label="Descargar PDF oficial"
+                            >
+                              Descargar PDF oficial
+                            </button>
+                          </div>
+                        )}
 
                         <div className="table-container">
                           <table className="table mobile-card-view">
