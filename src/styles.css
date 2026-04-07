@@ -4845,6 +4845,11 @@ a.welcome-panel__notif-link:hover {
   margin: 0;
 }
 
+.empty-state__action {
+  margin-top: var(--space-md);
+  padding: 0.85rem 1.8rem;
+}
+
 /* Student grade hero card */
 .grade-hero {
   display: flex;
