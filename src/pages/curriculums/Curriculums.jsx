@@ -3,7 +3,12 @@ import { api } from '../../api/axios'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 import { unwrapListData } from '../../utils/pagination'
 
-const INITIAL_FORM_DATA = { name: '', scope_type: 'TENANT_DEFAULT', is_active: true }
+const INITIAL_CURRICULUM_SUBJECT = { name: '' }
+const createInitialFormData = () => ({
+  name: '',
+  scope_type: 'TENANT_DEFAULT',
+  subjects: [{ ...INITIAL_CURRICULUM_SUBJECT }],
+})
 const INITIAL_CLONE_FORM_DATA = { curriculumId: null, curriculumName: '', gradeLevelId: '' }
 
 const SCOPE_LABELS = {
@@ -21,13 +26,13 @@ export default function Curriculums() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isCloneModalOpen, setIsCloneModalOpen] = useState(false)
-  const [formData, setFormData] = useState(() => ({ ...INITIAL_FORM_DATA }))
+  const [formData, setFormData] = useState(() => createInitialFormData())
   const [cloneFormData, setCloneFormData] = useState(() => ({ ...INITIAL_CLONE_FORM_DATA }))
   const [submitting, setSubmitting] = useState(false)
 
   const closeCreateModal = useCallback(() => {
     setIsCreateModalOpen(false)
-    setFormData({ ...INITIAL_FORM_DATA })
+    setFormData(createInitialFormData())
   }, [])
 
   const closeCloneModal = useCallback(() => {
@@ -90,7 +95,7 @@ export default function Curriculums() {
     setError(null)
     setSuccess('')
     setIsCloneModalOpen(false)
-    setFormData({ ...INITIAL_FORM_DATA })
+    setFormData(createInitialFormData())
     setIsCreateModalOpen(true)
   }
 
@@ -111,12 +116,95 @@ export default function Curriculums() {
     setIsCloneModalOpen(true)
   }
 
+  const handleSubjectChange = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      subjects: prev.subjects.map((subject, subjectIndex) => (
+        subjectIndex === index ? { ...subject, [field]: value } : subject
+      )),
+    }))
+  }
+
+  const addSubjectRow = () => {
+    setFormData((prev) => ({
+      ...prev,
+      subjects: [...prev.subjects, { ...INITIAL_CURRICULUM_SUBJECT }],
+    }))
+  }
+
+  const removeSubjectRow = (index) => {
+    setFormData((prev) => {
+      if (prev.subjects.length <= 1) return prev
+
+      return {
+        ...prev,
+        subjects: prev.subjects.filter((_, subjectIndex) => subjectIndex !== index),
+      }
+    })
+  }
+
+  const normalizeSubjectName = (value) => String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+
+  const buildSubjectsPayload = (subjects) => {
+    const payload = []
+    const normalizedNames = new Map()
+
+    for (let index = 0; index < subjects.length; index += 1) {
+      const subject = subjects[index]
+      const cleanedName = String(subject.name || '').trim().replace(/\s+/g, ' ')
+      if (!cleanedName) {
+        return {
+          payload: null,
+          error: `La materia #${index + 1} debe incluir un nombre valido.`,
+        }
+      }
+
+      const normalizedName = normalizeSubjectName(cleanedName)
+      if (normalizedNames.has(normalizedName)) {
+        const firstPosition = normalizedNames.get(normalizedName)
+        return {
+          payload: null,
+          error: `No se permiten materias duplicadas. Conflicto entre #${firstPosition} y #${index + 1}.`,
+        }
+      }
+      normalizedNames.set(normalizedName, index + 1)
+
+      payload.push({ name: cleanedName })
+    }
+
+    return { payload, error: null }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
+    const { payload: subjectsPayload, error: subjectsError } = buildSubjectsPayload(formData.subjects)
+    if (subjectsError) {
+      setError(subjectsError)
+      setSuccess('')
+      return
+    }
+
+    if (!subjectsPayload || subjectsPayload.length === 0) {
+      setError('Debes agregar al menos una materia para crear la malla.')
+      setSuccess('')
+      return
+    }
+
+    const curriculumPayload = {
+      name: formData.name,
+      scope_type: formData.scope_type,
+      subjects: subjectsPayload,
+    }
+
     try {
       setSubmitting(true)
-      await api.post('/api/v1/courses/curriculums/', formData)
+      await api.post('/api/v1/courses/curriculums/', curriculumPayload)
       closeCreateModal()
       await fetchData()
       showSuccessMessage('Malla curricular guardada correctamente.')
@@ -125,7 +213,7 @@ export default function Curriculums() {
       setSuccess('')
       setError(getApiErrorMessage(err, {
         action: 'guardar la malla curricular',
-        fallback: 'No se pudo guardar la malla curricular. Revisa el nombre y el alcance seleccionado.',
+        fallback: 'No se pudo guardar la malla curricular. Revisa el nombre, el alcance y las materias seleccionadas.',
       }))
     } finally {
       setSubmitting(false)
@@ -306,16 +394,51 @@ export default function Curriculums() {
                 </select>
               </div>
 
-              <div className="form-group sections-modal__checkbox-group">
-                <label className="sections-modal__checkbox" htmlFor="curriculum-active-checkbox">
-                  <span>Activa</span>
-                  <input
-                    id="curriculum-active-checkbox"
-                    type="checkbox"
-                    checked={formData.is_active}
-                    onChange={(event) => setFormData({ ...formData, is_active: event.target.checked })}
-                  />
-                </label>
+              <div className="form-group curriculum-subjects-form-group">
+                <div className="curriculum-subjects-form-group__header">
+                  <label>Materias de la Malla</label>
+                  <button
+                    type="button"
+                    className="btn secondary curriculum-subjects-form-group__add-btn"
+                    onClick={addSubjectRow}
+                    disabled={submitting}
+                  >
+                    Agregar materia
+                  </button>
+                </div>
+
+                <p className="curriculum-subjects-form-group__hint">
+                  Defini las materias iniciales que van a componer esta malla curricular.
+                </p>
+
+                <div className="curriculum-subjects-list">
+                  {formData.subjects.map((subject, index) => (
+                    <div key={`curriculum-subject-${index}`} className="curriculum-subject-row">
+                      <div className="curriculum-subject-row__fields">
+                        <div className="form-group">
+                          <label htmlFor={`curriculum-subject-name-${index}`}>Materia #{index + 1}</label>
+                          <input
+                            id={`curriculum-subject-name-${index}`}
+                            type="text"
+                            className="form-control"
+                            value={subject.name}
+                            onChange={(event) => handleSubjectChange(index, 'name', event.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="btn danger curriculum-subject-row__remove-btn"
+                        onClick={() => removeSubjectRow(index)}
+                        disabled={submitting || formData.subjects.length === 1}
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="sections-modal__actions">

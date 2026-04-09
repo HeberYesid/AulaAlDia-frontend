@@ -3494,6 +3494,172 @@ form {
   }
 }
 
+.subjects-page {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.subjects-page__helper {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.subjects-page__list-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.subjects-page__list-header h2 {
+  margin-bottom: 0;
+}
+
+.subjects-page__status {
+  margin: 0;
+  padding: var(--space-xl);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.subjects-by-grade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.subjects-by-grade-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.subjects-by-grade-actions .btn {
+  min-height: 44px;
+}
+
+.subjects-grade-group {
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.subjects-grade-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-height: 44px;
+  padding: var(--space-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subjects-grade-summary::-webkit-details-marker {
+  display: none;
+}
+
+.subjects-grade-summary::after {
+  content: '▸';
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: transform var(--transition-fast);
+}
+
+.subjects-grade-group[open] .subjects-grade-summary::after {
+  transform: rotate(90deg);
+}
+
+.subjects-grade-summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.subjects-grade-count {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.subjects-grade-content {
+  border-top: 1px solid var(--border-primary);
+  padding: var(--space-sm) 0;
+  animation: accordion-reveal 260ms ease-out;
+}
+
+.subjects-table th:nth-child(1),
+.subjects-table td:nth-child(1) {
+  width: auto;
+}
+
+.subjects-table th:nth-child(2),
+.subjects-table td:nth-child(2) {
+  width: 8rem;
+}
+
+.subjects-table th:nth-child(3),
+.subjects-table td:nth-child(3) {
+  width: 11rem;
+}
+
+.subjects-table th:nth-child(4),
+.subjects-table td:nth-child(4) {
+  width: 8.5rem;
+}
+
+.subjects-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+@media (max-width: 768px) {
+  .subjects-page__list-header {
+    align-items: stretch;
+  }
+
+  .subjects-page__helper {
+    width: 100%;
+  }
+
+  .subjects-by-grade-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .subjects-by-grade-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .subjects-grade-summary {
+    padding: var(--space-sm) var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .subjects-grade-count {
+    width: 100%;
+  }
+
+  .subjects-table__actions {
+    justify-content: flex-start;
+  }
+
+  .subjects-table__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* =========================================================
    My Subjects page
    ========================================================= */
