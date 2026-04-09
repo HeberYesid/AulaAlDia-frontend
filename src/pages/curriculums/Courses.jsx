@@ -7,6 +7,7 @@ export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [gradeLevels, setGradeLevels] = useState([]);
   const [sections, setSections] = useState([]);
+  const [curriculums, setCurriculums] = useState([]);
   const [schoolYears, setSchoolYears] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +18,7 @@ export default function Courses() {
     section: "",
     display_name: "",
     school_year: "",
+    curriculum_id: "",
     is_active: true,
   });
   const [editingId, setEditingId] = useState(null);
@@ -42,16 +44,18 @@ export default function Courses() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [coursesRes, gradesRes, sectionsRes, periodsRes] =
+      const [coursesRes, gradesRes, sectionsRes, curriculumsRes, periodsRes] =
         await Promise.all([
           api.get("/api/v1/courses/courses/"),
           api.get("/api/v1/courses/grade-levels/"),
           api.get("/api/v1/courses/course-sections/"),
+          api.get("/api/v1/courses/curriculums/"),
           api.get("/api/v1/courses/school-years/"),
         ]);
       setCourses(unwrapListData(coursesRes.data));
       setGradeLevels(unwrapListData(gradesRes.data));
       setSections(unwrapListData(sectionsRes.data));
+      setCurriculums(unwrapListData(curriculumsRes.data));
       setSchoolYears(unwrapListData(periodsRes.data));
       setError(null);
     } catch (err) {
@@ -71,6 +75,7 @@ export default function Courses() {
         section: "",
         display_name: "",
         school_year: "",
+        curriculum_id: "",
         is_active: true,
       });
     setEditingId(null);
@@ -83,6 +88,7 @@ export default function Courses() {
         section: course.section || "",
         display_name: course.display_name || "",
         school_year: course.school_year || "",
+        curriculum_id: "",
         is_active: course.is_active,
       });
     setEditingId(course.id);
@@ -96,6 +102,7 @@ export default function Courses() {
         section: "",
         display_name: "",
         school_year: "",
+        curriculum_id: "",
         is_active: true,
       });
     setEditingId(null);
@@ -108,6 +115,7 @@ export default function Courses() {
       const payload = { ...formData };
       if (!payload.section) payload.section = null;
       if (!payload.school_year) payload.school_year = null;
+      if (!payload.curriculum_id) payload.curriculum_id = null;
 
       if (editingId) {
         await api.patch(`/api/v1/courses/courses/${editingId}/`, payload);
@@ -138,6 +146,28 @@ export default function Courses() {
     if (!schoolYear) return "-";
     return schoolYear.label || `${schoolYear.start_date} - ${schoolYear.end_date}`;
   };
+
+  const availableCurriculums = curriculums
+    .filter((curriculum) => curriculum.is_active)
+    .filter((curriculum) => curriculum.scope_type !== 'COURSE')
+    .filter((curriculum) => {
+      if (!formData.grade_level) return curriculum.scope_type !== 'GRADE';
+      if (curriculum.scope_type !== 'GRADE') return true;
+      return String(curriculum.grade_level) === String(formData.grade_level);
+    });
+
+  useEffect(() => {
+    if (editingId) return;
+    if (!formData.curriculum_id) return;
+
+    const selectedExists = availableCurriculums.some(
+      (curriculum) => String(curriculum.id) === String(formData.curriculum_id)
+    );
+
+    if (!selectedExists) {
+      setFormData((prev) => ({ ...prev, curriculum_id: '' }));
+    }
+  }, [availableCurriculums, editingId, formData.curriculum_id]);
 
   return (
     <div className="admin-page sections-page courses-page">
@@ -290,6 +320,28 @@ export default function Courses() {
                   ))}
                 </select>
               </div>
+              {!editingId && (
+                <div className="form-group">
+                  <label>Malla Curricular (Opcional)</label>
+                  <select
+                    className="form-control"
+                    value={formData.curriculum_id}
+                    onChange={(e) =>
+                      setFormData({ ...formData, curriculum_id: e.target.value })
+                    }
+                  >
+                    <option value="">Sin malla</option>
+                    {availableCurriculums.map((curriculum) => (
+                      <option key={curriculum.id} value={curriculum.id}>
+                        {curriculum.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="curriculum-subjects-form-group__hint" style={{ marginTop: '0.4rem' }}>
+                    Si seleccionas una malla, el curso se crea con sus materias automáticamente.
+                  </p>
+                </div>
+              )}
               <div className="form-group sections-modal__checkbox-group">
                 <label className="sections-modal__checkbox" htmlFor="course-active-checkbox">
                   <span>Activo</span>
