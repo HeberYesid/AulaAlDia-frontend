@@ -8,8 +8,35 @@ import WelcomePanel from '../components/WelcomePanel'
 import ConfirmDialog from '../components/ConfirmDialog'
 import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
+import {
+  fetchTeacherAttendanceCurrent,
+  checkInTeacherAttendance,
+  checkOutTeacherAttendance,
+} from '../hooks/useTeacherAttendance'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import { unwrapListData } from '../utils/pagination'
+
+function isWeekday(date) {
+  const day = date.getDay()
+  return day >= 1 && day <= 5
+}
+
+function formatFullDate(date) {
+  return date.toLocaleDateString('es-CO', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+function isShiftOpen(shift) {
+  if (!shift) return false
+  if (typeof shift.status === 'string') {
+    return shift.status === 'open'
+  }
+  return !shift.check_out_at
+}
 
 export default function Dashboard() {
   const {
@@ -30,8 +57,13 @@ export default function Dashboard() {
     loading: false,
     hasOpenShift: false,
     shift: null,
+    hasMarkedToday: false,
+    todayShift: null,
   })
   const [teacherAttendanceError, setTeacherAttendanceError] = useState('')
+  const today = new Date(Date.now())
+  const todayLabel = formatFullDate(today)
+  const isWorkingDay = isWeekday(today)
 
   const hasTenantCatalog = Array.isArray(tenants) && tenants.length > 0
   const hasActiveTenant = Boolean(activeTenantId)
@@ -122,10 +154,14 @@ export default function Dashboard() {
     setTeacherAttendanceError('')
     try {
       const data = await fetchTeacherAttendanceCurrent()
+      const currentShift = data?.shift || null
+      const todayShift = data?.today_shift || null
       setTeacherAttendance({
         loading: false,
-        hasOpenShift: Boolean(data?.has_open_shift),
-        shift: data?.shift || null,
+        hasOpenShift: Boolean(data?.has_open_shift) || isShiftOpen(currentShift),
+        shift: currentShift,
+        hasMarkedToday: Boolean(data?.has_marked_today) || Boolean(todayShift),
+        todayShift,
       })
     } catch (err) {
       setTeacherAttendance((prev) => ({ ...prev, loading: false }))
@@ -139,13 +175,29 @@ export default function Dashboard() {
   async function handleTeacherCheckIn() {
     setTeacherAttendance((prev) => ({ ...prev, loading: true }))
     setTeacherAttendanceError('')
+    setSuccess('')
     try {
       const data = await checkInTeacherAttendance()
-      setTeacherAttendance({
-        loading: false,
-        hasOpenShift: Boolean(data?.shift),
-        shift: data?.shift || null,
-      })
+      await loadTeacherAttendance()
+
+      if (data?.result === 'created') {
+        setSuccess('Entrada docente registrada correctamente.')
+        return
+      }
+
+      if (data?.result === 'already_open') {
+        setTeacherAttendanceError('Ya tenés un turno abierto para hoy. Solo podés marcar salida.')
+        return
+      }
+
+      if (data?.result === 'already_marked_today') {
+        setTeacherAttendanceError('Ya registraste tu asistencia de hoy. Solo se permite una entrada por día laborable.')
+        return
+      }
+
+      if (data?.result === 'non_working_day') {
+        setTeacherAttendanceError('Hoy no es un día laborable. No se puede marcar asistencia.')
+      }
     } catch (err) {
       setTeacherAttendance((prev) => ({ ...prev, loading: false }))
       setTeacherAttendanceError(getApiErrorMessage(err, {
@@ -158,13 +210,24 @@ export default function Dashboard() {
   async function handleTeacherCheckOut() {
     setTeacherAttendance((prev) => ({ ...prev, loading: true }))
     setTeacherAttendanceError('')
+    setSuccess('')
     try {
       const data = await checkOutTeacherAttendance()
-      setTeacherAttendance({
-        loading: false,
-        hasOpenShift: Boolean(data?.shift),
-        shift: data?.shift || null,
-      })
+      await loadTeacherAttendance()
+
+      if (data?.result === 'closed') {
+        setSuccess('Salida docente registrada correctamente.')
+        return
+      }
+
+      if (data?.result === 'already_closed') {
+        setTeacherAttendanceError('No hay un turno abierto para cerrar en este momento.')
+        return
+      }
+
+      if (data?.result === 'non_working_day') {
+        setTeacherAttendanceError('Hoy no es un día laborable. No se puede marcar asistencia.')
+      }
     } catch (err) {
       setTeacherAttendance((prev) => ({ ...prev, loading: false }))
       setTeacherAttendanceError(getApiErrorMessage(err, {
@@ -172,6 +235,28 @@ export default function Dashboard() {
         fallback: 'No se pudo marcar tu salida docente.',
       }))
     }
+  }
+
+  function confirmTeacherCheckIn() {
+    setConfirmDialog({
+      title: 'Confirmar entrada docente',
+      message: `Vas a marcar tu entrada del día ${todayLabel}.\n\nEsta acción no se puede repetir en el mismo día laborable.`,
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        await handleTeacherCheckIn()
+      },
+    })
+  }
+
+  function confirmTeacherCheckOut() {
+    setConfirmDialog({
+      title: 'Confirmar salida docente',
+      message: `Vas a marcar tu salida del día ${todayLabel}.\n\nAsegurate de haber finalizado tu jornada antes de continuar.`,
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        await handleTeacherCheckOut()
+      },
+    })
   }
 
   useEffect(() => {
@@ -280,26 +365,52 @@ export default function Dashboard() {
         {user.role === 'TEACHER' && (
           <div className="card">
             <h2 style={{ marginBottom: 'var(--space-sm)' }}>Asistencia Docente</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
-              Estado actual: {teacherAttendance.hasOpenShift ? 'Turno abierto' : 'Sin turno abierto'}
-            </p>
+            <p style={{ color: 'var(--text-secondary)' }}>Hoy: {todayLabel}</p>
+            {isWorkingDay ? (
+              <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+                Estado actual: {teacherAttendance.hasOpenShift ? 'Turno abierto' : 'Sin turno abierto'}
+              </p>
+            ) : (
+              <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+                Hoy no es un día laborable. El registro de asistencia se habilita de lunes a viernes.
+              </p>
+            )}
+
+            {isWorkingDay && teacherAttendance.hasMarkedToday && !teacherAttendance.hasOpenShift ? (
+              <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+                Ya registraste entrada y salida hoy. El próximo registro se habilita el siguiente día laborable.
+              </p>
+            ) : null}
+
+            {isWorkingDay && teacherAttendance.hasOpenShift ? (
+              <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+                Ya registraste la entrada de hoy. Solo falta marcar la salida.
+              </p>
+            ) : null}
+
             {teacherAttendanceError ? <Alert type="error" message={teacherAttendanceError} /> : null}
-            <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
-              <button
-                className="btn primary"
-                onClick={handleTeacherCheckIn}
-                disabled={teacherAttendance.loading || teacherAttendance.hasOpenShift}
-              >
-                Marcar entrada
-              </button>
-              <button
-                className="btn secondary"
-                onClick={handleTeacherCheckOut}
-                disabled={teacherAttendance.loading || !teacherAttendance.hasOpenShift}
-              >
-                Marcar salida
-              </button>
-            </div>
+            {isWorkingDay ? (
+              <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+                {!teacherAttendance.hasMarkedToday ? (
+                  <button
+                    className="btn primary"
+                    onClick={confirmTeacherCheckIn}
+                    disabled={teacherAttendance.loading || teacherAttendance.hasOpenShift}
+                  >
+                    Marcar entrada
+                  </button>
+                ) : null}
+                {teacherAttendance.hasOpenShift ? (
+                  <button
+                    className="btn secondary"
+                    onClick={confirmTeacherCheckOut}
+                    disabled={teacherAttendance.loading}
+                  >
+                    Marcar salida
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         )}
         

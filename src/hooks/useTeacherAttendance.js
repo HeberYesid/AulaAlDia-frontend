@@ -19,3 +19,8 @@ export async function listTeacherAttendanceLogs(params = {}) {
   const { data } = await api.get('/api/v1/courses/teacher-attendance/', { params })
   return data
 }
+
+export async function listMyTeacherAttendanceHistory(params = {}) {
+  const { data } = await api.get('/api/v1/courses/teacher-attendance/my-history/', { params })
+  return data
+}

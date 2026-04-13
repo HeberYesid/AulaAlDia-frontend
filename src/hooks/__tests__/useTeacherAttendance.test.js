@@ -6,6 +6,7 @@ import {
   checkOutTeacherAttendance,
   fetchTeacherAttendanceCurrent,
   listTeacherAttendanceLogs,
+  listMyTeacherAttendanceHistory,
 } from '../useTeacherAttendance'
 
 vi.mock('../../api/axios', () => ({
@@ -53,5 +54,16 @@ describe('useTeacherAttendance API helpers', () => {
       params: { teacher_id: 4, status: 'open' },
     })
     expect(data).toEqual([{ id: 1 }])
+  })
+
+  it('lists teacher own attendance history with params', async () => {
+    api.get.mockResolvedValue({ data: [{ id: 2 }] })
+
+    const data = await listMyTeacherAttendanceHistory({ status: 'closed', order: 'desc' })
+
+    expect(api.get).toHaveBeenCalledWith('/api/v1/courses/teacher-attendance/my-history/', {
+      params: { status: 'closed', order: 'desc' },
+    })
+    expect(data).toEqual([{ id: 2 }])
   })
 })

@@ -24,6 +24,17 @@ describe('navigation config', () => {
     expect(keys).not.toContain('teacher-evaluations-student')
   })
 
+  it('shows teacher attendance history item for teacher only', () => {
+    const teacher = buildUser(USER_ROLES.TEACHER)
+    const student = buildUser(USER_ROLES.STUDENT)
+
+    const teacherKeys = getNavigationItems(teacher, { surface: 'sidebar' }).map((item) => item.key)
+    const studentKeys = getNavigationItems(student, { surface: 'sidebar' }).map((item) => item.key)
+
+    expect(teacherKeys).toContain('teacher-attendance-history')
+    expect(studentKeys).not.toContain('teacher-attendance-history')
+  })
+
   it('shows admin dashboard and admin-only items for admin', () => {
     const admin = buildUser(USER_ROLES.ADMIN)
 
