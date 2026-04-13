@@ -5,31 +5,75 @@ import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 const INITIAL_FORM = {
   enrollment_id: '',
-  clarity_score: 5,
-  methodology_score: 5,
-  engagement_score: 5,
-  respect_score: 5,
-  comment: '',
+  answers: {},
 }
 
-function StarRatingInput({ id, name, label, value, onChange }) {
-  const score = Number(value || 0)
+function scoreColor(value) {
+  const numericValue = Number(value || 0)
+  if (numericValue >= 4.5) return 'var(--success)'
+  if (numericValue >= 3.5) return 'var(--warning)'
+  return 'var(--danger)'
+}
 
+function answerFieldName(questionId) {
+  return `answer-${questionId}`
+}
+
+function QuestionInput({ question, value, onChange }) {
+  if (question.question_type === 'TEXT') {
+    const textValue = value?.text_answer || ''
+    return (
+      <div className="form-group" key={question.id}>
+        <label htmlFor={answerFieldName(question.id)}>
+          {question.prompt}
+          {question.is_required ? ' *' : ' (opcional)'}
+        </label>
+        <textarea
+          id={answerFieldName(question.id)}
+          value={textValue}
+          onChange={(event) =>
+            onChange(question.id, {
+              numeric_score: null,
+              text_answer: event.target.value,
+            })
+          }
+          rows={4}
+          maxLength={1200}
+          placeholder={question.help_text || 'Escribí tu respuesta...'}
+          style={{ resize: 'vertical' }}
+          required={question.is_required}
+        />
+        <p className="teacher-eval__char-counter" aria-live="polite">
+          {textValue.length}/1200
+        </p>
+      </div>
+    )
+  }
+
+  const numericValue = Number(value?.numeric_score || 0)
   return (
-    <fieldset className="teacher-eval__rating-group">
-      <legend>{label}</legend>
-      <div className="teacher-eval__stars" role="radiogroup" aria-label={label}>
+    <fieldset className="teacher-eval__rating-group" key={question.id}>
+      <legend>
+        {question.prompt}
+        {question.is_required ? ' *' : ' (opcional)'}
+      </legend>
+      {question.help_text ? <p className="teacher-eval__question-help">{question.help_text}</p> : null}
+      <div className="teacher-eval__stars" role="radiogroup" aria-label={question.prompt}>
         {[1, 2, 3, 4, 5].map((starValue) => {
-          const checked = score === starValue
+          const checked = numericValue === starValue
           return (
-            <label key={`${id}-${starValue}`} className="teacher-eval__star-label">
+            <label key={`${question.id}-${starValue}`} className="teacher-eval__star-label">
               <input
-                id={`${id}-${starValue}`}
                 type="radio"
-                name={name}
+                name={answerFieldName(question.id)}
                 value={starValue}
                 checked={checked}
-                onChange={onChange}
+                onChange={() =>
+                  onChange(question.id, {
+                    numeric_score: starValue,
+                    text_answer: '',
+                  })
+                }
               />
               <span aria-hidden="true" className={checked ? 'is-active' : ''}>
                 {checked ? '★' : '☆'}
@@ -43,24 +87,61 @@ function StarRatingInput({ id, name, label, value, onChange }) {
   )
 }
 
-function scoreColor(value) {
-  const numericValue = Number(value || 0)
-  if (numericValue >= 4.5) return 'var(--success)'
-  if (numericValue >= 3.5) return 'var(--warning)'
-  return 'var(--danger)'
+function groupResponsesByType(responses = []) {
+  const numeric = responses.filter((item) => item.question_type === 'SCALE_1_5')
+  const text = responses.filter((item) => item.question_type === 'TEXT')
+  return { numeric, text }
+}
+
+function normalizeAnswersForSubmit(questions, answersByQuestionId) {
+  return questions.map((question) => {
+    const current = answersByQuestionId?.[question.id] || {}
+    return {
+      question_id: question.id,
+      numeric_score:
+        question.question_type === 'SCALE_1_5'
+          ? Number(current.numeric_score || 0)
+          : null,
+      text_answer:
+        question.question_type === 'TEXT'
+          ? (current.text_answer || '').trim()
+          : '',
+    }
+  })
+}
+
+function buildInitialAnswers(questions) {
+  return questions.reduce((acc, question) => {
+    if (question.question_type === 'SCALE_1_5') {
+      acc[question.id] = { numeric_score: 5, text_answer: '' }
+    } else {
+      acc[question.id] = { numeric_score: null, text_answer: '' }
+    }
+    return acc
+  }, {})
 }
 
 export default function TeacherEvaluations() {
   const { user } = useAuth()
   const isStudent = user?.role === 'STUDENT'
   const isTeacherOrAdmin = user?.role === 'TEACHER' || user?.role === 'ADMIN'
+  const isAdmin = user?.role === 'ADMIN'
 
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [savingQuestion, setSavingQuestion] = useState(false)
   const [options, setOptions] = useState([])
   const [myEvaluations, setMyEvaluations] = useState([])
   const [reportData, setReportData] = useState(null)
   const [form, setForm] = useState(INITIAL_FORM)
+  const [adminQuestions, setAdminQuestions] = useState([])
+  const [questionForm, setQuestionForm] = useState({
+    prompt: '',
+    help_text: '',
+    question_type: 'SCALE_1_5',
+    is_required: true,
+    is_active: true,
+  })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -69,45 +150,32 @@ export default function TeacherEvaluations() {
     [options, form.enrollment_id],
   )
 
+  const selectedQuestions = useMemo(
+    () => (Array.isArray(selectedOption?.questions) ? selectedOption.questions : []),
+    [selectedOption],
+  )
+
   const studentSummary = useMemo(() => {
     if (!myEvaluations.length) {
       return {
         total: 0,
         avgOverall: 0,
-        avgClarity: 0,
-        avgMethodology: 0,
-        avgEngagement: 0,
-        avgRespect: 0,
       }
     }
 
     const total = myEvaluations.length
-    const totals = myEvaluations.reduce(
-      (acc, item) => ({
-        overall: acc.overall + Number(item.overall_score || 0),
-        clarity: acc.clarity + Number(item.clarity_score || 0),
-        methodology: acc.methodology + Number(item.methodology_score || 0),
-        engagement: acc.engagement + Number(item.engagement_score || 0),
-        respect: acc.respect + Number(item.respect_score || 0),
-      }),
-      {
-        overall: 0,
-        clarity: 0,
-        methodology: 0,
-        engagement: 0,
-        respect: 0,
-      },
-    )
-
+    const overall = myEvaluations.reduce((acc, item) => acc + Number(item.overall_score || 0), 0)
     return {
       total,
-      avgOverall: Number((totals.overall / total).toFixed(2)),
-      avgClarity: Number((totals.clarity / total).toFixed(2)),
-      avgMethodology: Number((totals.methodology / total).toFixed(2)),
-      avgEngagement: Number((totals.engagement / total).toFixed(2)),
-      avgRespect: Number((totals.respect / total).toFixed(2)),
+      avgOverall: Number((overall / total).toFixed(2)),
     }
   }, [myEvaluations])
+
+  async function loadQuestionAdminData() {
+    if (!isAdmin) return
+    const { data } = await api.get('/api/v1/courses/teacher-evaluation-questions/')
+    setAdminQuestions(Array.isArray(data) ? data : [])
+  }
 
   async function loadStudentData() {
     const [optionsResponse, myResponse] = await Promise.all([
@@ -123,13 +191,26 @@ export default function TeacherEvaluations() {
     const evaluations = Array.isArray(myResponse?.data) ? myResponse.data : []
     setMyEvaluations(evaluations)
 
-    setForm((current) => ({
-      ...current,
-      enrollment_id:
-        current.enrollment_id && availableOptions.some((item) => String(item.enrollment_id) === String(current.enrollment_id))
+    setForm((current) => {
+      const resolvedEnrollmentId =
+        current.enrollment_id &&
+        availableOptions.some((item) => String(item.enrollment_id) === String(current.enrollment_id))
           ? current.enrollment_id
-          : availableOptions[0]?.enrollment_id || '',
-    }))
+          : availableOptions[0]?.enrollment_id || ''
+
+      const selected = availableOptions.find(
+        (item) => String(item.enrollment_id) === String(resolvedEnrollmentId),
+      )
+      const selectedQuestionsSafe = Array.isArray(selected?.questions) ? selected.questions : []
+
+      return {
+        enrollment_id: resolvedEnrollmentId,
+        answers:
+          Object.keys(current.answers || {}).length > 0
+            ? current.answers
+            : buildInitialAnswers(selectedQuestionsSafe),
+      }
+    })
   }
 
   async function loadReportData() {
@@ -145,6 +226,10 @@ export default function TeacherEvaluations() {
         await loadStudentData()
       } else if (isTeacherOrAdmin) {
         await loadReportData()
+      }
+
+      if (isAdmin) {
+        await loadQuestionAdminData()
       }
     } catch (err) {
       setError(
@@ -163,14 +248,89 @@ export default function TeacherEvaluations() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role])
 
-  function handleScoreChange(event) {
-    const { name, value } = event.target
-    setForm((current) => ({ ...current, [name]: Number(value) }))
+  function handleEnrollmentChange(event) {
+    const enrollmentId = event.target.value
+    const selected = options.find((item) => String(item.enrollment_id) === String(enrollmentId))
+    const questions = Array.isArray(selected?.questions) ? selected.questions : []
+
+    setForm({
+      enrollment_id: enrollmentId,
+      answers: buildInitialAnswers(questions),
+    })
   }
 
-  function handleTextChange(event) {
-    const { name, value } = event.target
-    setForm((current) => ({ ...current, [name]: value }))
+  function handleAnswerChange(questionId, answer) {
+    setForm((current) => ({
+      ...current,
+      answers: {
+        ...current.answers,
+        [questionId]: answer,
+      },
+    }))
+  }
+
+  function handleQuestionFormChange(event) {
+    const { name, value, type, checked } = event.target
+    setQuestionForm((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+    }))
+  }
+
+  async function handleCreateQuestion(event) {
+    event.preventDefault()
+    setSavingQuestion(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      await api.post('/api/v1/courses/teacher-evaluation-questions/', {
+        prompt: questionForm.prompt.trim(),
+        help_text: questionForm.help_text.trim(),
+        question_type: questionForm.question_type,
+        is_required: Boolean(questionForm.is_required),
+        is_active: Boolean(questionForm.is_active),
+      })
+
+      setQuestionForm({
+        prompt: '',
+        help_text: '',
+        question_type: 'SCALE_1_5',
+        is_required: true,
+        is_active: true,
+      })
+
+      setSuccess('Pregunta creada correctamente.')
+      await loadQuestionAdminData()
+    } catch (err) {
+      setError(
+        getApiErrorMessage(err, {
+          action: 'crear la pregunta de evaluación',
+          fallback: 'No se pudo crear la pregunta. Revisá los datos e intentalo nuevamente.',
+        }),
+      )
+    } finally {
+      setSavingQuestion(false)
+    }
+  }
+
+  async function toggleQuestionState(question) {
+    setError('')
+    setSuccess('')
+    try {
+      await api.patch(`/api/v1/courses/teacher-evaluation-questions/${question.id}/`, {
+        is_active: !question.is_active,
+      })
+      setSuccess('Pregunta actualizada correctamente.')
+      await loadQuestionAdminData()
+    } catch (err) {
+      setError(
+        getApiErrorMessage(err, {
+          action: 'actualizar la pregunta',
+          fallback: 'No se pudo actualizar la pregunta. Intentá nuevamente.',
+        }),
+      )
+    }
   }
 
   async function handleSubmit(event) {
@@ -180,29 +340,33 @@ export default function TeacherEvaluations() {
       return
     }
 
+    if (selectedQuestions.length === 0) {
+      setError('No hay preguntas activas para esta evaluación. Contactá al administrador.')
+      return
+    }
+
+    const answers = normalizeAnswersForSubmit(selectedQuestions, form.answers)
+
     setSubmitting(true)
     setError('')
     setSuccess('')
     try {
       await api.post('/api/v1/courses/teacher-evaluations/', {
         enrollment_id: Number(form.enrollment_id),
-        clarity_score: Number(form.clarity_score),
-        methodology_score: Number(form.methodology_score),
-        engagement_score: Number(form.engagement_score),
-        respect_score: Number(form.respect_score),
-        comment: form.comment.trim(),
+        answers,
       })
 
-      setForm({
-        ...INITIAL_FORM,
-      })
-      setSuccess('Tu evaluacion se envio correctamente. El docente solo vera resultados agregados anonimos.')
+      setForm((current) => ({
+        enrollment_id: current.enrollment_id,
+        answers: buildInitialAnswers(selectedQuestions),
+      }))
+      setSuccess('Tu evaluación se envió correctamente. El docente solo verá resultados agregados anónimos.')
       await loadStudentData()
     } catch (err) {
       setError(
         getApiErrorMessage(err, {
-          action: 'enviar tu evaluacion docente',
-          fallback: 'No se pudo enviar tu evaluacion docente. Revisa los datos e intentalo nuevamente.',
+          action: 'enviar tu evaluación docente',
+          fallback: 'No se pudo enviar tu evaluación docente. Revisá los datos e intentalo nuevamente.',
         }),
       )
     } finally {
@@ -225,7 +389,9 @@ export default function TeacherEvaluations() {
     return (
       <div className="card empty-state">
         <h3 className="empty-state__title">Evaluación docente no disponible</h3>
-        <p className="empty-state__text">Esta sección está disponible para estudiantes, docentes y administradores.</p>
+        <p className="empty-state__text">
+          Esta sección está disponible para estudiantes, docentes y administradores.
+        </p>
       </div>
     )
   }
@@ -236,8 +402,8 @@ export default function TeacherEvaluations() {
         <h1 className="teacher-eval__title">Evaluación Docente</h1>
         <p className="teacher-eval__subtitle">
           {isStudent
-            ? 'Evalúa a tus profesores en materias activas. Tus respuestas son anónimas y se muestran solo en forma agregada.'
-            : 'Consulta resultados agregados y anónimos de evaluación docente por materia.'}
+            ? 'Evaluá a tus docentes con las preguntas configuradas por tu institución. Tus respuestas son anónimas y se muestran solo de forma agregada.'
+            : 'Consultá resultados agregados y anónimos de evaluación docente por materia.'}
         </p>
       </div>
 
@@ -252,11 +418,129 @@ export default function TeacherEvaluations() {
         </div>
       ) : null}
 
+      {isAdmin ? (
+        <div className="card teacher-eval__admin-config">
+          <h2 style={{ marginTop: 0 }}>Configuración de preguntas</h2>
+          <p className="teacher-eval__subtitle" style={{ marginTop: 0 }}>
+            Podés activar/desactivar preguntas preconfiguradas y crear preguntas personalizadas.
+          </p>
+
+          <form className="teacher-eval__question-form" onSubmit={handleCreateQuestion}>
+            <div className="form-group">
+              <label htmlFor="question-prompt">Pregunta</label>
+              <input
+                id="question-prompt"
+                name="prompt"
+                value={questionForm.prompt}
+                onChange={handleQuestionFormChange}
+                maxLength={240}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="question-help">Ayuda (opcional)</label>
+              <input
+                id="question-help"
+                name="help_text"
+                value={questionForm.help_text}
+                onChange={handleQuestionFormChange}
+                maxLength={500}
+              />
+            </div>
+            <div className="teacher-eval__question-form-inline">
+              <div className="form-group">
+                <label htmlFor="question-type">Tipo</label>
+                <select
+                  id="question-type"
+                  name="question_type"
+                  value={questionForm.question_type}
+                  onChange={handleQuestionFormChange}
+                >
+                  <option value="SCALE_1_5">Escala 1 a 5</option>
+                  <option value="TEXT">Texto libre</option>
+                </select>
+              </div>
+              <label className="teacher-eval__checkbox-label">
+                <input
+                  type="checkbox"
+                  name="is_required"
+                  checked={questionForm.is_required}
+                  onChange={handleQuestionFormChange}
+                />
+                Obligatoria
+              </label>
+              <label className="teacher-eval__checkbox-label">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={questionForm.is_active}
+                  onChange={handleQuestionFormChange}
+                />
+                Activa
+              </label>
+            </div>
+            <div className="teacher-eval__actions">
+              <button type="submit" className="btn primary" disabled={savingQuestion}>
+                {savingQuestion ? 'Guardando...' : 'Crear pregunta'}
+              </button>
+            </div>
+          </form>
+
+          <div className="data-table" style={{ marginTop: 'var(--space-md)' }}>
+            <table className="table mobile-card-view teacher-eval__table">
+              <thead>
+                <tr>
+                  <th scope="col">Orden</th>
+                  <th scope="col">Pregunta</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adminQuestions.map((question) => (
+                  <tr key={question.id}>
+                    <td data-label="Orden">{question.display_order}</td>
+                    <td data-label="Pregunta">
+                      <strong>{question.prompt}</strong>
+                      <div className="teacher-eval__meta">
+                        {question.code ? `Preconfigurada (${question.code})` : 'Personalizada'}
+                      </div>
+                    </td>
+                    <td data-label="Tipo">
+                      {question.question_type === 'SCALE_1_5' ? 'Escala 1-5' : 'Texto libre'}
+                    </td>
+                    <td data-label="Estado">
+                      {question.is_active ? (
+                        <span className="badge SCORE">Activa</span>
+                      ) : (
+                        <span className="badge PENDING">Inactiva</span>
+                      )}
+                    </td>
+                    <td data-label="Acción">
+                      <button
+                        type="button"
+                        className="btn ghost"
+                        onClick={() => toggleQuestionState(question)}
+                      >
+                        {question.is_active ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
+
       {isStudent ? (
         <>
           <div className="stats-grid teacher-eval__stats-grid">
             <div className="stat-card">
-              <div className="stat-value" style={{ color: 'var(--primary)' }}>{options.length}</div>
+              <div className="stat-value" style={{ color: 'var(--primary)' }}>
+                {options.length}
+              </div>
               <div className="stat-label">Pendientes</div>
             </div>
             <div className="stat-card">
@@ -269,19 +553,13 @@ export default function TeacherEvaluations() {
               </div>
               <div className="stat-label">Promedio General</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: scoreColor(studentSummary.avgRespect) }}>
-                {studentSummary.avgRespect.toFixed(2)}
-              </div>
-              <div className="stat-label">Respeto</div>
-            </div>
           </div>
 
           <div className="card">
             <h2 style={{ marginTop: 0 }}>Nueva evaluación</h2>
             {options.length === 0 ? (
               <p className="notice" style={{ marginBottom: 0 }}>
-                No tienes materias pendientes por evaluar en el periodo activo.
+                No tenés materias pendientes por evaluar en el periodo activo.
               </p>
             ) : (
               <form onSubmit={handleSubmit} className="teacher-eval__form">
@@ -291,10 +569,10 @@ export default function TeacherEvaluations() {
                     id="evaluation-enrollment"
                     name="enrollment_id"
                     value={form.enrollment_id}
-                    onChange={handleTextChange}
+                    onChange={handleEnrollmentChange}
                     required
                   >
-                    <option value="">Selecciona una materia</option>
+                    <option value="">Seleccioná una materia</option>
                     {options.map((option) => (
                       <option key={option.enrollment_id} value={option.enrollment_id}>
                         {option.subject_name} ({option.subject_code}) - {option.teacher_name}
@@ -312,51 +590,14 @@ export default function TeacherEvaluations() {
                 ) : null}
 
                 <div className="teacher-eval__ratings-grid">
-                  <StarRatingInput
-                    id="clarity-score"
-                    name="clarity_score"
-                    label="Claridad al explicar"
-                    value={form.clarity_score}
-                    onChange={handleScoreChange}
-                  />
-                  <StarRatingInput
-                    id="methodology-score"
-                    name="methodology_score"
-                    label="Metodología"
-                    value={form.methodology_score}
-                    onChange={handleScoreChange}
-                  />
-                  <StarRatingInput
-                    id="engagement-score"
-                    name="engagement_score"
-                    label="Motivación y acompañamiento"
-                    value={form.engagement_score}
-                    onChange={handleScoreChange}
-                  />
-                  <StarRatingInput
-                    id="respect-score"
-                    name="respect_score"
-                    label="Respeto y trato"
-                    value={form.respect_score}
-                    onChange={handleScoreChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="evaluation-comment">Comentario (opcional)</label>
-                  <textarea
-                    id="evaluation-comment"
-                    name="comment"
-                    value={form.comment}
-                    onChange={handleTextChange}
-                    rows={4}
-                    maxLength={1200}
-                    placeholder="Comparte una observación que ayude a mejorar (máx. 1200 caracteres)."
-                    style={{ resize: 'vertical' }}
-                  />
-                  <p className="teacher-eval__char-counter" aria-live="polite">
-                    {form.comment.length}/1200
-                  </p>
+                  {selectedQuestions.map((question) => (
+                    <QuestionInput
+                      key={question.id}
+                      question={question}
+                      value={form.answers?.[question.id]}
+                      onChange={handleAnswerChange}
+                    />
+                  ))}
                 </div>
 
                 <div className="teacher-eval__actions">
@@ -375,42 +616,61 @@ export default function TeacherEvaluations() {
                 Aún no has enviado evaluaciones.
               </p>
             ) : (
-              <div className="data-table">
-                <table className="table mobile-card-view teacher-eval__table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Fecha</th>
-                      <th scope="col">Materia</th>
-                      <th scope="col">Docente</th>
-                      <th scope="col">Promedio</th>
-                      <th scope="col">Comentario</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {myEvaluations.map((evaluation) => (
-                      <tr key={evaluation.id}>
-                        <td data-label="Fecha">
-                          {new Date(evaluation.created_at).toLocaleDateString('es-CO', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </td>
-                        <td data-label="Materia">
-                          <strong>{evaluation.subject_name}</strong>
-                          <div className="teacher-eval__meta">{evaluation.subject_code}</div>
-                        </td>
-                        <td data-label="Docente">{evaluation.teacher_name}</td>
-                        <td data-label="Promedio">
-                          <span style={{ color: scoreColor(evaluation.overall_score), fontWeight: 700 }}>
-                            {Number(evaluation.overall_score).toFixed(2)}
-                          </span>
-                        </td>
-                        <td data-label="Comentario">{evaluation.comment || 'Sin comentario'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="teacher-eval__evaluation-list">
+                {myEvaluations.map((evaluation) => {
+                  const grouped = groupResponsesByType(evaluation.responses)
+                  return (
+                    <article key={evaluation.id} className="teacher-eval__evaluation-card">
+                      <header className="teacher-eval__report-header">
+                        <h3>{evaluation.subject_name}</h3>
+                        <p>{evaluation.subject_code}</p>
+                      </header>
+                      <p className="teacher-eval__report-teacher">
+                        <strong>Docente:</strong> {evaluation.teacher_name}
+                      </p>
+                      <div className="teacher-eval__metric-row">
+                        <span>Promedio general</span>
+                        <strong style={{ color: scoreColor(evaluation.overall_score) }}>
+                          {Number(evaluation.overall_score || 0).toFixed(2)}
+                        </strong>
+                      </div>
+
+                      {grouped.numeric.length > 0 ? (
+                        <div className="teacher-eval__metric-grid">
+                          {grouped.numeric.map((item) => (
+                            <div key={`${evaluation.id}-numeric-${item.question_id}`}>
+                              <span>{item.prompt}</span>
+                              <strong>{Number(item.numeric_score || 0).toFixed(2)}</strong>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      {grouped.text.length > 0 ? (
+                        <section className="teacher-eval__comments">
+                          <h4>Respuestas abiertas</h4>
+                          <ul>
+                            {grouped.text.map((item) => (
+                              <li key={`${evaluation.id}-text-${item.question_id}`}>
+                                <p>
+                                  <strong>{item.prompt}:</strong> {item.text_answer || 'Sin respuesta'}
+                                </p>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      ) : null}
+
+                      <small>
+                        {new Date(evaluation.created_at).toLocaleDateString('es-CO', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </small>
+                    </article>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -427,18 +687,6 @@ export default function TeacherEvaluations() {
                 {Number(reportData?.summary?.avg_overall || 0).toFixed(2)}
               </div>
               <div className="stat-label">Promedio General</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: scoreColor(reportData?.summary?.avg_clarity || 0) }}>
-                {Number(reportData?.summary?.avg_clarity || 0).toFixed(2)}
-              </div>
-              <div className="stat-label">Claridad</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: scoreColor(reportData?.summary?.avg_respect || 0) }}>
-                {Number(reportData?.summary?.avg_respect || 0).toFixed(2)}
-              </div>
-              <div className="stat-label">Respeto</div>
             </div>
           </div>
 
@@ -469,24 +717,21 @@ export default function TeacherEvaluations() {
                         {Number(item.metrics.avg_overall).toFixed(2)}
                       </strong>
                     </div>
-                    <div className="teacher-eval__metric-grid">
-                      <div>
-                        <span>Claridad</span>
-                        <strong>{Number(item.metrics.avg_clarity).toFixed(2)}</strong>
+
+                    {Array.isArray(item.question_metrics) && item.question_metrics.length > 0 ? (
+                      <div className="teacher-eval__metric-grid">
+                        {item.question_metrics.map((metric) => (
+                          <div key={`${item.teacher.id}-${item.subject.code}-${metric.question_id}`}>
+                            <span>{metric.prompt}</span>
+                            <strong>
+                              {metric.avg_score === null || metric.avg_score === undefined
+                                ? `${metric.responses_count} respuestas`
+                                : Number(metric.avg_score).toFixed(2)}
+                            </strong>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <span>Metodología</span>
-                        <strong>{Number(item.metrics.avg_methodology).toFixed(2)}</strong>
-                      </div>
-                      <div>
-                        <span>Acompañamiento</span>
-                        <strong>{Number(item.metrics.avg_engagement).toFixed(2)}</strong>
-                      </div>
-                      <div>
-                        <span>Respeto</span>
-                        <strong>{Number(item.metrics.avg_respect).toFixed(2)}</strong>
-                      </div>
-                    </div>
+                    ) : null}
 
                     <section className="teacher-eval__comments">
                       <h4>Comentarios anónimos recientes</h4>
@@ -498,7 +743,12 @@ export default function TeacherEvaluations() {
                         <ul>
                           {item.comments.map((commentItem, index) => (
                             <li key={`${item.subject.code}-${index}`}>
-                              <p>{commentItem.comment}</p>
+                              <p>
+                                {commentItem.question_prompt ? (
+                                  <strong>{commentItem.question_prompt}: </strong>
+                                ) : null}
+                                {commentItem.comment}
+                              </p>
                               <small>
                                 {new Date(commentItem.created_at).toLocaleDateString('es-CO', {
                                   day: '2-digit',

@@ -7079,6 +7079,12 @@ a.welcome-panel__notif-link:hover {
   color: var(--text-secondary);
 }
 
+.teacher-eval__question-help {
+  margin: 0 0 var(--space-xs);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
 .teacher-eval__stars {
   display: flex;
   gap: var(--space-xs);
@@ -7415,6 +7421,51 @@ a.welcome-panel__notif-link:hover {
   justify-content: flex-start;
   align-items: center;
   gap: var(--space-sm);
+}
+
+.teacher-eval__evaluation-list {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.teacher-eval__evaluation-card {
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.teacher-eval__admin-config {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.teacher-eval__question-form {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.teacher-eval__question-form-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-md);
+}
+
+.teacher-eval__checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.teacher-eval__checkbox-label input {
+  width: 18px;
+  height: 18px;
 }
 
 .sections-modal__save {
