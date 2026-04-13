@@ -6,16 +6,6 @@ import { MemoryRouter } from 'react-router-dom'
 import Subjects from '../Subjects'
 import { api } from '../../api/axios'
 
-vi.mock('../../state/AuthContext', () => ({
-  useAuth: () => ({
-    user: {
-      id: 1,
-      role: 'ADMIN',
-      email: 'admin@test.com',
-    },
-  }),
-}))
-
 vi.mock('../../api/axios', () => ({
   api: {
     get: vi.fn(),
@@ -27,9 +17,22 @@ vi.mock('../../api/axios', () => ({
   setApiActiveTenantId: vi.fn()
 }))
 
+const mockUseAuth = vi.hoisted(() => vi.fn())
+
+vi.mock('../../state/AuthContext', () => ({
+  useAuth: mockUseAuth,
+}))
+
 describe('Subjects', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 1,
+        role: 'ADMIN',
+        email: 'admin@test.com',
+      },
+    })
     api.get.mockImplementation((url) => {
       if (url === '/api/v1/courses/subjects/') {
         return Promise.resolve({ data: [] })
@@ -42,6 +45,42 @@ describe('Subjects', () => {
       }
       return Promise.resolve({ data: [] })
     })
+  })
+
+  it('loads only assigned subjects for teacher without requesting courses catalog', async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 17,
+        role: 'TEACHER',
+        email: 'teacher@test.com',
+      },
+    })
+
+    api.get.mockImplementation((url) => {
+      if (url === '/api/v1/courses/subjects/') {
+        return Promise.resolve({
+          data: [
+            {
+              id: 99,
+              name: 'Matemáticas',
+              course: { id: 1, display_name: '7A', grade_level_id: 7, grade_level: 'Séptimo' },
+              teacher: { id: 17, email: 'teacher@test.com' },
+            },
+          ],
+        })
+      }
+      return Promise.resolve({ data: [] })
+    })
+
+    render(
+      <MemoryRouter>
+        <Subjects />
+      </MemoryRouter>
+    )
+
+    expect(await screen.findByText('Matemáticas')).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledWith('/api/v1/courses/subjects/')
+    expect(api.get).not.toHaveBeenCalledWith('/api/v1/courses/courses/')
   })
 
   it('shows the backend validation message when subject creation fails', async () => {

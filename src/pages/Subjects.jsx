@@ -128,13 +128,10 @@ export default function Subjects() {
         return
       }
 
-      const [subjectsRes, coursesRes] = await Promise.all([
-        api.get('/api/v1/courses/subjects/'),
-        api.get('/api/v1/courses/courses/'),
-      ])
+      const subjectsRes = await api.get('/api/v1/courses/subjects/')
 
       setItems(unwrapListData(subjectsRes.data))
-      setCourses(unwrapListData(coursesRes.data))
+      setCourses([])
       setTeachers([])
     } catch (err) {
       setError(normalizeApiError(
