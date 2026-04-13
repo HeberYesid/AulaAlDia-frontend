@@ -104,7 +104,7 @@ export default function Register() {
   }
 
   return (
-    <div className="auth-container">
+    <div className="auth-container auth-container--form-scroll">
       <div className="auth-card fade-in">
         <div className="auth-header">
           <h1><span className="auth-icon"></span> Crear Cuenta</h1>

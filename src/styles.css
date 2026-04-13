@@ -1650,6 +1650,12 @@ form {
     radial-gradient(circle at 88% 86%, rgba(45, 106, 104, 0.12) 0%, transparent 38%);
 }
 
+.auth-container--form-scroll {
+  align-items: flex-start;
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-xl);
+}
+
 .auth-card {
   background: linear-gradient(170deg, var(--bg-card), var(--bg-secondary));
   border: 1px solid var(--border-secondary);
