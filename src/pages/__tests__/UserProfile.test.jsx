@@ -5,6 +5,17 @@ import UserProfile from '../UserProfile'
 import { renderWithProviders } from '../../test/utils'
 import { api } from '../../api/axios'
 
+const mockNavigate = vi.fn()
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useLocation: () => ({ hash: '' }),
+  }
+})
+
 vi.mock('../../api/axios', () => ({
   api: {
     get: vi.fn(),
@@ -35,6 +46,8 @@ describe('UserProfile Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockNavigate.mockReset()
+    localStorage.clear()
     api.get.mockImplementation((url) => {
       if (url === '/api/v1/auth/profile/') {
         return Promise.resolve({ data: mockUser })
@@ -122,8 +135,29 @@ describe('UserProfile Component', () => {
 
   it('allows a student to invite a caregiver', async () => {
     const user = userEvent.setup()
-    api.post.mockResolvedValueOnce({
-      data: { message: 'Invitacion enviada correctamente al acudiente.' },
+    localStorage.setItem('auth', JSON.stringify({
+      user: mockUser,
+      access: 'fake-access-token',
+      refresh: 'fake-refresh-token',
+      active_tenant_id: 'tenant-123',
+    }))
+
+    api.post.mockImplementation((url) => {
+      if (url === '/api/v1/auth/student-tutor-invitation/') {
+        return Promise.resolve({
+          data: {
+            message: 'Invitacion enviada correctamente al acudiente.',
+            invitation_code: 'INV123ABC456',
+            tenant_id: 'tenant-123',
+          },
+        })
+      }
+
+      if (url === '/api/v1/auth/logout/') {
+        return Promise.resolve({ data: {} })
+      }
+
+      return Promise.reject(new Error(`Unhandled POST ${url}`))
     })
 
     renderWithProviders(<UserProfile />)
@@ -137,6 +171,9 @@ describe('UserProfile Component', () => {
       expect(api.post).toHaveBeenCalledWith('/api/v1/auth/student-tutor-invitation/', {
         email: 'caregiver@example.com',
       })
+      expect(api.post).toHaveBeenCalledWith('/api/v1/auth/logout/')
+      expect(mockNavigate).toHaveBeenCalledWith('/register-tutor?code=INV123ABC456&tenant_id=tenant-123', { replace: true })
+      expect(localStorage.getItem('auth')).toBeNull()
     })
   })
 })

@@ -9,7 +9,7 @@ import { useTheme } from '../state/ThemeContext'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 
 export default function UserProfile() {
-  const { updateUser } = useAuth()
+  const { updateUser, logout } = useAuth()
   const { isDark } = useTheme()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -206,6 +206,32 @@ export default function UserProfile() {
       const response = await api.post('/api/v1/auth/student-tutor-invitation/', {
         email: tutorInviteEmail,
       })
+
+      const invitationCode = response.data?.invitation_code
+      const tenantId = response.data?.tenant_id || user?.active_tenant_id || null
+
+      if (invitationCode) {
+        const params = new URLSearchParams({ code: invitationCode })
+        if (tenantId) {
+          params.set('tenant_id', tenantId)
+        }
+        const registerTutorUrl = `/register-tutor?${params.toString()}`
+
+        await logout()
+
+        // Intentamos navegación SPA y dejamos fallback por si el logout desmonta la vista
+        navigate(registerTutorUrl, { replace: true })
+
+        window.setTimeout(() => {
+          if (!window.location.pathname.startsWith('/register-tutor')) {
+            window.history.replaceState(null, '', registerTutorUrl)
+            window.dispatchEvent(new PopStateEvent('popstate'))
+          }
+        }, 0)
+
+        return
+      }
+
       setSuccess(response.data.message || 'Invitacion enviada correctamente.')
       await loadTutorInvitationStatus()
       setTimeout(() => setSuccess(''), 3000)
