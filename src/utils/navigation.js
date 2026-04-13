@@ -166,7 +166,7 @@ const NAVIGATION_ITEMS = [
     contextualTip: 'Usa este modulo para comunicarte de forma directa y mantener contexto por conversacion.',
     icon: MessageCircleMore,
     section: 'communication',
-    roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT],
+    roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-messages',
   },
   {

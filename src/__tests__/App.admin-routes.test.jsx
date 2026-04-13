@@ -40,6 +40,10 @@ vi.mock('../pages/TeacherEvaluations', () => ({
   default: () => <div>TeacherEvaluations Mock</div>,
 }))
 
+vi.mock('../pages/messaging/Messages', () => ({
+  default: () => <div>Messages Mock</div>,
+}))
+
 vi.mock('../pages/AdminTeacherAttendance', () => ({
   default: () => <div>AdminTeacherAttendance Mock</div>,
 }))
@@ -164,6 +168,20 @@ describe('App admin routes', () => {
 
     expect(await screen.findByText('Dashboard Mock')).toBeInTheDocument()
     expect(screen.queryByText('TeacherEvaluations Mock')).not.toBeInTheDocument()
+  })
+
+  it('allows TUTOR into /messages', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'TUTOR' },
+      loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+    })
+
+    renderAppAt('/messages')
+
+    expect(await screen.findByText('Messages Mock')).toBeInTheDocument()
   })
 
   it('allows ADMIN into /admin/teacher-attendance', async () => {

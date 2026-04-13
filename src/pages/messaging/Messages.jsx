@@ -217,6 +217,7 @@ const Messages = () => {
                         messages={messages}
                         currentUserId={user.id}
                         otherParticipant={getOtherParticipant(selectedConversation)}
+                        conversation={selectedConversation}
                         newMessage={newMessage}
                         onNewMessageChange={setNewMessage}
                         onSendMessage={handleSendMessage}

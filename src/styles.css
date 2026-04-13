@@ -5943,6 +5943,24 @@ a.welcome-panel__notif-link:hover {
   min-width: 100px;
 }
 
+.admin-news__target-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.admin-news__target-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  font-size: var(--font-size-sm);
+}
+
 /* Absences */
 .absences__header-card,
 .absences__form-card,

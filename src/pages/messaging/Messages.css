@@ -396,6 +396,24 @@ body.sidebar-collapsed .msg-container {
     letter-spacing: 0.02em;
 }
 
+.msg-chat-moderation-badge {
+    margin-left: 0.6rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--danger, #dc3545);
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    letter-spacing: 0.03em;
+}
+
+.msg-chat-moderation-note {
+    margin: 0.35rem 0 0;
+    font-size: 0.75rem;
+    color: var(--msg-text-secondary);
+}
+
 /* ── Messages area ──────────────────────────────────────── */
 .msg-chat-messages {
     flex: 1;
@@ -506,6 +524,16 @@ body.sidebar-collapsed .msg-container {
     background: var(--msg-bg-surface);
     border-top: 1px solid var(--msg-border);
     flex-shrink: 0;
+}
+
+.msg-chat-locked-banner {
+    margin: 0 1.25rem 0.85rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--danger, #dc3545);
+    color: var(--danger, #dc3545);
+    border-radius: var(--msg-radius-sm);
+    font-size: 0.82rem;
+    background: color-mix(in srgb, var(--danger, #dc3545) 10%, transparent);
 }
 
 .msg-chat-input-wrapper {
@@ -909,6 +937,10 @@ body.sidebar-collapsed .msg-container {
 
     .msg-chat-input-area {
         padding: 0.65rem 0.75rem;
+    }
+
+    .msg-chat-locked-banner {
+        margin: 0 0.75rem 0.65rem;
     }
 
     .msg-sidebar-header {

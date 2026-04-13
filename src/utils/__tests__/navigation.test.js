@@ -13,13 +13,13 @@ function buildUser(role, overrides = {}) {
 }
 
 describe('navigation config', () => {
-  it('hides messages for tutor role', () => {
+  it('shows messages for tutor role', () => {
     const tutor = buildUser(USER_ROLES.TUTOR)
 
     const sidebarItems = getNavigationItems(tutor, { surface: 'sidebar' })
     const keys = sidebarItems.map((item) => item.key)
 
-    expect(keys).not.toContain('messages')
+    expect(keys).toContain('messages')
     expect(keys).toContain('my-results')
     expect(keys).not.toContain('teacher-evaluations-student')
   })

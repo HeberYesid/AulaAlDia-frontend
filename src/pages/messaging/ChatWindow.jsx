@@ -28,6 +28,7 @@ const ChatWindow = ({
     messages,
     currentUserId,
     otherParticipant,
+    conversation,
     newMessage,
     onNewMessageChange,
     onSendMessage,
@@ -111,12 +112,20 @@ const ChatWindow = ({
                 <div className="msg-chat-header-info">
                     <h3 className="msg-chat-header-name">
                         {otherParticipant?.first_name} {otherParticipant?.last_name}
+                        {conversation?.is_locked ? (
+                            <span className="msg-chat-moderation-badge">Bloqueada</span>
+                        ) : null}
                     </h3>
                     {otherParticipant?.role && (
                         <span className="msg-chat-header-role">
                             {ROLE_LABELS[otherParticipant.role] || otherParticipant.role}
                         </span>
                     )}
+                    {conversation?.is_locked && conversation?.moderation_reason ? (
+                        <p className="msg-chat-moderation-note">
+                            Motivo: {conversation.moderation_reason}
+                        </p>
+                    ) : null}
                 </div>
             </div>
 
@@ -134,13 +143,14 @@ const ChatWindow = ({
                         value={newMessage}
                         onChange={(e) => onNewMessageChange(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Escribe un mensaje..."
+                        placeholder={conversation?.is_locked ? 'Conversación bloqueada por moderación' : 'Escribe un mensaje...'}
                         aria-label="Escribe un mensaje"
+                        disabled={conversation?.is_locked}
                     />
                     <button
                         type="submit"
                         className="msg-chat-send-btn"
-                        disabled={!newMessage.trim()}
+                        disabled={!newMessage.trim() || conversation?.is_locked}
                         aria-label="Enviar mensaje"
                         tabIndex={0}
                     >
@@ -148,6 +158,11 @@ const ChatWindow = ({
                     </button>
                 </div>
             </form>
+            {conversation?.is_locked ? (
+                <div className="msg-chat-locked-banner" role="status" aria-live="polite">
+                    Esta conversación fue bloqueada por administración y no permite nuevos mensajes.
+                </div>
+            ) : null}
         </section>
     );
 };

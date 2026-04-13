@@ -5,6 +5,19 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import { unwrapListData } from '../utils/pagination'
 
+const ANNOUNCEMENT_SCOPE_OPTIONS = [
+  { value: 'ALL', label: 'Toda la institución' },
+  { value: 'ROLES', label: 'Por roles' },
+  { value: 'COURSES', label: 'Por cursos' },
+]
+
+const ANNOUNCEMENT_ROLE_OPTIONS = [
+  { value: 'ADMIN', label: 'Administradores' },
+  { value: 'TEACHER', label: 'Profesores' },
+  { value: 'TUTOR', label: 'Acudientes' },
+  { value: 'STUDENT', label: 'Estudiantes' },
+]
+
 export default function AdminNews() {
   const [activeTab, setActiveTab] = useState('announcements') // 'announcements' | 'events'
   const [data, setData] = useState([])
@@ -17,6 +30,10 @@ export default function AdminNews() {
   // Form states
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [announcementScope, setAnnouncementScope] = useState('ALL')
+  const [announcementRoles, setAnnouncementRoles] = useState([])
+  const [availableCourses, setAvailableCourses] = useState([])
+  const [selectedCourseIds, setSelectedCourseIds] = useState([])
 
 
   const [dateStart, setDateStart] = useState('')
@@ -30,8 +47,12 @@ export default function AdminNews() {
     setError('')
     try {
       if (activeTab === 'announcements') {
-        const res = await api.get('/api/v1/courses/announcements/')
-        setData(unwrapListData(res.data))
+        const [announcementRes, coursesRes] = await Promise.all([
+          api.get('/api/v1/courses/announcements/'),
+          api.get('/api/v1/courses/courses/'),
+        ])
+        setData(unwrapListData(announcementRes.data))
+        setAvailableCourses(unwrapListData(coursesRes.data))
       } else {
         const res = await api.get('/api/v1/courses/calendar/')
         const calendarItems = unwrapListData(res.data)
@@ -61,6 +82,9 @@ export default function AdminNews() {
       setTitle(item.title || '')
       if (activeTab === 'announcements') {
         setContent(item.content || '')
+        setAnnouncementScope(item.target_scope || 'ALL')
+        setAnnouncementRoles(Array.isArray(item.target_roles) ? item.target_roles : [])
+        setSelectedCourseIds((item.target_courses || []).map((courseId) => Number(courseId)))
 
       } else {
         setContent(item.description || '')
@@ -71,6 +95,9 @@ export default function AdminNews() {
     } else {
       setTitle('')
       setContent('')
+      setAnnouncementScope('ALL')
+      setAnnouncementRoles([])
+      setSelectedCourseIds([])
       setDateStart('')
 
       setDateEnd('')
@@ -93,7 +120,14 @@ export default function AdminNews() {
       let url = activeTab === 'announcements' ? '/api/v1/courses/announcements/' : '/api/v1/courses/calendar/'
       
       if (activeTab === 'announcements') {
-        payload = { title, content, is_active: true }
+        payload = {
+          title,
+          content,
+          is_active: true,
+          target_scope: announcementScope,
+          target_roles: announcementScope === 'ROLES' ? announcementRoles : [],
+          target_courses: announcementScope === 'COURSES' ? selectedCourseIds : [],
+        }
 
       } else {
         payload = {
@@ -123,6 +157,50 @@ export default function AdminNews() {
           : 'No se pudo crear el registro. Verifica titulo, contenido y fechas.',
       }))
     }
+  }
+
+  function toggleRole(role) {
+    setAnnouncementRoles((current) => {
+      if (current.includes(role)) {
+        return current.filter((item) => item !== role)
+      }
+      return [...current, role]
+    })
+  }
+
+  function toggleCourse(courseId) {
+    const normalized = Number(courseId)
+    setSelectedCourseIds((current) => {
+      if (current.includes(normalized)) {
+        return current.filter((item) => item !== normalized)
+      }
+      return [...current, normalized]
+    })
+  }
+
+  function describeAnnouncementTarget(item) {
+    if (item.target_scope === 'ROLES') {
+      const roleLabels = (item.target_roles || []).map((role) => {
+        const option = ANNOUNCEMENT_ROLE_OPTIONS.find((entry) => entry.value === role)
+        return option ? option.label : role
+      })
+      return roleLabels.length > 0 ? roleLabels.join(', ') : 'Sin roles definidos'
+    }
+
+    if (item.target_scope === 'COURSES') {
+      if (!item.target_courses || item.target_courses.length === 0) {
+        return 'Sin cursos definidos'
+      }
+
+      const labels = item.target_courses
+        .map((courseId) => availableCourses.find((course) => course.id === Number(courseId)))
+        .filter(Boolean)
+        .map((course) => course.display_name || `Curso ${course.id}`)
+
+      return labels.length > 0 ? labels.join(', ') : 'Cursos seleccionados'
+    }
+
+    return 'Toda la institución'
   }
 
   async function handleDelete(id) {
@@ -210,7 +288,10 @@ export default function AdminNews() {
                   <tr>
                     <th scope="col">Título</th>
                     {activeTab === 'announcements' ? (
-                      <th scope="col">Estado</th>
+                      <>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Alcance</th>
+                      </>
                     ) : (
                       <th scope="col">Fechas</th>
                     )}
@@ -229,11 +310,16 @@ export default function AdminNews() {
                         </span>
                       </td>
                       {activeTab === 'announcements' ? (
-                        <td data-label="Estado">
-                          {item.is_active ? 
-                           <span className="admin-news__status admin-news__status--active">Activo</span> : 
-                           <span className="admin-news__status admin-news__status--inactive">Inactivo</span>}
-                        </td>
+                        <>
+                          <td data-label="Estado">
+                            {item.is_active ? 
+                             <span className="admin-news__status admin-news__status--active">Activo</span> : 
+                             <span className="admin-news__status admin-news__status--inactive">Inactivo</span>}
+                          </td>
+                          <td data-label="Alcance">
+                            {describeAnnouncementTarget(item)}
+                          </td>
+                        </>
                       ) : (
                         <td data-label="Fechas">
                           {new Date(item.start_time).toLocaleDateString()}
@@ -294,6 +380,55 @@ export default function AdminNews() {
                       required 
                     />
                   </div>
+
+                  <div>
+                    <label>Alcance</label>
+                    <select
+                      className="input-field admin-news__field-control"
+                      value={announcementScope}
+                      onChange={(e) => setAnnouncementScope(e.target.value)}
+                    >
+                      {ANNOUNCEMENT_SCOPE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {announcementScope === 'ROLES' && (
+                    <div>
+                      <label>Roles destinatarios</label>
+                      <div className="admin-news__target-grid" role="group" aria-label="Seleccionar roles destinatarios">
+                        {ANNOUNCEMENT_ROLE_OPTIONS.map((option) => (
+                          <label key={option.value} className="admin-news__target-option">
+                            <input
+                              type="checkbox"
+                              checked={announcementRoles.includes(option.value)}
+                              onChange={() => toggleRole(option.value)}
+                            />
+                            <span>{option.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {announcementScope === 'COURSES' && (
+                    <div>
+                      <label>Cursos destinatarios</label>
+                      <div className="admin-news__target-grid" role="group" aria-label="Seleccionar cursos destinatarios">
+                        {availableCourses.map((course) => (
+                          <label key={course.id} className="admin-news__target-option">
+                            <input
+                              type="checkbox"
+                              checked={selectedCourseIds.includes(Number(course.id))}
+                              onChange={() => toggleCourse(course.id)}
+                            />
+                            <span>{course.display_name || `Curso ${course.id}`}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                 </>
               ) : (

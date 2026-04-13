@@ -115,7 +115,7 @@ export default function App() {
           <Route
             path="/messages"
             element={
-              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN", "TUTOR"]} requireTenant>
                 <Messages />
               </ProtectedRoute>
             }
@@ -123,7 +123,7 @@ export default function App() {
           <Route
             path="/messages/:conversationId"
             element={
-              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN"]} requireTenant>
+              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN", "TUTOR"]} requireTenant>
                 <Messages />
               </ProtectedRoute>
             }
