@@ -13,6 +13,7 @@ export const INITIAL_FORM = {
   student_email: '',
   subject: '',
   category: 'OTHER',
+  occurred_on: new Date().toISOString().split('T')[0],
   title: '',
   description: '',
 }

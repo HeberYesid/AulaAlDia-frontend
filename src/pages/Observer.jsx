@@ -82,6 +82,7 @@ export default function Observer() {
       const payload = {
         student_email: form.student_email,
         category: form.category,
+        occurred_on: form.occurred_on,
         title: form.title,
         description: form.description,
       }
@@ -269,6 +270,18 @@ export default function Observer() {
                   ))}
                 </select>
               </div>
+              <div className="form-group">
+                <label htmlFor="obs-occurred-on">Fecha de los hechos *</label>
+                <input
+                  id="obs-occurred-on"
+                  type="date"
+                  name="occurred_on"
+                  value={form.occurred_on}
+                  onChange={handleFormChange}
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                />
+              </div>
             </div>
             <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
               <label htmlFor="obs-title">Título *</label>
@@ -411,10 +424,12 @@ export default function Observer() {
                       aria-label={`Observación: ${o.title}`}
                     >
                       <td data-label="Fecha" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                        {new Date(o.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {new Date(o.occurred_on || o.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}
                         <br />
                         <span style={{ fontSize: '0.75rem' }}>
-                          {new Date(o.created_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
+                          {o.occurred_on
+                            ? 'Hechos reportados'
+                            : new Date(o.created_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </td>
                       {(isTeacherOrAdmin || user?.role === 'TUTOR') && (

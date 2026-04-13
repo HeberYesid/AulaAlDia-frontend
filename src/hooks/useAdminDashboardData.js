@@ -52,8 +52,17 @@ function filterItemsByAcademicPeriod(items, academicPeriod, dateField) {
   const hasBoundaryDates = Boolean(startDate || endDate)
   const periodYear = Number(academicPeriod.year || 0)
 
+  const resolveItemDate = (item) => {
+    const fields = Array.isArray(dateField) ? dateField : [dateField]
+    for (const field of fields) {
+      const parsed = toDateOnly(item?.[field])
+      if (parsed) return parsed
+    }
+    return null
+  }
+
   return items.filter((item) => {
-    const date = toDateOnly(item?.[dateField])
+    const date = resolveItemDate(item)
     if (!date) return false
     if (!hasBoundaryDates && periodYear > 0 && date.getFullYear() !== periodYear) {
       return false
@@ -326,7 +335,7 @@ export default function useAdminDashboardData() {
   }, [absences, activeAcademicPeriod])
 
   const observationsInActivePeriod = useMemo(() => {
-    return filterItemsByAcademicPeriod(observations, activeAcademicPeriod, 'created_at')
+    return filterItemsByAcademicPeriod(observations, activeAcademicPeriod, ['occurred_on', 'created_at'])
   }, [observations, activeAcademicPeriod])
 
   const kpis = useMemo(() => {

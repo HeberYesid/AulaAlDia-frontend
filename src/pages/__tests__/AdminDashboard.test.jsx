@@ -94,6 +94,7 @@ describe('AdminDashboard page', () => {
       if (url.includes('/observations/')) return Promise.resolve({ data: [] });
       if (url.includes('/notifications/')) return Promise.resolve({ data: [] });
       if (url.includes('/calendar/all_events/')) return Promise.resolve({ data: [] });
+      if (url.includes('/announcements/')) return Promise.resolve({ data: [] });
       if (url.includes('/academic-periods/')) return Promise.resolve({ data: [] });
       if (url.includes('/academic-settings/')) return Promise.resolve({ data: null });
       return Promise.reject(new Error('not mocked'));
@@ -102,7 +103,7 @@ describe('AdminDashboard page', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText(/dashboard carg/i)).toBeInTheDocument();
+      expect(screen.getByRole('alert')).toHaveTextContent(/algunas secciones no se pudieron actualizar/i);
     });
   });
 
@@ -140,6 +141,7 @@ describe('AdminDashboard page', () => {
           data: [
             {
               id: 101,
+              occurred_on: asDateOnly(addDays(now, -1)),
               created_at: addDays(now, -1).toISOString(),
               title: 'Observación vigente',
               category: 'OTHER',
@@ -147,6 +149,7 @@ describe('AdminDashboard page', () => {
             },
             {
               id: 102,
+              occurred_on: asDateOnly(addDays(now, -4)),
               created_at: addDays(now, -4).toISOString(),
               title: 'Observación fuera de periodo',
               category: 'OTHER',
