@@ -15,14 +15,13 @@ function handleFocusTrap(e, ref) {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
 }
 
-export default function ExercisesTab({ user, id, exercises, academicPeriods, academicPeriodsById, loadAll, setError, setSuccess }) {
+export default function ExercisesTab({ user, id, exercises, loadAll, setError, setSuccess }) {
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [showExerciseForm, setShowExerciseForm] = useState(false)
   const [newExerciseName, setNewExerciseName] = useState('')
   const [newExerciseDeadline, setNewExerciseDeadline] = useState('')
   const [newExerciseDescription, setNewExerciseDescription] = useState('')
   const [newExerciseFile, setNewExerciseFile] = useState(null)
-  const [selectedPeriod, setSelectedPeriod] = useState('')
 
   const [editingExercise, setEditingExercise] = useState(null)
   const [editExerciseName, setEditExerciseName] = useState('')
@@ -45,33 +44,12 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
     return exercises.filter(ex => ex.name.toLowerCase().includes(search))
   }, [exercises, exerciseSearch])
 
-  const availablePeriodsForExercises = useMemo(() => {
-    return academicPeriods.filter(p => !p.is_closed && !p.is_grade_locked)
-  }, [academicPeriods])
-
-  const isPeriodGradeLocked = (periodId) => {
-    if (!periodId) return false
-    return Boolean(academicPeriodsById[Number(periodId)]?.is_grade_locked)
-  }
-
-  const formatPeriodState = (period) => {
-    if (!period) return 'Sin periodo'
-    if (period.is_closed) return 'Cerrado'
-    if (period.is_grade_locked) return 'Bloqueado'
-    return 'Abierto'
-  }
-
   /* ── Handlers ── */
 
   const handleCreateExercise = async (e) => {
     e.preventDefault()
     setError('')
     setSuccess('')
-
-    if (selectedPeriod && isPeriodGradeLocked(selectedPeriod)) {
-      setError('No puedes asociar el ejercicio a un periodo bloqueado para notas.')
-      return
-    }
 
     try {
       const formData = new FormData()
@@ -81,7 +59,6 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
       if (newExerciseDeadline) formData.append('deadline', newExerciseDeadline)
       if (newExerciseDescription) formData.append('description', newExerciseDescription)
       if (newExerciseFile) formData.append('attachment', newExerciseFile)
-      if (selectedPeriod) formData.append('academic_period', selectedPeriod)
 
       await api.post('/api/v1/courses/exercises/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -91,7 +68,6 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
       setNewExerciseDeadline('')
       setNewExerciseDescription('')
       setNewExerciseFile(null)
-      setSelectedPeriod('')
       setShowExerciseForm(false)
       loadAll()
       setTimeout(() => setSuccess(''), 3000)
@@ -243,21 +219,13 @@ export default function ExercisesTab({ user, id, exercises, academicPeriods, aca
                   <input id="create-exercise-file" type="file" onChange={(e) => setNewExerciseFile(e.target.files[0])} />
                 </div>
 
-                {availablePeriodsForExercises.length > 0 && (
-                  <div>
-                    <label htmlFor="create-exercise-period">Periodo Académico (Opcional)</label>
-                    <select id="create-exercise-period" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} aria-label="Seleccionar periodo académico">
-                      <option value="">Sin periodo asignado</option>
-                      {availablePeriodsForExercises.map(p => (
-                        <option key={p.id} value={p.id}>{p.label} &middot; {formatPeriodState(p)}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                <p className="notice" style={{ margin: '0 0 var(--space-md)' }}>
+                  El ejercicio se vincula automáticamente al periodo académico vigente.
+                </p>
 
                 <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
                   <button className="btn" type="submit" style={{ flex: 1 }}>Crear Ejercicio</button>
-                  <button className="btn secondary" type="button" style={{ flex: 1 }} onClick={() => { setShowExerciseForm(false); setNewExerciseName(''); setNewExerciseDeadline(''); setNewExerciseDescription(''); setNewExerciseFile(null); setSelectedPeriod(''); setError('') }}>Cancelar</button>
+                  <button className="btn secondary" type="button" style={{ flex: 1 }} onClick={() => { setShowExerciseForm(false); setNewExerciseName(''); setNewExerciseDeadline(''); setNewExerciseDescription(''); setNewExerciseFile(null); setError('') }}>Cancelar</button>
                 </div>
               </form>
             </div>

@@ -392,8 +392,6 @@ export default function SubjectDetail() {
               user={user}
               id={id}
               exercises={exercises}
-              academicPeriods={academicPeriods}
-              academicPeriodsById={academicPeriodsById}
               loadAll={loadAll}
               setError={setError}
               setSuccess={setSuccess}

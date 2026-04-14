@@ -186,7 +186,7 @@ describe('SubjectDetail Component', () => {
     })
   })
 
-  it('hides locked periods from the exercise creation selector', async () => {
+  it('shows auto-link notice for active period in exercise form', async () => {
     const user = userEvent.setup()
     renderWithProviders(<SubjectDetail />)
 
@@ -197,8 +197,8 @@ describe('SubjectDetail Component', () => {
     await user.click(screen.getByText(/Ejercicios \(\d+\)/))
     await user.click(screen.getByRole('button', { name: /^Nuevo Ejercicio$/i }))
 
-    expect(screen.getByRole('option', { name: /Periodo abierto/i })).toBeInTheDocument()
-    expect(screen.queryByRole('option', { name: /Periodo bloqueado/i })).not.toBeInTheDocument()
+    expect(screen.getByText(/se vincula automáticamente al periodo académico vigente/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/seleccionar periodo académico/i)).not.toBeInTheDocument()
   })
 
   it('disables result editing when the exercise period is locked', async () => {
