@@ -28,6 +28,14 @@ function handleFocusTrap(e, ref) {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
 }
 
+const normalizeEnrollmentsResponse = (data, role) => {
+  if (role === 'TEACHER' && !Array.isArray(data)) {
+    return []
+  }
+
+  return unwrapListData(data)
+}
+
 export default function SubjectDetail() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -35,6 +43,7 @@ export default function SubjectDetail() {
   /* ── Core data ── */
   const [subject, setSubject] = useState(null)
   const [enrollments, setEnrollments] = useState([])
+  const [enrollmentCount, setEnrollmentCount] = useState(0)
   const [dash, setDash] = useState(null)
   const [exercises, setExercises] = useState([])
   const [detailedResults, setDetailedResults] = useState([])
@@ -70,7 +79,14 @@ export default function SubjectDetail() {
       }
       const results = await Promise.all(promises)
       setSubject(results[0].data)
-      setEnrollments(unwrapListData(results[1].data))
+      const normalizedEnrollments = normalizeEnrollmentsResponse(results[1].data, user?.role)
+      const apiEnrollmentCount = Number(results[1]?.data?.count)
+      setEnrollments(normalizedEnrollments)
+      if (Number.isFinite(apiEnrollmentCount) && apiEnrollmentCount >= 0) {
+        setEnrollmentCount(apiEnrollmentCount)
+      } else {
+        setEnrollmentCount(normalizedEnrollments.length)
+      }
       setDash(results[2].data)
       setExercises(unwrapListData(results[3].data))
       setDetailedResults(unwrapListData(results[4].data))
@@ -144,6 +160,8 @@ export default function SubjectDetail() {
     }
   }
 
+  const teacherEnrollmentCount = user?.role === 'TEACHER' ? enrollmentCount : null
+
   /* ── Render ── */
   if (loading) return <div className="card" style={{ maxWidth: 1200, margin: '2rem auto' }}>Cargando…</div>
   if (!subject) return <div className="card" style={{ maxWidth: 1200, margin: '2rem auto' }}>Materia no encontrada</div>
@@ -157,10 +175,15 @@ export default function SubjectDetail() {
           <div className="subject-hero__info">
             <h1>{subject.name}</h1>
             <p className="subject-hero__meta">Profesor: {subject.teacher?.email}</p>
+            {user?.role === 'TEACHER' && (
+              <p className="notice" style={{ marginTop: 'var(--space-xs)' }}>
+                Solo podés ver la cantidad de estudiantes inscriptos.
+              </p>
+            )}
           </div>
           <div className="subject-hero__stats">
             <div className="stat-card" style={{ minWidth: 100 }}>
-              <div className="stat-value">{enrollments.length}</div>
+              <div className="stat-value">{user?.role === 'TEACHER' ? (teacherEnrollmentCount ?? 0) : enrollments.length}</div>
               <div className="stat-label">Estudiantes</div>
             </div>
             <div className="stat-card" style={{ minWidth: 100 }}>
@@ -357,6 +380,7 @@ export default function SubjectDetail() {
               user={user}
               id={id}
               enrollments={enrollments}
+              enrollmentCount={enrollmentCount}
               loadAll={loadAll}
               setError={setError}
               setSuccess={setSuccess}

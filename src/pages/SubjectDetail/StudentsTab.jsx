@@ -3,13 +3,22 @@ import { api } from '../../api/axios'
 import CSVUpload from '../../components/CSVUpload'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
-export default function StudentsTab({ user, id, enrollments, loadAll, setError, setSuccess }) {
+export default function StudentsTab({
+  user,
+  id,
+  enrollments,
+  enrollmentCount,
+  loadAll,
+  setError,
+  setSuccess,
+}) {
   const [email, setEmail] = useState('')
   const [studentSearch, setStudentSearch] = useState('')
   const [userExistsStatus, setUserExistsStatus] = useState(null)
   const [userExistsInfo, setUserExistsInfo] = useState(null)
 
-  const isTeacherOrAdmin = user?.role === 'TEACHER' || user?.role === 'ADMIN'
+  const isAdmin = user?.role === 'ADMIN'
+  const isTeacher = user?.role === 'TEACHER'
 
   const filteredEnrollments = useMemo(() => {
     if (!studentSearch.trim()) return enrollments
@@ -75,10 +84,10 @@ export default function StudentsTab({ user, id, enrollments, loadAll, setError, 
       {/* ── Student List ── */}
       <div className="card card--static section-card">
         <div className="section-header">
-          <h3>Estudiantes Inscritos ({enrollments.length})</h3>
+          <h3>Estudiantes Inscritos ({isTeacher ? enrollmentCount : enrollments.length})</h3>
         </div>
 
-        {enrollments.length > 0 && (
+        {!isTeacher && enrollments.length > 0 && (
           <div className="search-bar" style={{ marginBottom: 'var(--space-md)' }}>
             <input
               type="text"
@@ -95,7 +104,14 @@ export default function StudentsTab({ user, id, enrollments, loadAll, setError, 
           </div>
         )}
 
-        {enrollments.length === 0 ? (
+        {isTeacher ? (
+          <div className="empty-state">
+            <p className="empty-state__title">Cantidad de estudiantes inscriptos</p>
+            <p className="empty-state__text">
+              Esta materia tiene <strong>{enrollmentCount}</strong> estudiante(s) inscrito(s).
+            </p>
+          </div>
+        ) : enrollments.length === 0 ? (
           <div className="empty-state">
             <p className="empty-state__title">No hay estudiantes inscritos</p>
             <p className="empty-state__text">Inscribe al primero usando el formulario de abajo.</p>
@@ -127,7 +143,7 @@ export default function StudentsTab({ user, id, enrollments, loadAll, setError, 
       </div>
 
       {/* ── Enroll Individual Student ── */}
-      {isTeacherOrAdmin && (
+      {isAdmin && (
         <div className="card card--static section-card">
           <div className="section-header">
             <h3>Inscribir Estudiante</h3>
@@ -185,7 +201,7 @@ export default function StudentsTab({ user, id, enrollments, loadAll, setError, 
       )}
 
       {/* ── CSV Bulk Upload ── */}
-      {isTeacherOrAdmin && (
+      {isAdmin && (
         <div className="card card--static section-card">
           <div className="section-header">
             <h3>Carga Masiva de Estudiantes</h3>
@@ -195,6 +211,14 @@ export default function StudentsTab({ user, id, enrollments, loadAll, setError, 
             uploadUrl={`/api/v1/courses/subjects/${id}/enrollments/upload-csv/`}
             onComplete={loadAll}
           />
+        </div>
+      )}
+
+      {isTeacher && (
+        <div className="card card--static section-card">
+          <p className="notice" style={{ margin: 0 }}>
+            Como docente solo podés ver la cantidad de estudiantes inscriptos en esta materia.
+          </p>
         </div>
       )}
     </div>

@@ -237,6 +237,30 @@ describe('SubjectDetail Component', () => {
     const blockedButton = await screen.findByRole('button', { name: /Bloqueado/i })
     expect(blockedButton).toBeDisabled()
   })
+
+  it('teacher students tab shows only enrollment count and hides enrollment actions', async () => {
+    const user = userEvent.setup()
+
+    api.get.mockImplementation((url) => {
+      if (url.includes('/academic-periods/')) return Promise.resolve({ data: mockAcademicPeriods })
+      if (url.includes('/enrollments/')) return Promise.resolve({ data: { count: 7 } })
+      if (url.includes('/dashboard/')) return Promise.resolve({ data: mockDashboard })
+      if (url.includes('/exercises/')) return Promise.resolve({ data: mockExercises })
+      if (url.includes('/results/')) return Promise.resolve({ data: mockResults })
+      if (url.includes('/subjects/1')) return Promise.resolve({ data: mockSubject })
+      return Promise.reject(new Error('Not found'))
+    })
+
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    expect(screen.getByText(/Esta materia tiene/i)).toBeInTheDocument()
+    expect(screen.queryByText(/Inscribir Estudiante/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Carga Masiva de Estudiantes/i)).not.toBeInTheDocument()
+  })
   
   it('handles error when loading fails', async () => {
     // Mock error for subject fetch
