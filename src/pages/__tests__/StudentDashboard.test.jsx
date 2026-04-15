@@ -108,5 +108,8 @@ describe('StudentDashboard page', () => {
       expect(screen.getByText('Quiz 1')).toBeInTheDocument();
       expect(screen.getByText('Nota 4.50')).toBeInTheDocument();
     });
+
+    const pendingLink = screen.getByRole('link', { name: /Homework 1/i });
+    expect(pendingLink).toHaveAttribute('href', '/subjects/1/exercises/1');
   });
 });

@@ -1,12 +1,11 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useState, useMemo, useCallback } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { api } from '../../api/axios'
 import { useAuth } from '../../state/AuthContext'
 import StatusBadge from '../../components/StatusBadge'
 import StudentsTab from './StudentsTab'
 import ExercisesTab from './ExercisesTab'
 import ResultsTab from './ResultsTab'
-import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 import { unwrapListData } from '../../utils/pagination'
 
 const DEFAULT_GRADE_SETTINGS = {
@@ -14,18 +13,6 @@ const DEFAULT_GRADE_SETTINGS = {
   max_grade: '5.00',
   passing_grade: '3.00',
   period_scheme: 'TRIMESTER',
-}
-
-const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-
-function handleFocusTrap(e, ref) {
-  if (e.key !== 'Tab') return
-  const focusables = [...(ref.current?.querySelectorAll(FOCUSABLE) || [])]
-  if (focusables.length < 2) return
-  const first = focusables[0]
-  const last = focusables[focusables.length - 1]
-  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
 }
 
 const normalizeEnrollmentsResponse = (data, role) => {
@@ -54,14 +41,6 @@ export default function SubjectDetail() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [activeTab, setActiveTab] = useState('students')
-
-  /* ── Student submission modal ── */
-  const [uploadingExercise, setUploadingExercise] = useState(null)
-  const [submissionFile, setSubmissionFile] = useState(null)
-  const [submissionText, setSubmissionText] = useState('')
-  const uploadSolutionDialogRef = useRef(null)
-
-  useEffect(() => { if (uploadingExercise) uploadSolutionDialogRef.current?.focus() }, [uploadingExercise])
 
   /* ── Data loading ── */
   const loadAll = useCallback(async () => {
@@ -131,34 +110,6 @@ export default function SubjectDetail() {
       return { ...ex, result: result || null }
     })
   }, [exercises, detailedResults, user])
-
-  const handleSubmitSolution = async (e) => {
-    e.preventDefault()
-    if (!uploadingExercise) return
-    if (!submissionFile && !submissionText) { setError('Debes subir un archivo o escribir una respuesta'); return }
-    if (submissionFile && submissionFile.size > 1024 * 1024) { setError('El archivo no puede superar 1MB'); return }
-
-    const formData = new FormData()
-    if (submissionFile) formData.append('submission_file', submissionFile)
-    if (submissionText) formData.append('submission_text', submissionText)
-
-    try {
-      await api.post(`/api/v1/courses/exercises/${uploadingExercise.id}/submit/`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      setSuccess('Solución subida correctamente')
-      setUploadingExercise(null)
-      setSubmissionFile(null)
-      setSubmissionText('')
-      loadAll()
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      setError(getApiErrorMessage(err, {
-        action: 'subir tu solucion del ejercicio',
-        fallback: 'No se pudo subir la solucion del ejercicio. Verifica el archivo, el tamano y el estado del periodo academico.',
-      }))
-    }
-  }
 
   const teacherEnrollmentCount = user?.role === 'TEACHER' ? enrollmentCount : null
 
@@ -282,7 +233,14 @@ export default function SubjectDetail() {
                   {studentExercisesList.map(item => (
                     <tr key={item.id}>
                       <td data-label="Ejercicio">
-                        <strong>{item.name}</strong>
+                        <strong>
+                          <Link
+                            to={`/subjects/${id}/exercises/${item.id}`}
+                            style={{ color: 'var(--primary)', textDecoration: 'underline' }}
+                          >
+                            {item.name}
+                          </Link>
+                        </strong>
                         {item.description && <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>{item.description}</div>}
                       </td>
                       <td data-label="Fecha Límite">{item.deadline ? new Date(item.deadline).toLocaleDateString() : '—'}</td>
@@ -304,11 +262,13 @@ export default function SubjectDetail() {
                         ) : '—'}
                       </td>
                       <td data-label="Acción">
-                        {(!item.result || item.result.status === 'SUBMITTED') && (
-                          <button className="btn secondary" style={{ padding: '0.3rem 0.6rem', fontSize: 'var(--font-size-sm)' }} onClick={() => setUploadingExercise(item)}>
-                            {item.result ? 'Reenviar' : 'Subir Solución'}
-                          </button>
-                        )}
+                        <Link
+                          to={`/subjects/${id}/exercises/${item.id}`}
+                          className="btn secondary"
+                          style={{ padding: '0.3rem 0.6rem', fontSize: 'var(--font-size-sm)' }}
+                        >
+                          Ver detalle
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -417,42 +377,6 @@ export default function SubjectDetail() {
         </>
       )}
 
-      {/* ═══ UPLOAD SOLUTION MODAL (Student) ═══ */}
-      {uploadingExercise && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--space-md)' }} role="presentation">
-          <button type="button" className="modal-backdrop-button" aria-label="Cerrar modal de subir solución" onClick={() => setUploadingExercise(null)} />
-          <div
-            className="card modal-responsive"
-            role="dialog" aria-modal="true" aria-labelledby="upload-solution-modal-title"
-            tabIndex={-1} ref={uploadSolutionDialogRef}
-            onKeyDown={(e) => handleFocusTrap(e, uploadSolutionDialogRef)}
-            style={{ maxWidth: 500, width: '100%', margin: 0, position: 'relative', zIndex: 1, animation: 'fadeIn 0.2s ease' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 id="upload-solution-modal-title">Subir Solución</h2>
-            <p><strong>Ejercicio:</strong> {uploadingExercise.name}</p>
-
-            <form onSubmit={handleSubmitSolution}>
-              <div>
-                <label htmlFor="submission-file">Archivo (PDF, DOCX, XLSX — Máx 1 MB)</label>
-                <input id="submission-file" type="file" accept=".pdf,.docx,.xlsx" onChange={(e) => setSubmissionFile(e.target.files[0])} />
-              </div>
-
-              <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>— O —</div>
-
-              <div>
-                <label htmlFor="submission-text">Respuesta de Texto (Máx 5 000 caracteres)</label>
-                <textarea id="submission-text" value={submissionText} onChange={(e) => setSubmissionText(e.target.value)} placeholder="Escribe tu respuesta aquí…" rows="6" maxLength={5000} />
-              </div>
-
-              <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                <button type="submit" className="btn" style={{ flex: 1 }}>Subir</button>
-                <button type="button" className="btn secondary" onClick={() => setUploadingExercise(null)} style={{ flex: 1 }}>Cancelar</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

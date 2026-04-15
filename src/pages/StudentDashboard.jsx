@@ -187,7 +187,7 @@ export default function StudentDashboard() {
               {pending_exercises.map((exercise) => (
                 <Link
                   key={exercise.id}
-                  to={`/subjects/${exercise.subject_id}`}
+                  to={`/subjects/${exercise.subject_id}/exercises/${exercise.id}`}
                   style={{
                     display: 'block',
                     padding: 'var(--space-md)',

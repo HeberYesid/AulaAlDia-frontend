@@ -1,22 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SubjectDetail from '../SubjectDetail'
 import { renderWithProviders } from '../../test/utils'
 import { api } from '../../api/axios'
 import * as router from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+
+const useAuthMock = vi.fn()
+
+vi.mock('../../components/WelcomePanel', () => ({
+  default: () => null,
+}))
+
+vi.mock('../../components/SidebarBanner', () => ({
+  default: () => null,
+}))
 
 vi.mock('../../state/AuthContext', async () => {
   const actual = await vi.importActual('../../state/AuthContext')
   return {
     ...actual,
-    useAuth: () => ({
-      user: {
-        id: 2,
-        email: 'teacher@test.com',
-        role: 'TEACHER'
-      }
-    })
+    useAuth: () => useAuthMock(),
   }
 })
 
@@ -118,6 +123,13 @@ describe('SubjectDetail Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 2,
+        email: 'teacher@test.com',
+        role: 'TEACHER'
+      }
+    })
     vi.spyOn(router, 'useParams').mockReturnValue({ id: '1' })
     
     // Mock API responses
@@ -201,6 +213,20 @@ describe('SubjectDetail Component', () => {
     expect(screen.queryByLabelText(/seleccionar periodo académico/i)).not.toBeInTheDocument()
   })
 
+  it('renders exercise names as links to exercise detail page', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText(/Ejercicios \(\d+\)/))
+
+    const exerciseLink = await screen.findByRole('link', { name: 'Algebra Quiz' })
+    expect(exerciseLink).toHaveAttribute('href', '/subjects/1/exercises/1')
+  })
+
   it('disables result editing when the exercise period is locked', async () => {
     const user = userEvent.setup()
 
@@ -271,6 +297,181 @@ describe('SubjectDetail Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/Materia no encontrada/i)).toBeInTheDocument()
     })
+  })
+
+  it('student exercise list links to dedicated exercise detail route', async () => {
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 3,
+        email: 'student@test.com',
+        role: 'STUDENT',
+      }
+    })
+
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    const row = screen.getByRole('link', { name: 'Algebra Quiz' }).closest('tr')
+    const linksInRow = within(row).getAllByRole('link')
+
+    expect(linksInRow[0]).toHaveAttribute('href', '/subjects/1/exercises/1')
+    expect(within(row).getByRole('link', { name: /Ver detalle/i })).toHaveAttribute('href', '/subjects/1/exercises/1')
+  })
+
+  it('student multi-exercise action remains scoped to selected exercise URL', async () => {
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 3,
+        email: 'student@test.com',
+        role: 'STUDENT',
+      }
+    })
+
+    api.get.mockImplementation((url) => {
+      if (url.includes('/enrollments/')) return Promise.resolve({ data: mockEnrollments })
+      if (url.includes('/dashboard/')) return Promise.resolve({ data: mockDashboard })
+      if (url.includes('/exercises/')) {
+        return Promise.resolve({
+          data: [
+            { id: 1, name: 'Algebra Quiz', deadline: '2026-03-01T10:00:00Z', description: 'Solve equations' },
+            { id: 2, name: 'Geometry Workshop', deadline: '2026-03-02T10:00:00Z', description: 'Triangles' },
+          ],
+        })
+      }
+      if (url.includes('/results/')) return Promise.resolve({ data: mockResults })
+      if (url.includes('/subjects/1')) return Promise.resolve({ data: mockSubject })
+      return Promise.reject(new Error('Not found'))
+    })
+
+    const user = userEvent.setup()
+
+    render(
+      <MemoryRouter initialEntries={['/subjects/1']}>
+        <Routes>
+          <Route path="/subjects/:id" element={<SubjectDetail />} />
+          <Route path="/subjects/1/exercises/1" element={<div>ExerciseDetail 1</div>} />
+          <Route path="/subjects/1/exercises/2" element={<div>ExerciseDetail 2</div>} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    const geometryRow = screen.getByRole('link', { name: 'Geometry Workshop' }).closest('tr')
+    const geometryAction = within(geometryRow).getByRole('link', { name: /Ver detalle/i })
+    expect(geometryAction).toHaveAttribute('href', '/subjects/1/exercises/2')
+
+    await user.click(geometryAction)
+
+    expect(await screen.findByText('ExerciseDetail 2')).toBeInTheDocument()
+    expect(screen.queryByText('ExerciseDetail 1')).not.toBeInTheDocument()
+  })
+
+  it('student SubjectDetail does not expose upload modal or submit controls', async () => {
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 3,
+        email: 'student@test.com',
+        role: 'STUDENT',
+      }
+    })
+
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/archivo \(pdf, docx, xlsx/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/respuesta de texto/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /subir solución|reenviar|subir/i })).not.toBeInTheDocument()
+  })
+
+  it('student exercise interactions do not submit from SubjectDetail', async () => {
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 3,
+        email: 'student@test.com',
+        role: 'STUDENT',
+      }
+    })
+
+    const user = userEvent.setup()
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('link', { name: /Ver detalle/i }))
+
+    expect(api.post).not.toHaveBeenCalledWith(
+      expect.stringMatching(/\/api\/v1\/courses\/exercises\/\d+\/submit\//),
+      expect.anything(),
+      expect.anything()
+    )
+    expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('navigates from SubjectDetail "Ver detalle" to ExerciseDetail route render', async () => {
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 3,
+        email: 'student@test.com',
+        role: 'STUDENT',
+      }
+    })
+
+    const user = userEvent.setup()
+
+    render(
+      <MemoryRouter initialEntries={['/subjects/1']}>
+        <Routes>
+          <Route path="/subjects/:id" element={<SubjectDetail />} />
+          <Route path="/subjects/1/exercises/1" element={<div>ExerciseDetail rendered for Algebra Quiz</div>} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('link', { name: /Ver detalle/i }))
+
+    expect(await screen.findByText('ExerciseDetail rendered for Algebra Quiz')).toBeInTheDocument()
+  })
+
+  it('admin SubjectDetail runtime behavior keeps tabbed controls unchanged', async () => {
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      }
+    })
+
+    const user = userEvent.setup()
+    renderWithProviders(<SubjectDetail />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Mathematics$/i)).toBeInTheDocument()
+    })
+
+    expect(screen.getByRole('tab', { name: /Estudiantes/i })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Ejercicios \(1\)/i })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Resultados/i })).toBeInTheDocument()
+    expect(screen.queryByText(/Mis Ejercicios/i)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: /Ejercicios \(1\)/i }))
+
+    expect(await screen.findByRole('button', { name: /Nuevo Ejercicio/i })).toBeInTheDocument()
   })
 
   it('allows adding a new exercise', async () => {

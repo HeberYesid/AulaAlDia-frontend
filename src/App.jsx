@@ -43,6 +43,7 @@ const AdminNews = lazy(() => import('./pages/AdminNews'))
 const AdminSupportTickets = lazy(() => import('./pages/AdminSupportTickets'))
 const Subjects = lazy(() => import('./pages/Subjects'))
 const SubjectDetail = lazy(() => import('./pages/SubjectDetail'))
+const ExerciseDetail = lazy(() => import('./pages/ExerciseDetail'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const MyResults = lazy(() => import('./pages/MyResults'))
 const MySubjects = lazy(() => import('./pages/MySubjects'))
@@ -188,6 +189,15 @@ export default function App() {
             element={
               <ProtectedRoute roles={["TEACHER", "ADMIN", "STUDENT", "TUTOR"]} requireTenant requireActiveSchoolYear>
                 <SubjectDetail />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subjects/:subjectId/exercises/:exerciseId"
+            element={
+              <ProtectedRoute roles={["TEACHER", "ADMIN", "STUDENT", "TUTOR"]} requireTenant requireActiveSchoolYear>
+                <ExerciseDetail />
               </ProtectedRoute>
             }
           />

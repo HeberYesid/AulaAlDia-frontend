@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../../api/axios'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
@@ -272,13 +273,19 @@ export default function ExercisesTab({ user, id, exercises, loadAll, setError, s
                 {filteredExercises.map((ex, index) => (
                   <tr key={ex.id}>
                     <td data-label="#"><strong>{index + 1}</strong></td>
-                    <td data-label="Nombre"><strong>{ex.name}</strong></td>
+                    <td data-label="Nombre">
+                      <strong>
+                        <Link to={`/subjects/${id}/exercises/${ex.id}`} style={{ color: 'var(--primary)' }}>
+                          {ex.name}
+                        </Link>
+                      </strong>
+                    </td>
                     <td data-label="Descripción" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                       {ex.description || <em>Sin descripción</em>}
                     </td>
                     <td data-label="Archivo">
-                      {ex.attachment ? (
-                        <a href={ex.attachment} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Descargar</a>
+                      {ex.attachment_download_url ? (
+                        <a href={ex.attachment_download_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Descargar</a>
                       ) : (
                         <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>—</span>
                       )}
