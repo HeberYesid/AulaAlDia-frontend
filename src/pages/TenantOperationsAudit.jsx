@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useState } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
 import { normalizeApiErrorWithDetails } from '../api/errors'
+import './TenantOperationsAudit.css'
 
 const CATEGORY_OPTIONS = [
   { value: '', label: 'Todas' },
@@ -447,14 +448,14 @@ export default function TenantOperationsAudit() {
       {error ? <div className="alert error">{error}</div> : null}
 
       <div className="card">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+        <div className="operation-audit__header-row">
           <div>
-            <h3 style={{ margin: 0 }}>Tabla de Logs de la institución</h3>
-            <p className="notice" style={{ marginTop: '0.35rem' }}>
+            <h3 className="operation-audit__section-title">Tabla de Logs de la institución</h3>
+            <p className="notice operation-audit__section-copy">
               Se cargan primero todos los registros y luego puedes filtrar si lo necesitas.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+          <div className="operation-audit__header-actions">
             <button
               className="btn secondary"
               type="button"
@@ -466,7 +467,7 @@ export default function TenantOperationsAudit() {
           </div>
         </div>
 
-        <div className="grid cols-2 grid-stack-mobile" style={{ marginTop: 'var(--space-md)' }}>
+        <div className="grid cols-2 grid-stack-mobile operation-audit__filters-grid">
           <div className="form-group">
             <label htmlFor="operation-actor">Email</label>
             <input
@@ -552,7 +553,7 @@ export default function TenantOperationsAudit() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+        <div className="operation-audit__actions-row">
           <button
             className="btn secondary"
             type="button"
@@ -569,7 +570,7 @@ export default function TenantOperationsAudit() {
           >
             Quitar filtros
           </button>
-          <span className="notice" style={{ alignSelf: 'center' }}>
+          <span className="notice operation-audit__result-summary">
             {filtersApplied
               ? `Mostrando ${audits.length} de ${allAudits.length} registros filtrados`
               : `Mostrando ${audits.length} registros cargados`}
@@ -577,12 +578,12 @@ export default function TenantOperationsAudit() {
         </div>
 
         {audits.length === 0 ? (
-          <p className="notice" style={{ marginTop: 'var(--space-md)' }}>
+          <p className="notice operation-audit__empty-note">
             No hay registros para mostrar con los filtros actuales.
           </p>
         ) : (
-          <div className="table-container" style={{ marginTop: 'var(--space-md)' }}>
-            <table className="table mobile-card-view">
+          <div className="table-container operation-audit__table-top-gap">
+            <table className="table mobile-card-view operation-audit-table">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -615,7 +616,7 @@ export default function TenantOperationsAudit() {
                       <td data-label="Detalle">
                         <button
                           type="button"
-                          className="btn secondary"
+                          className="btn secondary operation-audit__detail-button"
                           onClick={() =>
                             setExpandedAuditId(expandedAuditId === audit.id ? null : audit.id)
                           }
@@ -627,39 +628,39 @@ export default function TenantOperationsAudit() {
                     {expandedAuditId === audit.id ? (
                       <tr>
                         <td colSpan={7}>
-                          <div style={{ display: 'grid', gap: 'var(--space-sm)' }}>
+                          <div className="operation-audit__detail-layout">
                             <div>
                               <strong>{getFriendlyDetailTitle(audit)}</strong>
-                              <p className="notice" style={{ margin: '0.35rem 0 0' }}>
+                              <p className="notice operation-audit__detail-summary">
                                 {audit.summary}. {getStatusLabel(audit)}
                               </p>
                             </div>
                             <div className="grid cols-2 grid-stack-mobile">
                               <div>
                                 <strong>Información clave</strong>
-                                <div style={{ display: 'grid', gap: '0.45rem', marginTop: '0.5rem' }}>
-                                  <p className="notice" style={{ margin: 0 }}>
+                                <div className="operation-audit__detail-items">
+                                  <p className="notice operation-audit__detail-item">
                                     <strong>Área:</strong> {getCategoryLabel(audit.category)}
                                   </p>
-                                  <p className="notice" style={{ margin: 0 }}>
+                                  <p className="notice operation-audit__detail-item">
                                     <strong>Registro afectado:</strong> {getTargetLabel(audit)}
                                   </p>
-                                  <p className="notice" style={{ margin: 0 }}>
+                                  <p className="notice operation-audit__detail-item">
                                     <strong>Fecha del movimiento:</strong> {formatAuditDate(audit.created_at)}
                                   </p>
                                 </div>
                               </div>
                               <div>
                                 <strong>Datos registrados</strong>
-                                <div style={{ display: 'grid', gap: '0.45rem', marginTop: '0.5rem' }}>
+                                <div className="operation-audit__detail-items">
                                   {getFriendlyMetadataItems(audit).length ? (
                                     getFriendlyMetadataItems(audit).map((item) => (
-                                      <p key={`${audit.id}-${item.label}`} className="notice" style={{ margin: 0 }}>
+                                      <p key={`${audit.id}-${item.label}`} className="notice operation-audit__detail-item">
                                         <strong>{item.label}:</strong> {item.value}
                                       </p>
                                     ))
                                   ) : (
-                                    <p className="notice" style={{ margin: 0 }}>
+                                    <p className="notice operation-audit__detail-item">
                                       No hay detalles adicionales relevantes para mostrar.
                                     </p>
                                   )}
