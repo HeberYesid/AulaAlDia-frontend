@@ -41,11 +41,11 @@ export default function ContextualTipBanner() {
   if (!user || !tip || isDismissed) return null
 
   return (
-    <div className="alert info contextual-tip-banner" role="status" aria-live="polite">
+    <div className="alert info contextual-tip-banner contextual-tip-banner--high-contrast" role="status" aria-live="polite">
       <p className="contextual-tip-banner__message">💡 {tip}</p>
       <button
         type="button"
-        className="contextual-tip-banner__dismiss"
+        className="contextual-tip-banner__dismiss contextual-tip-banner__dismiss--high-contrast"
         onClick={handleDismiss}
         aria-label="Cerrar tip"
       >

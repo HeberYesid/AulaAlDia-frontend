@@ -1499,6 +1499,14 @@ form {
   gap: var(--space-md);
 }
 
+.alert.info.contextual-tip-banner--high-contrast {
+  color: var(--ds-color-badge-text);
+}
+
+.alert.info.contextual-tip-banner--high-contrast .contextual-tip-banner__message {
+  color: var(--ds-color-badge-text);
+}
+
 .contextual-tip-banner__message {
   margin: 0;
   flex: 1;
@@ -1518,6 +1526,11 @@ form {
   font-weight: 700;
   cursor: pointer;
   transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.contextual-tip-banner__dismiss--high-contrast {
+  color: var(--ds-color-badge-text);
+  border-color: color-mix(in srgb, var(--ds-color-badge-text) 38%, var(--border-primary));
 }
 
 .contextual-tip-banner__dismiss:hover {

@@ -7,6 +7,7 @@ import { resetTour } from '../components/AppTour'
 import ThemeToggle from '../components/ThemeToggle'
 import { useTheme } from '../state/ThemeContext'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import './UserProfile.css'
 
 export default function UserProfile() {
   const { updateUser, logout } = useAuth()
@@ -263,64 +264,47 @@ export default function UserProfile() {
     return (
       <div className="container">
         <div className="card">
-          <p style={{ color: 'var(--danger)' }}>Error: No se pudo cargar el perfil</p>
+          <p className="user-profile__error-text">Error: No se pudo cargar el perfil</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container" style={{ maxWidth: '900px' }}>
+    <div className="container user-profile">
       {/* Header */}
-      <div className="profile-header" style={{ 
-        marginBottom: 'var(--space-xl)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 'var(--space-md)',
-        flexWrap: 'wrap'
-      }}>
+      <div className="profile-header user-profile__header">
         <button 
           onClick={() => navigate(-1)} 
-          className="btn secondary"
-          style={{ padding: '0.5rem 1rem' }}
+          className="btn secondary user-profile__compact-btn"
         >
           ← Volver
         </button>
-        <h1 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 'var(--font-size-3xl)' }}>
+        <h1 className="user-profile__title">
           Mi Perfil
         </h1>
       </div>
 
       {/* Success/Error Messages */}
       {success && (
-        <div className="alert success" style={{ marginBottom: 'var(--space-lg)' }}>
+        <div className="alert success user-profile__alert">
           {success}
         </div>
       )}
       {error && (
-        <div className="alert error" style={{ marginBottom: 'var(--space-lg)' }}>
+        <div className="alert error user-profile__alert">
           {error}
         </div>
       )}
 
       {/* Profile Information Card */}
       <div className="card">
-        <div className="card-header" style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: 'var(--space-xl)',
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--border-primary)',
-          flexWrap: 'wrap',
-          gap: 'var(--space-md)'
-        }}>
-          <h2 style={{ margin: 0 }}>Información Personal</h2>
+        <div className="card-header user-profile__card-header">
+          <h2 className="user-profile__section-title">Información Personal</h2>
           {!editing && (
             <button 
               onClick={() => setEditing(true)} 
-              className="btn secondary"
-              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+              className="btn secondary user-profile__compact-btn"
             >
               Editar
             </button>
@@ -330,7 +314,7 @@ export default function UserProfile() {
         {editing ? (
           // Edit Form
           <form onSubmit={handleUpdateProfile}>
-            <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
+            <div className="user-profile__stack">
               <div className="form-group">
                 <label htmlFor="profile-first-name"><strong>Nombre</strong></label>
                 <input
@@ -362,19 +346,15 @@ export default function UserProfile() {
                   type="email"
                   value={email}
                   disabled
-                  style={{ 
-                    opacity: 0.6, 
-                    cursor: 'not-allowed',
-                    background: 'var(--bg-primary)'
-                  }}
+                  className="user-profile__readonly-input"
                 />
-                <p className="notice" style={{ marginTop: '0.5rem' }}>
+                <p className="notice user-profile__notice-top">
                   El email no se puede modificar
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-                <button type="submit" className="btn" style={{ flex: 1 }}>
+              <div className="user-profile__actions">
+                <button type="submit" className="btn user-profile__action-btn">
                   Guardar Cambios
                 </button>
                 <button 
@@ -385,8 +365,7 @@ export default function UserProfile() {
                     setLastName(user.last_name)
                     setError('')
                   }} 
-                  className="btn secondary"
-                  style={{ flex: 1 }}
+                  className="btn secondary user-profile__action-btn"
                 >
                   Cancelar
                 </button>
@@ -395,83 +374,31 @@ export default function UserProfile() {
           </form>
         ) : (
           // View Mode
-          <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
-            <div className="profile-info-grid" style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-              gap: 'var(--space-lg)' 
-            }}>
-              <div style={{
-                padding: 'var(--space-lg)',
-                background: 'var(--bg-secondary)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-primary)'
-              }}>
-                <p style={{ 
-                  color: 'var(--text-muted)', 
-                  fontSize: 'var(--font-size-sm)',
-                  marginBottom: 'var(--space-sm)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
+          <div className="user-profile__stack">
+            <div className="profile-info-grid user-profile__info-grid">
+              <div className="user-profile__info-card">
+                <p className="user-profile__info-label">
                   Nombre Completo
                 </p>
-                <p style={{ 
-                  color: 'var(--text-primary)', 
-                  fontSize: 'var(--font-size-lg)',
-                  fontWeight: 600,
-                  margin: 0
-                }}>
+                <p className="user-profile__info-value">
                   {user.first_name} {user.last_name}
                 </p>
               </div>
 
-              <div style={{
-                padding: 'var(--space-lg)',
-                background: 'var(--bg-secondary)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-primary)'
-              }}>
-                <p style={{ 
-                  color: 'var(--text-muted)', 
-                  fontSize: 'var(--font-size-sm)',
-                  marginBottom: 'var(--space-sm)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
+              <div className="user-profile__info-card">
+                <p className="user-profile__info-label">
                   Email
                 </p>
-                <p style={{ 
-                  color: 'var(--text-primary)', 
-                  fontSize: 'var(--font-size-lg)',
-                  fontWeight: 600,
-                  margin: 0
-                }}>
+                <p className="user-profile__info-value">
                   {user.email}
                 </p>
               </div>
 
-              <div style={{
-                padding: 'var(--space-lg)',
-                background: 'var(--bg-secondary)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-primary)'
-              }}>
-                <p style={{ 
-                  color: 'var(--text-muted)', 
-                  fontSize: 'var(--font-size-sm)',
-                  marginBottom: 'var(--space-sm)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
+              <div className="user-profile__info-card">
+                <p className="user-profile__info-label">
                   Rol
                 </p>
-                <p style={{ 
-                  color: 'var(--text-primary)', 
-                  fontSize: 'var(--font-size-lg)',
-                  fontWeight: 600,
-                  margin: 0
-                }}>
+                <p className="user-profile__info-value">
                   {user.role === 'TEACHER' ? 'Profesor' : user.role === 'ADMIN' ? 'Administrador' : user.role === 'TUTOR' ? 'Acudiente' : 'Estudiante'}
                 </p>
               </div>
@@ -482,22 +409,12 @@ export default function UserProfile() {
 
       {/* Change Password Card */}
       <div className="card">
-        <div className="card-header" style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: 'var(--space-xl)',
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--border-primary)',
-          flexWrap: 'wrap',
-          gap: 'var(--space-md)'
-        }}>
-          <h2 style={{ margin: 0 }}>Cambiar Contraseña</h2>
+        <div className="card-header user-profile__card-header">
+          <h2 className="user-profile__section-title">Cambiar Contraseña</h2>
           {!changingPassword && (
             <button 
               onClick={() => setChangingPassword(true)} 
-              className="btn secondary"
-              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+              className="btn secondary user-profile__compact-btn"
             >
               Cambiar
             </button>
@@ -506,7 +423,7 @@ export default function UserProfile() {
 
         {changingPassword ? (
           <form onSubmit={handleChangePassword}>
-            <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
+            <div className="user-profile__stack">
               <div className="form-group">
                 <label htmlFor="profile-current-password"><strong>Contraseña Actual</strong></label>
                 <input
@@ -543,8 +460,8 @@ export default function UserProfile() {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-                <button type="submit" className="btn" style={{ flex: 1 }}>
+              <div className="user-profile__actions">
+                <button type="submit" className="btn user-profile__action-btn">
                   Cambiar Contraseña
                 </button>
                 <button 
@@ -556,8 +473,7 @@ export default function UserProfile() {
                     setConfirmPassword('')
                     setError('')
                   }} 
-                  className="btn secondary"
-                  style={{ flex: 1 }}
+                  className="btn secondary user-profile__action-btn"
                 >
                   Cancelar
                 </button>
@@ -565,23 +481,11 @@ export default function UserProfile() {
             </div>
           </form>
         ) : (
-          <div style={{
-            padding: 'var(--space-xl)',
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-primary)',
-            textAlign: 'center'
-          }}>
-            <p style={{ 
-              fontSize: '3rem', 
-              margin: '0 0 var(--space-md) 0' 
-            }}>
+          <div className="user-profile__center-panel">
+            <p className="user-profile__panel-icon">
               
             </p>
-            <p style={{ 
-              color: 'var(--text-secondary)', 
-              margin: 0 
-            }}>
+            <p className="user-profile__panel-text">
               Tu contraseña está segura. Haz clic en "Cambiar" para modificarla.
             </p>
           </div>
@@ -590,22 +494,12 @@ export default function UserProfile() {
 
       {/* Session Timeout Card */}
       <div className="card">
-        <div className="card-header" style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: 'var(--space-xl)',
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--border-primary)',
-          flexWrap: 'wrap',
-          gap: 'var(--space-md)'
-        }}>
-          <h2 style={{ margin: 0 }}>Tiempo de Sesión</h2>
+        <div className="card-header user-profile__card-header">
+          <h2 className="user-profile__section-title">Tiempo de Sesión</h2>
           {!editingTimeout && (
             <button 
               onClick={() => setEditingTimeout(true)} 
-              className="btn secondary"
-              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+              className="btn secondary user-profile__compact-btn"
             >
               Configurar
             </button>
@@ -614,7 +508,7 @@ export default function UserProfile() {
 
         {editingTimeout ? (
           <form onSubmit={handleUpdateTimeout}>
-            <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
+            <div className="user-profile__stack">
               <div className="form-group">
                 <label htmlFor="profile-session-timeout"><strong>Tiempo de inactividad (minutos)</strong></label>
                 <input
@@ -627,29 +521,24 @@ export default function UserProfile() {
                   placeholder="30"
                   required
                 />
-                <p className="notice" style={{ marginTop: '0.5rem' }}>
+                <p className="notice user-profile__notice-top">
                   Tu sesión se cerrará automáticamente después de este tiempo sin actividad (mínimo 5, máximo 120 minutos)
                 </p>
               </div>
 
-              <div style={{ 
-                padding: 'var(--space-md)', 
-                background: 'var(--bg-secondary)', 
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-primary)'
-              }}>
-                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+              <div className="user-profile__timeout-box">
+                <p className="user-profile__timeout-title">
                   <strong>Valores recomendados:</strong>
                 </p>
-                <ul style={{ margin: '0.5rem 0 0 1.25rem', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                <ul className="user-profile__timeout-list">
                   <li>5-15 minutos: Alta seguridad (dispositivos compartidos)</li>
                   <li>30 minutos: Balance seguridad/comodidad (recomendado)</li>
                   <li>60-120 minutos: Máxima comodidad (dispositivos personales)</li>
                 </ul>
               </div>
 
-              <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-                <button type="submit" className="btn" style={{ flex: 1 }}>
+              <div className="user-profile__actions">
+                <button type="submit" className="btn user-profile__action-btn">
                   Guardar
                 </button>
                 <button 
@@ -659,8 +548,7 @@ export default function UserProfile() {
                     setSessionTimeout(user.session_timeout || 30)
                     setError('')
                   }} 
-                  className="btn secondary"
-                  style={{ flex: 1 }}
+                  className="btn secondary user-profile__action-btn"
                 >
                   Cancelar
                 </button>
@@ -668,26 +556,11 @@ export default function UserProfile() {
             </div>
           </form>
         ) : (
-          <div style={{
-            padding: 'var(--space-xl)',
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-primary)',
-            textAlign: 'center'
-          }}>
-            <p style={{ 
-              color: 'var(--text-primary)', 
-              margin: '0 0 var(--space-sm) 0',
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 600
-            }}>
+          <div className="user-profile__center-panel">
+            <p className="user-profile__timeout-value">
               {user.session_timeout || 30} minutos
             </p>
-            <p style={{ 
-              color: 'var(--text-secondary)', 
-              margin: 0,
-              fontSize: 'var(--font-size-sm)'
-            }}>
+            <p className="user-profile__timeout-caption">
               Tu sesión se cerrará automáticamente después de este tiempo sin actividad
             </p>
           </div>
@@ -696,21 +569,10 @@ export default function UserProfile() {
 
       {/* Account Info */}
       <div className="card">
-        <h2 style={{ marginBottom: 'var(--space-lg)' }}>Información de la Cuenta</h2>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          padding: 'var(--space-lg)',
-          background: 'var(--bg-secondary)',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--border-primary)',
-          fontSize: 'var(--font-size-sm)'
-        }}>
-          <span style={{ color: 'var(--text-secondary)' }}>Email Verificado:</span>
-          <span style={{ 
-            color: user.is_verified ? 'var(--success)' : 'var(--warning)',
-            fontWeight: 600
-          }}>
+        <h2 className="user-profile__card-title">Información de la Cuenta</h2>
+        <div className="user-profile__account-row">
+          <span className="user-profile__account-label">Email Verificado:</span>
+          <span className={user.is_verified ? 'user-profile__account-status user-profile__account-status--verified' : 'user-profile__account-status user-profile__account-status--pending'}>
             {user.is_verified ? 'Verificado' : 'Pendiente'}
           </span>
         </div>
@@ -718,45 +580,29 @@ export default function UserProfile() {
 
       {user.role === 'STUDENT' && (
         <div 
-          className="card" 
+          className={`card user-profile__tutor-card ${highlightTutorSection ? 'user-profile__tutor-card--highlight' : ''}`}
           id="tutor-invite-section"
-          style={{
-            transition: 'all 0.5s ease',
-            boxShadow: highlightTutorSection ? '0 0 0 4px var(--primary)' : '0 1px 3px rgba(0,0,0,0.1)',
-            borderColor: highlightTutorSection ? 'var(--primary)' : 'var(--border-primary)',
-            transform: highlightTutorSection ? 'scale(1.02)' : 'scale(1)'
-          }}
         >
-          <h2 style={{ marginBottom: 'var(--space-lg)' }}>Invitar Acudiente</h2>
+          <h2 className="user-profile__card-title">Invitar Acudiente</h2>
           {tutorInvitationStatus?.has_tutor ? (
-            <div style={{
-              padding: 'var(--space-lg)',
-              background: 'var(--bg-secondary)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-primary)'
-            }}>
-              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
+            <div className="user-profile__info-card">
+              <p className="user-profile__status-title">
                 Ya tienes un acudiente vinculado.
               </p>
-              <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)' }}>
+              <p className="user-profile__status-text">
                 {tutorInvitationStatus.tutor?.name || tutorInvitationStatus.tutor?.email}
                 {tutorInvitationStatus.tutor?.email ? ` (${tutorInvitationStatus.tutor.email})` : ''}
               </p>
             </div>
           ) : (
             <form onSubmit={handleInviteTutor}>
-              <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
+              <div className="user-profile__stack">
                 {tutorInvitationStatus?.pending_invitation && (
-                  <div style={{
-                    padding: 'var(--space-lg)',
-                    background: 'var(--bg-secondary)',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-primary)'
-                  }}>
-                    <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <div className="user-profile__info-card">
+                    <p className="user-profile__status-title">
                       Invitacion pendiente para {tutorInvitationStatus.pending_invitation.email}
                     </p>
-                    <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                    <p className="user-profile__status-text user-profile__status-text--small">
                       Puedes reenviar la invitacion al mismo correo desde aqui.
                     </p>
                   </div>
@@ -789,23 +635,13 @@ export default function UserProfile() {
 
       {/* Appearance Card */}
       <div className="card">
-        <h2 style={{ marginBottom: 'var(--space-lg)' }}>Apariencia</h2>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: 'var(--space-lg)',
-          background: 'var(--bg-secondary)',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--border-primary)',
-          flexWrap: 'wrap',
-          gap: 'var(--space-md)'
-        }}>
+        <h2 className="user-profile__card-title">Apariencia</h2>
+        <div className="user-profile__appearance-row">
           <div>
-            <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
+            <p className="user-profile__status-title">
               Tema de la interfaz
             </p>
-            <p style={{ margin: '0.25rem 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+            <p className="user-profile__appearance-caption">
               Actualmente: {isDark ? 'Modo oscuro' : 'Modo claro'}
             </p>
           </div>
@@ -815,12 +651,8 @@ export default function UserProfile() {
 
       {/* Tour Guide */}
       <div className="card">
-        <h2 style={{ marginBottom: 'var(--space-lg)' }}>Tour de Bienvenida</h2>
-        <p style={{ 
-          color: 'var(--text-secondary)', 
-          marginBottom: 'var(--space-lg)',
-          fontSize: 'var(--font-size-sm)'
-        }}>
+        <h2 className="user-profile__card-title">Tour de Bienvenida</h2>
+        <p className="user-profile__tour-text">
           ¿Necesitas ayuda navegando la plataforma? Reinicia el tour interactivo para ver las funcionalidades principales.
         </p>
         <button 
@@ -828,8 +660,7 @@ export default function UserProfile() {
             resetTour(user.role)
             navigate('/')
           }} 
-          className="btn secondary"
-          style={{ width: '100%' }}
+          className="btn secondary user-profile__full-width-btn"
         >
           Reiniciar Tour de Bienvenida
         </button>

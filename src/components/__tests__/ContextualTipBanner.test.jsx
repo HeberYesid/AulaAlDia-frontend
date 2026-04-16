@@ -32,6 +32,28 @@ describe('ContextualTipBanner component', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/crear una materia/i)
   })
 
+  it('applies high-contrast readability classes to banner and dismiss button', () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: {
+        id: 2,
+        first_name: 'Teacher',
+        role: 'TEACHER',
+      },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/subjects']}>
+        <ContextualTipBanner />
+      </MemoryRouter>
+    )
+
+    const banner = screen.getByRole('status')
+    const dismissButton = screen.getByRole('button', { name: /cerrar tip/i })
+
+    expect(banner).toHaveClass('contextual-tip-banner--high-contrast')
+    expect(dismissButton).toHaveClass('contextual-tip-banner__dismiss--high-contrast')
+  })
+
   it('does not render a tip on detail subroutes', () => {
     AuthContext.useAuth.mockReturnValue({
       user: {

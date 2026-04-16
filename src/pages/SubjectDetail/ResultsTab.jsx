@@ -3,6 +3,7 @@ import { api } from '../../api/axios'
 import StatusBadge from '../../components/StatusBadge'
 import CSVUpload from '../../components/CSVUpload'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
+import './ResultsTab.css'
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
@@ -283,7 +284,7 @@ export default function ResultsTab({
                   </button>
                 </div>
 
-                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+                <div className="stats-grid results-tab__stats-grid">
                   <div className="stat-card">
                     <div className="stat-value">{dash.total_exercises}</div>
                     <div className="stat-label">Ejercicios</div>
@@ -292,17 +293,17 @@ export default function ResultsTab({
                     <div className="stat-value">{dash.aggregates?.avg_grade?.toFixed(2) || '0.0'}</div>
                     <div className="stat-label">Nota promedio</div>
                   </div>
-                  <div className="stat-card" style={{ background: 'var(--success)' }}>
-                    <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.avg_score?.toFixed(2) || '0.0'}</div>
-                    <div className="stat-label" style={{ color: 'white' }}>Prom. ejercicios</div>
+                  <div className="stat-card results-tab__stat-card results-tab__stat-card--success">
+                    <div className="stat-value results-tab__stat-value--on-solid">{dash.aggregates?.avg_score?.toFixed(2) || '0.0'}</div>
+                    <div className="stat-label results-tab__stat-label--on-solid">Prom. ejercicios</div>
                   </div>
-                  <div className="stat-card" style={{ background: 'var(--warning)' }}>
-                    <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.total_graded_results || 0}</div>
-                    <div className="stat-label" style={{ color: 'white' }}>Calificados</div>
+                  <div className="stat-card results-tab__stat-card results-tab__stat-card--warning">
+                    <div className="stat-value results-tab__stat-value--on-solid">{dash.aggregates?.total_graded_results || 0}</div>
+                    <div className="stat-label results-tab__stat-label--on-solid">Calificados</div>
                   </div>
-                  <div className="stat-card" style={{ background: 'var(--danger)' }}>
-                    <div className="stat-value" style={{ color: 'white' }}>{dash.aggregates?.total_submitted_results || 0}</div>
-                    <div className="stat-label" style={{ color: 'white' }}>Por revisar</div>
+                  <div className="stat-card results-tab__stat-card results-tab__stat-card--danger">
+                    <div className="stat-value results-tab__stat-value--on-solid">{dash.aggregates?.total_submitted_results || 0}</div>
+                    <div className="stat-label results-tab__stat-label--on-solid">Por revisar</div>
                   </div>
                 </div>
               </div>
@@ -359,26 +360,26 @@ export default function ResultsTab({
           </div>
 
           {isTeacherOrAdmin && (
-            <p className="notice" style={{ marginBottom: 'var(--space-md)' }}>
+            <p className="notice results-tab__notice-gap">
               Haz clic en &ldquo;Editar&rdquo; para cambiar el estado de cualquier resultado individual.
             </p>
           )}
 
           {/* Filters */}
-          <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)', flexWrap: 'wrap' }}>
+          <div className="results-tab__filters">
             <input
               type="text"
               aria-label={user?.role === 'STUDENT' ? 'Buscar resultado por ejercicio' : 'Buscar resultado por estudiante o ejercicio'}
               placeholder={user?.role === 'STUDENT' ? 'Buscar por ejercicio…' : 'Buscar por estudiante o ejercicio…'}
               value={resultSearch}
               onChange={(e) => setResultSearch(e.target.value)}
-              style={{ flex: '1 1 300px' }}
+              className="results-tab__search-input"
             />
             <select
               aria-label="Filtrar resultados por estado"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ flex: '0 1 200px' }}
+              className="results-tab__status-select"
             >
               <option value="ALL">Todos</option>
               <option value="SCORED">Con nota</option>
@@ -387,7 +388,7 @@ export default function ResultsTab({
           </div>
 
           {(resultSearch || statusFilter !== 'ALL') && (
-            <p className="notice" style={{ marginBottom: 'var(--space-md)' }}>
+            <p className="notice results-tab__notice-gap">
               Mostrando {filteredResults.length} de {detailedResults.length} resultados
             </p>
           )}
@@ -395,9 +396,9 @@ export default function ResultsTab({
           {filteredResults.length === 0 ? (
             <p className="notice">No se encontraron resultados con los filtros aplicados.</p>
           ) : (
-            <div className="data-table" style={{ maxHeight: 500, overflowY: 'auto', overflowX: 'auto' }}>
-              <table className="table mobile-card-view" style={{ tableLayout: 'auto', width: '100%' }}>
-                <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 1 }}>
+            <div className="data-table results-tab__data-table-scroll">
+              <table className="table mobile-card-view results-tab__results-table">
+                <thead className="results-tab__results-head">
                   <tr>
                     {isTeacherOrAdmin && <th>Estudiante</th>}
                     <th>Ejercicio</th>
@@ -412,36 +413,36 @@ export default function ResultsTab({
                   {filteredResults.map(result => (
                     <tr key={result.id}>
                       {isTeacherOrAdmin && (
-                        <td data-label="Estudiante" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={result.student_email}>{result.student_email}</td>
+                        <td data-label="Estudiante" className="results-tab__truncate" title={result.student_email}>{result.student_email}</td>
                       )}
-                      <td data-label="Ejercicio" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={result.exercise_name}>{result.exercise_name}</td>
+                      <td data-label="Ejercicio" className="results-tab__truncate" title={result.exercise_name}>{result.exercise_name}</td>
                       <td data-label="Resultado">
                         <StatusBadge status={result.status} grade={result.score} locked={isExerciseGradeLocked(result.exercise)} />
                       </td>
                       <td data-label="Solución">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                        <div className="results-tab__submission-links">
                           {result.submission_file && (
-                            <a href={result.submission_file} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline', fontSize: 'var(--font-size-sm)' }}>Descargar Archivo</a>
+                            <a href={result.submission_file} target="_blank" rel="noopener noreferrer" className="results-tab__action-link">Descargar Archivo</a>
                           )}
                           {result.submission_text && (
-                            <button type="button" onClick={() => setViewingSubmission(result)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer', fontSize: 'var(--font-size-sm)', textAlign: 'left' }}>Ver Texto</button>
+                            <button type="button" onClick={() => setViewingSubmission(result)} className="results-tab__link-button">Ver Texto</button>
                           )}
                           {!result.submission_file && !result.submission_text && (
-                            <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>—</span>
+                            <span className="results-tab__muted-sm">—</span>
                           )}
                         </div>
                       </td>
-                      <td data-label="Comentarios" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <td data-label="Comentarios" className="results-tab__comment-cell">
                         {result.comment ? (
-                          <span title={result.comment} style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.comment}</span>
+                          <span title={result.comment} className="results-tab__truncate-block">{result.comment}</span>
                         ) : (
-                          <em style={{ color: 'var(--text-muted)' }}>Sin comentarios</em>
+                          <em className="results-tab__muted">Sin comentarios</em>
                         )}
                       </td>
-                      <td data-label="Actualizado" style={{ fontSize: 'var(--font-size-sm)' }}>{new Date(result.updated_at).toLocaleString('es-CO')}</td>
+                      <td data-label="Actualizado" className="results-tab__small-text">{new Date(result.updated_at).toLocaleString('es-CO')}</td>
                       {isTeacherOrAdmin && (
                         <td data-label="Acción">
-                          <button className="btn secondary" style={{ padding: '0.3rem 0.6rem', fontSize: 'var(--font-size-sm)' }} onClick={() => openEditModal(result)} disabled={isExerciseGradeLocked(result.exercise)} title={isExerciseGradeLocked(result.exercise) ? 'Periodo bloqueado' : 'Editar resultado'}>
+                          <button className="btn secondary results-tab__mini-btn" onClick={() => openEditModal(result)} disabled={isExerciseGradeLocked(result.exercise)} title={isExerciseGradeLocked(result.exercise) ? 'Periodo bloqueado' : 'Editar resultado'}>
                             {isExerciseGradeLocked(result.exercise) ? 'Bloqueado' : 'Editar'}
                           </button>
                         </td>
@@ -463,7 +464,7 @@ export default function ResultsTab({
               <h3>Asignar Resultado Individual</h3>
               <button className="btn" onClick={openCreateResultForm}>Nuevo Resultado</button>
             </div>
-            <p className="notice" style={{ margin: 0 }}>
+            <p className="notice results-tab__notice-reset">
               Asigna resultados manualmente seleccionando un estudiante y un ejercicio.
             </p>
           </div>
@@ -477,7 +478,7 @@ export default function ResultsTab({
               uploadUrl={`/api/v1/courses/subjects/${id}/results/upload-csv/`}
               onComplete={loadAll}
             />
-            <p className="notice" style={{ marginTop: 'var(--space-sm)' }}>
+            <p className="notice results-tab__notice-top-sm">
               Los ejercicios se crean automáticamente si no existen al subir el CSV.
             </p>
           </div>
@@ -488,47 +489,46 @@ export default function ResultsTab({
 
       {/* ── Edit Result Modal ── */}
       {editingResult && isTeacherOrAdmin && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--space-md)' }} role="presentation">
+        <div className="results-tab__modal-overlay" role="presentation">
           <button type="button" className="modal-backdrop-button" aria-label="Cerrar modal de editar resultado" onClick={closeEditModal} />
           <div
-            className="card modal-responsive"
             role="dialog" aria-modal="true" aria-labelledby="edit-result-modal-title"
             tabIndex={-1} ref={editResultDialogRef}
             onKeyDown={(e) => handleFocusTrap(e, editResultDialogRef)}
-            style={{ maxWidth: 500, width: '100%', margin: 0, position: 'relative', zIndex: 1, animation: 'fadeIn 0.2s ease' }}
+            className="card modal-responsive results-tab__modal-panel results-tab__modal-panel--edit"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="edit-result-modal-title">Editar Resultado</h2>
 
-            <div style={{ background: 'var(--bg-secondary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-lg)' }}>
-              <p style={{ margin: 'var(--space-xs) 0' }}><strong>Estudiante:</strong> {editingResult.studentEmail}</p>
-              <p style={{ margin: 'var(--space-xs) 0' }}><strong>Ejercicio:</strong> {editingResult.exerciseName}</p>
+            <div className="results-tab__modal-meta">
+              <p className="results-tab__meta-line"><strong>Estudiante:</strong> {editingResult.studentEmail}</p>
+              <p className="results-tab__meta-line"><strong>Ejercicio:</strong> {editingResult.exerciseName}</p>
               {getExercisePeriod(editingResult.exerciseId) && (
-                <p style={{ margin: 'var(--space-xs) 0' }}>
+                <p className="results-tab__meta-line">
                   <strong>Periodo:</strong> {getExercisePeriod(editingResult.exerciseId).label} &middot; {formatPeriodState(getExercisePeriod(editingResult.exerciseId))}
                 </p>
               )}
-              <p style={{ margin: 'var(--space-xs) 0' }}>
+              <p className="results-tab__meta-line">
                 <strong>Actual:</strong>{' '}
                 <StatusBadge status={editingResult.currentScore == null ? 'SUBMITTED' : null} grade={editingResult.currentScore} locked={isExerciseGradeLocked(editingResult.exerciseId)} />
               </p>
               {editingResult.currentComment && (
-                <div style={{ marginTop: 'var(--space-sm)', padding: 'var(--space-sm)', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--primary)' }}>
+                <div className="results-tab__comment-previous">
                   <strong>Comentario Anterior:</strong>
-                  <p style={{ margin: 'var(--space-xs) 0 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>{editingResult.currentComment}</p>
+                  <p className="results-tab__comment-previous-text">{editingResult.currentComment}</p>
                 </div>
               )}
               {(editingResult.submissionText || editingResult.submissionFile) && (
-                <div style={{ marginTop: 'var(--space-sm)', padding: 'var(--space-sm)', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-primary)' }}>
+                <div className="results-tab__submission-box">
                   <strong>Entrega del Estudiante:</strong>
                   {editingResult.submissionFile && (
-                    <div style={{ marginTop: 'var(--space-xs)' }}>
-                      <a href={editingResult.submissionFile} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Ver Archivo Adjunto</a>
+                    <div className="results-tab__spacing-top-xs">
+                      <a href={editingResult.submissionFile} target="_blank" rel="noopener noreferrer" className="results-tab__action-link">Ver Archivo Adjunto</a>
                     </div>
                   )}
                   {editingResult.submissionText && (
-                    <div style={{ marginTop: 'var(--space-xs)' }}>
-                      <div style={{ padding: 'var(--space-sm)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', whiteSpace: 'pre-wrap', fontSize: 'var(--font-size-sm)', maxHeight: 200, overflowY: 'auto', border: '1px solid var(--border-primary)' }}>
+                    <div className="results-tab__spacing-top-xs">
+                      <div className="results-tab__submission-preview">
                         {editingResult.submissionText}
                       </div>
                     </div>
@@ -545,11 +545,11 @@ export default function ResultsTab({
               <div>
                 <label htmlFor="edit-result-comment">Comentarios / Retroalimentación (Opcional)</label>
                 <textarea id="edit-result-comment" value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Observaciones, sugerencias o felicitaciones…" rows="4" />
-                <p className="notice" style={{ marginTop: 'var(--space-xs)' }}>Los comentarios ayudan al estudiante a entender qué puede mejorar.</p>
+                <p className="notice results-tab__notice-top-xs">Los comentarios ayudan al estudiante a entender qué puede mejorar.</p>
               </div>
-              <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                <button type="submit" className="btn" style={{ flex: 1 }}>Guardar Cambios</button>
-                <button type="button" className="btn secondary" onClick={closeEditModal} style={{ flex: 1 }}>Cancelar</button>
+              <div className="results-tab__modal-actions">
+                <button type="submit" className="btn results-tab__grow-btn">Guardar Cambios</button>
+                <button type="button" className="btn secondary results-tab__grow-btn" onClick={closeEditModal}>Cancelar</button>
               </div>
             </form>
           </div>
@@ -558,14 +558,13 @@ export default function ResultsTab({
 
       {/* ── Create Result Modal ── */}
       {showCreateResultForm && isTeacherOrAdmin && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--space-md)' }} role="presentation">
+        <div className="results-tab__modal-overlay" role="presentation">
           <button type="button" className="modal-backdrop-button" aria-label="Cerrar modal de crear resultado" onClick={closeCreateResultForm} />
           <div
-            className="card modal-responsive"
+            className="card modal-responsive results-tab__modal-panel results-tab__modal-panel--create"
             role="dialog" aria-modal="true" aria-labelledby="create-result-modal-title"
             tabIndex={-1} ref={createResultDialogRef}
             onKeyDown={(e) => handleFocusTrap(e, createResultDialogRef)}
-            style={{ maxWidth: 600, width: '100%', margin: 0, position: 'relative', zIndex: 1, animation: 'fadeIn 0.2s ease' }}
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="create-result-modal-title">Asignar Resultado Individual</h2>
@@ -594,7 +593,7 @@ export default function ResultsTab({
                   ))}
                 </select>
                 {selectedExerciseId && getExercisePeriod(selectedExerciseId) && (
-                  <p className="notice" style={{ marginTop: 'var(--space-xs)' }}>
+                  <p className="notice results-tab__notice-top-xs">
                     {getExercisePeriod(selectedExerciseId).label} &middot; {formatPeriodState(getExercisePeriod(selectedExerciseId))}
                   </p>
                 )}
@@ -610,9 +609,9 @@ export default function ResultsTab({
                 <textarea id="create-result-comment" value={createComment} onChange={(e) => setCreateComment(e.target.value)} placeholder="Observaciones, sugerencias o felicitaciones…" rows="4" />
               </div>
 
-              <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                <button type="submit" className="btn" style={{ flex: 1 }}>Asignar Resultado</button>
-                <button type="button" className="btn secondary" onClick={closeCreateResultForm} style={{ flex: 1 }}>Cancelar</button>
+              <div className="results-tab__modal-actions">
+                <button type="submit" className="btn results-tab__grow-btn">Asignar Resultado</button>
+                <button type="button" className="btn secondary results-tab__grow-btn" onClick={closeCreateResultForm}>Cancelar</button>
               </div>
             </form>
           </div>
@@ -621,30 +620,29 @@ export default function ResultsTab({
 
       {/* ── View Submission Text Modal ── */}
       {viewingSubmission && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--space-md)' }} role="presentation">
+        <div className="results-tab__modal-overlay" role="presentation">
           <button type="button" className="modal-backdrop-button" aria-label="Cerrar modal de ver solución" onClick={() => setViewingSubmission(null)} />
           <div
-            className="card modal-responsive"
+            className="card modal-responsive results-tab__modal-panel results-tab__modal-panel--submission"
             role="dialog" aria-modal="true" aria-labelledby="view-submission-modal-title"
             tabIndex={-1} ref={viewSubmissionDialogRef}
             onKeyDown={(e) => handleFocusTrap(e, viewSubmissionDialogRef)}
-            style={{ maxWidth: 600, width: '100%', margin: 0, position: 'relative', zIndex: 1, animation: 'fadeIn 0.2s ease', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-              <h2 id="view-submission-modal-title" style={{ margin: 0 }}>Solución de Texto</h2>
-              <button onClick={() => setViewingSubmission(null)} aria-label="Cerrar" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+            <div className="results-tab__modal-title-row">
+              <h2 id="view-submission-modal-title" className="results-tab__modal-title">Solución de Texto</h2>
+              <button onClick={() => setViewingSubmission(null)} aria-label="Cerrar" className="results-tab__close-button">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div style={{ marginBottom: 'var(--space-md)' }}>
+            <div className="results-tab__modal-meta-block">
               <p><strong>Estudiante:</strong> {viewingSubmission.student_email}</p>
               <p><strong>Ejercicio:</strong> {viewingSubmission.exercise_name}</p>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-md)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)', whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: 'var(--font-size-sm)' }}>
+            <div className="results-tab__submission-content">
               {viewingSubmission.submission_text}
             </div>
-            <div style={{ marginTop: 'var(--space-lg)', textAlign: 'right' }}>
+            <div className="results-tab__modal-footer">
               <button className="btn secondary" onClick={() => setViewingSubmission(null)}>Cerrar</button>
             </div>
           </div>

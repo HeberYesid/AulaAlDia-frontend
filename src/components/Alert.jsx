@@ -1,12 +1,11 @@
 import React from 'react'
 
-export default function Alert({ type = 'success', message, style }) {
+export default function Alert({ type = 'success', message }) {
   if (!message) return null
 
   return (
     <div 
       className={`alert ${type}`} 
-      style={{ marginBottom: 'var(--space-lg)', ...style }}
       role={type === 'error' ? 'alert' : 'status'}
       aria-live={type === 'error' ? 'assertive' : 'polite'}
     >

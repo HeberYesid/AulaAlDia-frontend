@@ -55,4 +55,30 @@ export default [
       },
     },
   },
+  {
+    files: [
+      'src/App.jsx',
+      'src/components/Alert.jsx',
+      'src/components/ConfirmDialog.jsx',
+      'src/components/PublicNavBar.jsx',
+      'src/components/Sidebar.jsx',
+      'src/pages/UserProfile.jsx',
+      'src/pages/SubjectDetail/ResultsTab.jsx',
+      'src/pages/MyBulletins.jsx',
+      'src/pages/AdminBulletins.jsx',
+      'src/pages/Observer.jsx',
+      'src/pages/StudentDashboard.jsx',
+      'src/pages/TenantOperationsAudit.jsx',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='style']",
+          message:
+            'Inline style is not allowed in governed files. Use design tokens/classes. If you truly need runtime-only style, document and approve it first.',
+        },
+      ],
+    },
+  },
 ];

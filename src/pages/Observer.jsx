@@ -4,6 +4,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import { useStudentSearch } from '../hooks/useStudentSearch'
 import { useObservations, CATEGORIES, CATEGORY_MAP, INITIAL_FORM } from '../hooks/useObservations'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import './Observer.css'
 
 export default function Observer() {
   const { user } = useAuth()
@@ -127,10 +128,15 @@ export default function Observer() {
     setExpandedId(prev => (prev === id ? null : id))
   }
 
+  const getCategoryToneClass = (categoryValue) => {
+    if (categoryValue === 'MISBEHAVIOR') return 'observer__tone--danger'
+    return 'observer__tone--muted'
+  }
+
   if (loading) {
     return (
       <div className="card">
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <div className="observer__loading-state">
           <div className="spinner" role="status" aria-label="Cargando observaciones..."></div>
           <p>Cargando observaciones...</p>
         </div>
@@ -140,13 +146,13 @@ export default function Observer() {
 
   return (
     <>
-    <div className="fade-in">
+    <div className="fade-in observer">
       {/* Header */}
-      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
+      <div className="card observer__card-gap">
+        <div className="observer__header-row">
           <div>
-            <h1 style={{ margin: 0 }}><span aria-hidden="true">📋 </span>Observador</h1>
-            <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>
+            <h1 className="observer__title"><span aria-hidden="true">📋 </span>Observador</h1>
+            <p className="observer__subtitle">
               {isTeacherOrAdmin
                 ? 'Registra y consulta observaciones sobre el comportamiento de los estudiantes.'
                 : user?.role === 'TUTOR'
@@ -170,10 +176,10 @@ export default function Observer() {
 
       {/* Create form (teacher/admin only) */}
       {showForm && isTeacherOrAdmin && (
-        <div className="card" id="observation-form" style={{ marginBottom: 'var(--space-lg)' }}>
-          <h3 style={{ marginTop: 0 }}>Nueva Observación</h3>
+        <div className="card observer__card-gap" id="observation-form">
+          <h3 className="observer__form-title">Nueva Observación</h3>
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-md)' }}>
+            <div className="observer__form-grid">
               <div className="form-group">
                 <label htmlFor="obs-student">Estudiante *</label>
                 <input
@@ -185,7 +191,7 @@ export default function Observer() {
                   placeholder="Escribe el nombre del estudiante"
                   autoComplete="off"
                 />
-                <div style={{ minHeight: '1.25rem', marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                <div className="observer__student-hint">
                   {selectedStudent
                     ? `Seleccionado: ${selectedStudent.full_name} · ${selectedStudent.email}`
                     : studentSearch.trim().length >= 2
@@ -193,7 +199,7 @@ export default function Observer() {
                       : 'Escribe al menos 2 caracteres para buscar.'}
                 </div>
                 {studentSearchLoading && (
-                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <div className="observer__student-help">
                     Buscando estudiantes...
                   </div>
                 )}
@@ -201,34 +207,18 @@ export default function Observer() {
                   <div
                     role="listbox"
                     aria-label="Sugerencias de estudiantes"
-                    style={{
-                      marginTop: '0.5rem',
-                      border: '1px solid var(--border-secondary)',
-                      borderRadius: 'var(--radius-md)',
-                      background: 'var(--bg-hover)',
-                      overflow: 'hidden',
-                    }}
+                    className="observer__student-options"
                   >
                     {studentOptions.map(student => (
                       <button
                         key={student.id}
                         type="button"
-                        className="btn secondary"
+                        className="btn secondary observer__student-option"
                         onClick={() => handleStudentSelect(student)}
-                        style={{
-                          width: '100%',
-                          border: 'none',
-                          borderBottom: '1px solid var(--border-secondary)',
-                          borderRadius: 0,
-                          justifyContent: 'flex-start',
-                          padding: '0.75rem 1rem',
-                          background: 'transparent',
-                          color: 'var(--text-primary)',
-                        }}
                       >
                         <span>
                           <strong>{student.full_name}</strong>
-                          <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          <span className="observer__student-email">
                             {student.email}
                           </span>
                         </span>
@@ -237,7 +227,7 @@ export default function Observer() {
                   </div>
                 )}
                 {!selectedStudent && !studentSearchLoading && studentSearch.trim().length >= 2 && studentOptions.length === 0 && (
-                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <div className="observer__student-help">
                     No se encontraron estudiantes con ese criterio.
                   </div>
                 )}
@@ -283,7 +273,7 @@ export default function Observer() {
                 />
               </div>
             </div>
-            <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+            <div className="form-group observer__section-gap">
               <label htmlFor="obs-title">Título *</label>
               <input
                 id="obs-title"
@@ -296,7 +286,7 @@ export default function Observer() {
                 maxLength={200}
               />
             </div>
-            <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+            <div className="form-group observer__section-gap">
               <label htmlFor="obs-desc">Descripción *</label>
               <textarea
                 id="obs-desc"
@@ -306,13 +296,13 @@ export default function Observer() {
                 required
                 rows={4}
                 placeholder="Describe la situación con detalle..."
-                style={{ resize: 'vertical' }}
+                className="observer__description-input"
               />
             </div>
             {formError && (
-              <p style={{ color: 'var(--danger)', marginTop: 'var(--space-sm)' }} role="alert">{formError}</p>
+              <p className="observer__form-error" role="alert">{formError}</p>
             )}
-            <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
+            <div className="observer__form-actions">
               <button type="submit" className="btn primary" disabled={submitting}>
                 {submitting ? 'Guardando...' : 'Guardar Observación'}
               </button>
@@ -325,22 +315,22 @@ export default function Observer() {
       )}
 
       {/* Stats */}
-      <div className="stats-grid" style={{ marginBottom: 'var(--space-lg)' }}>
+      <div className="stats-grid observer__card-gap">
         <div className="stat-card">
           <div className="stat-value">{stats.total}</div>
           <div className="stat-label">Total</div>
         </div>
         {CATEGORIES.map(c => (
           <div className="stat-card" key={c.value}>
-            <div className="stat-value" style={{ color: c.color }}>{stats.byCategory[c.value]}</div>
+            <div className={`stat-value ${getCategoryToneClass(c.value)}`}>{stats.byCategory[c.value]}</div>
             <div className="stat-label">{c.label}</div>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
+      <div className="card observer__card-gap">
+        <div className="observer__filter-grid">
           <div className="form-group">
             <label htmlFor="obs-search">Buscar</label>
             <input
@@ -383,17 +373,17 @@ export default function Observer() {
       {/* Observations list */}
       <div className="card">
         {filteredObservations.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-            <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
-            <p style={{ fontSize: '1.2rem', margin: '1rem 0 0 0' }}>
+          <div className="observer__empty-state">
+            <p className="observer__empty-icon">📭</p>
+            <p className="observer__empty-title">
               {observations.length === 0
                 ? 'No hay observaciones registradas.'
                 : 'No se encontraron observaciones con esos filtros.'}
             </p>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="table mobile-card-view" style={{ width: '100%' }}>
+          <div className="observer__table-wrap">
+            <table className="table mobile-card-view observer__table">
               <thead>
                 <tr>
                   <th scope="col">Fecha</th>
@@ -404,7 +394,7 @@ export default function Observer() {
                   <th scope="col">Materia</th>
                   <th scope="col">Título</th>
                   <th scope="col">Profesor</th>
-                  <th scope="col" style={{ textAlign: 'center' }}>Acciones</th>
+                  <th scope="col" className="observer__actions-head">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -416,87 +406,67 @@ export default function Observer() {
                   return (
                     <tr
                       key={o.id}
-                      style={{ cursor: 'pointer' }}
+                      className="observer__row"
                       onClick={() => handleToggleExpand(o.id)}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleExpand(o.id) }}
                       tabIndex={0}
                       aria-expanded={isExpanded}
                       aria-label={`Observación: ${o.title}`}
                     >
-                      <td data-label="Fecha" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      <td data-label="Fecha" className="observer__date-cell">
                         {new Date(o.occurred_on || o.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}
                         <br />
-                        <span style={{ fontSize: '0.75rem' }}>
+                        <span className="observer__cell-caption">
                           {o.occurred_on
                             ? 'Hechos reportados'
                             : new Date(o.created_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </td>
                       {(isTeacherOrAdmin || user?.role === 'TUTOR') && (
-                        <td data-label="Estudiante" style={{ fontSize: '0.85rem' }}>
+                        <td data-label="Estudiante" className="observer__student-cell">
                           <strong>{o.student_name || '—'}</strong>
                           <br />
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                          <span className="observer__student-cell-email">
                             {o.student_email_display}
                           </span>
                         </td>
                       )}
                       <td data-label="Categoría">
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '0.25rem 0.6rem',
-                          borderRadius: '6px',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          background: cat.color,
-                          color: 'white',
-                          whiteSpace: 'nowrap',
-                        }}>
+                        <span className={`observer__category-badge ${getCategoryToneClass(o.category)}`}>
                           {o.category_display || cat.label}
                         </span>
                       </td>
-                      <td data-label="Materia" style={{ fontSize: '0.85rem' }}>
+                      <td data-label="Materia" className="observer__subject-cell">
                         {o.subject_name || 'General'}
                       </td>
-                      <td data-label="Título" style={{ fontWeight: '600', fontSize: '0.9rem' }}>
+                      <td data-label="Título" className="observer__title-cell">
                         {o.title}
                         {isExpanded && (
                           <div
-                            style={{
-                              fontWeight: 'normal',
-                              fontSize: '0.85rem',
-                              color: 'var(--text-secondary)',
-                              marginTop: 'var(--space-sm)',
-                              padding: 'var(--space-sm)',
-                              background: 'var(--bg-hover)',
-                              borderRadius: 'var(--radius-sm)',
-                              whiteSpace: 'pre-wrap',
-                            }}
+                            className="observer__description-panel"
                             onClick={e => e.stopPropagation()}
                           >
                             {o.description}
                           </div>
                         )}
                       </td>
-                      <td data-label="Profesor" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      <td data-label="Profesor" className="observer__teacher-cell">
                         {o.teacher_name}
                       </td>
-                      <td data-label="Acciones" style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                      <td data-label="Acciones" className="observer__actions-cell">
+                        <div className="observer__actions-wrap">
                           <button
-                            className="btn sm"
+                            className="btn sm observer__action-btn"
                             onClick={(e) => { e.stopPropagation(); handleToggleExpand(o.id) }}
                             title={isExpanded ? 'Ocultar detalle' : 'Ver detalle'}
-                            style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', minWidth: 'auto' }}
                           >
                             {isExpanded ? 'Ocultar' : 'Ver'}
                           </button>
                           {canDelete && (
                             <button
-                              className="btn sm danger"
+                              className="btn sm danger observer__action-btn"
                               onClick={(e) => { e.stopPropagation(); handleDelete(o.id) }}
                               title="Eliminar observación"
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', minWidth: 'auto' }}
                             >
                               Eliminar
                             </button>

@@ -5,19 +5,22 @@
 
 /* ── Scoped design tokens (dark theme overrides) ────────── */
 .msg-container {
-    --msg-bg-base: #0e131c;
-    --msg-bg-surface: #141d2b;
-    --msg-bg-elevated: #1b2638;
-    --msg-bg-card: #182233;
-    --msg-bg-input: #121a28;
-    --msg-border: #2a3a55;
-    --msg-border-subtle: #354767;
-    --msg-text-primary: #f3ece1;
-    --msg-text-secondary: #c7b8a4;
-    --msg-text-muted: #9b8f7c;
-    --msg-accent: var(--primary, #3b82f6);
-    --msg-accent-hover: var(--primary-dark, #2563eb);
-    --msg-accent-glow: rgba(201, 123, 47, 0.2);
+    --msg-bg-base: color-mix(in srgb, var(--bg-primary) 88%, #000);
+    --msg-bg-surface: color-mix(in srgb, var(--bg-secondary) 86%, #000);
+    --msg-bg-elevated: color-mix(in srgb, var(--bg-tertiary) 82%, var(--bg-secondary));
+    --msg-bg-card: color-mix(in srgb, var(--bg-card) 84%, var(--bg-secondary));
+    --msg-bg-input: color-mix(in srgb, var(--bg-secondary) 82%, #000);
+    --msg-border: color-mix(in srgb, var(--border-primary) 92%, rgba(255, 255, 255, 0.14));
+    --msg-border-subtle: color-mix(in srgb, var(--border-secondary) 78%, transparent);
+    --msg-text-primary: var(--text-primary);
+    --msg-text-secondary: var(--text-secondary);
+    --msg-text-muted: var(--text-muted);
+    --msg-accent: var(--primary);
+    --msg-accent-hover: var(--primary-dark);
+    --msg-accent-glow: color-mix(in srgb, var(--primary) 28%, transparent);
+    --msg-gradient-alt: color-mix(in srgb, var(--primary-dark) 58%, var(--accent));
+    --msg-overlay-heavy: color-mix(in srgb, black 62%, transparent);
+    --msg-overlay-soft: color-mix(in srgb, black 22%, transparent);
     --msg-radius-sm: 0.5rem;
     --msg-radius-md: 0.75rem;
     --msg-radius-lg: 1rem;
@@ -27,17 +30,20 @@
 
 /* Light theme overrides */
 [data-theme="light"] .msg-container {
-    --msg-bg-base: #f6efe1;
-    --msg-bg-surface: #fffaf0;
-    --msg-bg-elevated: #f2e8d8;
-    --msg-bg-card: #fffdf8;
-    --msg-bg-input: #f4eadb;
-    --msg-border: #d8c8ad;
-    --msg-border-subtle: #cdb997;
-    --msg-text-primary: #2f2619;
-    --msg-text-secondary: #655341;
-    --msg-text-muted: #8b7964;
-    --msg-accent-glow: rgba(201, 123, 47, 0.14);
+    --msg-bg-base: var(--bg-primary);
+    --msg-bg-surface: var(--bg-secondary);
+    --msg-bg-elevated: var(--bg-tertiary);
+    --msg-bg-card: var(--bg-card);
+    --msg-bg-input: color-mix(in srgb, var(--bg-secondary) 84%, white);
+    --msg-border: var(--border-primary);
+    --msg-border-subtle: color-mix(in srgb, var(--border-secondary) 82%, transparent);
+    --msg-text-primary: var(--text-primary);
+    --msg-text-secondary: var(--text-secondary);
+    --msg-text-muted: var(--text-muted);
+    --msg-accent-glow: color-mix(in srgb, var(--primary) 16%, transparent);
+    --msg-gradient-alt: color-mix(in srgb, var(--primary-dark) 42%, var(--accent));
+    --msg-overlay-heavy: color-mix(in srgb, black 56%, transparent);
+    --msg-overlay-soft: color-mix(in srgb, black 18%, transparent);
 }
 
 /* ── Root container — fixed position to fill viewport ───── */
@@ -54,8 +60,8 @@
     overflow: hidden;
     font-family: inherit;
     background-image:
-        radial-gradient(circle at 8% 10%, rgba(242, 197, 114, 0.08), transparent 36%),
-        radial-gradient(circle at 92% 86%, rgba(45, 106, 104, 0.11), transparent 38%);
+        radial-gradient(circle at 8% 10%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 36%),
+        radial-gradient(circle at 92% 86%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 38%);
     z-index: 10;
 }
 
@@ -99,7 +105,7 @@ body.sidebar-collapsed .msg-container {
     width: 44px;
     height: 44px;
     border-radius: var(--msg-radius-sm);
-    border: 1px solid rgba(242, 197, 114, 0.35);
+    border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
     background: var(--msg-accent);
     color: #fff;
     cursor: pointer;
@@ -208,7 +214,7 @@ body.sidebar-collapsed .msg-container {
 
 .msg-conversation-active {
     background: var(--msg-bg-elevated);
-    box-shadow: inset 3px 0 0 var(--msg-accent), 0 0 0 1px rgba(242, 197, 114, 0.14);
+    box-shadow: inset 3px 0 0 var(--msg-accent), 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .msg-conversation-active:hover {
@@ -221,7 +227,7 @@ body.sidebar-collapsed .msg-container {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--msg-accent), var(--secondary, #6366f1));
+    background: linear-gradient(135deg, var(--msg-accent), var(--msg-gradient-alt));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -361,7 +367,7 @@ body.sidebar-collapsed .msg-container {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--msg-accent), var(--secondary, #6366f1));
+    background: linear-gradient(135deg, var(--msg-accent), var(--msg-gradient-alt));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -402,7 +408,7 @@ body.sidebar-collapsed .msg-container {
     font-weight: 700;
     text-transform: uppercase;
     color: #fff;
-    background: var(--danger, #dc3545);
+    background: var(--danger);
     border-radius: 999px;
     padding: 0.2rem 0.55rem;
     letter-spacing: 0.03em;
@@ -466,7 +472,7 @@ body.sidebar-collapsed .msg-container {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--msg-accent), var(--secondary, #6366f1));
+    background: linear-gradient(135deg, var(--msg-accent), var(--msg-gradient-alt));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -493,7 +499,7 @@ body.sidebar-collapsed .msg-container {
     background: linear-gradient(135deg, var(--msg-accent), var(--msg-accent-hover));
     color: #fff;
     border-bottom-right-radius: 6px;
-    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--primary) 32%, transparent);
 }
 
 .msg-bubble-received {
@@ -501,7 +507,7 @@ body.sidebar-collapsed .msg-container {
     color: var(--msg-text-primary);
     border: 1px solid var(--msg-border);
     border-bottom-left-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 2px var(--msg-overlay-soft);
 }
 
 .msg-bubble-content {
@@ -529,11 +535,11 @@ body.sidebar-collapsed .msg-container {
 .msg-chat-locked-banner {
     margin: 0 1.25rem 0.85rem;
     padding: 0.65rem 0.8rem;
-    border: 1px solid var(--danger, #dc3545);
-    color: var(--danger, #dc3545);
+    border: 1px solid var(--danger);
+    color: var(--danger);
     border-radius: var(--msg-radius-sm);
     font-size: 0.82rem;
-    background: color-mix(in srgb, var(--danger, #dc3545) 10%, transparent);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .msg-chat-input-wrapper {
@@ -613,7 +619,7 @@ body.sidebar-collapsed .msg-container {
     background: var(--msg-bg-surface);
     border-radius: var(--msg-radius-xl);
     border: 1px solid var(--msg-border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px var(--msg-overlay-soft);
 }
 
 .msg-empty-icon-wrapper {
@@ -668,7 +674,7 @@ body.sidebar-collapsed .msg-container {
 .msg-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--msg-overlay-heavy);
     backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
@@ -686,7 +692,7 @@ body.sidebar-collapsed .msg-container {
     max-height: min(80vh, 42rem);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 16px 48px var(--msg-overlay-heavy);
     animation: msg-slide-up 200ms ease;
 }
 
@@ -799,7 +805,7 @@ body.sidebar-collapsed .msg-container {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--msg-accent), var(--secondary, #6366f1));
+    background: linear-gradient(135deg, var(--msg-accent), var(--msg-gradient-alt));
     display: flex;
     align-items: center;
     justify-content: center;

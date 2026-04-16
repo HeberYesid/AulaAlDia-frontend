@@ -7,6 +7,7 @@ import SchoolHeader from '../components/SchoolHeader'
 import SidebarBanner from '../components/SidebarBanner'
 import { useAuth } from '../state/AuthContext'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import './StudentDashboard.css'
 
 export default function StudentDashboard() {
   const [dashboard, setDashboard] = useState(null)
@@ -73,7 +74,7 @@ export default function StudentDashboard() {
     return (
       <div className="container">
         <div className="card">
-          <p style={{ color: 'var(--danger)' }}>{error || 'No se pudo cargar tu dashboard academico en este momento.'}</p>
+          <p className="student-dashboard__error-text">{error || 'No se pudo cargar tu dashboard academico en este momento.'}</p>
         </div>
       </div>
     )
@@ -82,29 +83,19 @@ export default function StudentDashboard() {
   const { summary, subjects_progress, pending_exercises, recent_results } = dashboard
 
   return (
-    <div className="fade-in">
+    <div className="fade-in student-dashboard">
       <SchoolHeader />
 
       {/* Notificación para Añadir Acudiente */}
       {showTutorNotice && (
-        <div style={{
-          backgroundColor: 'var(--bg-secondary)',
-          border: '1px solid var(--primary)',
-          borderRadius: 'var(--radius-md)',
-          padding: 'var(--space-md) var(--space-lg)',
-          marginBottom: 'var(--space-xl)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-        }}>
+        <div className="student-dashboard__notice">
           <div>
-            <h3 style={{ margin: '0 0 0.25rem 0', color: 'var(--primary)', fontSize: '1.2rem' }}>
+            <h3 className="student-dashboard__notice-title">
               ¡Añade a tu acudiente!
             </h3>
-            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+            <p className="student-dashboard__notice-copy">
               Aún no tienes un acudiente vinculado. Te recomendamos{' '}
-              <Link to="/profile#tutor-invite-section" style={{ fontWeight: '600', color: 'var(--primary)', textDecoration: 'underline' }}>
+              <Link to="/profile#tutor-invite-section" className="student-dashboard__notice-link">
                 añadirlo en tu perfil
               </Link>{' '}
               para que pueda acompañarte en tu proceso académico.
@@ -114,13 +105,13 @@ export default function StudentDashboard() {
       )}
 
       {/* Mis Materias */}
-      <div style={{ marginBottom: 'var(--space-xl)' }}>
-        <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: '1.5rem', fontWeight: 'bold' }}>
+      <div className="student-dashboard__section-gap">
+        <h2 className="student-dashboard__section-title">
           Mis Materias
         </h2>
 
         {subjects_progress.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
+          <div className="card student-dashboard__empty-state">
             <p>No estás inscrito en ninguna materia</p>
           </div>
         ) : (
@@ -129,36 +120,21 @@ export default function StudentDashboard() {
               <Link
                 key={subject.subject_id}
                 to={`/subjects/${subject.subject_id}`}
-                className="card"
-                style={{
-                  display: 'block',
-                  padding: 'var(--space-xl)',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  transition: 'transform var(--transition-fast), box-shadow var(--transition-fast)',
-                  height: '100%'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)'
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = ''
-                }}>
+                className="card student-dashboard__subject-link"
+              >
                 {/* Header de la materia */}
-                <div className="subject-header-responsive" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                  <div style={{ textAlign: 'center', width: '100%' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>
+                <div className="subject-header-responsive student-dashboard__subject-header">
+                  <div className="student-dashboard__subject-content">
+                    <h3 className="student-dashboard__subject-title">
                       {subject.subject_name}
                     </h3>
                     {(subject.total_absences > 0) && (
-                      <div style={{ marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
-                        <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
+                      <div className="student-dashboard__absence-summary">
+                        <span className="student-dashboard__absence-value">
                           {subject.total_absences} {subject.total_absences === 1 ? 'falta' : 'faltas'}
                         </span>
                         {subject.unjustified_absences > 0 && (
-                          <span style={{ color: 'var(--text-muted)', marginLeft: '0.25rem' }}>
+                          <span className="student-dashboard__absence-muted">
                             ({subject.unjustified_absences} sin justificar)
                           </span>
                         )}
@@ -176,58 +152,32 @@ export default function StudentDashboard() {
       <div className="exercises-grid-responsive">
         {/* Ejercicios Pendientes */}
         <div className="card">
-          <h2 style={{ marginBottom: 'var(--space-lg)' }}>Ejercicios Pendientes</h2>
+          <h2 className="student-dashboard__card-title">Ejercicios Pendientes</h2>
 
           {pending_exercises.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
+            <div className="student-dashboard__empty-state">
               <p>¡No tienes ejercicios pendientes!</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
+            <div className="student-dashboard__list-grid">
               {pending_exercises.map((exercise) => (
                 <Link
                   key={exercise.id}
                   to={`/subjects/${exercise.subject_id}/exercises/${exercise.id}`}
-                  style={{
-                    display: 'block',
-                    padding: 'var(--space-md)',
-                    background: 'var(--bg-secondary)',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-primary)',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    transition: 'transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--bg-hover)'
-                    e.currentTarget.style.borderColor = 'var(--primary)'
-                    e.currentTarget.style.transform = 'translateX(4px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--bg-secondary)'
-                    e.currentTarget.style.borderColor = 'var(--border-primary)'
-                    e.currentTarget.style.transform = 'translateX(0)'
-                  }}
+                  className="student-dashboard__pending-item"
                 >
-                  <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+                  <div className="student-dashboard__pending-name">
                     {exercise.name}
                   </div>
-                  <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                    {exercise.subject_name} <span style={{ color: 'var(--text-muted)' }}>({exercise.subject_code})</span>
+                  <div className="student-dashboard__pending-meta">
+                    {exercise.subject_name} <span className="student-dashboard__pending-code">({exercise.subject_code})</span>
                   </div>
                   {exercise.deadline ? (
-                    <div style={{
-                      fontSize: 'var(--font-size-xs)',
-                      color: 'var(--warning)',
-                      background: 'var(--bg-primary)',
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: 'var(--radius-sm)',
-                      display: 'inline-block'
-                    }}>
+                    <div className="student-dashboard__deadline-chip">
                       Entrega: {exercise.deadline}
                     </div>
                   ) : (
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                    <div className="student-dashboard__deadline-empty">
                       Sin fecha límite
                     </div>
                   )}
@@ -239,62 +189,36 @@ export default function StudentDashboard() {
 
         {/* Últimos Resultados */}
         <div className="card">
-          <h2 style={{ marginBottom: 'var(--space-lg)' }}>Últimos Resultados</h2>
+          <h2 className="student-dashboard__card-title">Últimos Resultados</h2>
 
           {recent_results.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
+            <div className="student-dashboard__empty-state">
               <p>No tienes resultados aún</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
+            <div className="student-dashboard__list-grid">
               {recent_results.map((result) => (
                 <div
                   key={result.id}
-                  style={{
-                    padding: 'var(--space-md)',
-                    background: 'var(--bg-secondary)',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-primary)',
-                    transition: 'all var(--transition-fast)'
-                  }}
+                  className="student-dashboard__result-card"
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                    <div style={{ fontWeight: 600, flex: 1, color: 'var(--text-primary)' }}>
+                  <div className="student-dashboard__result-head">
+                    <div className="student-dashboard__result-name">
                       {result.exercise_name}
                     </div>
-                    <span className={`badge ${result.status === 'SUBMITTED' ? 'SUBMITTED' : result.score != null ? 'SCORE' : 'PENDING'}`} style={{
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: 'var(--radius-sm)',
-                      fontSize: 'var(--font-size-xs)',
-                      fontWeight: 600
-                    }}>
+                    <span className={`badge student-dashboard__result-badge ${result.status === 'SUBMITTED' ? 'SUBMITTED' : result.score != null ? 'SCORE' : 'PENDING'}`}>
                       {result.status === 'SUBMITTED' ? 'Entregado' : result.score != null ? `Nota ${Number(result.score).toFixed(2)}` : 'Pendiente'}
                     </span>
                   </div>
-                  <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                  <div className="student-dashboard__result-subject">
                     {result.subject_name}
                   </div>
                   {result.comment && (
-                    <div style={{
-                      fontSize: 'var(--font-size-sm)',
-                      color: 'var(--text-secondary)',
-                      fontStyle: 'italic',
-                      marginTop: 'var(--space-sm)',
-                      padding: 'var(--space-sm)',
-                      background: 'var(--bg-primary)',
-                      borderRadius: 'var(--radius-sm)',
-                      borderLeft: '3px solid var(--primary)'
-                    }}>
+                    <div className="student-dashboard__result-comment">
                       {result.comment}
                     </div>
                   )}
-                  <div style={{
-                    fontSize: 'var(--font-size-xs)',
-                    color: 'var(--text-muted)',
-                    marginTop: '0.5rem',
-                    paddingTop: '0.5rem',
-                    borderTop: '1px solid var(--border-primary)'
-                  }}>
+                  <div className="student-dashboard__result-date">
                     {result.created_at}
                   </div>
                 </div>

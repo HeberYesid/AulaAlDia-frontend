@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
@@ -8,6 +8,8 @@ const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabi
  */
 export default function ConfirmDialog({ title = '¿Confirmar acción?', message, onConfirm, onCancel }) {
   const dialogRef = useRef(null)
+  const titleId = useId()
+  const descriptionId = useId()
 
   useEffect(() => {
     // Focus the Cancel button by default (safer for destructive actions)
@@ -36,34 +38,25 @@ export default function ConfirmDialog({ title = '¿Confirmar acción?', message,
 
   return (
     <div
-      style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        background: 'rgba(0, 0, 0, 0.6)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 2000, padding: '1rem',
-      }}
+      className="confirm-dialog-backdrop"
       role="presentation"
       onClick={onCancel}
     >
       <div
         role="alertdialog"
         aria-modal="true"
-        aria-labelledby="confirm-dialog-title"
-        aria-describedby="confirm-dialog-desc"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
         ref={dialogRef}
-        className="card"
-        style={{ maxWidth: '620px', width: '100%', margin: 0 }}
+        className="card confirm-dialog"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
-        <h2 id="confirm-dialog-title" style={{ marginTop: 0, fontSize: '1.1rem' }}>{title}</h2>
-        <p
-          id="confirm-dialog-desc"
-          style={{ color: 'var(--text-secondary)', margin: '0 0 1.5rem 0', whiteSpace: 'pre-line' }}
-        >
+        <h2 id={titleId} className="confirm-dialog__title">{title}</h2>
+        <p id={descriptionId} className="confirm-dialog__description">
           {message}
         </p>
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+        <div className="confirm-dialog__actions">
           <button className="btn secondary" onClick={onCancel}>Cancelar</button>
           <button className="btn danger" onClick={onConfirm}>Confirmar</button>
         </div>

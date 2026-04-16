@@ -4,6 +4,7 @@ import { api } from '../api/axios'
 import StatusBadge from '../components/StatusBadge'
 import { useAuth } from '../state/AuthContext'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
+import './AdminBulletins.css'
 
 function normalizeText(value) {
   return String(value || '')
@@ -24,14 +25,6 @@ function formatDate(value) {
   })
 }
 
-function getGradeColor(grade) {
-  const g = Number.parseFloat(grade)
-  if (Number.isNaN(g)) return 'var(--text-muted)'
-  if (g >= 4.5) return 'var(--success)'
-  if (g >= 3.0) return 'var(--warning)'
-  return 'var(--danger)'
-}
-
 export default function AdminBulletins() {
   const navigate = useNavigate()
   const { logout } = useAuth()
@@ -48,9 +41,17 @@ export default function AdminBulletins() {
   const [actionLoadingByBulletinId, setActionLoadingByBulletinId] = useState({})
 
   const officialStatusMeta = {
-    DRAFT: { label: 'Borrador', color: 'var(--text-muted)' },
-    APPROVED: { label: 'Aprobado', color: 'var(--warning)' },
-    ISSUED: { label: 'Emitido', color: 'var(--success)' },
+    DRAFT: { label: 'Borrador', tone: 'admin-bulletins__tone--muted' },
+    APPROVED: { label: 'Aprobado', tone: 'admin-bulletins__tone--warning' },
+    ISSUED: { label: 'Emitido', tone: 'admin-bulletins__tone--success' },
+  }
+
+  const getGradeToneClass = (grade) => {
+    const parsed = Number.parseFloat(grade)
+    if (Number.isNaN(parsed)) return 'admin-bulletins__tone--muted'
+    if (parsed >= 4.5) return 'admin-bulletins__tone--success'
+    if (parsed >= 3.0) return 'admin-bulletins__tone--warning'
+    return 'admin-bulletins__tone--danger'
   }
 
   const loadBulletins = useCallback(async () => {
@@ -222,8 +223,8 @@ export default function AdminBulletins() {
   if (error && bulletins.length === 0) {
     return (
       <div className="card">
-        <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--danger)' }}>
-          <p style={{ fontSize: '2rem', margin: 0 }}>⚠️</p>
+        <div className="admin-bulletins__state admin-bulletins__state--error">
+          <p className="admin-bulletins__state-icon">⚠️</p>
           <p>{error}</p>
           <button className="btn primary" onClick={loadBulletins}>
             Reintentar
@@ -235,25 +236,18 @@ export default function AdminBulletins() {
 
   return (
     <div className="fade-in">
-      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-        <div style={{ display: 'grid', gap: 'var(--space-sm)' }}>
-          <h1 style={{ margin: 0 }}>Boletines institucionales</h1>
-          <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+      <div className="card admin-bulletins__card-gap">
+        <div className="admin-bulletins__header-block">
+          <h1 className="admin-bulletins__header-title">Boletines institucionales</h1>
+          <p className="admin-bulletins__header-copy">
             Consulta boletines del año escolar activo, revisa detalle por estudiante y valida materias consolidadas por periodo.
           </p>
         </div>
       </div>
 
-      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-        <div
-          style={{
-            display: 'grid',
-            gap: 'var(--space-md)',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            alignItems: 'end',
-          }}
-        >
-          <div className="form-group" style={{ margin: 0 }}>
+      <div className="card admin-bulletins__card-gap">
+        <div className="admin-bulletins__filter-grid">
+          <div className="form-group admin-bulletins__form-group-reset">
             <label htmlFor="admin-bulletins-search">Buscar estudiante o periodo</label>
             <input
               id="admin-bulletins-search"
@@ -264,7 +258,7 @@ export default function AdminBulletins() {
             />
           </div>
 
-          <div className="form-group" style={{ margin: 0 }}>
+          <div className="form-group admin-bulletins__form-group-reset">
             <label htmlFor="admin-bulletins-period">Filtrar por periodo</label>
             <select
               id="admin-bulletins-period"
@@ -280,27 +274,27 @@ export default function AdminBulletins() {
             </select>
           </div>
 
-          <div className="stat-card" style={{ minHeight: '100%' }}>
-            <div className="stat-value" style={{ color: 'var(--primary)' }}>{filteredBulletins.length}</div>
+          <div className="stat-card admin-bulletins__stat-stretch">
+            <div className="stat-value admin-bulletins__tone--primary">{filteredBulletins.length}</div>
             <div className="stat-label">Boletines visibles</div>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="notice danger" style={{ marginBottom: 'var(--space-lg)' }}>
+        <div className="notice danger admin-bulletins__card-gap">
           {error}
         </div>
       )}
 
       <section className="card">
         {filteredBulletins.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: '2.25rem', margin: 0 }}>📋</p>
-            <h2 style={{ margin: 'var(--space-sm) 0', color: 'var(--text-primary)' }}>
+          <div className="admin-bulletins__state admin-bulletins__state--empty">
+            <p className="admin-bulletins__state-icon admin-bulletins__state-icon--empty">📋</p>
+            <h2 className="admin-bulletins__state-title">
               No hay boletines para los filtros actuales
             </h2>
-            <p style={{ margin: 0 }}>
+            <p className="admin-bulletins__state-copy">
               Prueba con otro criterio de búsqueda o verifica si ya se cerraron periodos académicos.
             </p>
           </div>
@@ -311,12 +305,12 @@ export default function AdminBulletins() {
                 <tr>
                   <th>Estudiante</th>
                   <th>Correo</th>
-                  <th style={{ textAlign: 'center' }}>Periodo</th>
-                  <th style={{ textAlign: 'center' }}>Promedio</th>
-                  <th style={{ textAlign: 'center' }}>Materias</th>
-                  <th style={{ textAlign: 'center' }}>Estado oficial</th>
+                  <th className="admin-bulletins__text-center">Periodo</th>
+                  <th className="admin-bulletins__text-center">Promedio</th>
+                  <th className="admin-bulletins__text-center">Materias</th>
+                  <th className="admin-bulletins__text-center">Estado oficial</th>
                   <th>Generado</th>
-                  <th style={{ textAlign: 'right' }}>Acción</th>
+                  <th className="admin-bulletins__text-right">Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -332,27 +326,23 @@ export default function AdminBulletins() {
                     <tr key={`bulletin-${bulletin.id}`}>
                         <td data-label="Estudiante">{bulletin.student_name || 'Sin nombre'}</td>
                         <td data-label="Correo">{bulletin.student_email}</td>
-                        <td data-label="Periodo" style={{ textAlign: 'center' }}>Periodo {bulletin.period_number}</td>
+                        <td data-label="Periodo" className="admin-bulletins__text-center">Periodo {bulletin.period_number}</td>
                         <td
                           data-label="Promedio"
-                          style={{
-                            textAlign: 'center',
-                            fontWeight: 700,
-                            color: getGradeColor(bulletin.average_grade),
-                          }}
+                          className={`admin-bulletins__grade-cell ${getGradeToneClass(bulletin.average_grade)}`}
                         >
                           {Number.parseFloat(bulletin.average_grade || 0).toFixed(2)}
                         </td>
-                        <td data-label="Materias" style={{ textAlign: 'center' }}>{bulletin.total_subjects}</td>
+                        <td data-label="Materias" className="admin-bulletins__text-center">{bulletin.total_subjects}</td>
                         <td
                           data-label="Estado oficial"
-                          style={{ textAlign: 'center', fontWeight: 700, color: statusMeta.color }}
+                          className={`admin-bulletins__status-cell ${statusMeta.tone}`}
                         >
                           {statusMeta.label}
                         </td>
                         <td data-label="Generado">{formatDate(bulletin.created_at)}</td>
-                        <td data-label="Acción" style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: 'var(--space-xs)', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <td data-label="Acción" className="admin-bulletins__text-right">
+                          <div className="admin-bulletins__action-group">
                             {bulletin.official_status === 'DRAFT' && (
                               <button
                                 type="button"
@@ -400,8 +390,8 @@ export default function AdminBulletins() {
                       </tr>,
                     isExpanded ? (
                         <tr key={`detail-${bulletin.id}`}>
-                          <td colSpan={8} data-label="Detalle" style={{ padding: 0 }}>
-                            <div className="card" style={{ margin: 'var(--space-sm)', borderLeft: '4px solid var(--primary)' }}>
+                          <td colSpan={8} data-label="Detalle" className="admin-bulletins__detail-cell">
+                            <div className="card admin-bulletins__detail-card">
                               {isLoadingDetail ? (
                                 <div className="loading">
                                   <div className="spinner"></div>
@@ -410,12 +400,12 @@ export default function AdminBulletins() {
                               ) : detailError ? (
                                 <div className="notice danger">{detailError}</div>
                               ) : detail ? (
-                                <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
-                                  <h3 style={{ margin: 0 }}>
+                                <div className="admin-bulletins__detail-stack">
+                                  <h3 className="admin-bulletins__detail-title">
                                     Detalle de {detail.student_name || detail.student_email} — {detail.period_label}
                                   </h3>
                                   {!!detail.official_comment && (
-                                    <div className="notice" style={{ whiteSpace: 'pre-wrap' }}>
+                                    <div className="notice admin-bulletins__pre-wrap">
                                       <strong>Comentario oficial:</strong> {detail.official_comment}
                                     </div>
                                   )}
@@ -425,11 +415,11 @@ export default function AdminBulletins() {
                                       <thead>
                                         <tr>
                                           <th>Materia</th>
-                                          <th style={{ textAlign: 'center' }}>Nota</th>
-                                          <th style={{ textAlign: 'center' }}>Promedio</th>
-                                          <th style={{ textAlign: 'center' }}>Calificados</th>
-                                          <th style={{ textAlign: 'center' }}>Entregados</th>
-                                          <th style={{ textAlign: 'center' }}>Faltas</th>
+                                          <th className="admin-bulletins__text-center">Nota</th>
+                                          <th className="admin-bulletins__text-center">Promedio</th>
+                                          <th className="admin-bulletins__text-center">Calificados</th>
+                                          <th className="admin-bulletins__text-center">Entregados</th>
+                                          <th className="admin-bulletins__text-center">Faltas</th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -438,20 +428,16 @@ export default function AdminBulletins() {
                                             <td data-label="Materia">{entry.subject_name}</td>
                                             <td
                                               data-label="Nota"
-                                              style={{
-                                                textAlign: 'center',
-                                                fontWeight: 700,
-                                                color: getGradeColor(entry.grade),
-                                              }}
+                                              className={`admin-bulletins__grade-cell ${getGradeToneClass(entry.grade)}`}
                                             >
                                               {Number.parseFloat(entry.grade || 0).toFixed(2)}
                                             </td>
-                                            <td data-label="Promedio" style={{ textAlign: 'center' }}>
+                                            <td data-label="Promedio" className="admin-bulletins__text-center">
                                               <StatusBadge status={null} grade={Number.parseFloat(entry.average_score || 0)} />
                                             </td>
-                                            <td data-label="Calificados" style={{ textAlign: 'center' }}>{entry.graded_count}</td>
-                                            <td data-label="Entregados" style={{ textAlign: 'center' }}>{entry.submitted_count}</td>
-                                            <td data-label="Faltas" style={{ textAlign: 'center' }}>
+                                            <td data-label="Calificados" className="admin-bulletins__text-center">{entry.graded_count}</td>
+                                            <td data-label="Entregados" className="admin-bulletins__text-center">{entry.submitted_count}</td>
+                                            <td data-label="Faltas" className="admin-bulletins__text-center">
                                               {entry.absence_count}
                                               {entry.unjustified_absence_count > 0 ? ` (${entry.unjustified_absence_count} inj.)` : ''}
                                             </td>
@@ -462,22 +448,17 @@ export default function AdminBulletins() {
                                   </div>
 
                                   {detail.entries.some((entry) => entry.observations_summary) && (
-                                    <div style={{ display: 'grid', gap: 'var(--space-sm)' }}>
-                                      <h4 style={{ margin: 0 }}>Observaciones</h4>
+                                    <div className="admin-bulletins__detail-stack-sm">
+                                      <h4 className="admin-bulletins__detail-subtitle">Observaciones</h4>
                                       {detail.entries
                                         .filter((entry) => entry.observations_summary)
                                         .map((entry) => (
                                           <div
                                             key={`obs-${entry.id}`}
-                                            style={{
-                                              padding: 'var(--space-sm)',
-                                              borderRadius: 'var(--radius-md)',
-                                              borderLeft: `3px solid ${getGradeColor(entry.grade)}`,
-                                              backgroundColor: 'var(--bg-secondary)',
-                                            }}
+                                            className={`admin-bulletins__observation-item ${getGradeToneClass(entry.grade)}`}
                                           >
                                             <strong>{entry.subject_name}</strong>
-                                            <p style={{ margin: 'var(--space-xs) 0 0 0', whiteSpace: 'pre-wrap' }}>
+                                            <p className="admin-bulletins__observation-copy">
                                               {entry.observations_summary}
                                             </p>
                                           </div>

@@ -1,0 +1,275 @@
+.my-bulletins__state {
+  text-align: center;
+  padding: var(--space-2xl);
+}
+
+.my-bulletins__state--error {
+  color: var(--danger);
+}
+
+.my-bulletins__state--empty {
+  color: var(--text-muted);
+}
+
+.my-bulletins__state-icon {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.my-bulletins__state-icon--large {
+  font-size: 3rem;
+}
+
+.my-bulletins__state-title {
+  margin: 1rem 0;
+  color: var(--text-primary);
+}
+
+.my-bulletins__card-gap {
+  margin-bottom: var(--space-lg);
+}
+
+.my-bulletins__header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.my-bulletins__title {
+  margin: 0;
+  font-size: var(--font-size-3xl);
+  color: var(--text-primary);
+}
+
+.my-bulletins__subtitle {
+  margin: 0.5rem 0 0;
+  color: var(--text-secondary);
+}
+
+.my-bulletins__year-filter {
+  margin: 0;
+  min-width: 160px;
+}
+
+.my-bulletins__year-label {
+  font-size: var(--font-size-sm);
+}
+
+.my-bulletins__year-block {
+  margin-bottom: var(--space-xl);
+}
+
+.my-bulletins__year-title {
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.my-bulletins__year-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+
+.my-bulletins__status-chip {
+  display: inline-flex;
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.my-bulletins__period-card {
+  margin: 0;
+  border: 2px solid transparent;
+}
+
+.my-bulletins__period-card--active {
+  border-color: var(--primary);
+}
+
+.my-bulletins__period-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.my-bulletins__period-name {
+  display: block;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.my-bulletins__period-date {
+  display: block;
+  margin: 0.25rem 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.my-bulletins__period-grade-wrap {
+  text-align: right;
+}
+
+.my-bulletins__period-grade {
+  display: block;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.my-bulletins__period-grade-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.my-bulletins__period-footer {
+  display: flex;
+  margin-top: var(--space-sm);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.my-bulletins__period-subjects {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.my-bulletins__period-toggle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.my-bulletins__detail-card {
+  margin-top: var(--space-sm);
+  border-left: 4px solid var(--primary);
+}
+
+.my-bulletins__detail-title {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--text-primary);
+}
+
+.my-bulletins__notice-bottom-sm {
+  margin-bottom: var(--space-sm);
+}
+
+.my-bulletins__download-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-sm);
+}
+
+.my-bulletins__text-center {
+  text-align: center;
+}
+
+.my-bulletins__grade-cell {
+  text-align: center;
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+}
+
+.my-bulletins__absences {
+  font-weight: 600;
+}
+
+.my-bulletins__inj {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  display: block;
+}
+
+.my-bulletins__muted {
+  color: var(--text-muted);
+}
+
+.my-bulletins__observations {
+  margin-top: var(--space-lg);
+}
+
+.my-bulletins__observation-item {
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--primary);
+}
+
+.my-bulletins__observation-item.my-bulletins__tone--success {
+  border-left-color: var(--success);
+}
+
+.my-bulletins__observation-item.my-bulletins__tone--warning {
+  border-left-color: var(--warning);
+}
+
+.my-bulletins__observation-item.my-bulletins__tone--danger {
+  border-left-color: var(--danger);
+}
+
+.my-bulletins__observation-subject {
+  color: var(--text-primary);
+}
+
+.my-bulletins__observation-text {
+  margin: 0.5rem 0 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.my-bulletins__stats-grid {
+  margin-top: var(--space-lg);
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.my-bulletins__tone--primary {
+  color: var(--primary);
+}
+
+.my-bulletins__tone--success {
+  color: var(--success);
+}
+
+.my-bulletins__tone--warning {
+  color: var(--warning);
+}
+
+.my-bulletins__tone--danger {
+  color: var(--danger);
+}
+
+.my-bulletins__tone--muted {
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .my-bulletins__period-head,
+  .my-bulletins__period-footer {
+    gap: var(--space-sm);
+  }
+
+  .my-bulletins__period-head {
+    flex-direction: column;
+  }
+
+  .my-bulletins__period-grade-wrap {
+    text-align: left;
+  }
+
+  .my-bulletins__download-row {
+    justify-content: stretch;
+  }
+
+  .my-bulletins__download-row .btn {
+    width: 100%;
+  }
+}
