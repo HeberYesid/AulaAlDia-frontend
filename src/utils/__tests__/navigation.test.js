@@ -20,6 +20,7 @@ describe('navigation config', () => {
     const keys = sidebarItems.map((item) => item.key)
 
     expect(keys).toContain('messages')
+    expect(keys).toContain('schedules')
     expect(keys).toContain('my-results')
     expect(keys).not.toContain('teacher-evaluations-student')
   })

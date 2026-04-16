@@ -52,6 +52,10 @@ vi.mock('../pages/ExerciseDetail', () => ({
   default: () => <div>ExerciseDetail Mock</div>,
 }))
 
+vi.mock('../pages/Schedules', () => ({
+  default: () => <div>Schedules Mock</div>,
+}))
+
 function renderAppAt(path) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -238,5 +242,22 @@ describe('App admin routes', () => {
     renderAppAt('/subjects/1/exercises/22')
 
     expect(await screen.findByText('ExerciseDetail Mock')).toBeInTheDocument()
+  })
+
+  it('allows TEACHER into /schedules when tenant and school year are active', async () => {
+    AuthContext.useAuth.mockReturnValue({
+      user: { id: 1, role: 'TEACHER' },
+      loading: false,
+      tenantsLoaded: true,
+      activeTenantId: 'tenant-1',
+      tenants: [{ tenant_id: 'tenant-1', tenant_name: 'Colegio Central' }],
+      schoolYearGateLoaded: true,
+      hasActiveSchoolYear: true,
+      activeSchoolYear: { id: 1, label: '2026' },
+    })
+
+    renderAppAt('/schedules')
+
+    expect(await screen.findByText('Schedules Mock')).toBeInTheDocument()
   })
 })

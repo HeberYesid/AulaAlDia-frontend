@@ -15,9 +15,9 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.error) {
       return (
-        <div className="card" style={{ maxWidth: 800, margin: '2rem auto', padding: '2rem' }}>
-          <h2 style={{ color: 'var(--danger)' }}>Algo salió mal</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>{this.state.error?.message}</p>
+        <div className="card app-error-shell" role="alert" aria-live="assertive">
+          <h2 className="app-error-shell__title">Algo salió mal</h2>
+          <p className="app-error-shell__message">{this.state.error?.message}</p>
           <button className="btn" onClick={() => { this.setState({ error: null }); window.location.reload() }}>
             Recargar página
           </button>
@@ -53,6 +53,7 @@ const Home = lazy(() => import('./pages/Home'))
 const FAQ = lazy(() => import('./pages/FAQ'))
 const Contact = lazy(() => import('./pages/Contact'))
 const CalendarPage = lazy(() => import('./pages/Calendar'))
+const Schedules = lazy(() => import('./pages/Schedules'))
 const Messages = lazy(() => import('./pages/messaging/Messages'))
 const Observer = lazy(() => import('./pages/Observer'))
 const Absences = lazy(() => import('./pages/Absences'))
@@ -216,6 +217,15 @@ export default function App() {
             element={
               <ProtectedRoute requireTenant requireActiveSchoolYear>
                 <CalendarPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/schedules"
+            element={
+              <ProtectedRoute roles={["STUDENT", "TEACHER", "ADMIN", "TUTOR"]} requireTenant requireActiveSchoolYear>
+                <Schedules />
               </ProtectedRoute>
             }
           />

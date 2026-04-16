@@ -24,6 +24,7 @@ import {
   School,
   Rows3,
   Package,
+  CalendarClock,
 } from 'lucide-react'
 import { USER_ROLES } from './constants'
 
@@ -179,6 +180,16 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-calendar',
+  },
+  {
+    key: 'schedules',
+    to: '/schedules',
+    label: 'Horarios',
+    contextualTip: 'Consultá los horarios por rol en formato semanal o diario según tu perfil institucional.',
+    icon: CalendarClock,
+    section: 'academic',
+    roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
+    tourId: 'nav-schedules',
   },
   {
     key: 'observer',
