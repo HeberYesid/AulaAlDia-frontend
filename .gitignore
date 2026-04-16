@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build and coverage artifacts
+dist/
+coverage/
+.vite/
+
+# Local environment files
+.env
+
+# Logs
+*.log
+
+# Editor/system files
+.vscode/
+.DS_Store
