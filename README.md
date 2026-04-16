@@ -1,4 +1,4 @@
-﻿# DevTrack Frontend
+﻿# AulaAlDia Frontend
 
 Repositorio frontend (React + Vite) extraido desde el monorepo principal.
 
