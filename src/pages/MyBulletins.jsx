@@ -261,7 +261,6 @@ export default function MyBulletins() {
                 {/* Period card */}
                 <button
                   type="button"
-                  className="card card-button"
                   aria-label={`Ver boletín ${bulletin.period_label}`}
                   aria-expanded={expandedBulletinId === bulletin.id}
                   onClick={() => loadBulletinDetail(bulletin.id)}

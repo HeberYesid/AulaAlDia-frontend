@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
@@ -106,7 +106,7 @@ export default function Subjects() {
     })
   }, [subjectsByGrade])
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       setLoading(true)
 
@@ -141,18 +141,21 @@ export default function Subjects() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [isAdmin])
 
   useEffect(() => {
     load()
-  }, [isAdmin])
+  }, [load])
 
   useEffect(() => {
     if (!isCreateModalOpen) return
 
     const handleEscape = (event) => {
       if (event.key === 'Escape' && !submitting) {
-        closeCreateModal()
+        setIsCreateModalOpen(false)
+        setName('')
+        setCourseId('')
+        setTeacherId('')
       }
     }
 
