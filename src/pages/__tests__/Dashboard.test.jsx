@@ -163,6 +163,7 @@ describe('Dashboard Component', () => {
   })
 
   it('shows teacher attendance card, opens confirmation dialog and can check in', async () => {
+    const getDaySpy = vi.spyOn(Date.prototype, 'getDay').mockReturnValue(1)
     api.get.mockResolvedValue({ data: [] })
     vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
       user: mockTeacherUser,
@@ -173,23 +174,27 @@ describe('Dashboard Component', () => {
       switchTenant: vi.fn(),
     })
 
-    renderDashboard()
+    try {
+      renderDashboard()
 
-    expect(await screen.findByRole('heading', { name: /asistencia docente/i })).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { name: /asistencia docente/i })).toBeInTheDocument()
 
-    const user = userEvent.setup()
-    const checkInButton = await screen.findByRole('button', { name: /marcar entrada/i })
-    await user.click(checkInButton)
+      const user = userEvent.setup()
+      const checkInButton = await screen.findByRole('button', { name: /marcar entrada/i })
+      await user.click(checkInButton)
 
-    expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
-    expect(screen.getByText(/confirmar entrada docente/i)).toBeInTheDocument()
+      expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
+      expect(screen.getByText(/confirmar entrada docente/i)).toBeInTheDocument()
 
-    const confirmButton = screen.getByRole('button', { name: /confirmar/i })
-    await user.click(confirmButton)
+      const confirmButton = screen.getByRole('button', { name: /confirmar/i })
+      await user.click(confirmButton)
 
-    await waitFor(() => {
-      expect(attendanceHook.checkInTeacherAttendance).toHaveBeenCalledTimes(1)
-    })
+      await waitFor(() => {
+        expect(attendanceHook.checkInTeacherAttendance).toHaveBeenCalledTimes(1)
+      })
+    } finally {
+      getDaySpy.mockRestore()
+    }
   })
 
   it('shows current day label in teacher attendance card', async () => {
@@ -220,16 +225,19 @@ describe('Dashboard Component', () => {
       switchTenant: vi.fn(),
     })
 
-    renderDashboard()
+    try {
+      renderDashboard()
 
-    expect(await screen.findByText(/hoy no es un día laborable/i)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /marcar entrada/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /marcar salida/i })).not.toBeInTheDocument()
-
-    getDaySpy.mockRestore()
+      expect(await screen.findByText(/hoy no es un día laborable/i)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /marcar entrada/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /marcar salida/i })).not.toBeInTheDocument()
+    } finally {
+      getDaySpy.mockRestore()
+    }
   })
 
   it('hides check-in button when teacher already marked attendance today', async () => {
+    const getDaySpy = vi.spyOn(Date.prototype, 'getDay').mockReturnValue(1)
     attendanceHook.fetchTeacherAttendanceCurrent.mockResolvedValue({
       has_open_shift: false,
       shift: null,
@@ -250,13 +258,18 @@ describe('Dashboard Component', () => {
       switchTenant: vi.fn(),
     })
 
-    renderDashboard()
+    try {
+      renderDashboard()
 
-    expect(await screen.findByText(/ya registraste entrada y salida hoy/i)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /marcar entrada/i })).not.toBeInTheDocument()
+      expect(await screen.findByText(/ya registraste entrada y salida hoy/i)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /marcar entrada/i })).not.toBeInTheDocument()
+    } finally {
+      getDaySpy.mockRestore()
+    }
   })
 
   it('shows check-out button when there is an open shift for today and confirms before closing', async () => {
+    const getDaySpy = vi.spyOn(Date.prototype, 'getDay').mockReturnValue(1)
     attendanceHook.fetchTeacherAttendanceCurrent.mockResolvedValue({
       has_open_shift: true,
       shift: {
@@ -281,20 +294,24 @@ describe('Dashboard Component', () => {
       switchTenant: vi.fn(),
     })
 
-    renderDashboard()
+    try {
+      renderDashboard()
 
-    const user = userEvent.setup()
-    const checkOutButton = await screen.findByRole('button', { name: /marcar salida/i })
-    await user.click(checkOutButton)
+      const user = userEvent.setup()
+      const checkOutButton = await screen.findByRole('button', { name: /marcar salida/i })
+      await user.click(checkOutButton)
 
-    expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
-    expect(screen.getByText(/confirmar salida docente/i)).toBeInTheDocument()
+      expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
+      expect(screen.getByText(/confirmar salida docente/i)).toBeInTheDocument()
 
-    const confirmButton = screen.getByRole('button', { name: /confirmar/i })
-    await user.click(confirmButton)
+      const confirmButton = screen.getByRole('button', { name: /confirmar/i })
+      await user.click(confirmButton)
 
-    await waitFor(() => {
-      expect(attendanceHook.checkOutTeacherAttendance).toHaveBeenCalledTimes(1)
-    })
+      await waitFor(() => {
+        expect(attendanceHook.checkOutTeacherAttendance).toHaveBeenCalledTimes(1)
+      })
+    } finally {
+      getDaySpy.mockRestore()
+    }
   })
 })
