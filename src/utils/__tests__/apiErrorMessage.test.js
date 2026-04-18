@@ -55,6 +55,16 @@ describe('apiErrorMessage utility', () => {
     expect(message).toBe('correo: Este correo ya existe')
   })
 
+  it('extracts field-level string errors using generic field humanization', () => {
+    const message = getApiErrorMessage({
+      response: {
+        data: { user_name: 'Formato invalido' },
+      },
+    })
+
+    expect(message).toBe('user name: Formato invalido')
+  })
+
   it('extracts nested object field errors', () => {
     const message = getApiErrorMessage({
       response: {
@@ -69,6 +79,39 @@ describe('apiErrorMessage utility', () => {
     expect(message).toBe('correo del estudiante: Correo invalido')
   })
 
+  it('uses first element from non_field_errors array', () => {
+    const message = getApiErrorMessage({
+      response: {
+        data: { non_field_errors: ['No puedes realizar esta accion'] },
+      },
+    })
+
+    expect(message).toBe('No puedes realizar esta accion')
+  })
+
+  it('uses payload string response when provided', () => {
+    const message = getApiErrorMessage({
+      response: {
+        data: 'Error de validacion externo',
+      },
+    })
+
+    expect(message).toBe('No se pudo completar esta accion. Error de validacion externo.')
+  })
+
+  it('treats unknown object payload as generic and appends payload text', () => {
+    const message = getApiErrorMessage(
+      {
+        response: {
+          data: { meta: {} },
+        },
+      },
+      { action: 'actualizar el registro' }
+    )
+
+    expect(message).toBe('No se pudo actualizar el registro. Intentalo nuevamente.')
+  })
+
   it('returns status-based fallback when payload has no usable message', () => {
     const message = getApiErrorMessage(
       {
@@ -81,6 +124,27 @@ describe('apiErrorMessage utility', () => {
     )
 
     expect(message).toBe('No tienes permisos para editar esta materia.')
+  })
+
+  it.each([
+    [400, 'guardar', 'No se pudo guardar. Revisa los datos ingresados e intentalo nuevamente.'],
+    [401, 'continuar', 'No se pudo continuar porque tu sesion ya no es valida. Inicia sesion nuevamente.'],
+    [404, 'consultar', 'No se encontro la informacion necesaria para consultar.'],
+    [409, 'actualizar', 'No se pudo actualizar porque hay un conflicto con el estado actual de los datos.'],
+    [429, 'enviar', 'Superaste el limite de intentos para enviar. Espera un momento e intentalo otra vez.'],
+    [500, 'procesar', 'No se pudo procesar por un problema interno del servidor. Intentalo nuevamente en unos minutos.'],
+  ])('maps status %s to its semantic fallback', (status, action, expected) => {
+    const message = getApiErrorMessage(
+      {
+        response: {
+          status,
+          data: {},
+        },
+      },
+      { action }
+    )
+
+    expect(message).toBe(expected)
   })
 
   it('returns custom fallback when status has no predefined message', () => {
