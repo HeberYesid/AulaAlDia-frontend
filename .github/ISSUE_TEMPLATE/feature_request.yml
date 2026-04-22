@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose a frontend feature or UX enhancement.
+title: "feat(scope): short feature summary"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the user problem and expected outcome.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are we solving?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe expected UI behavior and data flow.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-impact
+    attributes:
+      label: API and auth impact
+      description: Explain if `src/api/axios.js` integration, tenant context, or auth flows are affected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] UX behavior defined
+        - [ ] Tests added/updated
+        - [ ] Responsive behavior validated
+    validations:
+      required: true

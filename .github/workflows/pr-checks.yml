@@ -1,0 +1,62 @@
+name: Frontend PR Checks
+
+on:
+  pull_request:
+    branches: ["main"]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  github-flow-guardrails:
+    name: GitHub Flow Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch naming
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          BRANCH_REGEX='^(feat|fix|docs|refactor|test|chore|perf|ci|build|hotfix)\/[a-z0-9._-]+$'
+
+          if [[ "${HEAD_REF}" == "main" ]]; then
+            echo "Direct PRs from main are not allowed."
+            exit 1
+          fi
+
+          if [[ ! "${HEAD_REF}" =~ ${BRANCH_REGEX} ]]; then
+            echo "Invalid branch name: ${HEAD_REF}"
+            echo "Expected: <type>/<description>"
+            echo "Allowed types: feat|fix|docs|refactor|test|chore|perf|ci|build|hotfix"
+            exit 1
+          fi
+
+      - name: Validate PR title format
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          TITLE_REGEX='^(feat|fix|docs|refactor|test|chore|perf|ci|build)(\([a-z0-9._-]+\))?!?: .+'
+
+          if [[ ! "${PR_TITLE}" =~ ${TITLE_REGEX} ]]; then
+            echo "Invalid PR title: ${PR_TITLE}"
+            echo "Expected Conventional Commits format, for example:"
+            echo "feat(auth): add session timeout modal"
+            exit 1
+          fi
+
+      - name: Validate linked issue in PR body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          ISSUE_REGEX='(close|closes|fix|fixes|resolve|resolves)[[:space:]]+#([0-9]+)'
+
+          if [[ -z "${PR_BODY}" ]]; then
+            echo "PR body is empty. Add: Closes #<issue-number>."
+            exit 1
+          fi
+
+          if ! echo "${PR_BODY}" | grep -Eiq "${ISSUE_REGEX}"; then
+            echo "PR body must include linked issue keyword. Example: Closes #123"
+            exit 1
+          fi

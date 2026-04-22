@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a frontend bug or regression.
+title: "fix(scope): short bug summary"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this issue. Please include clear reproduction steps.
+
+  - type: input
+    id: affected-area
+    attributes:
+      label: Affected area
+      description: Page, component, or flow where the issue appears.
+      placeholder: src/pages/Login.jsx
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current behavior
+      description: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] Bug no longer reproducible
+        - [ ] Test updated or added
+        - [ ] No responsive regressions
+    validations:
+      required: true

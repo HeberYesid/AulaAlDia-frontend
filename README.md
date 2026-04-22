@@ -17,6 +17,7 @@ Aplicación web SPA construida con **React 18 + Vite** para la plataforma educat
 9. [Testing](#testing)
 10. [Despliegue](#despliegue)
 11. [Guía de diseño](#guía-de-diseño)
+12. [Contribución y GitHub Flow](#contribución-y-github-flow)
 
 ---
 
@@ -205,3 +206,13 @@ pnpm build
 El sistema de diseño está inspirado en Notion: paleta de neutros cálidos, tipografía con compresión a escala, bordes sutiles y sombras multicapa de baja opacidad. Consulta [`DESIGN.md`](./DESIGN.md) para ver la especificación completa de colores, tipografía, componentes y comportamiento responsive.
 
 El tour de bienvenida integrado con **React Joyride** puede resetearse desde el perfil del usuario o directamente desde la consola del navegador. Consulta [`RESET_TOUR.md`](./RESET_TOUR.md) para más detalles.
+
+---
+
+## Contribución y GitHub Flow
+
+Este repositorio usa GitHub Flow adaptado con rama base `develop`.
+
+- Flujo, convenciones y checklist: `CONTRIBUTING.md`
+- Plantilla de PR: `.github/PULL_REQUEST_TEMPLATE.md`
+- Plantillas de issues: `.github/ISSUE_TEMPLATE/`
