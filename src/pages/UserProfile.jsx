@@ -657,7 +657,7 @@ export default function UserProfile() {
         </p>
         <button 
           onClick={() => {
-            resetTour(user.role)
+            resetTour(user)
             navigate('/')
           }} 
           className="btn secondary user-profile__full-width-btn"

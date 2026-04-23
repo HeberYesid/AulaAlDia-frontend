@@ -9,6 +9,30 @@ function getTourStartPath(role) {
   return role === 'ADMIN' ? '/admin/dashboard' : '/'
 }
 
+function getTourStorageKey(userOrRole) {
+  if (!userOrRole) return null
+
+  if (typeof userOrRole === 'string') {
+    return `${TOUR_STORAGE_KEY}-${userOrRole}`
+  }
+
+  const role = userOrRole.role
+  if (!role) return null
+
+  const userIdentifier =
+    userOrRole.id ??
+    userOrRole.public_id ??
+    userOrRole.email ??
+    userOrRole.username ??
+    null
+
+  if (userIdentifier === null || userIdentifier === undefined || userIdentifier === '') {
+    return `${TOUR_STORAGE_KEY}-${role}`
+  }
+
+  return `${TOUR_STORAGE_KEY}-${role}-${String(userIdentifier)}`
+}
+
 function completionContent(title, features) {
   return (
     <div>
@@ -393,6 +417,7 @@ export default function AppTour() {
   const [steps, setSteps] = useState([])
   const [stepIndex, setStepIndex] = useState(0)
   const tourStartPath = getTourStartPath(user?.role)
+  const tourStorageKey = getTourStorageKey(user)
 
   useEffect(() => {
     let timerId = null
@@ -413,8 +438,7 @@ export default function AppTour() {
       }
     }
 
-    const tourKey = `${TOUR_STORAGE_KEY}-${user.role}`
-    const hasCompletedTour = localStorage.getItem(tourKey)
+    const hasCompletedTour = tourStorageKey ? localStorage.getItem(tourStorageKey) : null
 
     if (location.pathname === tourStartPath && !hasCompletedTour) {
       const tourSteps = getStepsByRole(user.role)
@@ -450,7 +474,7 @@ export default function AppTour() {
       if (timerId) clearTimeout(timerId)
       if (retryTimerId) clearTimeout(retryTimerId)
     }
-  }, [user, location.pathname, tourStartPath])
+  }, [user, location.pathname, tourStartPath, tourStorageKey])
 
   const handleJoyrideCallback = (data) => {
     const { action, index, status, type } = data
@@ -462,24 +486,24 @@ export default function AppTour() {
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setRun(false)
       setStepIndex(0)
-      if (user) {
-        localStorage.setItem(`${TOUR_STORAGE_KEY}-${user.role}`, 'true')
+      if (tourStorageKey) {
+        localStorage.setItem(tourStorageKey, 'true')
       }
     }
 
     if (action === ACTIONS.CLOSE && type === EVENTS.TOUR_END) {
       setRun(false)
       setStepIndex(0)
-      if (user) {
-        localStorage.setItem(`${TOUR_STORAGE_KEY}-${user.role}`, 'true')
+      if (tourStorageKey) {
+        localStorage.setItem(tourStorageKey, 'true')
       }
     }
   }
 
   // Función para reiniciar el tour (puede ser llamada desde el perfil)
   const restartTour = () => {
-    if (user) {
-      localStorage.removeItem(`${TOUR_STORAGE_KEY}-${user.role}`)
+    if (tourStorageKey) {
+      localStorage.removeItem(tourStorageKey)
       window.location.href = '/'
     }
   }
@@ -555,8 +579,9 @@ export default function AppTour() {
 }
 
 // Exportar función para reiniciar el tour
-export const resetTour = (role) => {
-  if (role) {
-    localStorage.removeItem(`${TOUR_STORAGE_KEY}-${role}`)
+export const resetTour = (userOrRole) => {
+  const tourKey = getTourStorageKey(userOrRole)
+  if (tourKey) {
+    localStorage.removeItem(tourKey)
   }
 }

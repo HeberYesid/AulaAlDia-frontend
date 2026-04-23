@@ -76,4 +76,27 @@ describe('AppTour', () => {
     const lastCall = joyrideMock.mock.calls.at(-1)?.[0]
     expect(lastCall.run).toBe(false)
   })
+
+  it('starts tour for a new user even when legacy role-only key exists', async () => {
+    localStorage.setItem('aulaaldia-tour-completed-ADMIN', 'true')
+    useAuthMock.mockReturnValue({
+      user: {
+        id: 99,
+        role: 'ADMIN',
+        is_global_admin: true,
+      },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/admin/dashboard']}>
+        <AppTour />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(joyrideMock).toHaveBeenCalled()
+      const lastCall = joyrideMock.mock.calls.at(-1)?.[0]
+      expect(lastCall.run).toBe(true)
+    })
+  })
 })
