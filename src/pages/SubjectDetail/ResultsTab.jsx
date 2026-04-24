@@ -3,6 +3,7 @@ import { api } from '../../api/axios'
 import StatusBadge from '../../components/StatusBadge'
 import CSVUpload from '../../components/CSVUpload'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
+import { getAcademicPeriodStatusLabel, sanitizeAcademicPeriodLabel } from '../../utils/academicPeriodPresentation'
 import './ResultsTab.css'
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -92,9 +93,7 @@ export default function ResultsTab({
 
   const formatPeriodState = (period) => {
     if (!period) return 'Sin periodo'
-    if (period.is_closed) return 'Cerrado'
-    if (period.is_grade_locked) return 'Bloqueado'
-    return 'Abierto'
+    return getAcademicPeriodStatusLabel(period)
   }
 
   /* ── Handlers ── */
@@ -505,7 +504,7 @@ export default function ResultsTab({
               <p className="results-tab__meta-line"><strong>Ejercicio:</strong> {editingResult.exerciseName}</p>
               {getExercisePeriod(editingResult.exerciseId) && (
                 <p className="results-tab__meta-line">
-                  <strong>Periodo:</strong> {getExercisePeriod(editingResult.exerciseId).label} &middot; {formatPeriodState(getExercisePeriod(editingResult.exerciseId))}
+                  <strong>Periodo:</strong> {sanitizeAcademicPeriodLabel(getExercisePeriod(editingResult.exerciseId).label)} &middot; {formatPeriodState(getExercisePeriod(editingResult.exerciseId))}
                 </p>
               )}
               <p className="results-tab__meta-line">
@@ -594,7 +593,7 @@ export default function ResultsTab({
                 </select>
                 {selectedExerciseId && getExercisePeriod(selectedExerciseId) && (
                   <p className="notice results-tab__notice-top-xs">
-                    {getExercisePeriod(selectedExerciseId).label} &middot; {formatPeriodState(getExercisePeriod(selectedExerciseId))}
+                    {sanitizeAcademicPeriodLabel(getExercisePeriod(selectedExerciseId).label)} &middot; {formatPeriodState(getExercisePeriod(selectedExerciseId))}
                   </p>
                 )}
               </div>

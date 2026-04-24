@@ -259,7 +259,7 @@ export function useAcademicSettings() {
     setSuccess('')
     try {
       const { data } = await api.post(`/api/v1/courses/academic-periods/${periodId}/close/`)
-      setSuccess(data?.detail || 'Periodo cerrado correctamente.')
+      setSuccess(data?.detail || 'Periodo desactivado correctamente.')
       loadAcademicAdmin()
     } catch (err) {
       setError(normalizeApiError(

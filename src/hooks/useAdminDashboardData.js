@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api } from '../api/axios'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import { unwrapListData } from '../utils/pagination'
+import { sanitizeAcademicPeriodLabel } from '../utils/academicPeriodPresentation'
 
 function toDate(value) {
   if (!value) return null
@@ -76,7 +77,7 @@ function filterItemsByAcademicPeriod(items, academicPeriod, dateField) {
 function formatAcademicPeriodLabel(period) {
   if (!period) return '-'
 
-  const label = String(period.label || '').trim()
+  const label = sanitizeAcademicPeriodLabel(period.label)
   if (!label) return '-'
 
   const simplifiedLabel = label.replace(/^\d{4}\s*[-–—]\s*/u, '')
@@ -372,9 +373,9 @@ export default function useAdminDashboardData() {
   }, [academicPeriods])
 
   const openPeriodsSummary = useMemo(() => {
-    if (openPeriods.length === 0) return 'Sin períodos académicos abiertos'
+    if (openPeriods.length === 0) return 'Sin periodos academicos activos'
     return openPeriods
-      .map((period) => `${period.label}${period.is_grade_locked ? ' (bloqueado)' : ''}`)
+      .map((period) => `${sanitizeAcademicPeriodLabel(period.label)}${period.is_grade_locked ? ' (bloqueado)' : ''}`)
       .join(', ')
   }, [openPeriods])
 

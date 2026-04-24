@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useAcademicSettings, toLocalDateTimeInput } from '../hooks/useAcademicSettings'
+import { getAcademicPeriodStatusLabel, sanitizeAcademicPeriodLabel } from '../utils/academicPeriodPresentation'
 
 export default function AcademicSettings() {
   const [schoolYearConfirmDialog, setSchoolYearConfirmDialog] = useState(null)
@@ -90,7 +91,7 @@ export default function AcademicSettings() {
 
   function buildClosePeriodMessage(period) {
     const detailLines = [
-      `Periodo a desactivar: ${period.label}.`,
+      `Periodo a desactivar: ${sanitizeAcademicPeriodLabel(period.label)}.`,
       '',
       'Si continúas, ocurrirá lo siguiente:',
       '- El periodo quedará inactivo y con fecha de cierre registrada.',
@@ -123,7 +124,7 @@ export default function AcademicSettings() {
   }
 
   function getPeriodStatusLabel(period) {
-    return period.is_closed ? 'Inactivo' : 'Activo'
+    return getAcademicPeriodStatusLabel(period)
   }
 
   async function handleSchoolYearStatusAction(schoolYear) {
@@ -462,7 +463,7 @@ export default function AcademicSettings() {
                 {periods.map((period) => (
                   <tr key={period.id}>
                     <td data-label="Periodo">
-                      <strong>{period.label}</strong>
+                      <strong>{sanitizeAcademicPeriodLabel(period.label)}</strong>
                     </td>
                     <td data-label="Fechas">
                       {period.start_date || '-'}<br />{period.end_date || '-'}
