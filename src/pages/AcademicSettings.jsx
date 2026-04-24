@@ -320,10 +320,16 @@ export default function AcademicSettings() {
           <h2>{editingPeriodId ? 'Editar periodo' : 'Crear periodo'}</h2>
           <form onSubmit={handleCreatePeriod} className="academic-admin__form">
             {editingPeriodId ? null : activeSchoolYear ? (
-              <p className="alert info">
-                Este periodo se creará dentro del año escolar activo <strong>{activeSchoolYear.label}</strong>
-                {' '}({activeSchoolYear.start_date} - {activeSchoolYear.end_date}).
-              </p>
+              <div
+                className="alert info contextual-tip-banner contextual-tip-banner--high-contrast"
+                role="status"
+                aria-live="polite"
+              >
+                <p className="contextual-tip-banner__message">
+                  💡 Este periodo se creará dentro del año escolar activo <strong>{activeSchoolYear.label}</strong>
+                  {' '}({activeSchoolYear.start_date} - {activeSchoolYear.end_date}).
+                </p>
+              </div>
             ) : (
               <p className="alert warning">
                 Debes activar un año escolar para poder crear periodos académicos.
