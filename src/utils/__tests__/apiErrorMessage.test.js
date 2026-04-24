@@ -99,6 +99,39 @@ describe('apiErrorMessage utility', () => {
     expect(message).toBe('No se pudo completar esta accion. Error de validacion externo.')
   })
 
+  it('hides raw html payload and returns status-based fallback', () => {
+    const message = getApiErrorMessage(
+      {
+        response: {
+          status: 404,
+          data: '<!DOCTYPE html><html><head><title>Page not found</title></head><body>debug</body></html>',
+        },
+      },
+      { action: 'activar el periodo academico' }
+    )
+
+    expect(message).toBe('No se encontro la informacion necesaria para activar el periodo academico.')
+  })
+
+  it('hides technical traceback strings from payload detail', () => {
+    const message = getApiErrorMessage(
+      {
+        response: {
+          status: 500,
+          data: {
+            detail: 'Traceback (most recent call last): ValueError at /api/v1/example',
+          },
+        },
+      },
+      {
+        action: 'procesar',
+        fallback: 'No se pudo procesar la solicitud. Intentalo nuevamente.',
+      }
+    )
+
+    expect(message).toBe('No se pudo procesar por un problema interno del servidor. Intentalo nuevamente en unos minutos.')
+  })
+
   it('treats unknown object payload as generic and appends payload text', () => {
     const message = getApiErrorMessage(
       {

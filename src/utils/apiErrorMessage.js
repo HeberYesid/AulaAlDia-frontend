@@ -32,6 +32,26 @@ function toSentence(value) {
   return /[.!?]$/.test(text) ? text : `${text}.`
 }
 
+function isUnsafeTechnicalMessage(message) {
+  const text = String(message || '').trim()
+  if (!text) return false
+
+  const lowered = text.toLowerCase()
+  const looksLikeHtmlDocument =
+    lowered.startsWith('<!doctype html') ||
+    lowered.startsWith('<html') ||
+    (/<\/?[a-z][^>]*>/i.test(text) && /<(html|head|body|title|style|script|table|tr|td|h1)\b/i.test(lowered))
+
+  if (looksLikeHtmlDocument) return true
+
+  return (
+    lowered.includes('traceback (most recent call last)') ||
+    lowered.includes('request method:') ||
+    lowered.includes('request url:') ||
+    lowered.includes('using the urlconf defined in')
+  )
+}
+
 function humanizeFieldName(field) {
   if (FIELD_LABELS[field]) return FIELD_LABELS[field]
   return field.replace(/_/g, ' ')
@@ -141,6 +161,13 @@ export function getApiErrorMessage(error, options = {}) {
 
   const payloadMessage = extractPayloadMessage(error?.response?.data)
   if (payloadMessage) {
+    if (isUnsafeTechnicalMessage(payloadMessage)) {
+      const statusFallback = buildStatusFallback(error?.response?.status, action)
+      if (statusFallback) return statusFallback
+      if (fallback) return fallback
+      return `No se pudo ${action}. Intentalo nuevamente.`
+    }
+
     if (isGenericMessage(payloadMessage)) {
       return `No se pudo ${action}. ${toSentence(payloadMessage)}`
     }
