@@ -105,6 +105,7 @@ export function useAcademicSettings() {
   const [savingSettings, setSavingSettings] = useState(false)
   const [savingPeriod, setSavingPeriod] = useState(false)
   const [savingSchoolYear, setSavingSchoolYear] = useState(false)
+  const [mutatingPeriodId, setMutatingPeriodId] = useState(null)
   const [mutatingSchoolYearId, setMutatingSchoolYearId] = useState(null)
   const activeSchoolYear = schoolYears.find((schoolYear) => schoolYear.is_active) || null
 
@@ -264,6 +265,86 @@ export function useAcademicSettings() {
     }
   }
 
+async function deactivatePeriodById(periodId) {
+    try {
+      await api.patch(`/api/v1/courses/academic-periods/${periodId}/`, { is_closed: true })
+      return
+    } catch (error) {
+      const statusCode = Number(error?.response?.status)
+      if (statusCode === 404 || statusCode === 405) {
+        try {
+          await api.post(`/api/v1/courses/academic-periods/${periodId}/deactivate/`)
+          return
+        } catch (deactivateError) {
+          const deactivateStatusCode = Number(deactivateError?.response?.status)
+          if (deactivateStatusCode === 404 || deactivateStatusCode === 405) {
+            await api.post(`/api/v1/courses/academic-periods/${periodId}/close/`)
+            return
+          }
+          throw deactivateError
+        }
+      }
+      throw error
+  }
+}
+
+  async function activatePeriodById(periodId) {
+    try {
+      await api.patch(`/api/v1/courses/academic-periods/${periodId}/`, { is_closed: false })
+      return
+    } catch (error) {
+      const statusCode = Number(error?.response?.status)
+      if (statusCode === 404 || statusCode === 405) {
+        try {
+          await api.post(`/api/v1/courses/academic-periods/${periodId}/activate/`)
+          return
+        } catch (activateError) {
+          const activateStatusCode = Number(activateError?.response?.status)
+          if (activateStatusCode === 404 || activateStatusCode === 405) {
+            try {
+              await api.post(`/api/v1/courses/academic-periods/${periodId}/open/`)
+              return
+            } catch (openError) {
+              const openStatusCode = Number(openError?.response?.status)
+              if (openStatusCode === 404 || openStatusCode === 405) {
+                await api.post(`/api/v1/courses/academic-periods/${periodId}/reopen/`)
+                return
+              }
+              throw openError
+            }
+          }
+          throw activateError
+        }
+      }
+      throw error
+    }
+  }
+
+  async function handleTogglePeriodStatus(period) {
+    setMutatingPeriodId(period.id)
+    setError('')
+    setSuccess('')
+
+    try {
+      if (period.is_closed) {
+        await activatePeriodById(period.id)
+        setSuccess('Periodo académico activado.')
+      } else {
+        await deactivatePeriodById(period.id)
+        setSuccess('Periodo académico desactivado.')
+      }
+      loadAcademicAdmin()
+    } catch (err) {
+      setError(normalizeApiError(
+        err,
+        'No se pudo actualizar el estado del periodo academico. Verifica que no tenga restricciones vigentes.',
+        'actualizar el estado del periodo academico'
+      ))
+    } finally {
+      setMutatingPeriodId(null)
+    }
+  }
+
   async function handleCreateSchoolYear(event) {
     event.preventDefault()
     setSavingSchoolYear(true)
@@ -320,7 +401,7 @@ export function useAcademicSettings() {
 
         if (periodsToClose.length > 0) {
           const closeResults = await Promise.allSettled(
-            periodsToClose.map((period) => api.post(`/api/v1/courses/academic-periods/${period.id}/close/`))
+            periodsToClose.map((period) => deactivatePeriodById(period.id))
           )
           closedAssociatedPeriods = closeResults.filter((result) => result.status === 'fulfilled').length
           failedAssociatedPeriods = closeResults.length - closedAssociatedPeriods
@@ -375,6 +456,7 @@ export function useAcademicSettings() {
     savingSettings,
     savingSchoolYear,
     savingPeriod,
+    mutatingPeriodId,
     mutatingSchoolYearId,
     activeSchoolYear,
     setSettingsForm,
@@ -389,5 +471,6 @@ export function useAcademicSettings() {
     handleEditPeriod,
     handleCancelPeriodEdit,
     handleClosePeriod,
+    handleTogglePeriodStatus,
   }
 }

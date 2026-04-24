@@ -5,7 +5,7 @@ import { useAcademicSettings, toLocalDateTimeInput } from '../hooks/useAcademicS
 
 export default function AcademicSettings() {
   const [schoolYearConfirmDialog, setSchoolYearConfirmDialog] = useState(null)
-  const [periodCloseConfirmDialog, setPeriodCloseConfirmDialog] = useState(null)
+  const [periodStatusConfirmDialog, setPeriodStatusConfirmDialog] = useState(null)
   const [loadingSchoolYearImpactId, setLoadingSchoolYearImpactId] = useState(null)
 
   const {
@@ -21,6 +21,7 @@ export default function AcademicSettings() {
     savingSettings,
     savingSchoolYear,
     savingPeriod,
+    mutatingPeriodId,
     mutatingSchoolYearId,
     activeSchoolYear,
     setSettingsForm,
@@ -34,7 +35,7 @@ export default function AcademicSettings() {
     handleCreatePeriod,
     handleEditPeriod,
     handleCancelPeriodEdit,
-    handleClosePeriod,
+    handleTogglePeriodStatus,
   } = useAcademicSettings()
 
   const activeSchoolYearStart = Number(String(activeSchoolYear?.start_date || '').slice(0, 4))
@@ -105,13 +106,18 @@ export default function AcademicSettings() {
     return detailLines.join('\n')
   }
 
-  function handlePeriodCloseAction(period) {
-    setPeriodCloseConfirmDialog({
+  function handlePeriodStatusAction(period) {
+    if (period.is_closed) {
+      handleTogglePeriodStatus(period)
+      return
+    }
+
+    setPeriodStatusConfirmDialog({
       title: '¿Seguro que deseas desactivar este periodo académico?',
       message: buildClosePeriodMessage(period),
       onConfirm: async () => {
-        setPeriodCloseConfirmDialog(null)
-        await handleClosePeriod(period.id)
+        setPeriodStatusConfirmDialog(null)
+        await handleTogglePeriodStatus(period)
       },
     })
   }
@@ -481,10 +487,10 @@ export default function AcademicSettings() {
                         <button
                           type="button"
                           className={`btn secondary academic-admin__toggle-btn ${period.is_closed ? 'is-inactive' : 'is-active'}`}
-                          disabled={period.is_closed || savingPeriod}
-                          onClick={() => handlePeriodCloseAction(period)}
+                          disabled={mutatingPeriodId === period.id || savingPeriod}
+                          onClick={() => handlePeriodStatusAction(period)}
                         >
-                          Desactivar
+                          {mutatingPeriodId === period.id ? 'Actualizando...' : period.is_closed ? 'Activar' : 'Desactivar'}
                         </button>
                       </div>
                     </td>
@@ -561,12 +567,12 @@ export default function AcademicSettings() {
         />
       ) : null}
 
-      {periodCloseConfirmDialog ? (
+      {periodStatusConfirmDialog ? (
         <ConfirmDialog
-          title={periodCloseConfirmDialog.title}
-          message={periodCloseConfirmDialog.message}
-          onConfirm={periodCloseConfirmDialog.onConfirm}
-          onCancel={() => setPeriodCloseConfirmDialog(null)}
+          title={periodStatusConfirmDialog.title}
+          message={periodStatusConfirmDialog.message}
+          onConfirm={periodStatusConfirmDialog.onConfirm}
+          onCancel={() => setPeriodStatusConfirmDialog(null)}
         />
       ) : null}
     </div>
