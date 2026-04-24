@@ -77,6 +77,20 @@ export function buildPeriodForm(period) {
   }
 }
 
+function parseSchoolYearBounds(schoolYear) {
+  const startYear = Number(String(schoolYear?.start_date || '').slice(0, 4))
+  const endYear = Number(String(schoolYear?.end_date || '').slice(0, 4))
+
+  if (!Number.isFinite(startYear) || !Number.isFinite(endYear)) {
+    return null
+  }
+
+  return {
+    startYear: Math.min(startYear, endYear),
+    endYear: Math.max(startYear, endYear),
+  }
+}
+
 export function useAcademicSettings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -287,8 +301,47 @@ export function useAcademicSettings() {
 
     try {
       const action = schoolYear.is_active ? 'deactivate' : 'activate'
+      const isDeactivating = action === 'deactivate'
       await api.post(`/api/v1/courses/school-years/${schoolYear.id}/${action}/`)
-      setSuccess(schoolYear.is_active ? 'Año escolar desactivado.' : 'Año escolar activado.')
+
+      let closedAssociatedPeriods = 0
+      let failedAssociatedPeriods = 0
+
+      if (isDeactivating) {
+        const schoolYearBounds = parseSchoolYearBounds(schoolYear)
+        const periodsToClose = schoolYearBounds
+          ? periods.filter((period) => {
+            if (period?.is_closed) return false
+            const periodYear = Number(period?.year)
+            if (!Number.isFinite(periodYear)) return false
+            return periodYear >= schoolYearBounds.startYear && periodYear <= schoolYearBounds.endYear
+          })
+          : []
+
+        if (periodsToClose.length > 0) {
+          const closeResults = await Promise.allSettled(
+            periodsToClose.map((period) => api.post(`/api/v1/courses/academic-periods/${period.id}/close/`))
+          )
+          closedAssociatedPeriods = closeResults.filter((result) => result.status === 'fulfilled').length
+          failedAssociatedPeriods = closeResults.length - closedAssociatedPeriods
+        }
+      }
+
+      if (isDeactivating) {
+        if (failedAssociatedPeriods > 0) {
+          setSuccess(
+            `Año escolar desactivado. Periodos asociados desactivados: ${closedAssociatedPeriods}. ` +
+            `No se pudieron desactivar ${failedAssociatedPeriods} periodos.`
+          )
+        } else if (closedAssociatedPeriods > 0) {
+          setSuccess(`Año escolar desactivado. También se desactivaron ${closedAssociatedPeriods} periodos asociados.`)
+        } else {
+          setSuccess('Año escolar desactivado.')
+        }
+      } else {
+        setSuccess('Año escolar activado.')
+      }
+
       loadAcademicAdmin()
     } catch (err) {
       setError(normalizeApiError(

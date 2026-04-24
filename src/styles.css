@@ -392,6 +392,35 @@ body.sidebar-collapsed .app-body {
   font-weight: 600;
 }
 
+.status-badge.neutral {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--overlay-bg) 88%, var(--text-muted) 12%);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.academic-admin__table-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.academic-admin__toggle-btn {
+  min-width: 8.5rem;
+}
+
+.academic-admin__toggle-btn.is-active {
+  border-color: color-mix(in srgb, var(--warning) 45%, var(--border-primary) 55%);
+}
+
+.academic-admin__toggle-btn.is-inactive {
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border-primary) 65%);
+}
+
 .sidebar.sidebar--collapsed {
   width: var(--sidebar-collapsed-width);
 }

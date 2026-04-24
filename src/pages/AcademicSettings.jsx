@@ -62,7 +62,8 @@ export default function AcademicSettings() {
     const detailLines = [
       `Año a desactivar: ${schoolYear.label}.`,
       `Años escolares activos: ${activeBefore} -> ${activeAfter}.`,
-      `Periodos en ese rango: ${periods} (${openPeriods} abiertos, ${closedPeriods} cerrados).`,
+      `Periodos en ese rango: ${periods} (${openPeriods} activos, ${closedPeriods} inactivos).`,
+      'Los periodos activos de este rango también se desactivarán automáticamente.',
       `Ejercicios asociados a esos periodos: ${exercises}.`,
       `Resultados de estudiantes asociados: ${results}.`,
       `Boletines asociados: ${bulletins}.`,
@@ -88,10 +89,10 @@ export default function AcademicSettings() {
 
   function buildClosePeriodMessage(period) {
     const detailLines = [
-      `Periodo a cerrar: ${period.label}.`,
+      `Periodo a desactivar: ${period.label}.`,
       '',
       'Si continúas, ocurrirá lo siguiente:',
-      '- El periodo quedará cerrado y con fecha de cierre registrada.',
+      '- El periodo quedará inactivo y con fecha de cierre registrada.',
       '- Las notas del periodo quedarán bloqueadas para edición.',
       '- No podrás asociar nuevos ejercicios a este periodo.',
       '- Se generarán boletines para los estudiantes con resultados en este periodo.',
@@ -106,13 +107,17 @@ export default function AcademicSettings() {
 
   function handlePeriodCloseAction(period) {
     setPeriodCloseConfirmDialog({
-      title: '¿Seguro que deseas cerrar este periodo académico?',
+      title: '¿Seguro que deseas desactivar este periodo académico?',
       message: buildClosePeriodMessage(period),
       onConfirm: async () => {
         setPeriodCloseConfirmDialog(null)
         await handleClosePeriod(period.id)
       },
     })
+  }
+
+  function getPeriodStatusLabel(period) {
+    return period.is_closed ? 'Inactivo' : 'Activo'
   }
 
   async function handleSchoolYearStatusAction(schoolYear) {
@@ -460,10 +465,12 @@ export default function AcademicSettings() {
                       {period.grading_deadline ? toLocalDateTimeInput(period.grading_deadline).replace('T', ' ') : '-'}
                     </td>
                     <td data-label="Estado">
-                      {period.is_closed ? 'Cerrado' : period.is_grade_locked ? 'Bloqueado' : 'Abierto'}
+                      <span className={`status-badge ${period.is_closed ? 'neutral' : 'success'}`}>
+                        {getPeriodStatusLabel(period)}
+                      </span>
                     </td>
                     <td data-label="Acciones">
-                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      <div className="academic-admin__table-actions">
                         <button
                           type="button"
                           className="btn secondary"
@@ -473,11 +480,11 @@ export default function AcademicSettings() {
                         </button>
                         <button
                           type="button"
-                          className="btn secondary"
+                          className={`btn secondary academic-admin__toggle-btn ${period.is_closed ? 'is-inactive' : 'is-active'}`}
                           disabled={period.is_closed || savingPeriod}
                           onClick={() => handlePeriodCloseAction(period)}
                         >
-                          Cerrar
+                          Desactivar
                         </button>
                       </div>
                     </td>
@@ -517,12 +524,14 @@ export default function AcademicSettings() {
                     </td>
                     <td data-label="Tipo evaluación">{schoolYear.evaluation_type}</td>
                     <td data-label="Estado">
-                      {schoolYear.is_active ? <span className="status-badge success">Activo</span> : 'Inactivo'}
+                      <span className={`status-badge ${schoolYear.is_active ? 'success' : 'neutral'}`}>
+                        {schoolYear.is_active ? 'Activo' : 'Inactivo'}
+                      </span>
                     </td>
                     <td data-label="Acciones">
                       <button
                         type="button"
-                        className="btn secondary"
+                        className={`btn secondary academic-admin__toggle-btn ${schoolYear.is_active ? 'is-active' : 'is-inactive'}`}
                         disabled={mutatingSchoolYearId === schoolYear.id || loadingSchoolYearImpactId === schoolYear.id}
                         onClick={() => handleSchoolYearStatusAction(schoolYear)}
                       >

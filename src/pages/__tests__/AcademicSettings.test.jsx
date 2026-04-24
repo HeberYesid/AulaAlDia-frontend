@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AcademicSettings from '../AcademicSettings'
 import { api } from '../../api/axios'
@@ -68,6 +68,8 @@ describe('AcademicSettings', () => {
     render(<AcademicSettings />)
 
     expect(await screen.findByText(/configuraci.n del a.o y periodos/i)).toBeInTheDocument()
+    expect(screen.getByText(/^Activo$/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Desactivar/i })).toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: /^Editar$/i })[0])
 
@@ -177,6 +179,9 @@ describe('AcademicSettings', () => {
       if (url === '/api/v1/courses/school-years/99/deactivate/') {
         return Promise.resolve({ data: { id: 99, is_active: false } })
       }
+      if (url === '/api/v1/courses/academic-periods/11/close/') {
+        return Promise.resolve({ data: { id: 11, is_closed: true } })
+      }
       return Promise.reject(new Error(`Unexpected POST ${url}`))
     })
 
@@ -184,7 +189,9 @@ describe('AcademicSettings', () => {
 
     expect(await screen.findByText(/configuraci.n del a.o y periodos/i)).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /Desactivar/i }))
+    const schoolYearsSection = screen.getByRole('heading', { name: /Años escolares configurados/i }).closest('section')
+    expect(schoolYearsSection).not.toBeNull()
+    await user.click(within(schoolYearsSection).getByRole('button', { name: /Desactivar/i }))
 
     expect(await screen.findByRole('heading', { name: /seguro que deseas desactivar este a.o escolar/i })).toBeInTheDocument()
     expect(screen.getByText(/A.os escolares activos: 1 -> 0\./i)).toBeInTheDocument()
@@ -195,6 +202,7 @@ describe('AcademicSettings', () => {
 
     await waitFor(() => {
       expect(api.post).toHaveBeenCalledWith('/api/v1/courses/school-years/99/deactivate/')
+      expect(api.post).toHaveBeenCalledWith('/api/v1/courses/academic-periods/11/close/')
     })
   })
 })
