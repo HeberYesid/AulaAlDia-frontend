@@ -77,7 +77,7 @@ export function buildPeriodForm(period) {
   }
 }
 
-function parseSchoolYearBounds(schoolYear) {
+  function parseSchoolYearBounds(schoolYear) {
   const startYear = Number(String(schoolYear?.start_date || '').slice(0, 4))
   const endYear = Number(String(schoolYear?.end_date || '').slice(0, 4))
 
@@ -89,6 +89,11 @@ function parseSchoolYearBounds(schoolYear) {
     startYear: Math.min(startYear, endYear),
     endYear: Math.max(startYear, endYear),
   }
+}
+
+function normalizePeriodsList(periodsResponse) {
+  const nextPeriods = periodsResponse?.data?.results || periodsResponse?.data || []
+  return Array.isArray(nextPeriods) ? nextPeriods : []
 }
 
 export function useAcademicSettings() {
@@ -320,21 +325,45 @@ async function deactivatePeriodById(periodId) {
     }
   }
 
+  async function reloadPeriods() {
+    const periodsResult = await api.get('/api/v1/courses/academic-periods/')
+    const nextPeriods = normalizePeriodsList(periodsResult)
+    setPeriods(nextPeriods)
+    return nextPeriods
+  }
+
   async function handleTogglePeriodStatus(period) {
     setMutatingPeriodId(period.id)
     setError('')
     setSuccess('')
 
     try {
+      const expectedClosedState = !period.is_closed
+
       if (period.is_closed) {
         await activatePeriodById(period.id)
-        setSuccess('Periodo académico activado.')
       } else {
         await deactivatePeriodById(period.id)
-        setSuccess('Periodo académico desactivado.')
       }
-      loadAcademicAdmin()
+
+      const refreshedPeriods = await reloadPeriods()
+      const refreshedPeriod = refreshedPeriods.find((item) => item.id === period.id)
+
+      if (!refreshedPeriod || Boolean(refreshedPeriod.is_closed) !== expectedClosedState) {
+        throw new Error('PERIOD_STATUS_NOT_UPDATED')
+      }
+
+      setSuccess(period.is_closed ? 'Periodo académico activado.' : 'Periodo académico desactivado.')
     } catch (err) {
+      if (err?.message === 'PERIOD_STATUS_NOT_UPDATED') {
+        setError(
+          period.is_closed
+            ? 'No se pudo activar el periodo academico. El estado no cambio en el servidor.'
+            : 'No se pudo desactivar el periodo academico. El estado no cambio en el servidor.'
+        )
+        return
+      }
+
       setError(normalizeApiError(
         err,
         'No se pudo actualizar el estado del periodo academico. Verifica que no tenga restricciones vigentes.',

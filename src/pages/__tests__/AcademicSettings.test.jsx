@@ -130,6 +130,111 @@ describe('AcademicSettings', () => {
 
   it('activates an inactive period from period actions', async () => {
     const user = userEvent.setup()
+    const inactivePeriod = {
+      id: 77,
+      label: '2026 - Trimestre 2',
+      year: 2026,
+      period_number: 2,
+      sequence: 2,
+      name: 'Trimestre 2',
+      start_date: '2026-04-01',
+      end_date: '2026-06-30',
+      grading_deadline: '2026-06-30T05:00:00Z',
+      lock_after_deadline: true,
+      is_closed: true,
+      is_grade_locked: true,
+    }
+    const activePeriod = { ...inactivePeriod, is_closed: false, is_grade_locked: false }
+    let periodsGetCount = 0
+
+    api.get.mockImplementation((url) => {
+      if (url === '/api/v1/courses/academic-settings/') {
+        return Promise.resolve({ data: settingsResponse })
+      }
+      if (url === '/api/v1/courses/academic-periods/') {
+        periodsGetCount += 1
+        return Promise.resolve({ data: periodsGetCount >= 2 ? [activePeriod] : [inactivePeriod] })
+      }
+      if (url === '/api/v1/courses/school-years/') {
+        return Promise.resolve({ data: [] })
+      }
+      return Promise.reject(new Error(`Unexpected GET ${url}`))
+    })
+
+    api.patch.mockImplementation((url, payload) => {
+      if (url === '/api/v1/courses/academic-periods/88/' && payload?.is_closed === false) {
+        return Promise.reject({ response: { status: 404 } })
+      }
+      return Promise.reject(new Error(`Unexpected PATCH ${url}`))
+    })
+
+    api.post.mockResolvedValue({ data: { id: 88, is_closed: false } })
+
+    render(<AcademicSettings />)
+
+    expect(await screen.findByText(/configuraci.n del a.o y periodos/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /^Activar$/i }))
+
+    await waitFor(() => {
+      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/academic-periods/77/', { is_closed: false })
+    })
+  })
+
+  it('falls back to activate endpoint when patch status update is unavailable', async () => {
+    const user = userEvent.setup()
+    const inactivePeriod = {
+      id: 88,
+      label: '2026 - Trimestre 3',
+      year: 2026,
+      period_number: 3,
+      sequence: 3,
+      name: 'Trimestre 3',
+      start_date: '2026-07-01',
+      end_date: '2026-09-30',
+      grading_deadline: '2026-09-30T05:00:00Z',
+      lock_after_deadline: true,
+      is_closed: true,
+      is_grade_locked: true,
+    }
+    const activePeriod = { ...inactivePeriod, is_closed: false, is_grade_locked: false }
+    let periodsGetCount = 0
+
+    api.get.mockImplementation((url) => {
+      if (url === '/api/v1/courses/academic-settings/') {
+        return Promise.resolve({ data: settingsResponse })
+      }
+      if (url === '/api/v1/courses/academic-periods/') {
+        periodsGetCount += 1
+        return Promise.resolve({ data: periodsGetCount >= 2 ? [activePeriod] : [inactivePeriod] })
+      }
+      if (url === '/api/v1/courses/school-years/') {
+        return Promise.resolve({ data: [] })
+      }
+      return Promise.reject(new Error(`Unexpected GET ${url}`))
+    })
+
+    api.patch.mockImplementation((url, payload) => {
+      if (url === '/api/v1/courses/academic-periods/88/' && payload?.is_closed === false) {
+        return Promise.reject({ response: { status: 404 } })
+      }
+      return Promise.reject(new Error(`Unexpected PATCH ${url}`))
+    })
+
+    api.post.mockResolvedValue({ data: { id: 88, is_closed: false } })
+
+    render(<AcademicSettings />)
+
+    expect(await screen.findByText(/configuraci.n del a.o y periodos/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /^Activar$/i }))
+
+    await waitFor(() => {
+      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/academic-periods/88/', { is_closed: false })
+      expect(screen.getByText(/^Activo$/i)).toBeInTheDocument()
+    })
+  })
+
+  it('shows an error when backend does not change period status after activation attempt', async () => {
+    const user = userEvent.setup()
     const inactivePeriodsResponse = [
       {
         id: 77,
@@ -167,61 +272,7 @@ describe('AcademicSettings', () => {
       return Promise.reject(new Error(`Unexpected PATCH ${url}`))
     })
 
-    render(<AcademicSettings />)
-
-    expect(await screen.findByText(/configuraci.n del a.o y periodos/i)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /^Activar$/i }))
-
-    await waitFor(() => {
-      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/academic-periods/77/', { is_closed: false })
-    })
-  })
-
-  it('falls back to activate endpoint when patch status update is unavailable', async () => {
-    const user = userEvent.setup()
-    const inactivePeriodsResponse = [
-      {
-        id: 88,
-        label: '2026 - Trimestre 3',
-        year: 2026,
-        period_number: 3,
-        sequence: 3,
-        name: 'Trimestre 3',
-        start_date: '2026-07-01',
-        end_date: '2026-09-30',
-        grading_deadline: '2026-09-30T05:00:00Z',
-        lock_after_deadline: true,
-        is_closed: true,
-        is_grade_locked: true,
-      },
-    ]
-
-    api.get.mockImplementation((url) => {
-      if (url === '/api/v1/courses/academic-settings/') {
-        return Promise.resolve({ data: settingsResponse })
-      }
-      if (url === '/api/v1/courses/academic-periods/') {
-        return Promise.resolve({ data: inactivePeriodsResponse })
-      }
-      if (url === '/api/v1/courses/school-years/') {
-        return Promise.resolve({ data: [] })
-      }
-      return Promise.reject(new Error(`Unexpected GET ${url}`))
-    })
-
-    api.patch.mockImplementation((url, payload) => {
-      if (url === '/api/v1/courses/academic-periods/88/' && payload?.is_closed === false) {
-        return Promise.reject({ response: { status: 404 } })
-      }
-      return Promise.reject(new Error(`Unexpected PATCH ${url}`))
-    })
-
-    api.post.mockImplementation((url) => {
-      if (url === '/api/v1/courses/academic-periods/88/activate/') {
-        return Promise.resolve({ data: { id: 88, is_closed: false } })
-      }
-      return Promise.reject(new Error(`Unexpected POST ${url}`))
-    })
+    api.post.mockResolvedValue({ data: {} })
 
     render(<AcademicSettings />)
 
@@ -229,8 +280,7 @@ describe('AcademicSettings', () => {
     await user.click(screen.getByRole('button', { name: /^Activar$/i }))
 
     await waitFor(() => {
-      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/academic-periods/88/', { is_closed: false })
-      expect(api.post).toHaveBeenCalledWith('/api/v1/courses/academic-periods/88/activate/')
+      expect(screen.getByText(/No se pudo activar el periodo academico\. El estado no cambio en el servidor\./i)).toBeInTheDocument()
     })
   })
 
