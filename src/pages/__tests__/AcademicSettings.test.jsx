@@ -161,14 +161,12 @@ describe('AcademicSettings', () => {
       return Promise.reject(new Error(`Unexpected GET ${url}`))
     })
 
-    api.patch.mockImplementation((url, payload) => {
-      if (url === '/api/v1/courses/academic-periods/88/' && payload?.is_closed === false) {
-        return Promise.reject({ response: { status: 404 } })
+    api.post.mockImplementation((url) => {
+      if (url === '/api/v1/courses/academic-periods/77/reopen/') {
+        return Promise.resolve({ data: { id: 77, is_closed: false } })
       }
-      return Promise.reject(new Error(`Unexpected PATCH ${url}`))
+      return Promise.reject(new Error(`Unexpected POST ${url}`))
     })
-
-    api.post.mockResolvedValue({ data: { id: 88, is_closed: false } })
 
     render(<AcademicSettings />)
 
@@ -176,11 +174,12 @@ describe('AcademicSettings', () => {
     await user.click(screen.getByRole('button', { name: /^Activar$/i }))
 
     await waitFor(() => {
-      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/academic-periods/77/', { is_closed: false })
+      expect(api.post).toHaveBeenCalledWith('/api/v1/courses/academic-periods/77/reopen/')
+      expect(screen.getByText(/^Activo$/i)).toBeInTheDocument()
     })
   })
 
-  it('falls back to activate endpoint when patch status update is unavailable', async () => {
+  it('falls back to activate endpoint when reopen action is unavailable', async () => {
     const user = userEvent.setup()
     const inactivePeriod = {
       id: 88,
@@ -213,14 +212,15 @@ describe('AcademicSettings', () => {
       return Promise.reject(new Error(`Unexpected GET ${url}`))
     })
 
-    api.patch.mockImplementation((url, payload) => {
-      if (url === '/api/v1/courses/academic-periods/88/' && payload?.is_closed === false) {
+    api.post.mockImplementation((url) => {
+      if (url === '/api/v1/courses/academic-periods/88/reopen/') {
         return Promise.reject({ response: { status: 404 } })
       }
-      return Promise.reject(new Error(`Unexpected PATCH ${url}`))
+      if (url === '/api/v1/courses/academic-periods/88/activate/') {
+        return Promise.resolve({ data: { id: 88, is_closed: false } })
+      }
+      return Promise.reject(new Error(`Unexpected POST ${url}`))
     })
-
-    api.post.mockResolvedValue({ data: { id: 88, is_closed: false } })
 
     render(<AcademicSettings />)
 
@@ -228,7 +228,8 @@ describe('AcademicSettings', () => {
     await user.click(screen.getByRole('button', { name: /^Activar$/i }))
 
     await waitFor(() => {
-      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/academic-periods/88/', { is_closed: false })
+      expect(api.post).toHaveBeenCalledWith('/api/v1/courses/academic-periods/88/reopen/')
+      expect(api.post).toHaveBeenCalledWith('/api/v1/courses/academic-periods/88/activate/')
       expect(screen.getByText(/^Activo$/i)).toBeInTheDocument()
     })
   })
@@ -265,14 +266,12 @@ describe('AcademicSettings', () => {
       return Promise.reject(new Error(`Unexpected GET ${url}`))
     })
 
-    api.patch.mockImplementation((url, payload) => {
-      if (url === '/api/v1/courses/academic-periods/77/' && payload?.is_closed === false) {
+    api.post.mockImplementation((url) => {
+      if (url === '/api/v1/courses/academic-periods/77/reopen/') {
         return Promise.resolve({ data: { id: 77, is_closed: false } })
       }
-      return Promise.reject(new Error(`Unexpected PATCH ${url}`))
+      return Promise.reject(new Error(`Unexpected POST ${url}`))
     })
-
-    api.post.mockResolvedValue({ data: {} })
 
     render(<AcademicSettings />)
 
@@ -335,7 +334,7 @@ describe('AcademicSettings', () => {
       if (url === '/api/v1/courses/school-years/99/deactivate/') {
         return Promise.resolve({ data: { id: 99, is_active: false } })
       }
-      if (url === '/api/v1/courses/academic-periods/11/deactivate/') {
+      if (url === '/api/v1/courses/academic-periods/11/close/') {
         return Promise.resolve({ data: { id: 11, is_closed: true } })
       }
       return Promise.reject(new Error(`Unexpected POST ${url}`))
@@ -358,7 +357,7 @@ describe('AcademicSettings', () => {
 
     await waitFor(() => {
       expect(api.post).toHaveBeenCalledWith('/api/v1/courses/school-years/99/deactivate/')
-      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/academic-periods/11/', { is_closed: true })
+      expect(api.post).toHaveBeenCalledWith('/api/v1/courses/academic-periods/11/close/')
     })
   })
 })

@@ -96,6 +96,10 @@ function normalizePeriodsList(periodsResponse) {
   return Array.isArray(nextPeriods) ? nextPeriods : []
 }
 
+function isMissingPeriodStatusAction(statusCode) {
+  return statusCode === 404 || statusCode === 405
+}
+
 export function useAcademicSettings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -270,59 +274,62 @@ export function useAcademicSettings() {
     }
   }
 
-async function deactivatePeriodById(periodId) {
+  async function deactivatePeriodById(periodId) {
     try {
-      await api.patch(`/api/v1/courses/academic-periods/${periodId}/`, { is_closed: true })
+      await api.post(`/api/v1/courses/academic-periods/${periodId}/close/`)
       return
-    } catch (error) {
-      const statusCode = Number(error?.response?.status)
-      if (statusCode === 404 || statusCode === 405) {
-        try {
-          await api.post(`/api/v1/courses/academic-periods/${periodId}/deactivate/`)
-          return
-        } catch (deactivateError) {
-          const deactivateStatusCode = Number(deactivateError?.response?.status)
-          if (deactivateStatusCode === 404 || deactivateStatusCode === 405) {
-            await api.post(`/api/v1/courses/academic-periods/${periodId}/close/`)
-            return
-          }
-          throw deactivateError
-        }
+    } catch (closeError) {
+      const closeStatusCode = Number(closeError?.response?.status)
+      if (!isMissingPeriodStatusAction(closeStatusCode)) {
+        throw closeError
       }
-      throw error
+    }
+
+    try {
+      await api.post(`/api/v1/courses/academic-periods/${periodId}/deactivate/`)
+      return
+    } catch (deactivateError) {
+      const deactivateStatusCode = Number(deactivateError?.response?.status)
+      if (isMissingPeriodStatusAction(deactivateStatusCode)) {
+        await api.patch(`/api/v1/courses/academic-periods/${periodId}/`, { is_closed: true })
+        return
+      }
+      throw deactivateError
+    }
   }
-}
 
   async function activatePeriodById(periodId) {
     try {
-      await api.patch(`/api/v1/courses/academic-periods/${periodId}/`, { is_closed: false })
+      await api.post(`/api/v1/courses/academic-periods/${periodId}/reopen/`)
       return
-    } catch (error) {
-      const statusCode = Number(error?.response?.status)
-      if (statusCode === 404 || statusCode === 405) {
-        try {
-          await api.post(`/api/v1/courses/academic-periods/${periodId}/activate/`)
-          return
-        } catch (activateError) {
-          const activateStatusCode = Number(activateError?.response?.status)
-          if (activateStatusCode === 404 || activateStatusCode === 405) {
-            try {
-              await api.post(`/api/v1/courses/academic-periods/${periodId}/open/`)
-              return
-            } catch (openError) {
-              const openStatusCode = Number(openError?.response?.status)
-              if (openStatusCode === 404 || openStatusCode === 405) {
-                await api.post(`/api/v1/courses/academic-periods/${periodId}/reopen/`)
-                return
-              }
-              throw openError
-            }
-          }
-          throw activateError
-        }
+    } catch (reopenError) {
+      const reopenStatusCode = Number(reopenError?.response?.status)
+      if (!isMissingPeriodStatusAction(reopenStatusCode)) {
+        throw reopenError
       }
-      throw error
     }
+
+    try {
+      await api.post(`/api/v1/courses/academic-periods/${periodId}/activate/`)
+      return
+    } catch (activateError) {
+      const activateStatusCode = Number(activateError?.response?.status)
+      if (!isMissingPeriodStatusAction(activateStatusCode)) {
+        throw activateError
+      }
+    }
+
+    try {
+      await api.post(`/api/v1/courses/academic-periods/${periodId}/open/`)
+      return
+    } catch (openError) {
+      const openStatusCode = Number(openError?.response?.status)
+      if (!isMissingPeriodStatusAction(openStatusCode)) {
+        throw openError
+      }
+    }
+
+    await api.patch(`/api/v1/courses/academic-periods/${periodId}/`, { is_closed: false })
   }
 
   async function reloadPeriods() {
