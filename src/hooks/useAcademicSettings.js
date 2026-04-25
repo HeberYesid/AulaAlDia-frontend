@@ -100,6 +100,12 @@ function isMissingPeriodStatusAction(statusCode) {
   return statusCode === 404 || statusCode === 405
 }
 
+function isAlreadyClosedPeriodError(error) {
+  const statusCode = Number(error?.response?.status)
+  const detail = String(error?.response?.data?.detail || '').toLowerCase()
+  return statusCode === 400 && detail.includes('ya fue cerrado')
+}
+
 export function useAcademicSettings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -279,6 +285,9 @@ export function useAcademicSettings() {
       await api.post(`/api/v1/courses/academic-periods/${periodId}/close/`)
       return
     } catch (closeError) {
+      if (isAlreadyClosedPeriodError(closeError)) {
+        return
+      }
       const closeStatusCode = Number(closeError?.response?.status)
       if (!isMissingPeriodStatusAction(closeStatusCode)) {
         throw closeError
