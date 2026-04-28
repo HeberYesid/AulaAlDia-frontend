@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { api } from '../api/axios'
 import { renderSafeMarkdown } from '../utils/markdown'
 import { unwrapListData } from '../utils/pagination'
@@ -13,47 +13,54 @@ function toDate(value) {
 export default function SidebarBanner() {
   const [events, setEvents] = useState([])
   const [announcements, setAnnouncements] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [eventsRes, annRes] = await Promise.all([
-          api.get('/api/v1/courses/calendar/all_events/'),
-          api.get('/api/v1/courses/announcements/')
-        ])
-        
-        const allEvents = unwrapListData(eventsRes.data)
-        const allAnnouncements = unwrapListData(annRes.data)
-        
-        const now = new Date()
-        
-        // Filtrar solo eventos futuros y tomar los 4 más próximos
-        const upcomingEvents = allEvents
-          .filter((event) => {
-            const startValue = event.start || event.start_time || event.date
-            const startDate = toDate(startValue)
-            return startDate && startDate >= now
-          })
-          .sort((a, b) => {
-            const first = toDate(a.start || a.start_time || a.date)?.getTime() || 0
-            const second = toDate(b.start || b.start_time || b.date)?.getTime() || 0
-            return first - second
-          })
-          .slice(0, 4)
+  const loadData = useCallback(async () => {
+    setLoading(true)
 
-        setEvents(upcomingEvents)
-        setAnnouncements(allAnnouncements.filter(a => a.is_active).slice(0, 5))
-      } catch (err) {
-        console.error('Error loading sidebar data:', err)
-      } finally {
-        setLoading(false)
-      }
+    try {
+      const [eventsRes, annRes] = await Promise.all([
+        api.get('/api/v1/courses/calendar/all_events/'),
+        api.get('/api/v1/courses/announcements/')
+      ])
+
+      const allEvents = unwrapListData(eventsRes.data)
+      const allAnnouncements = unwrapListData(annRes.data)
+
+      const now = new Date()
+
+      // Filtrar solo eventos futuros y tomar los 4 más próximos
+      const upcomingEvents = allEvents
+        .filter((event) => {
+          const startValue = event.start || event.start_time || event.date
+          const startDate = toDate(startValue)
+          return startDate && startDate >= now
+        })
+        .sort((a, b) => {
+          const first = toDate(a.start || a.start_time || a.date)?.getTime() || 0
+          const second = toDate(b.start || b.start_time || b.date)?.getTime() || 0
+          return first - second
+        })
+        .slice(0, 4)
+
+      setEvents(upcomingEvents)
+      setAnnouncements(allAnnouncements.filter(a => a.is_active).slice(0, 5))
+    } catch (err) {
+      console.error('Error loading sidebar data:', err)
+    } finally {
+      setLoading(false)
     }
-
-    loadData()
   }, [])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  useEffect(() => {
+    if (!isOpen) return
+    loadData()
+  }, [isOpen, loadData])
 
   // Prevenir scroll en el body cuando el panel está abierto
   useEffect(() => {

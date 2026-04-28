@@ -50,6 +50,7 @@ describe('AdminDashboard page', () => {
       if (url.includes('/observations/')) return Promise.resolve({ data: [] });
       if (url.includes('/notifications/')) return Promise.resolve({ data: [] });
       if (url.includes('/calendar/all_events/')) return Promise.resolve({ data: [] });
+      if (url.includes('/announcements/')) return Promise.resolve({ data: [] });
       if (url.includes('/academic-periods/')) return Promise.resolve({ data: [] });
       if (url.includes('/academic-settings/')) return Promise.resolve({ data: { period_scheme: 'SEMESTER', min_grade: '1.0', max_grade: '5.0' } });
       return Promise.reject(new Error('not mocked: ' + url));
@@ -72,6 +73,7 @@ describe('AdminDashboard page', () => {
       if (url.includes('/observations/')) return Promise.resolve({ data: [] });
       if (url.includes('/notifications/')) return Promise.resolve({ data: [] });
       if (url.includes('/calendar/all_events/')) return Promise.resolve({ data: [] });
+      if (url.includes('/announcements/')) return Promise.resolve({ data: [] });
       if (url.includes('/academic-periods/')) return Promise.resolve({ data: [] });
       if (url.includes('/academic-settings/')) return Promise.resolve({ data: { period_scheme: 'SEMESTER', min_grade: '1.0', max_grade: '5.0' } });
       return Promise.reject(new Error('not mocked: ' + url));
@@ -160,6 +162,7 @@ describe('AdminDashboard page', () => {
       }
       if (url.includes('/notifications/')) return Promise.resolve({ data: [] });
       if (url.includes('/calendar/all_events/')) return Promise.resolve({ data: [] });
+      if (url.includes('/announcements/')) return Promise.resolve({ data: [] });
       if (url.includes('/academic-periods/')) {
         return Promise.resolve({
           data: [
