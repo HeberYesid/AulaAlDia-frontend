@@ -59,7 +59,7 @@ const NAVIGATION_ITEMS = [
   {
     key: 'admin-news',
     to: '/admin/news',
-    label: 'Gestion de Novedades',
+    label: 'Novedades',
     contextualTip: 'Publica novedades claras y breves para mantener informada a toda la comunidad en tiempo real.',
     icon: Megaphone,
     section: 'administration',
