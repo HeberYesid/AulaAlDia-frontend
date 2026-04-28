@@ -6,6 +6,7 @@ import { AuthProvider } from './state/AuthContext'
 import { ThemeProvider } from './state/ThemeContext'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import './styles.css'
+import './styles/markdown.css'
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
 

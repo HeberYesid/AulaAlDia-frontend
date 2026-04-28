@@ -7,6 +7,7 @@ import getDay from 'date-fns/getDay'
 import es from 'date-fns/locale/es'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { api } from '../api/axios'
+import { renderSafeMarkdown } from '../utils/markdown'
 import { useAuth } from '../state/AuthContext'
 
 const locales = {
@@ -154,7 +155,13 @@ export default function CalendarPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="event-dialog-title" style={{ marginTop: 0 }}>{selectedEvent.title}</h2>
-            {selectedEvent.description && <p style={{ color: 'var(--text-secondary)' }}>{selectedEvent.description}</p>}
+            {selectedEvent.description && (
+              <div
+                className="markdown-content"
+                style={{ color: 'var(--text-secondary)', marginTop: '0.75rem' }}
+                dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(selectedEvent.description) }}
+              />
+            )}
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
               {selectedEvent.start?.toLocaleDateString('es-CO', { dateStyle: 'full' })}
             </p>

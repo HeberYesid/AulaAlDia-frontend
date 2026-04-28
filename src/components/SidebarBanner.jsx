@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { api } from '../api/axios'
+import { renderSafeMarkdown } from '../utils/markdown'
 import { unwrapListData } from '../utils/pagination'
 
 function toDate(value) {
@@ -112,7 +113,11 @@ export default function SidebarBanner() {
             announcements.map((ann, idx) => (
               <div key={ann.id || idx} className="sidebar-banner__announcement" style={{marginBottom: "1rem"}}>
                 <strong>{ann.title}</strong>
-                <p style={{whiteSpace: "pre-wrap"}}>{ann.content}</p>
+                <div
+                  className="sidebar-banner__announcement-copy markdown-content"
+                  style={{ marginTop: '0.35rem' }}
+                  dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(ann.content) || '<p></p>' }}
+                />
                 <small style={{display: "block", marginTop: "0.5rem", color: "#666"}}>
                   {new Date(ann.created_at).toLocaleDateString('es-CO')}
                 </small>
