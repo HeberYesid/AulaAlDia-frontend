@@ -115,7 +115,7 @@ export default function MyBulletins() {
 
     // Sort periods within each year
     Object.keys(groups).forEach((year) => {
-      groups[year].sort((a, b) => a.period_number - b.period_number)
+      groups[year].sort((a, b) => a.sequence - b.sequence)
     })
 
     // Return sorted by year descending
@@ -270,7 +270,7 @@ export default function MyBulletins() {
                   <span className="my-bulletins__period-head">
                     <span>
                       <span className="my-bulletins__period-name">
-                        Periodo {bulletin.period_number}
+                        Periodo {bulletin.sequence}
                       </span>
                       <span className="my-bulletins__period-date">
                         {new Date(bulletin.created_at).toLocaleDateString('es-CO', {

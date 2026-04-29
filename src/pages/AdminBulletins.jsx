@@ -183,7 +183,7 @@ export default function AdminBulletins() {
   const periodOptions = useMemo(() => {
     const values = new Set(
       bulletins
-        .map((bulletin) => Number(bulletin.period_number))
+        .map((bulletin) => Number(bulletin.sequence))
         .filter((value) => Number.isFinite(value) && value > 0)
     )
     return [...values].sort((first, second) => first - second)
@@ -193,7 +193,7 @@ export default function AdminBulletins() {
     const normalizedSearch = normalizeText(search)
 
     return bulletins.filter((bulletin) => {
-      if (periodFilter !== 'ALL' && Number(bulletin.period_number) !== Number(periodFilter)) {
+      if (periodFilter !== 'ALL' && Number(bulletin.sequence) !== Number(periodFilter)) {
         return false
       }
 
@@ -326,7 +326,7 @@ export default function AdminBulletins() {
                     <tr key={`bulletin-${bulletin.id}`}>
                         <td data-label="Estudiante">{bulletin.student_name || 'Sin nombre'}</td>
                         <td data-label="Correo">{bulletin.student_email}</td>
-                        <td data-label="Periodo" className="admin-bulletins__text-center">Periodo {bulletin.period_number}</td>
+                        <td data-label="Periodo" className="admin-bulletins__text-center">Periodo {bulletin.sequence}</td>
                         <td
                           data-label="Promedio"
                           className={`admin-bulletins__grade-cell ${getGradeToneClass(bulletin.average_grade)}`}

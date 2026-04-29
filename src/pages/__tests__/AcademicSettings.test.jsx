@@ -29,7 +29,6 @@ describe('AcademicSettings', () => {
       id: 11,
       label: '2026 - Trimestre 1',
       year: 2026,
-      period_number: 1,
       sequence: 1,
       name: 'Trimestre 1',
       start_date: '2026-01-15',
@@ -70,6 +69,7 @@ describe('AcademicSettings', () => {
     expect(await screen.findByText(/configuraci.n del a.o y periodos/i)).toBeInTheDocument()
     expect(screen.getByText(/^Activo$/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Desactivar/i })).toBeInTheDocument()
+    expect(screen.queryByLabelText(/Secuencia/i)).not.toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: /^Editar$/i })[0])
 
@@ -89,7 +89,6 @@ describe('AcademicSettings', () => {
           name: 'Trimestre 1 actualizado',
           year: 2026,
           sequence: 1,
-          period_number: 1,
         })
       )
     })
@@ -151,8 +150,7 @@ describe('AcademicSettings', () => {
         '/api/v1/courses/academic-periods/',
         expect.objectContaining({
           year: 2026,
-          sequence: 1,
-          period_number: 1,
+          sequence: 2,
           is_closed: true,
         })
       )
@@ -175,7 +173,6 @@ describe('AcademicSettings', () => {
       id: 77,
       label: '2026 - Trimestre 2',
       year: 2026,
-      period_number: 2,
       sequence: 2,
       name: 'Trimestre 2',
       start_date: '2026-04-01',
@@ -226,7 +223,6 @@ describe('AcademicSettings', () => {
       id: 88,
       label: '2026 - Trimestre 3',
       year: 2026,
-      period_number: 3,
       sequence: 3,
       name: 'Trimestre 3',
       start_date: '2026-07-01',
@@ -282,7 +278,6 @@ describe('AcademicSettings', () => {
         id: 77,
         label: '2026 - Trimestre 2',
         year: 2026,
-        period_number: 2,
         sequence: 2,
         name: 'Trimestre 2',
         start_date: '2026-04-01',

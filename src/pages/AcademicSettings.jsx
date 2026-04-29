@@ -348,30 +348,17 @@ export default function AcademicSettings() {
               </p>
             )}
 
-            <div className="academic-admin__grid-2">
-              <div>
-                <label htmlFor="period-year">Año</label>
-                <input
-                  id="period-year"
-                  type="number"
-                  value={periodForm.year}
-                  min={!editingPeriodId && hasActiveSchoolYearRange ? activeSchoolYearStart : undefined}
-                  max={!editingPeriodId && hasActiveSchoolYearRange ? activeSchoolYearEnd : undefined}
-                  onChange={(event) => setPeriodForm((current) => ({ ...current, year: event.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="period-sequence">Secuencia</label>
-                <input
-                  id="period-sequence"
-                  type="number"
-                  min="1"
-                  value={periodForm.sequence}
-                  onChange={(event) => setPeriodForm((current) => ({ ...current, sequence: event.target.value }))}
-                  required
-                />
-              </div>
+            <div>
+              <label htmlFor="period-year">Año</label>
+              <input
+                id="period-year"
+                type="number"
+                value={periodForm.year}
+                min={!editingPeriodId && hasActiveSchoolYearRange ? activeSchoolYearStart : undefined}
+                max={!editingPeriodId && hasActiveSchoolYearRange ? activeSchoolYearEnd : undefined}
+                onChange={(event) => setPeriodForm((current) => ({ ...current, year: event.target.value }))}
+                required
+              />
             </div>
 
             <div>

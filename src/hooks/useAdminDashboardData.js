@@ -37,8 +37,8 @@ function resolveActiveAcademicPeriod(periods) {
       const yearDiff = Number(first.year || 0) - Number(second.year || 0)
       if (yearDiff !== 0) return yearDiff
 
-      const firstSequence = Number(first.sequence || first.period_number || 0)
-      const secondSequence = Number(second.sequence || second.period_number || 0)
+      const firstSequence = Number(first.sequence || 0)
+      const secondSequence = Number(second.sequence || 0)
       return firstSequence - secondSequence
     })
 

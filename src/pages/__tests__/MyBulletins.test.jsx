@@ -66,7 +66,7 @@ describe('MyBulletins page', () => {
       {
         id: 1,
         year: 2023,
-        period_number: 1,
+        sequence: 1,
         period_label: 'Per 1',
         average_grade: 4.0,
         total_subjects: 5,
@@ -93,7 +93,7 @@ describe('MyBulletins page', () => {
       {
         id: 1,
         year: 2023,
-        period_number: 1,
+        sequence: 1,
         period_label: 'Per 1',
         average_grade: 4.0,
         total_subjects: 1,
@@ -151,7 +151,7 @@ describe('MyBulletins page', () => {
       {
         id: 5,
         year: 2026,
-        period_number: 2,
+        sequence: 2,
         period_label: 'Per 2',
         average_grade: 3.8,
         total_subjects: 4,

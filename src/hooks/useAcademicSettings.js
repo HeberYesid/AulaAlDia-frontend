@@ -70,7 +70,7 @@ export function createDefaultSchoolYear() {
 export function buildPeriodForm(period) {
   return {
     year: period.year,
-    sequence: period.sequence,
+    sequence: period.sequence ?? 1,
     name: period.name || '',
     start_date: period.start_date || '',
     end_date: period.end_date || '',
@@ -78,6 +78,17 @@ export function buildPeriodForm(period) {
     lock_after_deadline: Boolean(period.lock_after_deadline),
     is_closed: Boolean(period.is_closed),
   }
+}
+
+function getNextPeriodSequence(periods, year) {
+  const numericYear = Number(year)
+  if (!Number.isFinite(numericYear)) return 1
+
+  const maxSequence = (Array.isArray(periods) ? periods : [])
+    .filter((period) => Number(period.year) === numericYear)
+    .reduce((highest, period) => Math.max(highest, Number(period.sequence || 0)), 0)
+
+  return maxSequence + 1
 }
 
   function parseSchoolYearBounds(schoolYear) {
@@ -223,8 +234,7 @@ export function useAcademicSettings() {
     try {
       const payload = {
         year: periodYear,
-        sequence: Number(periodForm.sequence),
-        period_number: Number(periodForm.sequence),
+        sequence: editingPeriodId ? Number(periodForm.sequence) : getNextPeriodSequence(periods, periodYear),
         name: periodForm.name,
         start_date: periodForm.start_date || null,
         end_date: periodForm.end_date || null,
