@@ -199,7 +199,7 @@ export default function AcademicSettings() {
       <section className="card">
         <div className="academic-admin__section-header">
           <div>
-            <h2>Años escolares</h2>
+            <h2>Crear año escolar</h2>
             <p>Configura vigencias institucionales, ventana de matrícula y esquema de evaluación.</p>
           </div>
         </div>
