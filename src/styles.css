@@ -3132,6 +3132,31 @@ form {
   border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
 }
 
+.alert.error,
+.alert.alert-danger,
+.alert.alert-error {
+  position: fixed;
+  top: calc(var(--space-lg) + env(safe-area-inset-top));
+  right: calc(var(--space-lg) + env(safe-area-inset-right));
+  z-index: 1200;
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  margin: 0;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  border-left-width: 4px;
+  box-shadow: var(--shadow-xl);
+  animation: slide-in-right 220ms ease-out both;
+  backdrop-filter: blur(10px);
+}
+
+.alert.error,
+.alert.alert-danger,
+.alert.alert-error {
+  background: color-mix(in srgb, var(--bg-card) 84%, var(--danger-bg) 16%);
+}
+
 /* 
 ===============================================
 📱 RESPONSIVE STYLES FOR NEW PAGES
