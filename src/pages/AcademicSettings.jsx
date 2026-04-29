@@ -415,6 +415,20 @@ export default function AcademicSettings() {
               />
             </div>
 
+            {!editingPeriodId ? (
+              <label className="academic-admin__checkbox">
+                <input
+                  type="checkbox"
+                  checked={!periodForm.is_closed}
+                  onChange={(event) => setPeriodForm((current) => ({
+                    ...current,
+                    is_closed: !event.target.checked,
+                  }))}
+                />
+                <span>Crear como periodo activo</span>
+              </label>
+            ) : null}
+
             <label className="academic-admin__checkbox">
               <input
                 type="checkbox"

@@ -18,6 +18,7 @@ export const DEFAULT_PERIOD = {
   end_date: '',
   grading_deadline: '',
   lock_after_deadline: true,
+  is_closed: false,
 }
 
 export const DEFAULT_SCHOOL_YEAR = {
@@ -51,6 +52,7 @@ export function createDefaultPeriod() {
     end_date: '',
     grading_deadline: '',
     lock_after_deadline: true,
+    is_closed: false,
   }
 }
 
@@ -74,6 +76,7 @@ export function buildPeriodForm(period) {
     end_date: period.end_date || '',
     grading_deadline: toLocalDateTimeInput(period.grading_deadline),
     lock_after_deadline: Boolean(period.lock_after_deadline),
+    is_closed: Boolean(period.is_closed),
   }
 }
 
@@ -227,6 +230,9 @@ export function useAcademicSettings() {
         end_date: periodForm.end_date || null,
         grading_deadline: periodForm.grading_deadline || null,
         lock_after_deadline: Boolean(periodForm.lock_after_deadline),
+      }
+      if (!editingPeriodId) {
+        payload.is_closed = Boolean(periodForm.is_closed)
       }
       if (editingPeriodId) {
         await api.patch(`/api/v1/courses/academic-periods/${editingPeriodId}/`, payload)

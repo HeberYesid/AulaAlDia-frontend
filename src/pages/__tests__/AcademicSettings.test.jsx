@@ -118,6 +118,47 @@ describe('AcademicSettings', () => {
     expect(screen.getAllByText(/2026-2027/i).length).toBeGreaterThan(0)
   })
 
+  it('sends is_closed when creating a period from the active checkbox', async () => {
+    const user = userEvent.setup()
+
+    schoolYearsResponse = [
+      {
+        id: 5,
+        label: '2026-2027',
+        start_date: '2026-01-01',
+        end_date: '2027-12-31',
+        enrollment_open_date: '2026-01-10',
+        enrollment_close_date: '2026-02-10',
+        evaluation_type: 'TRIMESTER',
+        is_active: true,
+      },
+    ]
+
+    api.post.mockResolvedValue({ data: { id: 99 } })
+
+    render(<AcademicSettings />)
+
+    expect(await screen.findByText(/configuraci.n del a.o y periodos/i)).toBeInTheDocument()
+
+    const activeCheckbox = screen.getByRole('checkbox', { name: /Crear como periodo activo/i })
+    expect(activeCheckbox).toBeChecked()
+
+    await user.click(activeCheckbox)
+    await user.click(screen.getByRole('button', { name: /Crear periodo/i }))
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith(
+        '/api/v1/courses/academic-periods/',
+        expect.objectContaining({
+          year: 2026,
+          sequence: 1,
+          period_number: 1,
+          is_closed: true,
+        })
+      )
+    })
+  })
+
   it('disables period creation when there is no active school year', async () => {
     render(<AcademicSettings />)
 
