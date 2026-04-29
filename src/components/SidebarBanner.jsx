@@ -125,7 +125,7 @@ export default function SidebarBanner() {
                   style={{ marginTop: '0.35rem' }}
                   dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(ann.content) || '<p></p>' }}
                 />
-                <small style={{display: "block", marginTop: "0.5rem", color: "#666"}}>
+                <small className="sidebar-banner__announcement-meta">
                   {new Date(ann.created_at).toLocaleDateString('es-CO')}
                 </small>
               </div>
