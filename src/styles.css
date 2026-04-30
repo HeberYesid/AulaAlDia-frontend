@@ -7988,7 +7988,18 @@ a.welcome-panel__notif-link:hover {
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - var(--space-lg) * 2);
+  overflow: hidden;
   padding: var(--space-xl);
+}
+
+.sections-modal form {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .sections-modal h2 {
@@ -8108,7 +8119,7 @@ a.welcome-panel__notif-link:hover {
   .sections-modal {
     width: 100%;
     max-height: 90dvh;
-    overflow-y: auto;
+    overflow: hidden;
     padding: var(--space-lg);
   }
 
