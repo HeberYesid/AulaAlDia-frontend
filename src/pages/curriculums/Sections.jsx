@@ -109,7 +109,6 @@ export default function Sections() {
           <table className="table mobile-card-view sections-table">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Nombre</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -118,18 +117,17 @@ export default function Sections() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td data-label="Estado" colSpan="4" className="text-center">Cargando...</td>
+                  <td data-label="Estado" colSpan="3" className="text-center">Cargando...</td>
                 </tr>
               ) : sections.length === 0 ? (
                 <tr>
-                  <td data-label="Estado" colSpan="4" className="text-center">
+                  <td data-label="Estado" colSpan="3" className="text-center">
                     No hay secciones registradas.
                   </td>
                 </tr>
               ) : (
                 sections.map((sec) => (
                   <tr key={sec.id}>
-                    <td data-label="ID">{sec.id}</td>
                     <td data-label="Nombre">{sec.name}</td>
                     <td data-label="Estado">
                       <span
