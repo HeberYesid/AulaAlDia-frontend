@@ -1930,7 +1930,29 @@ form {
 }
 
 .auth-feedback {
+  display: grid;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
   min-height: 0;
+}
+
+.auth-card .auth-feedback .alert {
+  margin: 0;
+}
+
+.auth-card .alert.error,
+.auth-card .alert.alert-danger,
+.auth-card .alert.alert-error {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  width: auto;
+  max-height: none;
+  overflow: visible;
+  margin: var(--space-md) 0;
+  animation: none;
+  backdrop-filter: none;
 }
 
 .auth-btn {
