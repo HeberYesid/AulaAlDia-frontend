@@ -268,7 +268,7 @@ export default function Courses() {
                 />
               </div>
               <div className="form-group">
-                <label>Grado Nivel</label>
+                <label>Grado</label>
                 <select
                   className="form-control"
                   value={formData.grade_level}
