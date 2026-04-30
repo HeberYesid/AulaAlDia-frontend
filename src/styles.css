@@ -8000,6 +8000,31 @@ a.welcome-panel__notif-link:hover {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 55%, transparent) transparent;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sections-modal form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sections-modal form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sections-modal form::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-muted) 52%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.sections-modal form::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-primary) 58%, transparent);
+  background-clip: content-box;
 }
 
 .sections-modal h2 {
