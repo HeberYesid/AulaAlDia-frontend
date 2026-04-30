@@ -17,7 +17,6 @@ export default function Courses() {
     grade_level: "",
     section: "",
     display_name: "",
-    school_year: "",
     curriculum_id: "",
     is_active: true,
   });
@@ -74,7 +73,6 @@ export default function Courses() {
         grade_level: "",
         section: "",
         display_name: "",
-        school_year: "",
         curriculum_id: "",
         is_active: true,
       });
@@ -101,7 +99,6 @@ export default function Courses() {
         grade_level: "",
         section: "",
         display_name: "",
-        school_year: "",
         curriculum_id: "",
         is_active: true,
       });
@@ -114,8 +111,13 @@ export default function Courses() {
       setSubmitting(true);
       const payload = { ...formData };
       if (!payload.section) payload.section = null;
-      if (!payload.school_year) payload.school_year = null;
       if (!payload.curriculum_id) payload.curriculum_id = null;
+
+      if (editingId) {
+        if (!payload.school_year) payload.school_year = null;
+      } else {
+        delete payload.school_year;
+      }
 
       if (editingId) {
         await api.patch(`/api/v1/courses/courses/${editingId}/`, payload);
@@ -298,24 +300,6 @@ export default function Courses() {
                   {sections.map((sec) => (
                     <option key={sec.id} value={sec.id}>
                       {sec.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Año Académico</label>
-                <select
-                  className="form-control"
-                  value={formData.school_year}
-                  onChange={(e) =>
-                    setFormData({ ...formData, school_year: e.target.value })
-                  }
-                  required
-                >
-                  <option value="">Seleccione un año</option>
-                  {schoolYears.map((year) => (
-                    <option key={year.id} value={year.id}>
-                      {year.label || `${year.start_date} - ${year.end_date}`}
                     </option>
                   ))}
                 </select>
