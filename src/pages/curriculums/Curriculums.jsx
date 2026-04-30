@@ -9,6 +9,8 @@ const createInitialFormData = () => ({
   scope_type: 'TENANT_DEFAULT',
   subjects: [{ ...INITIAL_CURRICULUM_SUBJECT }],
 })
+const INITIAL_EDIT_FORM_DATA = { name: '' }
+const createInitialEditFormData = () => ({ ...INITIAL_EDIT_FORM_DATA })
 const INITIAL_CLONE_FORM_DATA = { curriculumId: null, curriculumName: '', gradeLevelId: '' }
 
 const SCOPE_LABELS = {
@@ -25,14 +27,23 @@ export default function Curriculums() {
   const [success, setSuccess] = useState('')
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isCloneModalOpen, setIsCloneModalOpen] = useState(false)
   const [formData, setFormData] = useState(() => createInitialFormData())
+  const [editFormData, setEditFormData] = useState(() => createInitialEditFormData())
+  const [editingCurriculumId, setEditingCurriculumId] = useState(null)
   const [cloneFormData, setCloneFormData] = useState(() => ({ ...INITIAL_CLONE_FORM_DATA }))
   const [submitting, setSubmitting] = useState(false)
 
   const closeCreateModal = useCallback(() => {
     setIsCreateModalOpen(false)
     setFormData(createInitialFormData())
+  }, [])
+
+  const closeEditModal = useCallback(() => {
+    setIsEditModalOpen(false)
+    setEditingCurriculumId(null)
+    setEditFormData(createInitialEditFormData())
   }, [])
 
   const closeCloneModal = useCallback(() => {
@@ -45,7 +56,7 @@ export default function Curriculums() {
   }, [])
 
   useEffect(() => {
-    if (!isCreateModalOpen && !isCloneModalOpen) return
+    if (!isCreateModalOpen && !isCloneModalOpen && !isEditModalOpen) return
 
     const handleEscape = (event) => {
       if (event.key !== 'Escape' || submitting) {
@@ -57,12 +68,17 @@ export default function Curriculums() {
         return
       }
 
+      if (isEditModalOpen) {
+        closeEditModal()
+        return
+      }
+
       closeCreateModal()
     }
 
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [isCreateModalOpen, isCloneModalOpen, submitting, closeCreateModal, closeCloneModal])
+  }, [isCreateModalOpen, isCloneModalOpen, isEditModalOpen, submitting, closeCreateModal, closeEditModal, closeCloneModal])
 
   const showSuccessMessage = (message) => {
     setSuccess(message)
@@ -94,9 +110,20 @@ export default function Curriculums() {
   const openCreateModal = () => {
     setError(null)
     setSuccess('')
+    closeEditModal()
     setIsCloneModalOpen(false)
     setFormData(createInitialFormData())
     setIsCreateModalOpen(true)
+  }
+
+  const openEditModal = (curriculum) => {
+    setError(null)
+    setSuccess('')
+    setIsCreateModalOpen(false)
+    setIsCloneModalOpen(false)
+    setEditingCurriculumId(curriculum.id)
+    setEditFormData({ name: curriculum.name || '' })
+    setIsEditModalOpen(true)
   }
 
   const openCloneModal = (curriculum) => {
@@ -108,6 +135,7 @@ export default function Curriculums() {
     setError(null)
     setSuccess('')
     setIsCreateModalOpen(false)
+    closeEditModal()
     setCloneFormData({
       curriculumId: curriculum.id,
       curriculumName: curriculum.name,
@@ -196,8 +224,15 @@ export default function Curriculums() {
       return
     }
 
+    const curriculumName = String(formData.name || '').trim().replace(/\s+/g, ' ')
+    if (!curriculumName) {
+      setError('Debes ingresar un nombre valido para la malla.')
+      setSuccess('')
+      return
+    }
+
     const curriculumPayload = {
-      name: formData.name,
+      name: curriculumName,
       scope_type: formData.scope_type,
       subjects: subjectsPayload,
     }
@@ -214,6 +249,43 @@ export default function Curriculums() {
       setError(getApiErrorMessage(err, {
         action: 'guardar la malla curricular',
         fallback: 'No se pudo guardar la malla curricular. Revisa el nombre, el alcance y las materias seleccionadas.',
+      }))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleEditSubmit = async (event) => {
+    event.preventDefault()
+
+    if (!editingCurriculumId) {
+      setError('No se pudo identificar la malla a editar.')
+      setSuccess('')
+      return
+    }
+
+    const curriculumName = String(editFormData.name || '').trim().replace(/\s+/g, ' ')
+    if (!curriculumName) {
+      setError('Debes ingresar un nombre valido para la malla.')
+      setSuccess('')
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      await api.patch(`/api/v1/courses/curriculums/${editingCurriculumId}/`, {
+        name: curriculumName,
+      })
+
+      closeEditModal()
+      await fetchData()
+      showSuccessMessage('Malla curricular actualizada correctamente.')
+    } catch (err) {
+      console.error(err)
+      setSuccess('')
+      setError(getApiErrorMessage(err, {
+        action: 'actualizar la malla curricular',
+        fallback: 'No se pudo actualizar la malla curricular. Revisa el nombre e intentalo nuevamente.',
       }))
     } finally {
       setSubmitting(false)
@@ -250,22 +322,53 @@ export default function Curriculums() {
     }
   }
 
-  const handleUnlink = async (id) => {
-    if (!window.confirm('Seguro que queres desvincular esta malla? El grado volvera a usar la malla por defecto.')) {
+  const handleToggleActive = async (curriculum) => {
+    try {
+      setSubmitting(true)
+      await api.patch(`/api/v1/courses/curriculums/${curriculum.id}/`, {
+        is_active: !curriculum.is_active,
+      })
+
+      await fetchData()
+      showSuccessMessage(
+        curriculum.is_active
+          ? 'Malla curricular desactivada correctamente.'
+          : 'Malla curricular activada correctamente.',
+      )
+    } catch (err) {
+      console.error(err)
+      setSuccess('')
+      setError(getApiErrorMessage(err, {
+        action: curriculum.is_active ? 'desactivar la malla curricular' : 'activar la malla curricular',
+        fallback: 'No se pudo actualizar el estado de la malla curricular. Intentalo nuevamente.',
+      }))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (curriculum) => {
+    const confirmationMessage = curriculum.scope_type === 'GRADE'
+      ? 'Seguro que queres eliminar esta malla? El grado volvera a usar la malla por defecto.'
+      : curriculum.is_default
+        ? 'Seguro que queres eliminar la malla por defecto? Las nuevas configuraciones no tendran una malla base.'
+        : 'Seguro que queres eliminar esta malla?'
+
+    if (!window.confirm(confirmationMessage)) {
       return
     }
 
     try {
       setSubmitting(true)
-      await api.delete(`/api/v1/courses/curriculums/${id}/`)
+      await api.delete(`/api/v1/courses/curriculums/${curriculum.id}/`)
       await fetchData()
-      showSuccessMessage('Malla curricular desvinculada correctamente.')
+      showSuccessMessage('Malla curricular eliminada correctamente.')
     } catch (err) {
       console.error(err)
       setSuccess('')
       setError(getApiErrorMessage(err, {
-        action: 'desvincular la malla curricular',
-        fallback: 'No se pudo desvincular la malla curricular. Intentalo nuevamente.',
+        action: 'eliminar la malla curricular',
+        fallback: 'No se pudo eliminar la malla curricular. Intentalo nuevamente.',
       }))
     } finally {
       setSubmitting(false)
@@ -330,6 +433,7 @@ export default function Curriculums() {
                       <div className="curriculums-table__actions">
                         {curriculum.scope_type === 'TENANT_DEFAULT' && (
                           <button
+                            type="button"
                             className="btn btn-sm btn-outline-primary"
                             onClick={() => openCloneModal(curriculum)}
                             disabled={submitting}
@@ -338,15 +442,32 @@ export default function Curriculums() {
                           </button>
                         )}
 
-                        {curriculum.scope_type === 'GRADE' && (
-                          <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() => handleUnlink(curriculum.id)}
-                            disabled={submitting}
-                          >
-                            Desvincular
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => openEditModal(curriculum)}
+                          disabled={submitting}
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`btn btn-sm secondary academic-admin__toggle-btn ${curriculum.is_active ? 'is-active' : 'is-inactive'}`}
+                          onClick={() => handleToggleActive(curriculum)}
+                          disabled={submitting}
+                        >
+                          {curriculum.is_active ? 'Desactivar' : 'Activar'}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(curriculum)}
+                          disabled={submitting}
+                        >
+                          Eliminar
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -449,6 +570,51 @@ export default function Curriculums() {
                   type="button"
                   className="btn sections-modal__cancel"
                   onClick={closeCreateModal}
+                  disabled={submitting}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && (
+        <div className="sections-modal-backdrop" onClick={!submitting ? closeEditModal : undefined}>
+          <div
+            className="sections-modal modal-responsive"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="curriculums-edit-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="curriculums-edit-modal-title">Editar Malla</h2>
+            <p className="curriculums-clone-modal__hint">
+              Desde esta pantalla puedes actualizar el nombre de la malla sin alterar sus materias.
+            </p>
+
+            <form onSubmit={handleEditSubmit}>
+              <div className="form-group">
+                <label htmlFor="curriculum-edit-name">Nombre de la Malla</label>
+                <input
+                  id="curriculum-edit-name"
+                  type="text"
+                  className="form-control"
+                  value={editFormData.name}
+                  onChange={(event) => setEditFormData({ ...editFormData, name: event.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="sections-modal__actions">
+                <button type="submit" className="btn sections-modal__save" disabled={submitting}>
+                  {submitting ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+                <button
+                  type="button"
+                  className="btn sections-modal__cancel"
+                  onClick={closeEditModal}
                   disabled={submitting}
                 >
                   Cancelar
