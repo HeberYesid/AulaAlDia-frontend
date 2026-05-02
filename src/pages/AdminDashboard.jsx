@@ -102,7 +102,7 @@ export default function AdminDashboard() {
                 <thead>
                   <tr>
                     <th scope="col">Materia</th>
-                    <th scope="col">Prom. calificación</th>
+                    <th scope="col">Promedio notas</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
                       <td data-label="Materia">
                         <strong>{item.subjectName}</strong>
                       </td>
-                      <td data-label="Prom. calificación">{item.avgGrade.toFixed(2)}</td>
+                      <td data-label="Promedio notas">{item.avgGrade.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
