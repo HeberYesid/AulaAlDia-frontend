@@ -48,6 +48,7 @@ describe('Courses', () => {
               label: '2026-2027',
               start_date: '2026-01-01',
               end_date: '2026-12-31',
+              is_active: true,
             },
           ],
         })
@@ -65,7 +66,7 @@ describe('Courses', () => {
     api.delete.mockResolvedValue({ data: {} })
   })
 
-  it('opens the create modal without a school year selector and posts without school_year', async () => {
+  it('opens the create modal without a school year selector and posts with active school_year', async () => {
     const user = userEvent.setup()
 
     render(<Courses />)
@@ -90,12 +91,12 @@ describe('Courses', () => {
     })
 
     const payload = api.post.mock.calls[0][1]
-    expect(payload).not.toHaveProperty('school_year')
     expect(payload).toMatchObject({
       display_name: '6A',
       grade_level: '1',
       section: null,
       curriculum_id: null,
+      school_year: 9,
       is_active: true,
     })
   })

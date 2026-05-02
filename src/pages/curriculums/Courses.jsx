@@ -9,6 +9,7 @@ export default function Courses() {
   const [gradeLevels, setGradeLevels] = useState([]);
   const [sections, setSections] = useState([]);
   const [curriculums, setCurriculums] = useState([]);
+  const [activeSchoolYearId, setActiveSchoolYearId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -45,17 +46,21 @@ export default function Courses() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [coursesRes, gradesRes, sectionsRes, curriculumsRes] =
+      const [coursesRes, gradesRes, sectionsRes, curriculumsRes, schoolYearsRes] =
         await Promise.all([
           api.get("/api/v1/courses/courses/"),
           api.get("/api/v1/courses/grade-levels/"),
           api.get("/api/v1/courses/course-sections/"),
           api.get("/api/v1/courses/curriculums/"),
+          api.get("/api/v1/courses/school-years/"),
         ]);
       setCourses(unwrapListData(coursesRes.data));
       setGradeLevels(unwrapListData(gradesRes.data));
       setSections(unwrapListData(sectionsRes.data));
       setCurriculums(unwrapListData(curriculumsRes.data));
+      const schoolYears = unwrapListData(schoolYearsRes.data);
+      const activeSchoolYear = schoolYears.find((schoolYear) => schoolYear.is_active) || null;
+      setActiveSchoolYearId(activeSchoolYear?.id ?? null);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -116,7 +121,11 @@ export default function Courses() {
       if (editingId) {
         if (!payload.school_year) payload.school_year = null;
       } else {
-        delete payload.school_year;
+        if (!activeSchoolYearId) {
+          setError('No se pudo crear el curso porque no hay un año académico activo. Actívalo primero en Configuración Académica.');
+          return;
+        }
+        payload.school_year = activeSchoolYearId;
       }
 
       if (editingId) {
@@ -158,10 +167,25 @@ export default function Courses() {
       await fetchData();
     } catch (err) {
       console.error(err);
-      setError(getApiErrorMessage(err, {
-        action: 'eliminar el curso',
-        fallback: 'No se pudo eliminar el curso. Puede tener registros asociados o permisos restringidos.',
-      }));
+      const detail = String(err?.response?.data?.detail || '').toLowerCase();
+      const status = err?.response?.status;
+      const hasDependencies =
+        detail.includes('materias asociadas') ||
+        detail.includes('dependent') ||
+        detail.includes('protected');
+
+      if (status === 403) {
+        setError('No tienes permisos para eliminar cursos. Esta acción solo la puede realizar un administrador.');
+      } else if (status === 409 && hasDependencies) {
+        setError('No se puede eliminar el curso porque tiene materias o registros asociados.');
+      } else if (status === 409) {
+        setError('No se pudo eliminar el curso porque no hay un año académico activo o existe un conflicto de datos.');
+      } else {
+        setError(getApiErrorMessage(err, {
+          action: 'eliminar el curso',
+          fallback: 'No se pudo eliminar el curso. Puede tener registros asociados o permisos restringidos.',
+        }));
+      }
     } finally {
       setDeleting(false);
     }
