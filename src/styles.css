@@ -304,7 +304,7 @@ body.sidebar-collapsed .app-body {
 }
 
 .academic-admin__hero {
-  background: linear-gradient(135deg, var(--bg-card) 0%, var(--overlay-bg) 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border-primary);
 }
 
@@ -7397,7 +7397,7 @@ a.welcome-panel__notif-link:hover {
 }
 
 .admin-users__hero {
-  background: linear-gradient(145deg, var(--bg-card), var(--overlay-bg));
+  background: var(--bg-card);
 }
 
 .admin-users__count {
@@ -7476,7 +7476,7 @@ a.welcome-panel__notif-link:hover {
 }
 
 .support-tickets__hero {
-  background: linear-gradient(145deg, var(--bg-card), var(--overlay-bg));
+  background: var(--bg-card);
 }
 
 .support-tickets__count {
@@ -7924,7 +7924,8 @@ a.welcome-panel__notif-link:hover {
 
 .sections-table th:nth-child(3),
 .sections-table td:nth-child(3) {
-  width: 7.5rem;
+  width: 14rem;
+  white-space: nowrap;
 }
 
 .sections-table th:nth-child(4),
@@ -7936,7 +7937,11 @@ a.welcome-panel__notif-link:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
+}
+
+.sections-table td[data-label="Acciones"] .btn + .btn {
+  margin-left: var(--space-sm);
 }
 
 .curriculums-clone-modal__hint {
@@ -7959,15 +7964,17 @@ a.welcome-panel__notif-link:hover {
 .courses-page .courses-table th:nth-child(4),
 .courses-page .courses-table td:nth-child(4),
 .courses-page .courses-table th:nth-child(5),
-.courses-page .courses-table td:nth-child(5),
-.courses-page .courses-table th:nth-child(6),
-.courses-page .courses-table td:nth-child(6) {
+.courses-page .courses-table td:nth-child(5) {
   width: 8rem;
 }
 
-.courses-page .courses-table th:nth-child(7),
-.courses-page .courses-table td:nth-child(7) {
-  width: 8.5rem;
+.courses-page .courses-table th:nth-child(6),
+.courses-page .courses-table td:nth-child(6) {
+  width: 14rem;
+}
+
+.courses-page .courses-table .curriculums-table__actions {
+  flex-wrap: nowrap;
 }
 
 .sections-modal-backdrop {
