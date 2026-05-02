@@ -41,7 +41,9 @@ describe('Subjects', () => {
         return Promise.resolve({ data: [{ id: 7, display_name: '6A' }] })
       }
       if (url === '/api/v1/auth/tenant-users/') {
-        return Promise.resolve({ data: [{ id: 17, full_name: 'Docente Uno', email: 'docente1@test.com' }] })
+        return Promise.resolve({
+          data: [{ id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' }],
+        })
       }
       return Promise.resolve({ data: [] })
     })
@@ -131,16 +133,19 @@ describe('Subjects', () => {
               id: 11,
               name: 'Matemáticas',
               course: { id: 1, display_name: '1A', grade_level_id: 1, grade_level: 'Primero' },
+              teacher: { id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' },
             },
             {
               id: 12,
               name: 'Lengua',
               course: { id: 1, display_name: '1A', grade_level_id: 1, grade_level: 'Primero' },
+              teacher: { id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' },
             },
             {
               id: 13,
               name: 'Ciencias',
               course: { id: 2, display_name: '2A', grade_level_id: 2, grade_level: 'Segundo' },
+              teacher: { id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' },
             },
           ],
         })
@@ -149,7 +154,9 @@ describe('Subjects', () => {
         return Promise.resolve({ data: [{ id: 1, display_name: '1A' }, { id: 2, display_name: '2A' }] })
       }
       if (url === '/api/v1/auth/tenant-users/') {
-        return Promise.resolve({ data: [{ id: 17, full_name: 'Docente Uno', email: 'docente1@test.com' }] })
+        return Promise.resolve({
+          data: [{ id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' }],
+        })
       }
       return Promise.resolve({ data: [] })
     })
@@ -176,6 +183,7 @@ describe('Subjects', () => {
     expect(mySubjectsScope.getByText('Matemáticas')).toBeInTheDocument()
     expect(mySubjectsScope.getByText('Lengua')).toBeInTheDocument()
     expect(mySubjectsScope.getByText('Ciencias')).toBeInTheDocument()
+    expect(mySubjectsScope.getAllByText('Docente Uno')).toHaveLength(3)
   })
 
   it('expands and collapses all grade groups with action buttons', async () => {
@@ -187,11 +195,13 @@ describe('Subjects', () => {
               id: 21,
               name: 'Matemáticas',
               course: { id: 1, display_name: '1A', grade_level_id: 1, grade_level: 'Primero' },
+              teacher: { id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' },
             },
             {
               id: 22,
               name: 'Ciencias',
               course: { id: 2, display_name: '2A', grade_level_id: 2, grade_level: 'Segundo' },
+              teacher: { id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' },
             },
           ],
         })
@@ -200,7 +210,9 @@ describe('Subjects', () => {
         return Promise.resolve({ data: [{ id: 1, display_name: '1A' }, { id: 2, display_name: '2A' }] })
       }
       if (url === '/api/v1/auth/tenant-users/') {
-        return Promise.resolve({ data: [{ id: 17, full_name: 'Docente Uno', email: 'docente1@test.com' }] })
+        return Promise.resolve({
+          data: [{ id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' }],
+        })
       }
       return Promise.resolve({ data: [] })
     })

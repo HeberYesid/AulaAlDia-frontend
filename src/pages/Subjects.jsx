@@ -29,10 +29,16 @@ function resolveSubjectCourse(subject) {
 }
 
 function resolveSubjectTeacher(subject) {
+  const teacherFullName = [subject?.teacher?.first_name, subject?.teacher?.last_name]
+    .filter(Boolean)
+    .join(' ')
+    .trim()
+
   return (
     subject?.teacher?.full_name
-    || subject?.teacher?.email
+    || teacherFullName
     || subject?.teacher_name
+    || subject?.teacher?.email
     || subject?.teacher_email
     || 'Sin docente asignado'
   )
