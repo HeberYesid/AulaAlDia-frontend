@@ -92,7 +92,7 @@ export default function AdminDashboard() {
           onClick={() => handleCardClick('/subjects')}
           onKeyDown={(event) => handleCardKeyDown(event, '/subjects')}
         >
-          <h2 className="admin-dashboard__section-title">Rendimiento por materia</h2>
+          <h2 className="admin-dashboard__section-title">Promedio por materia</h2>
           {blockErrors.performance && <Alert type="error" message={blockErrors.performance} />}
           {performanceList.length === 0 ? (
             <p className="admin-dashboard__muted">No hay métricas disponibles aún.</p>
