@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { api } from '../../api/axios'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 import { unwrapListData } from '../../utils/pagination'
 
@@ -10,10 +11,12 @@ export default function GradeLevels() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(null)
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formData, setFormData] = useState(() => ({ ...INITIAL_FORM_DATA }))
   const [submitting, setSubmitting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false)
@@ -82,11 +85,52 @@ export default function GradeLevels() {
       setSubmitting(false)
     }
   }
+
+  const deleteGrade = async (grade) => {
+    try {
+      setDeleting(true)
+      await api.delete(`/api/v1/courses/grade-levels/${grade.id}/`)
+      await fetchGrades()
+      setSuccess(`Grado "${grade.name}" eliminado correctamente.`)
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error(err)
+      setError(getApiErrorMessage(err, {
+        action: `eliminar el grado ${grade.name}`,
+        fallback: 'No se pudo eliminar el grado. Puede tener registros relacionados o permisos restringidos.',
+      }))
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const handleDeleteClick = (grade) => {
+    setError(null)
+    setSuccess('')
+    setConfirmDelete(grade)
+  }
+
+  const handleConfirmDelete = async () => {
+    const grade = confirmDelete
+    setConfirmDelete(null)
+    if (!grade) return
+
+    await deleteGrade(grade)
+  }
   
   if (loading && grades.length === 0) return <div>Cargando grados...</div>
   
   return (
     <div className="admin-page sections-page grade-levels-page">
+      {confirmDelete && (
+        <ConfirmDialog
+          title="¿Eliminar grado?"
+          message={`¿Estás seguro de que deseas eliminar el grado "${confirmDelete.name}"? Esta acción no se puede deshacer.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
       <div className="sections-page__header">
         <h1>Gestión de Grados</h1>
         <button className="btn btn-primary" onClick={openCreateModal}>
@@ -108,18 +152,19 @@ export default function GradeLevels() {
               <tr>
                 <th>Nombre</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td data-label="Estado" colSpan="2" className="text-center">
+                  <td data-label="Estado" colSpan="3" className="text-center">
                     Cargando...
                   </td>
                 </tr>
               ) : grades.length === 0 ? (
                 <tr>
-                  <td data-label="Estado" colSpan="2" className="text-center">
+                  <td data-label="Estado" colSpan="3" className="text-center">
                     No hay grados registrados. Crea el primero.
                   </td>
                 </tr>
@@ -133,6 +178,16 @@ export default function GradeLevels() {
                       >
                         {g.is_active ? 'Activo' : 'Inactivo'}
                       </span>
+                    </td>
+                    <td data-label="Acciones">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDeleteClick(g)}
+                        disabled={deleting}
+                      >
+                        Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))
