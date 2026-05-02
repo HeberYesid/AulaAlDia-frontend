@@ -26,12 +26,12 @@ Variables que se mantienen constantes en ambos temas
   --ds-color-text-secondary: #615d59;
   --ds-color-text-muted: #a39e98;
   --ds-color-surface-dark: #31302e;
-  --ds-color-accent: #0075de;
-  --ds-color-accent-active: #005bab;
-  --ds-color-focus: #097fe8;
+  --ds-color-accent: #c97b2f;
+  --ds-color-accent-active: #a85f1e;
+  --ds-color-focus: #d98c3b;
   --ds-color-border-whisper: rgba(0, 0, 0, 0.1);
-  --ds-color-badge-bg: #f2f9ff;
-  --ds-color-badge-text: #097fe8;
+  --ds-color-badge-bg: #f7e8cf;
+  --ds-color-badge-text: #a85f1e;
 
   --ds-shadow-card: rgba(0, 0, 0, 0.04) 0px 4px 18px,
     rgba(0, 0, 0, 0.027) 0px 2.025px 7.84688px,
@@ -112,19 +112,19 @@ Paleta minimalista en negro/gris - Diseño sofisticado
   --text-primary: rgba(255, 255, 255, 0.95);
   --text-secondary: #d1cbc6;
   --text-muted: #b3aca5;
-  --text-accent: #62aef0;
+  --text-accent: #f2c572;
 
   --border-primary: rgba(255, 255, 255, 0.18);
   --border-secondary: rgba(255, 255, 255, 0.24);
-  --border-accent: #62aef0;
+  --border-accent: rgba(242, 197, 114, 0.9);
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28);
   --shadow-md: 0 3px 10px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 18px rgba(0, 0, 0, 0.34);
   --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.38);
 
-  --overlay-bg: rgba(98, 174, 240, 0.14);
-  --overlay-hover: rgba(98, 174, 240, 0.22);
+  --overlay-bg: rgba(201, 123, 47, 0.16);
+  --overlay-hover: rgba(201, 123, 47, 0.24);
 }
 
 /* 
@@ -152,8 +152,8 @@ Paleta optimizada para uso diurno y alta legibilidad
   --shadow-lg: var(--ds-shadow-card);
   --shadow-xl: var(--ds-shadow-deep);
 
-  --overlay-bg: rgba(0, 117, 222, 0.08);
-  --overlay-hover: rgba(0, 117, 222, 0.14);
+  --overlay-bg: rgba(201, 123, 47, 0.08);
+  --overlay-hover: rgba(201, 123, 47, 0.16);
 }
 
 /* 

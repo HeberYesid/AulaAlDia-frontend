@@ -50,6 +50,17 @@ function shiftHexColor(hexColor, amount) {
   return `#${toHex(applyShift(r))}${toHex(applyShift(g))}${toHex(applyShift(b))}`
 }
 
+function hexToRgba(hexColor, alpha) {
+  const normalized = normalizeHexColor(hexColor)
+  if (!normalized) return hexColor
+
+  const r = parseInt(normalized.slice(1, 3), 16)
+  const g = parseInt(normalized.slice(3, 5), 16)
+  const b = parseInt(normalized.slice(5, 7), 16)
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 function normalizeTenantBranding(tenant) {
   if (!tenant) return DEFAULT_BRANDING
 
@@ -75,11 +86,16 @@ function applyBrandingToDocument(branding) {
   const root = document.documentElement
   const primaryColor = branding?.primaryColor || DEFAULT_BRANDING.primaryColor
   const accentColor = branding?.accentColor || DEFAULT_BRANDING.accentColor
+  const overlayBaseColor = normalizeHexColor(primaryColor) || DEFAULT_BRANDING.primaryColor
 
   root.style.setProperty('--primary', primaryColor)
   root.style.setProperty('--primary-light', shiftHexColor(primaryColor, 0.18))
   root.style.setProperty('--primary-dark', shiftHexColor(primaryColor, -0.18))
   root.style.setProperty('--accent', accentColor)
+  root.style.setProperty('--text-accent', primaryColor)
+  root.style.setProperty('--border-accent', primaryColor)
+  root.style.setProperty('--overlay-bg', hexToRgba(overlayBaseColor, 0.14))
+  root.style.setProperty('--overlay-hover', hexToRgba(overlayBaseColor, 0.22))
   document.title = branding.displayName
   setDocumentFavicon(branding.faviconUrl)
 }
