@@ -7957,25 +7957,23 @@ a.welcome-panel__notif-link:hover {
 
 .courses-page .courses-table th:nth-child(1),
 .courses-page .courses-table td:nth-child(1) {
-  width: 4.5rem;
+  width: 10rem;
 }
 
 .courses-page .courses-table th:nth-child(2),
 .courses-page .courses-table td:nth-child(2) {
-  width: auto;
+  width: 8rem;
 }
 
 .courses-page .courses-table th:nth-child(3),
 .courses-page .courses-table td:nth-child(3),
 .courses-page .courses-table th:nth-child(4),
-.courses-page .courses-table td:nth-child(4),
-.courses-page .courses-table th:nth-child(5),
-.courses-page .courses-table td:nth-child(5) {
+.courses-page .courses-table td:nth-child(4) {
   width: 8rem;
 }
 
-.courses-page .courses-table th:nth-child(6),
-.courses-page .courses-table td:nth-child(6) {
+.courses-page .courses-table th:nth-child(5),
+.courses-page .courses-table td:nth-child(5) {
   width: 14rem;
 }
 
