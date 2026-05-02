@@ -247,7 +247,6 @@ export default function Courses() {
           <table className="table mobile-card-view sections-table courses-table">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Nombre</th>
                 <th>Grado</th>
                 <th>Sección</th>
@@ -258,20 +257,19 @@ export default function Courses() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td data-label="Estado" colSpan="6" className="text-center">
+                  <td data-label="Estado" colSpan="5" className="text-center">
                     Cargando...
                   </td>
                 </tr>
               ) : courses.length === 0 ? (
                 <tr>
-                  <td data-label="Estado" colSpan="6" className="text-center">
+                  <td data-label="Estado" colSpan="5" className="text-center">
                     No hay cursos registrados.
                   </td>
                 </tr>
               ) : (
                 courses.map((course) => (
                   <tr key={course.id}>
-                    <td data-label="ID">{course.id}</td>
                     <td data-label="Nombre">{course.display_name}</td>
                     <td data-label="Grado">{getGradeName(course.grade_level)}</td>
                     <td data-label="Sección">{course.section ? getSectionName(course.section) : "-"}</td>
