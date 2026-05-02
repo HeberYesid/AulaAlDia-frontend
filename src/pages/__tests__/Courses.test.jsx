@@ -63,6 +63,7 @@ describe('Courses', () => {
     mockCourseResponses()
 
     api.post.mockResolvedValue({ data: { id: 123 } })
+    api.patch.mockResolvedValue({ data: { id: 123 } })
     api.delete.mockResolvedValue({ data: {} })
   })
 
@@ -129,5 +130,65 @@ describe('Courses', () => {
     await waitFor(() => {
       expect(api.delete).toHaveBeenCalledWith('/api/v1/courses/courses/1/')
     })
+  })
+
+  it('allows selecting curriculum when editing and sends curriculum_id in patch payload', async () => {
+    const user = userEvent.setup()
+
+    api.get.mockImplementation((url) => {
+      if (url === '/api/v1/courses/courses/') {
+        return Promise.resolve({
+          data: [
+            {
+              id: 1,
+              display_name: '6A',
+              grade_level: 1,
+              section: null,
+              school_year: 9,
+              is_active: true,
+            },
+          ],
+        })
+      }
+      if (url === '/api/v1/courses/grade-levels/') {
+        return Promise.resolve({ data: [{ id: 1, name: '6to' }] })
+      }
+      if (url === '/api/v1/courses/course-sections/') {
+        return Promise.resolve({ data: [] })
+      }
+      if (url === '/api/v1/courses/curriculums/') {
+        return Promise.resolve({
+          data: [
+            { id: 22, name: 'Malla Sexto', scope_type: 'GRADE', grade_level: 1, is_active: true },
+          ],
+        })
+      }
+      if (url === '/api/v1/courses/school-years/') {
+        return Promise.resolve({
+          data: [{ id: 9, label: '2026-2027', start_date: '2026-01-01', end_date: '2026-12-31', is_active: true }],
+        })
+      }
+      return Promise.reject(new Error(`Unexpected GET ${url}`))
+    })
+
+    render(<Courses />)
+
+    const courseName = await screen.findByText('6A')
+    const courseRow = courseName.closest('tr')
+    await user.click(within(courseRow).getByRole('button', { name: 'Editar' }))
+
+    const dialog = screen.getByRole('dialog')
+    const selects = within(dialog).getAllByRole('combobox')
+    const curriculumSelect = selects[2]
+
+    await user.selectOptions(curriculumSelect, '22')
+    await user.click(screen.getByRole('button', { name: /^Guardar$/i }))
+
+    await waitFor(() => {
+      expect(api.patch).toHaveBeenCalledWith('/api/v1/courses/courses/1/', expect.any(Object))
+    })
+
+    const payload = api.patch.mock.calls[0][1]
+    expect(payload.curriculum_id).toBe('22')
   })
 })

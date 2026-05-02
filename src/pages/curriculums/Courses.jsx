@@ -369,28 +369,30 @@ export default function Courses() {
                   ))}
                 </select>
               </div>
-              {!editingId && (
-                <div className="form-group">
-                  <label>Malla Curricular (Opcional)</label>
-                  <select
-                    className="form-control"
-                    value={formData.curriculum_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, curriculum_id: e.target.value })
-                    }
-                  >
-                    <option value="">Sin malla</option>
-                    {availableCurriculums.map((curriculum) => (
-                      <option key={curriculum.id} value={curriculum.id}>
-                        {curriculum.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="curriculum-subjects-form-group__hint" style={{ marginTop: '0.4rem' }}>
-                    Si seleccionas una malla, el curso se crea con sus materias automáticamente.
-                  </p>
-                </div>
-              )}
+              <div className="form-group">
+                <label>Malla Curricular (Opcional)</label>
+                <select
+                  className="form-control"
+                  value={formData.curriculum_id}
+                  onChange={(e) =>
+                    setFormData({ ...formData, curriculum_id: e.target.value })
+                  }
+                >
+                  <option value="">
+                    {editingId ? "Mantener malla actual" : "Sin malla"}
+                  </option>
+                  {availableCurriculums.map((curriculum) => (
+                    <option key={curriculum.id} value={curriculum.id}>
+                      {curriculum.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="curriculum-subjects-form-group__hint" style={{ marginTop: '0.4rem' }}>
+                  {editingId
+                    ? 'Si eliges una malla, se reemplazará la malla actual del curso.'
+                    : 'Si seleccionas una malla, el curso se crea con sus materias automáticamente.'}
+                </p>
+              </div>
               <div className="form-group sections-modal__checkbox-group">
                 <label className="sections-modal__checkbox" htmlFor="course-active-checkbox">
                   <span>Activo</span>
