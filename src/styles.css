@@ -3737,6 +3737,7 @@ form {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
+  margin-bottom: var(--space-md);
 }
 
 .subjects-page__list-header h2 {
