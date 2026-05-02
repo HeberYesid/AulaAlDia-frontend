@@ -10,16 +10,15 @@ vi.mock('../../api/axios', () => ({
     get: vi.fn(),
     post: vi.fn(),
     patch: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
 describe('Courses', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-
+  const mockCourseResponses = (courses = []) => {
     api.get.mockImplementation((url) => {
       if (url === '/api/v1/courses/courses/') {
-        return Promise.resolve({ data: [] })
+        return Promise.resolve({ data: courses })
       }
 
       if (url === '/api/v1/courses/grade-levels/') {
@@ -56,8 +55,14 @@ describe('Courses', () => {
 
       return Promise.reject(new Error(`Unexpected GET ${url}`))
     })
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockCourseResponses()
 
     api.post.mockResolvedValue({ data: { id: 123 } })
+    api.delete.mockResolvedValue({ data: {} })
   })
 
   it('opens the create modal without a school year selector and posts without school_year', async () => {
@@ -92,6 +97,36 @@ describe('Courses', () => {
       section: null,
       curriculum_id: null,
       is_active: true,
+    })
+  })
+
+  it('shows a delete confirmation and removes a course', async () => {
+    const user = userEvent.setup()
+
+    mockCourseResponses([
+      {
+        id: 1,
+        display_name: '6A',
+        grade_level: 1,
+        section: null,
+        school_year: 9,
+        is_active: true,
+      },
+    ])
+
+    render(<Courses />)
+
+    const courseName = await screen.findByText('6A')
+    const courseRow = courseName.closest('tr')
+
+    await user.click(within(courseRow).getByRole('button', { name: 'Eliminar' }))
+
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('¿Eliminar curso?')
+
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }))
+
+    await waitFor(() => {
+      expect(api.delete).toHaveBeenCalledWith('/api/v1/courses/courses/1/')
     })
   })
 })

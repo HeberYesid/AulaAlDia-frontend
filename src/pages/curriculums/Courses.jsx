@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../../api/axios";
+import ConfirmDialog from '../../components/ConfirmDialog';
 import { getApiErrorMessage } from '../../utils/apiErrorMessage';
 import { unwrapListData } from '../../utils/pagination';
 
@@ -8,9 +9,9 @@ export default function Courses() {
   const [gradeLevels, setGradeLevels] = useState([]);
   const [sections, setSections] = useState([]);
   const [curriculums, setCurriculums] = useState([]);
-  const [schoolYears, setSchoolYears] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ export default function Courses() {
   });
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -43,19 +45,17 @@ export default function Courses() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [coursesRes, gradesRes, sectionsRes, curriculumsRes, periodsRes] =
+      const [coursesRes, gradesRes, sectionsRes, curriculumsRes] =
         await Promise.all([
           api.get("/api/v1/courses/courses/"),
           api.get("/api/v1/courses/grade-levels/"),
           api.get("/api/v1/courses/course-sections/"),
           api.get("/api/v1/courses/curriculums/"),
-          api.get("/api/v1/courses/school-years/"),
         ]);
       setCourses(unwrapListData(coursesRes.data));
       setGradeLevels(unwrapListData(gradesRes.data));
       setSections(unwrapListData(sectionsRes.data));
       setCurriculums(unwrapListData(curriculumsRes.data));
-      setSchoolYears(unwrapListData(periodsRes.data));
       setError(null);
     } catch (err) {
       console.error(err);
@@ -139,15 +139,38 @@ export default function Courses() {
     }
   };
 
+  const handleDeleteClick = (course) => {
+    setError(null);
+    setConfirmDelete(course);
+  };
+
+  const handleConfirmDelete = async () => {
+    const course = confirmDelete;
+    setConfirmDelete(null);
+
+    if (!course) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await api.delete(`/api/v1/courses/courses/${course.id}/`);
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      setError(getApiErrorMessage(err, {
+        action: 'eliminar el curso',
+        fallback: 'No se pudo eliminar el curso. Puede tener registros asociados o permisos restringidos.',
+      }));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const getGradeName = (id) =>
     gradeLevels.find((g) => g.id === id)?.name || "Desconocido";
   const getSectionName = (id) =>
     sections.find((s) => s.id === id)?.name || "N/A";
-  const getSchoolYearLabel = (id) => {
-    const schoolYear = schoolYears.find((year) => year.id === id);
-    if (!schoolYear) return "-";
-    return schoolYear.label || `${schoolYear.start_date} - ${schoolYear.end_date}`;
-  };
 
   const availableCurriculums = curriculums
     .filter((curriculum) => curriculum.is_active)
@@ -173,6 +196,15 @@ export default function Courses() {
 
   return (
     <div className="admin-page sections-page courses-page">
+      {confirmDelete && (
+        <ConfirmDialog
+          title="¿Eliminar curso?"
+          message={`¿Estás seguro de que deseas eliminar el curso "${confirmDelete.display_name}"? Esta acción no se puede deshacer.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
       <div className="sections-page__header">
         <h1>Gestión de Cursos</h1>
         <button className="btn btn-primary" onClick={openCreateModal}>
@@ -192,10 +224,9 @@ export default function Courses() {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Nombre Mostrar</th>
+                <th>Nombre</th>
                 <th>Grado</th>
                 <th>Sección</th>
-                <th>Año</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
@@ -203,13 +234,13 @@ export default function Courses() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td data-label="Estado" colSpan="7" className="text-center">
+                  <td data-label="Estado" colSpan="6" className="text-center">
                     Cargando...
                   </td>
                 </tr>
               ) : courses.length === 0 ? (
                 <tr>
-                  <td data-label="Estado" colSpan="7" className="text-center">
+                  <td data-label="Estado" colSpan="6" className="text-center">
                     No hay cursos registrados.
                   </td>
                 </tr>
@@ -217,10 +248,9 @@ export default function Courses() {
                 courses.map((course) => (
                   <tr key={course.id}>
                     <td data-label="ID">{course.id}</td>
-                    <td data-label="Nombre Mostrar">{course.display_name}</td>
+                    <td data-label="Nombre">{course.display_name}</td>
                     <td data-label="Grado">{getGradeName(course.grade_level)}</td>
                     <td data-label="Sección">{course.section ? getSectionName(course.section) : "-"}</td>
-                    <td data-label="Año">{getSchoolYearLabel(course.school_year)}</td>
                     <td data-label="Estado">
                       <span
                         className={`badge ${
@@ -231,12 +261,25 @@ export default function Courses() {
                       </span>
                     </td>
                     <td data-label="Acciones">
-                      <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => openEditModal(course)}
-                      >
-                        Editar
-                      </button>
+                      <div className="curriculums-table__actions">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => openEditModal(course)}
+                          disabled={submitting || deleting}
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDeleteClick(course)}
+                          disabled={submitting || deleting}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
