@@ -126,7 +126,7 @@ export default function AdminSupportTickets() {
             </div>
           </div>
 
-          <button className="btn" type="submit" disabled={creating}>
+          <button className="btn support-tickets__submit" type="submit" disabled={creating}>
             {creating ? 'Creando ticket...' : 'Crear ticket'}
           </button>
         </form>

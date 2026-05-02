@@ -7492,6 +7492,11 @@ a.welcome-panel__notif-link:hover {
   gap: var(--space-md);
 }
 
+.support-tickets__submit {
+  width: fit-content;
+  align-self: flex-start;
+}
+
 .support-tickets__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
