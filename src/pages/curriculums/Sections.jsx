@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../../api/axios";
+import ConfirmDialog from "../../components/ConfirmDialog";
 import { getApiErrorMessage } from '../../utils/apiErrorMessage';
 import { unwrapListData } from '../../utils/pagination';
 
@@ -7,11 +8,14 @@ export default function Sections() {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", is_active: true });
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchSections();
@@ -48,12 +52,16 @@ export default function Sections() {
   };
 
   const openCreateModal = () => {
+    setError(null);
+    setSuccess('');
     setFormData({ name: "", is_active: true });
     setEditingId(null);
     setIsModalOpen(true);
   };
 
   const openEditModal = (section) => {
+    setError(null);
+    setSuccess('');
     setFormData({ name: section.name, is_active: section.is_active });
     setEditingId(section.id);
     setIsModalOpen(true);
@@ -67,6 +75,7 @@ export default function Sections() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const wasEditing = Boolean(editingId);
     try {
       setSubmitting(true);
       if (editingId) {
@@ -75,7 +84,9 @@ export default function Sections() {
         await api.post("/api/v1/courses/course-sections/", formData);
       }
       closeModal();
-      fetchSections();
+      await fetchSections();
+      setSuccess(wasEditing ? 'Seccion actualizada correctamente.' : 'Seccion creada correctamente.');
+      window.setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error(err);
       setError(getApiErrorMessage(err, {
@@ -89,8 +100,48 @@ export default function Sections() {
     }
   };
 
+  const handleDeleteClick = (section) => {
+    setError(null);
+    setSuccess('');
+    setConfirmDelete(section);
+  };
+
+  const handleConfirmDelete = async () => {
+    const section = confirmDelete;
+    setConfirmDelete(null);
+
+    if (!section) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await api.delete(`/api/v1/courses/course-sections/${section.id}/`);
+      await fetchSections();
+      setSuccess('Seccion eliminada correctamente.');
+      window.setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error(err);
+      setError(getApiErrorMessage(err, {
+        action: 'eliminar la seccion',
+        fallback: 'No se pudo eliminar la seccion. Puede tener cursos asociados o permisos restringidos.',
+      }));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="admin-page sections-page">
+      {confirmDelete && (
+        <ConfirmDialog
+          title="¿Eliminar sección?"
+          message={`¿Estás seguro de que deseas eliminar la sección "${confirmDelete.name}"? Esta acción no se puede deshacer.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
       <div className="sections-page__header">
         <h1>Gestión de Secciones</h1>
         <button className="btn btn-primary" onClick={openCreateModal}>
@@ -99,6 +150,7 @@ export default function Sections() {
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
 
       <div className="card sections-page__list-card">
         <div className="sections-page__list-header">
@@ -142,8 +194,17 @@ export default function Sections() {
                       <button
                         className="btn btn-sm btn-outline-primary"
                         onClick={() => openEditModal(sec)}
+                        type="button"
                       >
                         Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDeleteClick(sec)}
+                        disabled={deleting}
+                      >
+                        Eliminar
                       </button>
                     </td>
                   </tr>
