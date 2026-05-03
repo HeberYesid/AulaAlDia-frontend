@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
 import Alert from '../components/Alert'
-import ConfirmDialog from '../components/ConfirmDialog'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import { unwrapListData } from '../utils/pagination'
 
@@ -46,20 +45,11 @@ function resolveSubjectTeacher(subject) {
 
 export default function Subjects() {
   const { user } = useAuth()
-  const isAdmin = user?.role === 'ADMIN'
 
   const [items, setItems] = useState([])
-  const [courses, setCourses] = useState([])
-  const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [name, setName] = useState('')
-  const [courseId, setCourseId] = useState('')
-  const [teacherId, setTeacherId] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [confirmDelete, setConfirmDelete] = useState(null)
   const [openGroupKeys, setOpenGroupKeys] = useState(new Set())
 
   const subjectsByGrade = useMemo(() => {
@@ -115,30 +105,8 @@ export default function Subjects() {
   const load = useCallback(async () => {
     try {
       setLoading(true)
-
-      if (isAdmin) {
-        const [subjectsRes, coursesRes, teachersRes] = await Promise.all([
-          api.get('/api/v1/courses/subjects/'),
-          api.get('/api/v1/courses/courses/'),
-          api.get('/api/v1/auth/tenant-users/', {
-            params: {
-              role: 'TEACHER',
-              status: 'active',
-            },
-          }),
-        ])
-
-        setItems(unwrapListData(subjectsRes.data))
-        setCourses(unwrapListData(coursesRes.data))
-        setTeachers(unwrapListData(teachersRes.data))
-        return
-      }
-
-      const subjectsRes = await api.get('/api/v1/courses/subjects/')
-
+      const subjectsRes = await api.get('/api/v1/courses/course-subjects/')
       setItems(unwrapListData(subjectsRes.data))
-      setCourses([])
-      setTeachers([])
     } catch (err) {
       setError(normalizeApiError(
         err,
@@ -147,100 +115,11 @@ export default function Subjects() {
     } finally {
       setLoading(false)
     }
-  }, [isAdmin])
+  }, [])
 
   useEffect(() => {
     load()
   }, [load])
-
-  useEffect(() => {
-    if (!isCreateModalOpen) return
-
-    const handleEscape = (event) => {
-      if (event.key === 'Escape' && !submitting) {
-        setIsCreateModalOpen(false)
-        setName('')
-        setCourseId('')
-        setTeacherId('')
-      }
-    }
-
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [isCreateModalOpen, submitting])
-
-  function resetCreateForm() {
-    setName('')
-    setCourseId('')
-    setTeacherId('')
-  }
-
-  function openCreateModal() {
-    setError('')
-    setSuccess('')
-    resetCreateForm()
-    setIsCreateModalOpen(true)
-  }
-
-  function closeCreateModal() {
-    setIsCreateModalOpen(false)
-    resetCreateForm()
-  }
-
-  async function createSubject(e) {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    try {
-      setSubmitting(true)
-      await api.post('/api/v1/courses/subjects/', {
-        name,
-        course_id: Number(courseId),
-        teacher_id: Number(teacherId),
-      })
-
-      closeCreateModal()
-      setSuccess('Materia creada exitosamente')
-      await load()
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      setError(normalizeApiError(
-        err,
-        'No se pudo crear la materia. Verifica nombre, curso, docente y tu institucion activa.'
-      ))
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  async function deleteSubject(subject) {
-    setError('')
-    setSuccess('')
-    try {
-      await api.delete(`/api/v1/courses/subjects/${subject.id}/`)
-      setSuccess(`Materia "${subject.name}" eliminada exitosamente`)
-      load()
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      console.error('Error deleting subject:', err)
-      const errorMessage = getApiErrorMessage(err, {
-        action: `eliminar la materia ${subject.name}`,
-        fallback: 'No se pudo eliminar la materia. Puede tener registros relacionados o permisos restringidos.',
-      })
-      setError(errorMessage)
-    }
-  }
-
-  function handleDeleteClick(subject) {
-    setConfirmDelete(subject)
-  }
-
-  function handleConfirmDelete() {
-    const subject = confirmDelete
-    setConfirmDelete(null)
-    deleteSubject(subject)
-  }
 
   function handleGradeGroupToggle(groupKey, isOpen) {
     setOpenGroupKeys((prevOpenKeys) => {
@@ -269,28 +148,15 @@ export default function Subjects() {
 
   return (
     <div>
-      {confirmDelete && (
-        <ConfirmDialog
-          title="¿Eliminar materia?"
-          message={`¿Estás seguro de que deseas eliminar la materia "${confirmDelete.name}"? Esta acción eliminará todos los estudiantes inscritos, ejercicios y resultados. Esta acción NO se puede deshacer.`}
-          onConfirm={handleConfirmDelete}
-          onCancel={() => setConfirmDelete(null)}
-        />
-      )}
-      {/* Mensajes de éxito/error */}
       <Alert type="success" message={success} />
       <Alert type="error" message={error} />
 
       <div className="admin-page sections-page subjects-page">
         <div className="sections-page__header">
           <h1>Gestión de Materias</h1>
-          {isAdmin ? (
-            <button className="btn btn-primary" onClick={openCreateModal}>
-              Nueva Materia
-            </button>
-          ) : (
-            <p className="subjects-page__helper">Solo administradores pueden crear materias nuevas.</p>
-          )}
+          <p className="subjects-page__helper">
+            Las materias se generan automáticamente desde las mallas asignadas a cada curso.
+          </p>
         </div>
 
         <div className="card sections-page__list-card">
@@ -361,19 +227,10 @@ export default function Subjects() {
                                 <div className="subjects-table__actions">
                                   <Link
                                     className="btn secondary"
-                                    to={`/subjects/${subject.id}`}
+                                    to={`/subjects/-${subject.id}`}
                                   >
                                     Ver
                                   </Link>
-                                  {isAdmin && (
-                                    <button
-                                      onClick={() => handleDeleteClick(subject)}
-                                      className="btn danger"
-                                      type="button"
-                                    >
-                                      Eliminar
-                                    </button>
-                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -388,81 +245,6 @@ export default function Subjects() {
           )}
         </div>
       </div>
-
-      {isAdmin && isCreateModalOpen && (
-        <div className="sections-modal-backdrop" onClick={!submitting ? closeCreateModal : undefined}>
-          <div
-            className="sections-modal modal-responsive"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="subjects-modal-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h2 id="subjects-modal-title">Nueva Materia</h2>
-
-            <form onSubmit={createSubject}>
-              <div className="form-group">
-                <label htmlFor="subject-name">Nombre</label>
-                <input
-                  id="subject-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                  placeholder="Ej: Matemáticas"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="subject-course">Curso</label>
-                <select
-                  id="subject-course"
-                  value={courseId}
-                  onChange={(event) => setCourseId(event.target.value)}
-                  required
-                >
-                  <option value="">Selecciona un curso</option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.display_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="subject-teacher">Docente</label>
-                <select
-                  id="subject-teacher"
-                  value={teacherId}
-                  onChange={(event) => setTeacherId(event.target.value)}
-                  required
-                >
-                  <option value="">Selecciona un docente</option>
-                  {teachers.map((teacher) => (
-                    <option key={teacher.id} value={teacher.id}>
-                      {teacher.full_name || teacher.email}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="sections-modal__actions">
-                <button type="submit" className="btn sections-modal__save" disabled={submitting}>
-                  {submitting ? 'Guardando...' : 'Guardar'}
-                </button>
-                <button
-                  type="button"
-                  className="btn sections-modal__cancel"
-                  onClick={closeCreateModal}
-                  disabled={submitting}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

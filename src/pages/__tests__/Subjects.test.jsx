@@ -34,16 +34,8 @@ describe('Subjects', () => {
       },
     })
     api.get.mockImplementation((url) => {
-      if (url === '/api/v1/courses/subjects/') {
+      if (url === '/api/v1/courses/course-subjects/') {
         return Promise.resolve({ data: [] })
-      }
-      if (url === '/api/v1/courses/courses/') {
-        return Promise.resolve({ data: [{ id: 7, display_name: '6A' }] })
-      }
-      if (url === '/api/v1/auth/tenant-users/') {
-        return Promise.resolve({
-          data: [{ id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' }],
-        })
       }
       return Promise.resolve({ data: [] })
     })
@@ -59,7 +51,7 @@ describe('Subjects', () => {
     })
 
     api.get.mockImplementation((url) => {
-      if (url === '/api/v1/courses/subjects/') {
+      if (url === '/api/v1/courses/course-subjects/') {
         return Promise.resolve({
           data: [
             {
@@ -81,52 +73,25 @@ describe('Subjects', () => {
     )
 
     expect(await screen.findByText('Matemáticas')).toBeInTheDocument()
-    expect(api.get).toHaveBeenCalledWith('/api/v1/courses/subjects/')
-    expect(api.get).not.toHaveBeenCalledWith('/api/v1/courses/courses/')
+    expect(api.get).toHaveBeenCalledWith('/api/v1/courses/course-subjects/')
   })
 
-  it('shows the backend validation message when subject creation fails', async () => {
-    const user = userEvent.setup()
-    api.post.mockRejectedValue({
-      response: {
-        data: {
-          name: ['Ya existe una materia con un nombre igual o muy parecido: "Historia".'],
-        },
-      },
-    })
-
+  it('explains that subjects are generated from assigned curriculums', async () => {
     render(
       <MemoryRouter>
         <Subjects />
       </MemoryRouter>
     )
 
-    await waitFor(() => {
-      expect(api.get).toHaveBeenCalledWith('/api/v1/courses/subjects/')
-      expect(api.get).toHaveBeenCalledWith('/api/v1/courses/courses/')
-      expect(api.get).toHaveBeenCalledWith('/api/v1/auth/tenant-users/', {
-        params: {
-          role: 'TEACHER',
-          status: 'active',
-        },
-      })
-    })
-
-    await user.click(screen.getByRole('button', { name: /nueva materia/i }))
-
-    await user.type(screen.getByLabelText(/Nombre/i), 'Histora')
-    await user.selectOptions(screen.getByLabelText(/Curso/i), '7')
-    await user.selectOptions(screen.getByLabelText(/Docente/i), '17')
-    await user.click(screen.getByRole('button', { name: /guardar/i }))
-
     expect(
-      await screen.findByText(/Ya existe una materia con un nombre igual o muy parecido/i)
+      await screen.findByText(/se generan automáticamente desde las mallas asignadas/i)
     ).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /nueva materia/i })).not.toBeInTheDocument()
   })
 
   it('groups subjects by grade in collapsible sections', async () => {
     api.get.mockImplementation((url) => {
-      if (url === '/api/v1/courses/subjects/') {
+      if (url === '/api/v1/courses/course-subjects/') {
         return Promise.resolve({
           data: [
             {
@@ -148,14 +113,6 @@ describe('Subjects', () => {
               teacher: { id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' },
             },
           ],
-        })
-      }
-      if (url === '/api/v1/courses/courses/') {
-        return Promise.resolve({ data: [{ id: 1, display_name: '1A' }, { id: 2, display_name: '2A' }] })
-      }
-      if (url === '/api/v1/auth/tenant-users/') {
-        return Promise.resolve({
-          data: [{ id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' }],
         })
       }
       return Promise.resolve({ data: [] })
@@ -188,7 +145,7 @@ describe('Subjects', () => {
 
   it('expands and collapses all grade groups with action buttons', async () => {
     api.get.mockImplementation((url) => {
-      if (url === '/api/v1/courses/subjects/') {
+      if (url === '/api/v1/courses/course-subjects/') {
         return Promise.resolve({
           data: [
             {
@@ -204,14 +161,6 @@ describe('Subjects', () => {
               teacher: { id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' },
             },
           ],
-        })
-      }
-      if (url === '/api/v1/courses/courses/') {
-        return Promise.resolve({ data: [{ id: 1, display_name: '1A' }, { id: 2, display_name: '2A' }] })
-      }
-      if (url === '/api/v1/auth/tenant-users/') {
-        return Promise.resolve({
-          data: [{ id: 17, first_name: 'Docente', last_name: 'Uno', email: 'docente1@test.com' }],
         })
       }
       return Promise.resolve({ data: [] })

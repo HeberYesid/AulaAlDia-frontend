@@ -16,6 +16,13 @@ function handleFocusTrap(e, ref) {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
 }
 
+function resolveExerciseSubjectPayload(id) {
+  const numericId = Number(id)
+  if (Number.isNaN(numericId)) return { subject: id }
+  if (numericId < 0) return { course_subject: Math.abs(numericId) }
+  return { subject: numericId }
+}
+
 export default function ExercisesTab({ user, id, exercises, loadAll, setError, setSuccess }) {
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [showExerciseForm, setShowExerciseForm] = useState(false)
@@ -54,7 +61,10 @@ export default function ExercisesTab({ user, id, exercises, loadAll, setError, s
 
     try {
       const formData = new FormData()
-      formData.append('subject', id)
+      const subjectPayload = resolveExerciseSubjectPayload(id)
+      Object.entries(subjectPayload).forEach(([key, value]) => {
+        formData.append(key, value)
+      })
       formData.append('name', newExerciseName)
       formData.append('order', exercises.length)
       if (newExerciseDeadline) formData.append('deadline', newExerciseDeadline)

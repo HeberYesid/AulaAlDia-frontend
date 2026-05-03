@@ -130,7 +130,7 @@ describe('SubjectDetail Component', () => {
         role: 'TEACHER'
       }
     })
-    vi.spyOn(router, 'useParams').mockReturnValue({ id: '1' })
+    vi.spyOn(router, 'useParams').mockReturnValue({ id: '-1' })
     
     // Mock API responses
     api.get.mockImplementation((url) => {
@@ -139,7 +139,7 @@ describe('SubjectDetail Component', () => {
       if (url.includes('/dashboard/')) return Promise.resolve({ data: mockDashboard })
       if (url.includes('/exercises/')) return Promise.resolve({ data: mockExercises })
       if (url.includes('/results/')) return Promise.resolve({ data: mockResults })
-      if (url.includes('/subjects/1')) return Promise.resolve({ data: mockSubject })
+      if (url.includes('/subjects/-1')) return Promise.resolve({ data: mockSubject })
       return Promise.reject(new Error('Not found'))
     })
   })
@@ -224,7 +224,7 @@ describe('SubjectDetail Component', () => {
     await user.click(screen.getByText(/Ejercicios \(\d+\)/))
 
     const exerciseLink = await screen.findByRole('link', { name: 'Algebra Quiz' })
-    expect(exerciseLink).toHaveAttribute('href', '/subjects/1/exercises/1')
+    expect(exerciseLink).toHaveAttribute('href', '/subjects/-1/exercises/1')
   })
 
   it('disables result editing when the exercise period is locked', async () => {
@@ -248,7 +248,7 @@ describe('SubjectDetail Component', () => {
         })
       }
       if (url.includes('/results/')) return Promise.resolve({ data: mockResults })
-      if (url.includes('/subjects/1')) return Promise.resolve({ data: mockSubject })
+      if (url.includes('/subjects/-1')) return Promise.resolve({ data: mockSubject })
       return Promise.reject(new Error('Not found'))
     })
 
@@ -273,7 +273,7 @@ describe('SubjectDetail Component', () => {
       if (url.includes('/dashboard/')) return Promise.resolve({ data: mockDashboard })
       if (url.includes('/exercises/')) return Promise.resolve({ data: mockExercises })
       if (url.includes('/results/')) return Promise.resolve({ data: mockResults })
-      if (url.includes('/subjects/1')) return Promise.resolve({ data: mockSubject })
+      if (url.includes('/subjects/-1')) return Promise.resolve({ data: mockSubject })
       return Promise.reject(new Error('Not found'))
     })
 
@@ -317,8 +317,8 @@ describe('SubjectDetail Component', () => {
     const row = screen.getByRole('link', { name: 'Algebra Quiz' }).closest('tr')
     const linksInRow = within(row).getAllByRole('link')
 
-    expect(linksInRow[0]).toHaveAttribute('href', '/subjects/1/exercises/1')
-    expect(within(row).getByRole('link', { name: /Ver detalle/i })).toHaveAttribute('href', '/subjects/1/exercises/1')
+    expect(linksInRow[0]).toHaveAttribute('href', '/subjects/-1/exercises/1')
+    expect(within(row).getByRole('link', { name: /Ver detalle/i })).toHaveAttribute('href', '/subjects/-1/exercises/1')
   })
 
   it('student multi-exercise action remains scoped to selected exercise URL', async () => {
@@ -342,18 +342,18 @@ describe('SubjectDetail Component', () => {
         })
       }
       if (url.includes('/results/')) return Promise.resolve({ data: mockResults })
-      if (url.includes('/subjects/1')) return Promise.resolve({ data: mockSubject })
+      if (url.includes('/subjects/-1')) return Promise.resolve({ data: mockSubject })
       return Promise.reject(new Error('Not found'))
     })
 
     const user = userEvent.setup()
 
     render(
-      <MemoryRouter initialEntries={['/subjects/1']}>
+      <MemoryRouter initialEntries={['/subjects/-1']}>
         <Routes>
           <Route path="/subjects/:id" element={<SubjectDetail />} />
-          <Route path="/subjects/1/exercises/1" element={<div>ExerciseDetail 1</div>} />
-          <Route path="/subjects/1/exercises/2" element={<div>ExerciseDetail 2</div>} />
+          <Route path="/subjects/-1/exercises/1" element={<div>ExerciseDetail 1</div>} />
+          <Route path="/subjects/-1/exercises/2" element={<div>ExerciseDetail 2</div>} />
         </Routes>
       </MemoryRouter>
     )
@@ -364,7 +364,7 @@ describe('SubjectDetail Component', () => {
 
     const geometryRow = screen.getByRole('link', { name: 'Geometry Workshop' }).closest('tr')
     const geometryAction = within(geometryRow).getByRole('link', { name: /Ver detalle/i })
-    expect(geometryAction).toHaveAttribute('href', '/subjects/1/exercises/2')
+    expect(geometryAction).toHaveAttribute('href', '/subjects/-1/exercises/2')
 
     await user.click(geometryAction)
 
@@ -431,10 +431,10 @@ describe('SubjectDetail Component', () => {
     const user = userEvent.setup()
 
     render(
-      <MemoryRouter initialEntries={['/subjects/1']}>
+      <MemoryRouter initialEntries={['/subjects/-1']}>
         <Routes>
           <Route path="/subjects/:id" element={<SubjectDetail />} />
-          <Route path="/subjects/1/exercises/1" element={<div>ExerciseDetail rendered for Algebra Quiz</div>} />
+          <Route path="/subjects/-1/exercises/1" element={<div>ExerciseDetail rendered for Algebra Quiz</div>} />
         </Routes>
       </MemoryRouter>
     )
