@@ -629,6 +629,30 @@ body.sidebar-collapsed .app-body {
   border-left-color: var(--primary);
 }
 
+.sidebar__nav-item--tour-target {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  color: var(--text-primary);
+  border-left: 3px solid var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent);
+  animation: sidebar-tour-pulse 1.2s ease-in-out infinite;
+}
+
+[data-theme="light"] .sidebar__nav-item--tour-target {
+  background: rgba(59, 130, 246, 0.14);
+}
+
+@keyframes sidebar-tour-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent);
+  }
+}
+
 .sidebar__nav-icon {
   display: flex;
   align-items: center;

@@ -45,6 +45,10 @@ const NAVIGATION_ITEMS = [
     section: 'general',
     roles: [USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-dashboard',
+    onboarding: {
+      internalTarget: '.welcome-panel',
+      internalDescription: 'Aquí comienza el flujo diario: revisa el resumen, detecta alertas y decide a qué módulo entrar primero.',
+    },
   },
   {
     key: 'admin-dashboard',
@@ -55,6 +59,10 @@ const NAVIGATION_ITEMS = [
     section: 'general',
     roles: [USER_ROLES.ADMIN],
     tourId: 'nav-admin-dashboard',
+    onboarding: {
+      internalTarget: '.dashboard-header',
+      internalDescription: 'Este panel concentra indicadores operativos para que priorices incidencias, seguimiento académico y configuración.',
+    },
   },
   {
     key: 'admin-news',
@@ -65,6 +73,11 @@ const NAVIGATION_ITEMS = [
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+    tourId: 'nav-admin-news',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Novedades te permite publicar comunicaciones institucionales y controlar su audiencia.',
+    },
   },
   {
     key: 'admin-support',
@@ -76,6 +89,11 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
     tourId: 'nav-admin-support',
+      onboarding: {
+        internalTarget: '.support-tickets__form',
+        internalDescription: 'En este módulo aprenderás a crear un ticket.',
+        taskDescription: 'Haz esto: revisa el formulario, escribe un asunto y un detalle para entender cómo se solicita soporte desde este módulo.',
+      },
   },
   {
     key: 'admin-bulletins',
@@ -87,6 +105,10 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
     tourId: 'nav-admin-bulletins',
+    onboarding: {
+      internalTarget: '.admin-bulletins__header-title',
+      internalDescription: 'Boletines institucionales consolida emisión, consulta y seguimiento formal por estudiante y periodo.',
+    },
   },
   {
     key: 'admin-teacher-attendance',
@@ -97,6 +119,11 @@ const NAVIGATION_ITEMS = [
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+    tourId: 'nav-admin-teacher-attendance',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Asistencia Docente centraliza la supervisión diaria de entradas, salidas y novedades del equipo.',
+    },
   },
   {
     key: 'subjects',
@@ -107,6 +134,10 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.TEACHER, USER_ROLES.ADMIN],
     tourId: 'nav-subjects',
+    onboarding: {
+      internalTarget: '.data-table',
+      internalDescription: 'Aquí gestionas la operación académica por materia: estudiantes, ejercicios, resultados y seguimiento.',
+    },
   },
   {
     key: 'my-results',
@@ -117,6 +148,10 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-my',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Este módulo te ayuda a leer el rendimiento consolidado y detectar rápidamente fortalezas y alertas.',
+    },
   },
   {
     key: 'my-subjects',
@@ -128,6 +163,10 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     showInNavbar: false,
     tourId: 'nav-my-subjects',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Desde aquí entras al detalle de cada asignatura para entender contenidos, progreso y tareas.',
+    },
   },
   {
     key: 'teacher-evaluations-student',
@@ -139,6 +178,10 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.STUDENT],
     showInNavbar: false,
     tourId: 'nav-teacher-evaluations',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Aquí se consulta o diligencia la evaluación docente según el rol, siempre con enfoque por materia activa.',
+    },
   },
   {
     key: 'teacher-evaluations-staff',
@@ -160,6 +203,10 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-my-bulletins',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'En Boletines revisas el consolidado formal del periodo para seguimiento académico y familiar.',
+    },
   },
   {
     key: 'messages',
@@ -170,6 +217,10 @@ const NAVIGATION_ITEMS = [
     section: 'communication',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-messages',
+    onboarding: {
+      internalTarget: '.msg-container',
+      internalDescription: 'Mensajes separa conversaciones y chat activo para que mantengas contexto y trazabilidad por hilo.',
+    },
   },
   {
     key: 'calendar',
@@ -180,6 +231,10 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-calendar',
+    onboarding: {
+      internalTarget: '.calendar-page',
+      internalDescription: 'Calendario centraliza eventos y filtros por materia para planificar entregas y hitos institucionales.',
+    },
   },
   {
     key: 'schedules',
@@ -190,6 +245,10 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     tourId: 'nav-schedules',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Horarios te permite entender la distribución semanal de clases y disponibilidad según el rol.',
+    },
   },
   {
     key: 'observer',
@@ -201,6 +260,10 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     showInNavbar: false,
     tourId: 'nav-observer',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Observador reúne observaciones académicas y convivenciales para hacer seguimiento más fino.',
+    },
   },
   {
     key: 'absences',
@@ -212,6 +275,10 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT, USER_ROLES.TUTOR],
     showInNavbar: false,
     tourId: 'nav-absences',
+    onboarding: {
+      internalTarget: '.absences__filters-card',
+      internalDescription: 'Asistencia combina filtros, registro y consulta del estado de faltas y justificaciones.',
+    },
   },
   {
     key: 'admin-operations',
@@ -222,6 +289,11 @@ const NAVIGATION_ITEMS = [
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+    tourId: 'nav-admin-operations',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Auditoría te muestra trazabilidad operacional para revisar cambios y eventos relevantes.',
+    },
   },
   {
     key: 'teacher-attendance-history',
@@ -232,6 +304,11 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.TEACHER],
     showInNavbar: false,
+    tourId: 'nav-teacher-attendance-history',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Aquí el docente revisa su propio historial de asistencia con filtros y trazabilidad temporal.',
+    },
   },
   {
     key: 'admin-users',
@@ -242,6 +319,11 @@ const NAVIGATION_ITEMS = [
     section: 'administration',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+    tourId: 'nav-admin-users',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Usuarios del colegio concentra altas, roles y control de acceso por institución.',
+    },
   },
   {
     key: 'admin-commercial',
@@ -254,6 +336,10 @@ const NAVIGATION_ITEMS = [
     when: (user) => Boolean(user.is_global_admin),
     showInNavbar: false,
     tourId: 'nav-admin-commercial',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Este módulo consolida la operación comercial multiinstitución para administradores globales.',
+    },
   },
   {
     key: 'admin-academic-settings',
@@ -265,6 +351,10 @@ const NAVIGATION_ITEMS = [
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
     tourId: 'nav-admin-academic-settings',
+    onboarding: {
+      internalTarget: '.table-container',
+      internalDescription: 'Configuración académica define años, periodos y reglas base que afectan toda la operación.',
+    },
   },
   {
     key: 'admin-curriculums',
@@ -275,6 +365,11 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+    tourId: 'nav-admin-curriculums',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Mallas Curriculares define la estructura académica que luego consumen grados, cursos y materias.',
+    },
   },
   {
     key: 'admin-grade-levels',
@@ -285,6 +380,11 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+    tourId: 'nav-admin-grade-levels',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Grados te ayuda a organizar la estructura académica base sobre la que opera la institución.',
+    },
   },
   {
     key: 'admin-sections',
@@ -295,6 +395,11 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     showInNavbar: false,
     roles: [USER_ROLES.ADMIN],
+    tourId: 'nav-admin-sections',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Secciones separa grupos por grado para ordenar matrícula, horarios y materias.',
+    },
   },
   {
     key: 'admin-courses',
@@ -305,6 +410,11 @@ const NAVIGATION_ITEMS = [
     section: 'academic',
     roles: [USER_ROLES.ADMIN],
     showInNavbar: false,
+    tourId: 'nav-admin-courses',
+    onboarding: {
+      internalTarget: 'main h1',
+      internalDescription: 'Cursos conecta grados, secciones y mallas para estructurar la oferta académica real.',
+    },
   },
 ]
 
@@ -355,4 +465,10 @@ export function getContextualTipByPath(user, pathname, options = {}) {
   const matchedItem = items.find((item) => normalizePath(item.to) === normalizedPath)
 
   return matchedItem?.contextualTip || null
+}
+
+export function getOnboardingNavigationItems(user, options = {}) {
+  return getNavigationItems(user, { surface: 'sidebar', ...options })
+    .filter((item) => item.tourId)
+    .filter((item) => item.onboarding !== false)
 }

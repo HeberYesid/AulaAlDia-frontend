@@ -1,531 +1,159 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride'
-import { useAuth } from '../state/AuthContext'
 import { useLocation } from 'react-router-dom'
+import { useAuth } from '../state/AuthContext'
+import { getTourStartPath, useTour } from '../state/TourContext'
 
-const TOUR_STORAGE_KEY = 'aulaaldia-tour-completed'
-
-function getTourStartPath(role) {
-  return role === 'ADMIN' ? '/admin/dashboard' : '/'
+function getTarget(selector) {
+  if (!selector || selector === 'body') return 'body'
+  if (typeof document !== 'undefined' && document.querySelector(selector)) {
+    return selector
+  }
+  return 'body'
 }
 
-function getTourStorageKey(userOrRole) {
-  if (!userOrRole) return null
+function getModuleSteps(module, pathname) {
+  if (!module) return []
 
-  if (typeof userOrRole === 'string') {
-    return `${TOUR_STORAGE_KEY}-${userOrRole}`
+  const routeTarget = `[data-tour-id="${module.tourId}"]`
+  const internalDescription = module.onboarding?.internalDescription || module.contextualTip
+  const internalTarget = getTarget('main')
+  const moduleInstruction =
+    module.onboarding?.taskDescription ||
+    `Haz esto dentro de ${module.label}: usa la pantalla principal para entender cómo se hacen las acciones base de este módulo.`
+
+  if (pathname !== module.to) {
+    return [
+      {
+        target: routeTarget,
+        content: `Entra a ${module.label}. ${module.contextualTip}`,
+        disableBeacon: true,
+        placement: 'right',
+        data: {
+          gate: 'route',
+          route: module.to,
+          allowSpotlightClicks: true,
+        },
+      },
+    ]
   }
 
-  const role = userOrRole.role
-  if (!role) return null
-
-  const userIdentifier =
-    userOrRole.id ??
-    userOrRole.public_id ??
-    userOrRole.email ??
-    userOrRole.username ??
-    null
-
-  if (userIdentifier === null || userIdentifier === undefined || userIdentifier === '') {
-    return `${TOUR_STORAGE_KEY}-${role}`
-  }
-
-  return `${TOUR_STORAGE_KEY}-${role}-${String(userIdentifier)}`
-}
-
-function completionContent(title, features) {
-  return (
-    <div>
-      <h3>✨ {title}</h3>
-      <p>Funcionalidades destacadas que puedes explorar:</p>
-      <ul style={{ textAlign: 'left', marginTop: '10px' }}>
-        {features.map((feature) => (
-          <li key={feature}>{feature}</li>
-        ))}
-      </ul>
-      <p style={{ marginTop: '15px' }}>Puedes reactivar este tour desde tu perfil.</p>
-    </div>
-  )
-}
-
-function navTarget(tourId) {
-  return `[data-tour-id="${tourId}"]`
-}
-
-const STUDENT_STEPS = [
-  {
-    target: 'body',
-    content: (
-      <div>
-        <h2>¡Bienvenido a AulaAlDía! 👋</h2>
-        <p>Este recorrido te mostrará las funciones nuevas y los atajos clave para estudiantes.</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true,
-  },
-  {
-    target: '.theme-toggle',
-    content: 'Cambia entre tema claro y oscuro según tu preferencia.',
-    disableBeacon: true,
-  },
-  {
-    target: '.notification-bell',
-    content: 'Aquí recibes alertas de ejercicios, notas, boletines y avisos importantes.',
-    disableBeacon: true,
-  },
-  {
-    target: '.subjects-grid-responsive',
-    content: 'Mis Materias: entra a cada materia para revisar tareas, resultados y estado académico.',
-    disableBeacon: true,
-  },
-  {
-    target: '.exercises-grid-responsive',
-    content: 'Aquí encuentras Ejercicios Pendientes y tus Últimos Resultados para actuar rápidamente.',
-    disableBeacon: true,
-  },
-  {
-    target: '.welcome-panel',
-    content: 'Panel de bienvenida con últimas notificaciones, rol activo y datos de tu sesión reciente.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-my'),
-    content: 'Resultados: consulta tu historial completo de calificaciones y comentarios.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-my-subjects'),
-    content: 'Mis Materias: revisa el progreso detallado y el rendimiento por asignatura.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-teacher-evaluations'),
-    content: 'Eval. Docente: califica de forma anonima a tus profesores en materias activas.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-my-bulletins'),
-    content: 'Boletines: genera y descarga reportes de desempeño académico.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-messages'),
-    content: 'Mensajes: comunícate con docentes y mantén seguimiento de conversaciones.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-calendar'),
-    content: 'Calendario: organiza entregas, evaluaciones y eventos académicos.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-observer'),
-    content: 'Observador: revisa anotaciones y seguimiento académico.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-absences'),
-    content: 'Asistencia: verifica faltas justificadas y pendientes de justificación.',
-    disableBeacon: true,
-  },
-  {
-    target: '.sidebar__profile',
-    content: 'Perfil: actualiza tus datos y también puedes reiniciar este tour cuando quieras.',
-    disableBeacon: true,
-  },
-  {
-    target: 'body',
-    content: completionContent('¡Tour completado!', [
-      '📚 Mis Materias y progreso por asignatura',
-      '📊 Resultados, boletines y observador',
-      '📅 Calendario y recordatorios clave',
-      '💬 Mensajería con el equipo académico',
-    ]),
-    placement: 'center',
-    disableBeacon: true,
-  },
-]
-
-const TEACHER_STEPS = [
-  {
-    target: 'body',
-    content: (
-      <div>
-        <h2>¡Bienvenido Profesor! 👨‍🏫</h2>
-        <p>Te mostraremos el flujo actualizado para gestionar clases, seguimiento y comunicación.</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true,
-  },
-  {
-    target: '.theme-toggle',
-    content: 'Cambia entre tema claro y oscuro según tu preferencia.',
-    disableBeacon: true,
-  },
-  {
-    target: '.notification-bell',
-    content: 'Recibirás notificaciones cuando estudiantes se inscriban o completen ejercicios.',
-    disableBeacon: true,
-  },
-  {
-    target: '.data-table',
-    content: 'Dashboard con listado de materias: entra a detalle para ejercicios, estudiantes y resultados.',
-    disableBeacon: true,
-  },
-  {
-    target: '.welcome-panel',
-    content: 'Panel de bienvenida con notificaciones recientes y actividad de sesión.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-subjects'),
-    content: 'Gestión de Materias: crea cursos, ejercicios, inscripciones y carga de resultados CSV.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-messages'),
-    content: 'Mensajes: comunicación directa con estudiantes y coordinación académica.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-calendar'),
-    content: 'Calendario: planifica fechas límite, clases y actividades.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-observer'),
-    content: 'Observador: registra y revisa observaciones de seguimiento por estudiante.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-absences'),
-    content: 'Asistencia: controla faltas y su estado de justificación.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-teacher-evaluations'),
-    content: 'Eval. Docente: revisa resultados agregados y anonimos por materia.',
-    disableBeacon: true,
-  },
-  {
-    target: '.sidebar__profile',
-    content: 'Perfil: personaliza datos, configuración y reinicia este tour cuando quieras.',
-    disableBeacon: true,
-  },
-  {
-    target: 'body',
-    content: completionContent('¡Tour completado!', [
-      '📚 Materias, ejercicios e inscripciones',
-      '📥 Carga de resultados por CSV y seguimiento',
-      '💬 Mensajería y coordinación con estudiantes',
-      '📅 Calendario, observador y asistencia',
-    ]),
-    placement: 'center',
-    disableBeacon: true,
-  },
-]
-
-const ADMIN_STEPS = [
-  {
-    target: 'body',
-    content: (
-      <div>
-        <h2>¡Bienvenido Administrador! 🛡️</h2>
-        <p>Este recorrido te muestra los accesos clave para la operación académica y administrativa.</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true,
-  },
-  {
-    target: '.theme-toggle',
-    content: 'Cambia entre tema claro y oscuro según tu preferencia.',
-    disableBeacon: true,
-  },
-  {
-    target: '.notification-bell',
-    content: 'Aquí recibes alertas del sistema, actividad académica y avisos operativos.',
-    disableBeacon: true,
-  },
-  {
-    target: '.dashboard-header',
-    content: 'Este panel resume el estado operativo para seguimiento académico y decisiones rápidas.',
-    disableBeacon: true,
-  },
-  {
-    target: '.stats-grid',
-    content: 'Estas métricas te dan una lectura rápida de materias, estudiantes, faltas y periodos bloqueados.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-subjects'),
-    content: 'Materias: administra cursos, ejercicios, inscripciones y resultados.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-messages'),
-    content: 'Mensajes: coordina con docentes y estudiantes desde un solo lugar.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-calendar'),
-    content: 'Calendario: revisa eventos, cierres y fechas operativas importantes.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-observer'),
-    content: 'Observador: consulta y registra novedades de seguimiento estudiantil.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-absences'),
-    content: 'Asistencia: monitorea faltas, justificaciones y casos de riesgo.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-admin-academic-settings'),
-    content: 'Config. Académica: gestiona periodos, escalas de calificación y parámetros institucionales.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-teacher-evaluations'),
-    content: 'Eval. Docente: monitorea indicadores anonimos por docente y materia.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-admin-commercial'),
-    content: 'Comercial Institucional: disponible para administradores globales con gestión multiinstitución.',
-    disableBeacon: true,
-  },
-  {
-    target: '.sidebar__profile',
-    content: 'Perfil: actualiza tu cuenta y reinicia este tour cuando lo necesites.',
-    disableBeacon: true,
-  },
-  {
-    target: 'body',
-    content: completionContent('¡Tour completado!', [
-      '🧭 Dashboard administrativo y métricas clave',
-      '📚 Gestión de materias y seguimiento académico',
-      '⚙️ Configuración académica y operación institucional',
-      '💬 Comunicación y alertas del sistema',
-    ]),
-    placement: 'center',
-    disableBeacon: true,
-  },
-]
-
-const TUTOR_STEPS = [
-  {
-    target: 'body',
-    content: (
-      <div>
-        <h2>¡Bienvenido Acudiente! 👪</h2>
-        <p>Este tour te guía por las herramientas para monitorear el progreso académico.</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true,
-  },
-  {
-    target: '.theme-toggle',
-    content: 'Cambia entre tema claro y oscuro según tu preferencia.',
-    disableBeacon: true,
-  },
-  {
-    target: '.notification-bell',
-    content: 'Recibe alertas sobre avances, resultados y novedades de los estudiantes vinculados.',
-    disableBeacon: true,
-  },
-  {
-    target: '.data-table',
-    content: 'Dashboard con materias vinculadas para revisar el estado general de cada estudiante.',
-    disableBeacon: true,
-  },
-  {
-    target: '.welcome-panel',
-    content: 'Panel de bienvenida con notificaciones recientes e información de acceso.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-my'),
-    content: 'Progreso: vista consolidada de desempeño académico.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-my-subjects'),
-    content: 'Mis Materias: detalle por materia para el seguimiento familiar.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-my-bulletins'),
-    content: 'Boletines: consulta reportes de rendimiento.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-calendar'),
-    content: 'Calendario: mantén al día fechas relevantes de actividades y entregas.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-observer'),
-    content: 'Observador: revisa observaciones registradas por docentes.',
-    disableBeacon: true,
-  },
-  {
-    target: navTarget('nav-absences'),
-    content: 'Asistencia: consulta faltas y estado de justificación.',
-    disableBeacon: true,
-  },
-  {
-    target: '.sidebar__profile',
-    content: 'Perfil: gestiona tu cuenta y reinicia este tour cuando quieras.',
-    disableBeacon: true,
-  },
-  {
-    target: 'body',
-    content: completionContent('¡Tour completado!', [
-      '👀 Seguimiento de progreso y materias vinculadas',
-      '📄 Consulta de boletines y observaciones',
-      '📅 Calendario y control de asistencia',
-      '🔔 Notificaciones para mantenerte informado',
-    ]),
-    placement: 'center',
-    disableBeacon: true,
-  },
-]
-
-function getStepsByRole(role) {
-  if (role === 'STUDENT') return STUDENT_STEPS
-  if (role === 'TEACHER') return TEACHER_STEPS
-  if (role === 'ADMIN') return ADMIN_STEPS
-  if (role === 'TUTOR') return TUTOR_STEPS
-  return []
-}
-
-function isTargetAvailable(target) {
-  if (target === 'body') return true
-  return Boolean(document.querySelector(target))
+  return [
+    {
+      target: internalTarget,
+      content: moduleInstruction,
+      disableBeacon: true,
+      placement: 'top',
+      data: {
+        gate: 'next',
+        allowSpotlightClicks: true,
+      },
+    },
+  ]
 }
 
 export default function AppTour() {
   const { user } = useAuth()
   const location = useLocation()
-  const [run, setRun] = useState(false)
-  const [steps, setSteps] = useState([])
+  const {
+    modules,
+    currentModule,
+    isActive,
+    isCompleted,
+    status,
+    startOrResumeTour,
+    pauseTour,
+    restartTour,
+    completeCurrentModule,
+  } = useTour()
   const [stepIndex, setStepIndex] = useState(0)
+
   const tourStartPath = getTourStartPath(user?.role)
-  const tourStorageKey = getTourStorageKey(user)
+  const steps = useMemo(
+    () => getModuleSteps(currentModule, location.pathname),
+    [currentModule, location.pathname]
+  )
+  const joyrideRenderKey = `${currentModule?.key || 'none'}::${location.pathname}::${steps.length}`
 
   useEffect(() => {
-    let timerId = null
-    let retryTimerId = null
+    if (!user?.role || isCompleted || modules.length === 0) return
+    if (status === 'idle' && location.pathname !== tourStartPath) return
+    if (!['idle', 'paused'].includes(status)) return
 
-    if (location.pathname !== tourStartPath) {
-      setRun(false)
-      return () => {
-        if (timerId) clearTimeout(timerId)
-        if (retryTimerId) clearTimeout(retryTimerId)
-      }
-    }
+    const timerId = window.setTimeout(() => {
+      startOrResumeTour()
+    }, 500)
 
-    if (!user || !user.role) {
-      return () => {
-        if (timerId) clearTimeout(timerId)
-        if (retryTimerId) clearTimeout(retryTimerId)
-      }
-    }
+    return () => window.clearTimeout(timerId)
+  }, [isCompleted, location.pathname, modules.length, startOrResumeTour, status, tourStartPath, user?.role])
 
-    const hasCompletedTour = tourStorageKey ? localStorage.getItem(tourStorageKey) : null
+  useEffect(() => {
+    setStepIndex(0)
+  }, [currentModule?.key, location.pathname, steps.length])
 
-    if (location.pathname === tourStartPath && !hasCompletedTour) {
-      const tourSteps = getStepsByRole(user.role)
-      if (tourSteps.length > 0) {
-        let attempts = 0
-        const totalNonBodySteps = tourSteps.filter((step) => step.target !== 'body').length
-        const minNonBodyTargets = Math.min(3, totalNonBodySteps)
-
-        const prepareAndRunTour = () => {
-          const availableSteps = tourSteps.filter((step) => isTargetAvailable(step.target))
-          const availableNonBodyTargets = availableSteps.filter((step) => step.target !== 'body').length
-          const hasEnoughTargets = minNonBodyTargets === 0 || availableNonBodyTargets >= minNonBodyTargets
-
-          if (availableSteps.length > 0 && (hasEnoughTargets || attempts >= 7)) {
-            setSteps(availableSteps)
-            setStepIndex(0)
-            setRun(true)
-            return
-          }
-
-          attempts += 1
-          if (attempts < 8) {
-            retryTimerId = setTimeout(prepareAndRunTour, 300)
-          }
-        }
-
-        // Esperar a que el dashboard termine de montar antes de buscar targets
-        timerId = setTimeout(prepareAndRunTour, 600)
-      }
-    }
-
-    return () => {
-      if (timerId) clearTimeout(timerId)
-      if (retryTimerId) clearTimeout(retryTimerId)
-    }
-  }, [user, location.pathname, tourStartPath, tourStorageKey])
-
-  const handleJoyrideCallback = (data) => {
-    const { action, index, status, type } = data
-
-    if (type === EVENTS.STEP_AFTER) {
-      setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1))
-    }
-
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-      setRun(false)
-      setStepIndex(0)
-      if (tourStorageKey) {
-        localStorage.setItem(tourStorageKey, 'true')
-      }
-    }
-
-    if (action === ACTIONS.CLOSE && type === EVENTS.TOUR_END) {
-      setRun(false)
-      setStepIndex(0)
-      if (tourStorageKey) {
-        localStorage.setItem(tourStorageKey, 'true')
-      }
-    }
-  }
-
-  // Función para reiniciar el tour (puede ser llamada desde el perfil)
-  const restartTour = () => {
-    if (tourStorageKey) {
-      localStorage.removeItem(tourStorageKey)
-      window.location.href = '/'
-    }
-  }
-
-  // Exportar función para uso externo
-  if (typeof window !== 'undefined') {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
     window.restartAppTour = restartTour
+  }, [restartTour])
+
+  if (!user?.role || isCompleted || !isActive || steps.length === 0) {
+    return null
+  }
+
+  const currentStep = steps[stepIndex] || steps[0]
+
+  function handleJoyrideCallback(data) {
+    const { action, status: joyrideStatus, type } = data
+
+    if (joyrideStatus === STATUS.FINISHED) {
+      completeCurrentModule()
+      return
+    }
+
+    if (action === ACTIONS.CLOSE || joyrideStatus === STATUS.SKIPPED) {
+      pauseTour()
+      return
+    }
+
+    if (type !== EVENTS.STEP_AFTER) return
+
+    const gate = currentStep?.data?.gate
+
+    if (gate === 'next') {
+      if (stepIndex < steps.length - 1) {
+        setStepIndex((current) => current + 1)
+        return
+      }
+
+      completeCurrentModule()
+      return
+    }
+
+    if (gate === 'route') {
+      if (location.pathname === currentStep?.data?.route) {
+        setStepIndex((current) => current + 1)
+      } else {
+        setStepIndex(0)
+      }
+      return
+    }
+
   }
 
   return (
     <Joyride
+      key={joyrideRenderKey}
       steps={steps}
-      run={run}
+      run={isActive}
       stepIndex={stepIndex}
       continuous
       showProgress
-      showSkipButton
+      showSkipButton={false}
       scrollToFirstStep
       disableScrolling={false}
       disableOverlayClose
-      hideCloseButton
-      spotlightClicks={false}
+      hideCloseButton={false}
+      spotlightClicks={Boolean(currentStep?.data?.allowSpotlightClicks)}
       callback={handleJoyrideCallback}
       styles={{
         options: {
@@ -557,11 +185,8 @@ export default function AppTour() {
           color: '#666666',
           marginRight: '10px',
         },
-        buttonSkip: {
-          color: '#666666',
-        },
         buttonClose: {
-          display: 'none',
+          color: '#666666',
         },
         spotlight: {
           borderRadius: '8px',
@@ -569,19 +194,17 @@ export default function AppTour() {
       }}
       locale={{
         back: 'Atrás',
-        close: 'Cerrar',
+        close: 'Pausar tour',
         last: 'Finalizar',
-        next: 'Siguiente',
-        skip: 'Saltar tour',
+        next: 'Continuar',
+        skip: 'Pausar tour',
       }}
     />
   )
 }
 
-// Exportar función para reiniciar el tour
-export const resetTour = (userOrRole) => {
-  const tourKey = getTourStorageKey(userOrRole)
-  if (tourKey) {
-    localStorage.removeItem(tourKey)
+export function resetTour() {
+  if (typeof window !== 'undefined' && typeof window.restartAppTour === 'function') {
+    window.restartAppTour()
   }
 }

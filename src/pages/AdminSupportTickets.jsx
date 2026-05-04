@@ -95,7 +95,7 @@ export default function AdminSupportTickets() {
 
       <section className="card">
         <h2>Crear ticket</h2>
-        <form className="support-tickets__form" onSubmit={handleCreate}>
+        <form className="support-tickets__form" onSubmit={handleCreate} data-tour-id="support-ticket-form">
           <div className="support-tickets__grid">
             <div>
               <label htmlFor="support-ticket-subject">Asunto</label>

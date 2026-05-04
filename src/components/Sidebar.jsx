@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import NotificationBell from './NotificationBell'
 import { getBrandInitials } from '../utils/branding'
 import { getNavigationSections } from '../utils/navigation'
+import { useTour } from '../state/TourContext'
 import {
   User,
   LogOut,
@@ -21,6 +22,7 @@ export default function Sidebar() {
     logout,
     activeTenantBranding,
   } = useAuth()
+  const { isActive: isTourActive, currentModule } = useTour()
   const navigate = useNavigate()
   const location = useLocation()
   const [showLogoImage, setShowLogoImage] = useState(true)
@@ -70,6 +72,13 @@ export default function Sidebar() {
     setShowLogoImage(true)
   }, [activeTenantBranding.sidebarLogoUrl])
 
+  useEffect(() => {
+    if (!isTourActive || !currentModule?.tourId) return
+
+    setCollapsed(false)
+    setMobileOpen(true)
+  }, [currentModule?.tourId, isTourActive])
+
   function onLogout() {
     logout()
     navigate('/login')
@@ -84,6 +93,10 @@ export default function Sidebar() {
   if (!user) return null
 
   const navSections = getNavigationSections(user, { surface: 'sidebar' })
+  const isTourPromptingNavigation =
+    isTourActive &&
+    Boolean(currentModule?.tourId) &&
+    location.pathname !== currentModule?.to
 
   const sidebarClasses = [
     'sidebar',
@@ -169,7 +182,7 @@ export default function Sidebar() {
                 <Link
                   key={key}
                   to={to}
-                  className={`sidebar__nav-item ${isActive(to) ? 'sidebar__nav-item--active' : ''}`}
+                  className={`sidebar__nav-item ${isActive(to) ? 'sidebar__nav-item--active' : ''} ${isTourPromptingNavigation && currentModule?.tourId === tourId ? 'sidebar__nav-item--tour-target' : ''}`}
                   aria-current={isActive(to) ? 'page' : undefined}
                   aria-label={collapsed ? itemLabel : undefined}
                   title={collapsed ? itemLabel : undefined}

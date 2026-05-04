@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { AuthProvider } from './state/AuthContext'
 import { ThemeProvider } from './state/ThemeContext'
+import { TourProvider } from './state/TourContext'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import './styles.css'
 import './styles/markdown.css'
@@ -14,7 +15,9 @@ const app = (
   <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
     <ThemeProvider>
       <AuthProvider>
-        <App />
+        <TourProvider>
+          <App />
+        </TourProvider>
       </AuthProvider>
     </ThemeProvider>
   </BrowserRouter>

@@ -82,6 +82,7 @@ api.interceptors.request.use((config) => {
   if (auth?.access) {
     config.headers['Authorization'] = `Bearer ${auth.access}`
   }
+
   return config
 })
 
