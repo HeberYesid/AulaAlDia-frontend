@@ -69,7 +69,7 @@ describe('AppTour', () => {
     )
   }
 
-  it('starts the admin tour on the admin dashboard route', async () => {
+  it('skips the redundant main highlight on the admin dashboard route', async () => {
     renderTour(['/admin/dashboard'])
 
     await act(async () => {
@@ -80,7 +80,17 @@ describe('AppTour', () => {
     expect(joyrideMock).toHaveBeenCalled()
     const lastCall = joyrideMock.mock.calls.at(-1)?.[0]
     expect(lastCall.run).toBe(true)
-    expect(lastCall.steps[0].target).toBe('body')
+    expect(lastCall.steps[0].target).toBe('[data-tour-id="nav-admin-news"]')
+
+    const progress = JSON.parse(localStorage.getItem('aulaaldia-tour-progress-v2-ADMIN-1'))
+    expect(progress.currentModuleIndex).toBe(1)
+    expect(progress.status).toBe('active')
+
+    expect(
+      joyrideMock.mock.calls.some(([props]) =>
+        props.steps.some((step) => step.target === 'main')
+      )
+    ).toBe(false)
   })
 
   it('does not start the admin tour on the root route', async () => {
@@ -135,7 +145,7 @@ describe('AppTour', () => {
     })
 
     const progress = JSON.parse(localStorage.getItem('aulaaldia-tour-progress-v2-ADMIN-1'))
-    expect(progress.currentModuleIndex).toBe(1)
+    expect(progress.currentModuleIndex).toBe(2)
     expect(progress.status).toBe('active')
   })
 
@@ -159,7 +169,7 @@ describe('AppTour', () => {
     })
 
     const progress = JSON.parse(localStorage.getItem('aulaaldia-tour-progress-v2-ADMIN-1'))
-    expect(progress.currentModuleIndex).toBe(1)
+    expect(progress.currentModuleIndex).toBe(2)
     expect(progress.status).toBe('active')
   })
 })

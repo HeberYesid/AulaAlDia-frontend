@@ -15,18 +15,13 @@ function getTarget(selector) {
 function getModuleSteps(module, pathname) {
   if (!module) return []
 
-  const routeTarget = `[data-tour-id="${module.tourId}"]`
-  const internalDescription = module.onboarding?.internalDescription || module.contextualTip
-  const internalTarget = getTarget('main')
-  const moduleInstruction =
-    module.onboarding?.taskDescription ||
-    `Haz esto dentro de ${module.label}: usa la pantalla principal para entender cómo se hacen las acciones base de este módulo.`
-
   if (pathname !== module.to) {
+    const routeTarget = `[data-tour-id="${module.tourId}"]`
+
     return [
       {
         target: routeTarget,
-        content: `Entra a ${module.label}. ${module.contextualTip}`,
+        content: `${module.label} sirve para ${module.contextualTip}`,
         disableBeacon: true,
         placement: 'right',
         data: {
@@ -38,18 +33,7 @@ function getModuleSteps(module, pathname) {
     ]
   }
 
-  return [
-    {
-      target: internalTarget,
-      content: moduleInstruction,
-      disableBeacon: true,
-      placement: 'top',
-      data: {
-        gate: 'next',
-        allowSpotlightClicks: true,
-      },
-    },
-  ]
+  return []
 }
 
 export default function AppTour() {
@@ -92,6 +76,13 @@ export default function AppTour() {
   }, [currentModule?.key, location.pathname, steps.length])
 
   useEffect(() => {
+    if (!isActive || !currentModule || steps.length !== 0) return
+    if (location.pathname !== currentModule.to) return
+
+    completeCurrentModule()
+  }, [completeCurrentModule, currentModule, isActive, location.pathname, steps.length])
+
+  useEffect(() => {
     if (typeof window === 'undefined') return
     window.restartAppTour = restartTour
   }, [restartTour])
@@ -130,14 +121,11 @@ export default function AppTour() {
     }
 
     if (gate === 'route') {
-      if (location.pathname === currentStep?.data?.route) {
-        setStepIndex((current) => current + 1)
-      } else {
+      if (location.pathname !== currentStep?.data?.route) {
         setStepIndex(0)
       }
       return
     }
-
   }
 
   return (
