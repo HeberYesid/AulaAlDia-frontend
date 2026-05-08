@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
-import { getTourStartPath, useTour } from '../state/TourContext'
+import { useTour } from '../state/TourContext'
+import { getTourStartPath } from '../utils/tourHelpers'
 
 function getTarget(selector) {
   if (!selector || selector === 'body') return 'body'

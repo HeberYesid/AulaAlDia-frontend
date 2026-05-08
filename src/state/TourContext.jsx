@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import { getOnboardingNavigationItems } from '../utils/navigation'
 import { useAuth } from './AuthContext'
 
@@ -33,9 +33,7 @@ function getTourStorageKey(user) {
   return `${TOUR_STORAGE_PREFIX}-${user.role}-${String(userIdentifier)}`
 }
 
-export function getTourStartPath(role) {
-  return role === 'ADMIN' ? '/admin/dashboard' : '/'
-}
+
 
 function getDefaultProgress() {
   return {
@@ -86,27 +84,27 @@ export function TourProvider({ children }) {
     localStorage.setItem(storageKey, JSON.stringify(progress))
   }, [progress, storageKey])
 
-  function startOrResumeTour() {
+  const startOrResumeTour = useCallback(() => {
     setProgress((current) => ({
       ...current,
       status: 'active',
       currentModuleIndex:
         current.status === 'completed' || current.currentModuleIndex >= modules.length ? 0 : current.currentModuleIndex,
     }))
-  }
+  }, [modules.length])
 
-  function pauseTour() {
+  const pauseTour = useCallback(() => {
     setProgress((current) => ({ ...current, status: 'paused' }))
-  }
+  }, [])
 
-  function restartTour() {
+  const restartTour = useCallback(() => {
     setProgress({
       status: 'active',
       currentModuleIndex: 0,
     })
-  }
+  }, [])
 
-  function completeCurrentModule() {
+  const completeCurrentModule = useCallback(() => {
     setProgress((current) => {
       const nextIndex = current.currentModuleIndex + 1
 
@@ -122,7 +120,7 @@ export function TourProvider({ children }) {
         currentModuleIndex: nextIndex,
       }
     })
-  }
+  }, [modules.length])
 
   const value = useMemo(() => ({
     modules,
@@ -144,6 +142,10 @@ export function TourProvider({ children }) {
     isActive,
     isCompleted,
     storageKey,
+    startOrResumeTour,
+    pauseTour,
+    restartTour,
+    completeCurrentModule,
   ])
 
   return (
@@ -153,6 +155,7 @@ export function TourProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTour() {
   const value = useContext(TourContext)
   return value || FALLBACK_TOUR_CONTEXT
