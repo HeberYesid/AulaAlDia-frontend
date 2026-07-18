@@ -23,6 +23,7 @@ export function useObservations(user) {
 
   const [observations, setObservations] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [subjects, setSubjects] = useState([])
   
   // Filters
@@ -32,11 +33,18 @@ export function useObservations(user) {
 
   const loadObservations = useCallback(async () => {
     setLoading(true)
+    setError('')
     try {
       const res = await api.get('/api/v1/courses/observations/')
       setObservations(unwrapListData(res.data))
     } catch (err) {
       console.error('Error loading observations:', err)
+      const errorCode = err?.response?.data?.error_code
+      if (errorCode === 'NO_ACTIVE_ACADEMIC_PERIOD') {
+        setError('Todavía no hay un período abierto para hoy en las observaciones. Abre uno o ajusta sus fechas en Configuración académica.')
+      } else {
+        setError(err?.response?.data?.detail || 'No se pudieron cargar las observaciones.')
+      }
     } finally {
       setLoading(false)
     }
@@ -99,6 +107,7 @@ export function useObservations(user) {
     isTeacherOrAdmin,
     observations,
     loading,
+    error,
     subjects,
     searchTerm,
     setSearchTerm,

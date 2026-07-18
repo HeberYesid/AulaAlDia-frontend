@@ -75,8 +75,10 @@ export default function Sidebar() {
   useEffect(() => {
     if (!isTourActive || !currentModule?.tourId) return
 
-    setCollapsed(false)
-    setMobileOpen(true)
+    const target = document.querySelector(`[data-tour-id="${currentModule.tourId}"]`)
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
   }, [currentModule?.tourId, isTourActive])
 
   function onLogout() {

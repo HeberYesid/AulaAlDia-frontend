@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/axios'
 import { useAuth } from '../state/AuthContext'
+import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import { unwrapListData } from '../utils/pagination'
@@ -30,6 +31,7 @@ export default function Absences() {
 
   const [absences, setAbsences] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [subjects, setSubjects] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(INITIAL_FORM)
@@ -47,11 +49,18 @@ export default function Absences() {
 
   const loadAbsences = async () => {
     setLoading(true)
+    setError('')
     try {
       const res = await api.get('/api/v1/courses/absences/')
       setAbsences(unwrapListData(res.data))
     } catch (err) {
       console.error('Error loading absences:', err)
+      const errorCode = err?.response?.data?.error_code
+      if (errorCode === 'NO_ACTIVE_ACADEMIC_PERIOD') {
+        setError('Todavía no hay un período abierto para hoy en las faltas. Abre uno o ajusta sus fechas en Configuración académica.')
+      } else {
+        setError(err?.response?.data?.detail || 'No se pudieron cargar las faltas.')
+      }
     } finally {
       setLoading(false)
     }
@@ -364,6 +373,8 @@ export default function Absences() {
           </form>
         </div>
       )}
+
+      {error && <Alert type="error" message={error} />}
 
       {/* Stats */}
       <div className="stats-grid absences__stats-grid">

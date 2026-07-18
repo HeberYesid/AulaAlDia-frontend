@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/PublicLayout'
 import ContextualTipBanner from './components/ContextualTipBanner'
+import TourWelcomeBanner from './components/TourWelcomeBanner'
 import LegalNotice from './pages/LegalNotice'
 import TermsConditions from './pages/TermsConditions'
 import HabeasData from './pages/HabeasData'
@@ -85,8 +86,9 @@ export default function App() {
       </Suspense>
       <div className="app-body">
         <main id="main-content" className="container">
-        <ContextualTipBanner />
-        <ErrorBoundary>
+          <ContextualTipBanner />
+          <TourWelcomeBanner />
+          <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />

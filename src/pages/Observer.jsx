@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../state/AuthContext'
+import Alert from '../components/Alert'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useStudentSearch } from '../hooks/useStudentSearch'
 import { useObservations, CATEGORIES, CATEGORY_MAP, INITIAL_FORM } from '../hooks/useObservations'
@@ -13,6 +14,7 @@ export default function Observer() {
     isTeacherOrAdmin,
     observations,
     loading,
+    error,
     subjects,
     searchTerm,
     setSearchTerm,
@@ -313,6 +315,8 @@ export default function Observer() {
           </form>
         </div>
       )}
+
+      {error && <Alert type="error" message={error} />}
 
       {/* Stats */}
       <div className="stats-grid observer__card-gap">

@@ -1,40 +1,68 @@
 import { useEffect, useMemo, useState } from 'react'
-import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride'
+import Joyride, { ACTIONS, EVENTS } from 'react-joyride'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { useTour } from '../state/TourContext'
-import { getTourStartPath } from '../utils/tourHelpers'
 
-function getTarget(selector) {
-  if (!selector || selector === 'body') return 'body'
-  if (typeof document !== 'undefined' && document.querySelector(selector)) {
-    return selector
+function getModuleNavStep(module, currentIndex, totalModules) {
+  if (!module) return null
+
+  return {
+    target: `[data-tour-id="${module.tourId}"]`,
+    content: (
+      <div className="tour__step">
+        <span className="tour__step-badge">
+          Modulo {currentIndex + 1} de {totalModules}
+        </span>
+        <h3 className="tour__step-title">{module.label}</h3>
+        <p className="tour__step-desc">{module.contextualTip}</p>
+      </div>
+    ),
+    disableBeacon: true,
+    placement: 'right',
+    disableOverlay: false,
+    spotlightClicks: true,
+    data: { gate: 'route', route: module.to },
   }
-  return 'body'
 }
 
-function getModuleSteps(module, pathname) {
-  if (!module) return []
-
-  if (pathname !== module.to) {
-    const routeTarget = `[data-tour-id="${module.tourId}"]`
-
-    return [
-      {
-        target: routeTarget,
-        content: `${module.label} sirve para ${module.contextualTip}`,
-        disableBeacon: true,
-        placement: 'right',
-        data: {
-          gate: 'route',
-          route: module.to,
-          allowSpotlightClicks: true,
-        },
-      },
-    ]
+function createWelcomeStep(totalModules) {
+  return {
+    target: 'body',
+    content: (
+      <div className="tour__step tour__step--welcome">
+        <h3 className="tour__step-title">Bienvenido a la plataforma</h3>
+        <p className="tour__step-desc">
+          Te mostraremos los {totalModules} modulos principales en un recorrido
+          rapido. Podes pausarlo cuando quieras y retomarlo mas tarde desde tu
+          perfil.
+        </p>
+      </div>
+    ),
+    placement: 'center',
+    disableBeacon: true,
+    disableOverlay: false,
+    data: { gate: 'welcome' },
   }
+}
 
-  return []
+function createCompletionStep() {
+  return {
+    target: 'body',
+    content: (
+      <div className="tour__step tour__step--completion">
+        <h3 className="tour__step-title">Recorrido completo</h3>
+        <p className="tour__step-desc">
+          Ya conoces los modulos principales. Podes repetir este recorrido
+          cuando quieras desde tu perfil.
+        </p>
+      </div>
+    ),
+    placement: 'center',
+    disableBeacon: true,
+    disableOverlay: false,
+    data: { gate: 'finish' },
+  }
 }
 
 export default function AppTour() {
@@ -43,49 +71,67 @@ export default function AppTour() {
   const {
     modules,
     currentModule,
+    currentModuleIndex,
+    totalModules,
     isActive,
     isCompleted,
-    status,
-    startOrResumeTour,
     pauseTour,
     restartTour,
+    skipTour,
     completeCurrentModule,
   } = useTour()
   const [stepIndex, setStepIndex] = useState(0)
+  const [welcomeDone, setWelcomeDone] = useState(false)
+  const [isFinishing, setIsFinishing] = useState(false)
 
-  const tourStartPath = getTourStartPath(user?.role)
-  const steps = useMemo(
-    () => getModuleSteps(currentModule, location.pathname),
-    [currentModule, location.pathname]
-  )
-  const joyrideRenderKey = `${currentModule?.key || 'none'}::${location.pathname}::${steps.length}`
+  const steps = useMemo(() => {
+    if (isFinishing) return [createCompletionStep()]
+    if (!currentModule) return []
+
+    const navStep = getModuleNavStep(currentModule, currentModuleIndex, totalModules)
+    const isOnRoute = location.pathname === currentModule.to
+
+    if (currentModuleIndex === 0 && !welcomeDone) {
+      if (isOnRoute) return [createWelcomeStep(totalModules)]
+      if (navStep) return [createWelcomeStep(totalModules), navStep]
+      return [createWelcomeStep(totalModules)]
+    }
+
+    if (isOnRoute) return []
+    if (navStep) return [navStep]
+    return []
+  }, [currentModule, currentModuleIndex, totalModules, location.pathname, welcomeDone, isFinishing])
+
+  const joyrideRenderKey = `${currentModuleIndex}::${location.pathname}::${steps.length}::${welcomeDone}::${isFinishing}`
 
   useEffect(() => {
-    if (!user?.role || isCompleted || modules.length === 0) return
-    if (status === 'idle' && location.pathname !== tourStartPath) return
-    if (!['idle', 'paused'].includes(status)) return
+    if (!isActive || isCompleted || steps.length > 0) return
+    if (!currentModule || location.pathname !== currentModule.to) return
 
-    const timerId = window.setTimeout(() => {
-      startOrResumeTour()
-    }, 500)
+    if (currentModuleIndex >= modules.length - 1) {
+      setIsFinishing(true)
+      return
+    }
 
-    return () => window.clearTimeout(timerId)
-  }, [isCompleted, location.pathname, modules.length, startOrResumeTour, status, tourStartPath, user?.role])
+    completeCurrentModule()
+  }, [isActive, isCompleted, steps.length, location.pathname, currentModule, currentModuleIndex, modules.length, completeCurrentModule])
 
   useEffect(() => {
     setStepIndex(0)
-  }, [currentModule?.key, location.pathname, steps.length])
-
-  useEffect(() => {
-    if (!isActive || !currentModule || steps.length !== 0) return
-    if (location.pathname !== currentModule.to) return
-
-    completeCurrentModule()
-  }, [completeCurrentModule, currentModule, isActive, location.pathname, steps.length])
+    if (currentModuleIndex === 0) {
+      setWelcomeDone(false)
+    }
+    setIsFinishing(false)
+  }, [currentModuleIndex])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    window.restartAppTour = restartTour
+    window.restartAppTour = () => {
+      setWelcomeDone(false)
+      setIsFinishing(false)
+      setStepIndex(0)
+      restartTour()
+    }
   }, [restartTour])
 
   if (!user?.role || isCompleted || !isActive || steps.length === 0) {
@@ -95,14 +141,14 @@ export default function AppTour() {
   const currentStep = steps[stepIndex] || steps[0]
 
   function handleJoyrideCallback(data) {
-    const { action, status: joyrideStatus, type } = data
+    const { action, type } = data
 
-    if (joyrideStatus === STATUS.FINISHED) {
-      completeCurrentModule()
+    if (action === ACTIONS.SKIP) {
+      skipTour()
       return
     }
 
-    if (action === ACTIONS.CLOSE || joyrideStatus === STATUS.SKIPPED) {
+    if (action === ACTIONS.CLOSE) {
       pauseTour()
       return
     }
@@ -111,22 +157,38 @@ export default function AppTour() {
 
     const gate = currentStep?.data?.gate
 
-    if (gate === 'next') {
-      if (stepIndex < steps.length - 1) {
-        setStepIndex((current) => current + 1)
-        return
-      }
+    if (gate === 'welcome') {
+      setWelcomeDone(true)
+      return
+    }
 
-      completeCurrentModule()
+    if (gate === 'finish') {
+      skipTour()
       return
     }
 
     if (gate === 'route') {
-      if (location.pathname !== currentStep?.data?.route) {
+      if (currentModuleIndex >= modules.length - 1) {
+        setIsFinishing(true)
         setStepIndex(0)
+        return
       }
+      completeCurrentModule()
       return
     }
+
+    if (stepIndex < steps.length - 1) {
+      setStepIndex((current) => current + 1)
+      return
+    }
+
+    if (currentModuleIndex >= modules.length - 1) {
+      setIsFinishing(true)
+      setStepIndex(0)
+      return
+    }
+
+    completeCurrentModule()
   }
 
   return (
@@ -136,19 +198,19 @@ export default function AppTour() {
       run={isActive}
       stepIndex={stepIndex}
       continuous
-      showProgress
-      showSkipButton={false}
+      showProgress={false}
+      showSkipButton={true}
       scrollToFirstStep
       disableScrolling={false}
       disableOverlayClose
       hideCloseButton={false}
-      spotlightClicks={Boolean(currentStep?.data?.allowSpotlightClicks)}
+      spotlightClicks={Boolean(currentStep?.data?.gate === 'route')}
       callback={handleJoyrideCallback}
       styles={{
         options: {
           arrowColor: '#ffffff',
           backgroundColor: '#ffffff',
-          overlayColor: 'rgba(0, 0, 0, 0.8)',
+          overlayColor: 'rgba(0, 0, 0, 0.4)',
           primaryColor: '#1976d2',
           textColor: '#333333',
           zIndex: 10000,
@@ -157,10 +219,11 @@ export default function AppTour() {
           borderRadius: '12px',
           padding: '20px',
           fontSize: '15px',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+          maxWidth: '360px',
         },
         tooltipContent: {
-          padding: '10px 0',
+          padding: '8px 0',
         },
         buttonNext: {
           backgroundColor: '#1976d2',
@@ -173,20 +236,25 @@ export default function AppTour() {
         buttonBack: {
           color: '#666666',
           marginRight: '10px',
+          display: 'none',
         },
         buttonClose: {
-          color: '#666666',
+          color: '#888888',
+        },
+        buttonSkip: {
+          color: '#999999',
+          fontSize: '13px',
         },
         spotlight: {
           borderRadius: '8px',
         },
       }}
       locale={{
-        back: 'Atrás',
-        close: 'Pausar tour',
-        last: 'Finalizar',
+        back: 'Atras',
+        close: 'Pausar',
+        last: isFinishing ? 'Finalizar' : 'Siguiente',
         next: 'Continuar',
-        skip: 'Pausar tour',
+        skip: 'Saltar tour',
       }}
     />
   )

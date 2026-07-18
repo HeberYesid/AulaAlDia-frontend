@@ -8194,3 +8194,165 @@ a.welcome-panel__notif-link:hover {
   }
 
 }
+
+/* =========================================================
+   Tour Welcome Banner
+   ========================================================= */
+
+.tour-welcome-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.tour-welcome-banner__content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.tour-welcome-banner__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  margin-top: 2px;
+}
+
+.tour-welcome-banner__text {
+  min-width: 0;
+}
+
+.tour-welcome-banner__title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tour-welcome-banner__subtitle {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.tour-welcome-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.tour-welcome-banner__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+  border: none;
+  white-space: nowrap;
+}
+
+.tour-welcome-banner__btn--primary {
+  background: var(--primary);
+  color: #ffffff;
+  padding: var(--space-sm) var(--space-lg);
+  min-height: 40px;
+}
+
+.tour-welcome-banner__btn--primary:hover {
+  background: color-mix(in srgb, var(--primary) 85%, black);
+  box-shadow: var(--shadow-md);
+}
+
+.tour-welcome-banner__btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  padding: var(--space-xs);
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.tour-welcome-banner__btn--ghost:hover {
+  color: var(--text-secondary);
+  background: var(--overlay-bg);
+}
+
+@media (max-width: 640px) {
+  .tour-welcome-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-md);
+  }
+
+  .tour-welcome-banner__actions {
+    justify-content: flex-end;
+  }
+}
+
+/* =========================================================
+   Tour step content (inside Joyride tooltips)
+   ========================================================= */
+
+.tour__step {
+  line-height: 1.5;
+}
+
+.tour__step-badge {
+  display: inline-block;
+  margin-bottom: var(--space-sm);
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border-radius: 999px;
+}
+
+.tour__step-title {
+  margin: 0 0 var(--space-xs);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.tour__step-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #555);
+  line-height: 1.5;
+}
+
+.tour__step--welcome .tour__step-title {
+  font-size: 18px;
+}
+
+.tour__step--welcome .tour__step-desc {
+  font-size: 14px;
+}
+
+.tour__step--completion .tour__step-title {
+  font-size: 18px;
+}

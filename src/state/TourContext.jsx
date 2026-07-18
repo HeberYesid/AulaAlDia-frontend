@@ -10,12 +10,14 @@ const FALLBACK_TOUR_CONTEXT = {
   modules: [],
   currentModule: null,
   currentModuleIndex: 0,
+  totalModules: 0,
   isActive: false,
   isCompleted: false,
   status: 'idle',
   startOrResumeTour: () => {},
   pauseTour: () => {},
   restartTour: () => {},
+  skipTour: () => {},
   completeCurrentModule: () => {},
   storageKey: null,
 }
@@ -104,6 +106,13 @@ export function TourProvider({ children }) {
     })
   }, [])
 
+  const skipTour = useCallback(() => {
+    setProgress({
+      status: 'completed',
+      currentModuleIndex: modules.length,
+    })
+  }, [modules.length])
+
   const completeCurrentModule = useCallback(() => {
     setProgress((current) => {
       const nextIndex = current.currentModuleIndex + 1
@@ -126,12 +135,14 @@ export function TourProvider({ children }) {
     modules,
     currentModule,
     currentModuleIndex: progress.currentModuleIndex,
+    totalModules: modules.length,
     isActive,
     isCompleted,
     status: progress.status,
     startOrResumeTour,
     pauseTour,
     restartTour,
+    skipTour,
     completeCurrentModule,
     storageKey,
   }), [
@@ -145,6 +156,7 @@ export function TourProvider({ children }) {
     startOrResumeTour,
     pauseTour,
     restartTour,
+    skipTour,
     completeCurrentModule,
   ])
 
