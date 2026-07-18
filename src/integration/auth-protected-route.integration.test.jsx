@@ -15,6 +15,7 @@ vi.mock('../api/axios', async () => {
       ...actual.api,
       get: vi.fn(),
       post: vi.fn(),
+      refreshToken: undefined,
     },
     setApiActiveTenantId: vi.fn(),
     AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
@@ -89,6 +90,7 @@ describe('Auth + ProtectedRoute integration', () => {
   it('allows tenant-protected route when active tenant is authorized', async () => {
     const user = userEvent.setup()
     setStoredAuth()
+    api.setAccessToken('access-token')
 
     api.get.mockImplementation((url) => {
       if (url === '/api/v1/auth/my-tenants/') {
@@ -136,6 +138,7 @@ describe('Auth + ProtectedRoute integration', () => {
       },
       active_tenant_id: 'tenant-b',
     })
+    api.setAccessToken('access-token')
 
     api.get.mockImplementation((url) => {
       if (url === '/api/v1/auth/my-tenants/') {

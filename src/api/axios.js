@@ -10,19 +10,56 @@ export const api = axios.create({
   timeout: 30000, // 30 segundos - suficiente para envío de email
 })
 
+let memoryAccessToken = null
 let memoryTenantId = null
+
+api.setAccessToken = function (token) {
+  memoryAccessToken = token || null
+}
+
+api.getAccessToken = function () {
+  return memoryAccessToken || null
+}
+
+api.refreshToken = async function (refreshToken) {
+  const { data } = await axios.post(`${API_BASE}${API_ENDPOINTS.auth.tokenRefresh}`, {
+    refresh: refreshToken,
+  })
+  setTokens({
+    access: data.access,
+    active_tenant_id: data.active_tenant_id ?? getActiveTenantId(),
+  })
+  return data
+}
+
+export function setAccessToken(token) {
+  memoryAccessToken = token || null
+}
+
+export function getAccessToken() {
+  return memoryAccessToken || null
+}
 
 function getTokens() {
   try {
     const raw = localStorage.getItem('auth')
-    if (!raw) return null
-    return JSON.parse(raw)
+    if (!raw) return memoryAccessToken ? { access: memoryAccessToken } : null
+    const parsed = JSON.parse(raw)
+    return {
+      ...parsed,
+      access: memoryAccessToken || parsed.access || null,
+    }
   } catch (e) {
-    return null
+    return memoryAccessToken ? { access: memoryAccessToken } : null
   }
 }
 
 function setTokens(tokens) {
+  if ('access' in tokens) {
+    memoryAccessToken = tokens.access || null
+    delete tokens.access
+  }
+
   const raw = localStorage.getItem('auth')
   const current = raw ? JSON.parse(raw) : {}
   const next = { ...current, ...tokens }
@@ -94,6 +131,11 @@ function onRefreshed(token) {
   pending = []
 }
 
+function rejectPending(error) {
+  pending.forEach((cb) => cb(Promise.reject(error)))
+  pending = []
+}
+
 api.interceptors.response.use(
   (resp) => resp,
   async (error) => {
@@ -127,6 +169,8 @@ api.interceptors.response.use(
         return api(original)
       } catch (e) {
         isRefreshing = false
+        memoryAccessToken = null
+        rejectPending(e)
         localStorage.removeItem('auth')
         notifyAuthInvalidated()
         return Promise.reject(attachUserMessage(e))

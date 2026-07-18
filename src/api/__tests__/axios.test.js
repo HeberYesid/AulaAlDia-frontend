@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { api, setApiActiveTenantId } from '../axios';
+import { api, setApiActiveTenantId, setAccessToken } from '../axios';
 
 describe('axios api utility', () => {
     beforeEach(() => {
         localStorage.clear();
         setApiActiveTenantId(null);
+        setAccessToken(null);
     });
 
     const reqInterceptor = api.interceptors.request.handlers && api.interceptors.request.handlers.length > 0
@@ -14,7 +15,7 @@ describe('axios api utility', () => {
     it('request interceptor adds headers when tokens and tenant exist', async () => {
         if (!reqInterceptor) return;
 
-        localStorage.setItem('auth', JSON.stringify({ access: 'test-token' }));
+        setAccessToken('test-token');
         setApiActiveTenantId('test-tenant');
 
         const config = { headers: {} };

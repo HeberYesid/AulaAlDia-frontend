@@ -4,6 +4,8 @@ import { vi, afterEach, describe, expect, it } from 'vitest'
 import { AuthProvider, useAuth } from '../AuthContext'
 import { api, AUTH_INVALIDATED_EVENT, setApiActiveTenantId } from '../../api/axios'
 
+const mockAccessToken = { current: null }
+
 vi.mock('../../api/axios', async () => {
   const actual = await vi.importActual('../../api/axios')
 
@@ -13,6 +15,8 @@ vi.mock('../../api/axios', async () => {
       ...actual.api,
       get: vi.fn(),
       post: vi.fn(),
+      setAccessToken: vi.fn((token) => { mockAccessToken.current = token || null }),
+      getAccessToken: vi.fn(() => mockAccessToken.current),
     },
     setApiActiveTenantId: vi.fn(),
   }
@@ -36,6 +40,7 @@ function AuthProbe() {
 describe('AuthContext', () => {
   afterEach(() => {
     localStorage.clear()
+    mockAccessToken.current = null
     vi.clearAllMocks()
   })
 
@@ -46,11 +51,12 @@ describe('AuthContext', () => {
       'auth',
       JSON.stringify({
         user: { id: 1, role: 'STUDENT', active_tenant_id: 'tenant-1' },
-        access: 'old-access',
         refresh: 'old-refresh',
         active_tenant_id: 'tenant-1',
       })
     )
+
+    api.setAccessToken('old-access')
 
     api.post.mockResolvedValue({
       data: {
@@ -106,7 +112,7 @@ describe('AuthContext', () => {
 
     const storedAuth = JSON.parse(localStorage.getItem('auth'))
 
-    expect(storedAuth.access).toBe('new-access')
+    expect(storedAuth.access).toBeUndefined()
     expect(storedAuth.refresh).toBe('new-refresh')
     expect(storedAuth.active_tenant_id).toBe('tenant-2')
     expect(api.post).toHaveBeenCalledWith('/api/v1/auth/select-tenant/', {
@@ -120,11 +126,12 @@ describe('AuthContext', () => {
       'auth',
       JSON.stringify({
         user: { id: 1, role: 'STUDENT', active_tenant_id: 'tenant-1' },
-        access: 'old-access',
         refresh: 'old-refresh',
         active_tenant_id: 'tenant-1',
       })
     )
+
+    api.setAccessToken('old-access')
 
     api.get.mockResolvedValue({
       data: {

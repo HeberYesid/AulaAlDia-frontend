@@ -129,38 +129,62 @@ export function showToast({
     font-family: system-ui, -apple-system, sans-serif;
   `
   
-  const closeButton = closable ? `
-    <button onclick="this.closest('.toast').classList.add('removing'); setTimeout(() => this.closest('.toast').remove(), 500)" 
-      style="background: rgba(255,255,255,0.2); border: none; color: white; 
-             border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
-             font-size: 1.2rem; display: flex; align-items: center; 
-             justify-content: center; flex-shrink: 0; line-height: 1;
-             transition: background 0.2s;"
-      onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-      onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-      ×
-    </button>
-  ` : ''
-  
-  toastDiv.innerHTML = `
-    <div style="display: flex; align-items: start; gap: 1rem;">
-      <div style="font-size: 2rem; flex-shrink: 0; line-height: 1;">${config.icon}</div>
-      <div style="flex: 1; min-width: 0;">
-        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600;">
-          ${title || config.title}
-        </h3>
-        <p style="margin: 0; font-size: 0.9rem; line-height: 1.4; opacity: 0.95;">
-          ${message}
-        </p>
-        ${subtitle ? `
-          <p style="margin: 0.75rem 0 0 0; font-size: 0.8rem; opacity: 0.85; line-height: 1.3;">
-            ${subtitle}
-          </p>
-        ` : ''}
-      </div>
-      ${closeButton}
-    </div>
-  `
+  const row = document.createElement('div')
+  row.style.cssText = 'display: flex; align-items: start; gap: 1rem;'
+
+  const iconSpan = document.createElement('span')
+  iconSpan.setAttribute('aria-hidden', 'true')
+  iconSpan.style.cssText = 'font-size: 2rem; flex-shrink: 0; line-height: 1;'
+  iconSpan.textContent = config.icon
+  row.appendChild(iconSpan)
+
+  const bodyCol = document.createElement('div')
+  bodyCol.style.cssText = 'flex: 1; min-width: 0;'
+
+  const titleEl = document.createElement('h3')
+  titleEl.style.cssText = 'margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600;'
+  titleEl.textContent = title || config.title
+  bodyCol.appendChild(titleEl)
+
+  const messageEl = document.createElement('p')
+  messageEl.style.cssText = 'margin: 0; font-size: 0.9rem; line-height: 1.4; opacity: 0.95;'
+  messageEl.textContent = message
+  bodyCol.appendChild(messageEl)
+
+  if (subtitle) {
+    const subtitleEl = document.createElement('p')
+    subtitleEl.style.cssText = 'margin: 0.75rem 0 0 0; font-size: 0.8rem; opacity: 0.85; line-height: 1.3;'
+    subtitleEl.textContent = subtitle
+    bodyCol.appendChild(subtitleEl)
+  }
+
+  row.appendChild(bodyCol)
+
+  if (closable) {
+    const closeBtn = document.createElement('button')
+    closeBtn.type = 'button'
+    closeBtn.textContent = '\u00D7'
+    closeBtn.setAttribute('aria-label', 'Cerrar notificacion')
+    closeBtn.style.cssText =
+      'background: rgba(255,255,255,0.2); border: none; color: white; ' +
+      'border-radius: 50%; width: 28px; height: 28px; cursor: pointer; ' +
+      'font-size: 1.2rem; display: flex; align-items: center; ' +
+      'justify-content: center; flex-shrink: 0; line-height: 1; ' +
+      'transition: background 0.2s;'
+    closeBtn.addEventListener('mouseenter', () => {
+      closeBtn.style.background = 'rgba(255,255,255,0.3)'
+    })
+    closeBtn.addEventListener('mouseleave', () => {
+      closeBtn.style.background = 'rgba(255,255,255,0.2)'
+    })
+    closeBtn.addEventListener('click', () => {
+      toastDiv.classList.add('removing')
+      setTimeout(() => toastDiv.remove(), 500)
+    })
+    row.appendChild(closeBtn)
+  }
+
+  toastDiv.appendChild(row)
   
   container.appendChild(toastDiv)
   

@@ -127,7 +127,6 @@ export function AuthProvider({ children }) {
     if (raw) {
       const data = JSON.parse(raw)
       setUser(data.user || null)
-      setAccess(data.access || null)
       setRefresh(data.refresh || null)
       setLastLoginAt(data.last_login_at || null)
       setLastLoginIp(data.last_login_ip || null)
@@ -145,7 +144,6 @@ export function AuthProvider({ children }) {
     )
     const payload = {
       user,
-      access,
       refresh,
       last_login_at,
       last_login_ip,
@@ -154,6 +152,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('auth', JSON.stringify(payload))
     setUser(user)
     setAccess(access)
+    if (api.setAccessToken) api.setAccessToken(access)
     setRefresh(refresh)
     setLastLoginAt(last_login_at || null)
     setLastLoginIp(last_login_ip || null)
@@ -164,13 +163,18 @@ export function AuthProvider({ children }) {
 
   function mergeAuthState(partialAuth) {
     const currentAuth = JSON.parse(localStorage.getItem('auth') || '{}')
+
+    if (Object.prototype.hasOwnProperty.call(partialAuth, 'access')) {
+      partialAuth = { ...partialAuth }
+      const newAccess = partialAuth.access || null
+      if (api.setAccessToken) api.setAccessToken(newAccess)
+      setAccess(newAccess)
+      delete partialAuth.access
+    }
+
     const nextAuth = { ...currentAuth, ...partialAuth }
 
     localStorage.setItem('auth', JSON.stringify(nextAuth))
-
-    if (Object.prototype.hasOwnProperty.call(partialAuth, 'access')) {
-      setAccess(nextAuth.access || null)
-    }
 
     if (Object.prototype.hasOwnProperty.call(partialAuth, 'refresh')) {
       setRefresh(nextAuth.refresh || null)
@@ -270,6 +274,7 @@ export function AuthProvider({ children }) {
       console.error('Error during logout:', error)
     } finally {
       localStorage.removeItem('auth')
+      if (api.setAccessToken) api.setAccessToken(null)
       setUser(null)
       setAccess(null)
       setRefresh(null)
@@ -282,6 +287,36 @@ export function AuthProvider({ children }) {
       setApiActiveTenantId(null)
     }
   }, [access])
+
+  useEffect(() => {
+    if (!user || !refresh || access) return
+
+    if (api.getAccessToken && api.getAccessToken()) {
+      setAccess(api.getAccessToken())
+      return
+    }
+
+    if (!api.refreshToken) return
+
+    let cancelled = false
+
+    api.refreshToken(refresh)
+      .then(({ access: newAccess, active_tenant_id: newTenantId }) => {
+        if (cancelled) return
+        if (api.setAccessToken) api.setAccessToken(newAccess)
+        setAccess(newAccess)
+        if (newTenantId) {
+          setActiveTenantId(newTenantId)
+          setApiActiveTenantId(newTenantId)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) logout()
+      })
+
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, refresh, access])
 
   useEffect(() => {
     const handleAuthInvalidated = () => {
