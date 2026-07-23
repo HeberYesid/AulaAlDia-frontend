@@ -3203,6 +3203,21 @@ form {
   background: color-mix(in srgb, var(--bg-card) 84%, var(--danger-bg) 16%);
 }
 
+.card .alert.error,
+.card .alert.alert-danger,
+.card .alert.alert-error {
+  position: static;
+  z-index: auto;
+  width: auto;
+  max-height: none;
+  top: auto;
+  right: auto;
+  margin: var(--space-md) 0;
+  box-shadow: none;
+  animation: none;
+  backdrop-filter: none;
+}
+
 /* 
 ===============================================
 📱 RESPONSIVE STYLES FOR NEW PAGES
