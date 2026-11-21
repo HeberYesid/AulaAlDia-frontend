@@ -138,7 +138,7 @@ describe('navigation config', () => {
 
     const tip = getContextualTipByPath(teacher, '/subjects')
 
-    expect(tip).toMatch(/crear una materia/i)
+    expect(tip).toMatch(/gestiona tus materias: crea contenidos/i)
   })
 
   it('does not resolve contextual tip for subroute detail path', () => {

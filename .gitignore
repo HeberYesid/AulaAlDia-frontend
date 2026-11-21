@@ -4,6 +4,7 @@ node_modules/
 # Build and coverage artifacts
 dist/
 coverage/
+test-results/
 .vite/
 .atl/
 

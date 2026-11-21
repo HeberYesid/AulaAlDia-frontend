@@ -21,6 +21,7 @@ vi.mock('../../api/axios', () => ({
     get: vi.fn(),
     patch: vi.fn(),
     post: vi.fn(),
+    refreshToken: vi.fn(),
   },
   AUTH_INVALIDATED_EVENT: 'aulaaldia:auth-invalidated',
   setApiActiveTenantId: vi.fn()
@@ -61,6 +62,14 @@ describe('UserProfile Component', () => {
             pending_invitation: null,
           },
         })
+      }
+
+      if (url === '/api/v1/auth/my-tenants/') {
+        return Promise.resolve({ data: { tenants: [], active_tenant_id: null } })
+      }
+
+      if (url === '/api/v1/courses/active-school-year-status/') {
+        return Promise.resolve({ data: { has_active_school_year: false } })
       }
 
       return Promise.reject(new Error(`Unhandled GET ${url}`))
@@ -137,10 +146,10 @@ describe('UserProfile Component', () => {
     const user = userEvent.setup()
     localStorage.setItem('auth', JSON.stringify({
       user: mockUser,
-      access: 'fake-access-token',
       refresh: 'fake-refresh-token',
       active_tenant_id: 'tenant-123',
     }))
+    api.refreshToken.mockResolvedValueOnce({ access: 'fake-access-token', active_tenant_id: 'tenant-123' })
 
     api.post.mockImplementation((url) => {
       if (url === '/api/v1/auth/student-tutor-invitation/') {
@@ -163,6 +172,8 @@ describe('UserProfile Component', () => {
     renderWithProviders(<UserProfile />)
 
     await waitFor(() => expect(screen.getByText('Invitar Acudiente')).toBeInTheDocument())
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/v1/auth/my-tenants/'))
+    expect(api.refreshToken).toHaveBeenCalledWith('fake-refresh-token')
 
     await user.type(screen.getByLabelText(/correo del acudiente/i), 'caregiver@example.com')
     await user.click(screen.getByRole('button', { name: /enviar invitacion/i }))
