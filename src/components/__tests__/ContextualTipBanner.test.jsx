@@ -29,7 +29,7 @@ describe('ContextualTipBanner component', () => {
       </MemoryRouter>
     )
 
-    expect(screen.getByRole('status')).toHaveTextContent(/crear una materia/i)
+    expect(screen.getByRole('status')).toHaveTextContent(/gestiona tus materias: crea contenidos/i)
   })
 
   it('applies high-contrast readability classes to banner and dismiss button', () => {
