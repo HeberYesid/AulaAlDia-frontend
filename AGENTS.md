@@ -3,7 +3,7 @@
 ## How to Use This Guide
 
 - Use this guide for all work inside `AulaAlDia-Frontend/`.
-- The root `../AGENTS.md` applies here too, but this file wins when it is more specific.
+- In the shared `AulaAlDia/` workspace, also follow `../AGENTS.md` if it exists. This guide takes precedence for frontend-specific work and is sufficient in a standalone clone.
 - Preserve the existing design system, routing, and auth flow.
 
 ## Useful Skills
@@ -20,7 +20,7 @@
 
 ```powershell
 cd AulaAlDia-Frontend
-pnpm install
+pnpm install --frozen-lockfile
 pnpm lint
 pnpm build
 pnpm test:run

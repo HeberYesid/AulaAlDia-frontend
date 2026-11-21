@@ -41,8 +41,8 @@ Aplicación web SPA construida con **React 18 + Vite** para la plataforma educat
 
 ## Requisitos previos
 
-- **Node.js** ≥ 18
-- **pnpm** ≥ 10 (`npm install -g pnpm`)
+- **Node.js** `^20.19.0` o `>=22.12.0`, según la versión de Vite del lockfile.
+- **pnpm** 10.24.0, fijado en `package.json`.
 - Una instancia del **backend AulaAlDia** corriendo (por defecto en `http://127.0.0.1:8000`)
 
 ---
@@ -51,7 +51,7 @@ Aplicación web SPA construida con **React 18 + Vite** para la plataforma educat
 
 ```bash
 # 1. Instalar dependencias
-pnpm install
+pnpm install --frozen-lockfile
 
 # 2. Crear el archivo de variables de entorno
 cp .env.example .env   # Linux / macOS
@@ -102,7 +102,7 @@ Copia `.env.example` a `.env` y ajusta los valores:
 | Variable | Ejemplo | Descripción |
 |---|---|---|
 | `VITE_API_BASE_URL` | `http://127.0.0.1:8000` | URL base de la API REST del backend |
-| `VITE_GOOGLE_CLIENT_ID` | `123456.apps.googleusercontent.com` | Client ID de Google OAuth 2.0 |
+| `VITE_GOOGLE_CLIENT_ID` | `123456.apps.googleusercontent.com` | Client ID de Google OAuth 2.0; si se deja vacío, no aparece el inicio de sesión con Google |
 | `VITE_TURNSTILE_SITE_KEY` | `0x4AAAAAAB195...` | Site key de Cloudflare Turnstile (CAPTCHA) |
 | `VITE_SUPPORT_CONTACT_EMAIL` | `support@aulaaldia.com` | Correo mostrado en la página de contacto |
 
